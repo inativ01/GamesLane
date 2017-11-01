@@ -1,0 +1,250 @@
+
+html, body {
+    font-family: 'Roboto', 'Helvetica', sans-serif;
+}
+a {
+    text-decoration: underline;
+    color: #039BE5;
+}
+
+/* Fixes an MDL bug where the header does not scroll on small devices */
+.mdl-layout__container .mdl-layout--fixed-header .mdl-layout__content {
+    overflow-y: visible;
+    overflow-x: visible;
+    overflow: visible;
+}
+/* Overrides MDL colors */
+/*
+.mdl-layout.is-upgraded .mdl-layout__tab.is-active::after,
+.header .mdl-textfield__label:after {
+    background-color: #FFCA28;
+}
+.mdl-snackbar__action {
+    color: #FFCA28;
+}
+.mdl-textfield__label:after {
+    background-color: #0288D1;
+}
+.mdl-textfield--floating-label.is-focused .mdl-textfield__label {
+    color: #0288D1;
+}
+*/
+
+/* Header */
+/*
+.header .mdl-layout__header-row {
+    max-width: 1024px;
+    width: 100%;
+    height: auto;
+    padding: 10px 20px;
+    margin: auto;
+    position: relative;
+}
+@media screen and (max-width: 840px) {
+    .header .mdl-layout__header-row.titlebar {
+        height: 56px;
+    }
+    .titlebar h3 {
+        font-size: 24px;
+    }
+    .titlebar h3 .material-icons {
+        top: 2.5px;
+        font-size: 23px;
+    }
+}
+@media screen and (max-width: 479px) {
+    .mdl-grid {
+        padding: 0;
+    }
+    .mdl-card {
+        font-size: 14px;
+    }
+}
+*/
+/* Signed-in user */
+/*
+.avatar {
+    height: 32px;
+    width: 32px;
+    display: inline-block;
+    background-size: 32px 32px;
+    border-radius: 32px;
+    border: 2px white solid;
+    margin-right: 10px;
+    background-image: url('./silhouette.jpg');
+}
+.username {
+    display: inline-block;
+    line-height: 38px;
+    vertical-align: top;
+    width: calc(100% - 46px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+#signInEmailButton {
+    margin-left: 10px;
+    color: inherit;
+}
+#sign-out-button {
+    margin: 10px;
+    color: inherit;
+}
+.mdl-button .material-icons {
+    margin-top: -2px;
+}
+.mdl-button.mdl-button--icon .material-icons,
+.mdl-button.mdl-button--fab .material-icons {
+    margin-top: 0;
+}
+*/
+/* Navigation Bar */
+/*
+.header .mdl-tab {
+    padding-left: 23px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    position: relative;
+    margin: auto;
+    max-width: 1024px;
+}
+@media screen and (max-width: 609px) {
+    .header .mdl-tab {
+        width: auto;
+    }
+}
+.header .tab {
+    padding: 0;
+    max-width: none;
+}
+#add {
+    position: absolute;
+    right: 20px;
+    top: 18px;
+    z-index: 998;
+}
+@media screen and (max-width: 840px) {
+    #add {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 998;
+        top: auto;
+    }
+}
+#sign-out-button {
+    right: 0;
+    position: absolute;
+}
+*/
+
+/* Splash Page */
+
+#splashPage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+/*
+    background-color: #0288D1;
+    background: radial-gradient(circle, #039BE5, #01579b);
+*/
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+/*    color: white;*/
+    flex-direction: column;
+}
+
+/*
+#splashContent {
+    background-color: #00fefe;
+    width: 50%; // Could be more or less, depending on screen size
+}
+*/
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 5; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    margin: 5% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px; /* Could be more or less, depending on screen size */
+}
+
+.gameLists {
+    background-color: white;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 360px;
+}
+
+
+
+.chess-modal-content {
+    margin: auto; /* 15% from the top and centered */
+    z-index: 999; /* Sit on top */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px; /* Could be more or less, depending on screen size */
+}
+
+.modal input {
+//    background-color: white;
+	color: black;
+}
+
+.modal button {
+    border-radius: 12px;
+}
+#signInModal button {
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+.mdl-button {
+     margin: 0 5px;
+}
+
+
+#uploadBtn {
+    cursor: pointer;
+    height: 100%;
+    right: 0;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    width: 300px;
+    z-index: 4;
+}
+
+.mdl-textfield--file {
+  .mdl-textfield__input {
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+  }
+  .mdl-button--file {
+    right: 0;
+  }
+}
+*/

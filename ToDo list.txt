@@ -1,0 +1,22 @@
+To do:
+* when clicking name/picture on the top right, open MDL menu:
+  - Update Display name
+  - Update email (require re-authentication)
+  - Update passworkd (require re-authentication)
+  - Update/upload picture (will be saved in firebase storage)
+* cleanup all unknow stuff from main.css and index.html
+* add database auth rules
+* add "are you sure?" to endGame
+* display names of players in the game
+* cleanup: all server functions need to return a promise.
+  Promise.all([pr1,pr2])
+* test on explorer, ipad
+* change lists: my turn, waiting for others, Join, watch
+* backgammon - 
+** event on game board
+** inside event on last status: dice, 1st move, 2nd move
+** implement state machine:
+*** 0 - need to roll dice
+*** 1 - wait for 1st move
+*** 2 - wait for 2nd move
+*** 3 - new turn started 
