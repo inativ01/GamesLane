@@ -371,19 +371,19 @@ function addGameToList(snapshot) {
       }
     }
   }
-  if (active)
+  if (game.currentUID==currentUID) {
     addToList(game.game,"Active",node);
-  else if (game.status=="pending")
+  }
+  else if (game.status=="pending") {
     addToList(game.game,"Pending",node);
-  else if (game.status=="active")
+  }
+  else
     addToList(game.game,"Watch",node);
 
   $("#"+node.id).click( function() {
     debug(2,"Game selected:"+this.id);
     newGID=this.value;
     this.parentElement.parentElement.style="display:none";
-debug(0,this.parentElement.parentElement);
-//    this.parentElement.parentElement.close();
     $("#chessBoard").show();
     gameMsg="chess";
   });
@@ -392,7 +392,13 @@ debug(0,this.parentElement.parentElement);
 function addToList(game,list,node) {
     debug(2,"Add "+node.value+" to "+list);
     debug(3,gameInfo);
-    $("#"+game+list+"List").append(node);
+    var listName="#"+game+list+"List";
+    $(listName).append(node);
+    if (list=="Active") {
+      var nActive=$(listName)[0].children.length;
+      if (nActive==1) $("#"+game+"Badge").addClass("mdl-badge");
+      $("#"+game+"Badge").attr("data-badge",nActive);
+    }
     $("#"+game+list+"ListButton").attr("disabled", false);
 }
 
@@ -401,6 +407,11 @@ function removeFromList(game) {
     var node=$("#line-"+game.game+"-"+game.gid);
     var pnode=node.parent();
     node.remove();
+    if (pnode.hasClass("Active")) {
+      var nActive=pnode.children().length;
+      if (nActive==0) $("#"+game.game+"Badge").removeClass("mdl-badge");
+      else $("#"+game.game+"Badge").attr("data-badge",nActive);
+    }
     if (pnode.children().length<1)       // No more items in the list
       $("#"+pnode.prop('id')+"Button").attr("disabled",true);
 }

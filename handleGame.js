@@ -57,27 +57,21 @@ function updateGame(db,msg,gameInfo,gameData) {
 function startChess(db,gameSnap,msg) {
   if (gameSnap.val()) return Promise.reject(new Error("New game already exists"));
   var gameInfo={
-	game:msg.game,
-	gid:msg.gid,
-	players:{},
+    game:msg.game,
+    gid:msg.gid,
+    players:{},
+    currentUID:-1,
+    status:'pending'
   } ;
   var gameData={
     from:{x:0, y:0},
     to:{x:0, y:0},
     board: msg.board,
     movedPiece:-1,
-    newPiece:-1
+    newPiece:-1,
+    player:-1,
   };
-  if (msg.role == 'Single') {
-	gameInfo.players.White=gameInfo.players.Black={uid:msg.uid,displayName:msg.displayName,photoURL:msg.photoURL};
-	gameInfo.status='active';
-	gameData.player=0;
-  }
-  else { // Black or White
-	gameInfo.players[msg.role]={uid:msg.uid,displayName:msg.displayName,photoURL:msg.photoURL};
-	gameInfo.status='pending';
-	gameData.player=-1;
-  }
+  gameInfo.players[msg.role]={uid:msg.uid,displayName:msg.displayName,photoURL:msg.photoURL};
   gameData.info=gameInfo;
   return updateGame(db,msg,gameInfo,gameData);
 }
@@ -89,6 +83,7 @@ function joinChess(db,gameSnap,msg) {
 	if (gameInfo.status=="pending") {
 	  gameInfo.players[msg.role]={uid:msg.uid,displayName:msg.displayName,photoURL:msg.photoURL};
 	  gameInfo.status="active";
+	  gameInfo.currentUID=gameInfo.players["White"].uid;
 	  var gameData=gameSnap.val();
 	  gameData.info=gameInfo;
 	  gameData.player=0;
@@ -133,13 +128,15 @@ function chessMove(db,gameSnap,msg) {
     var gameData=gameSnap.val();
     gameData.board=msg.board;
     gameData.player=1-msg.player;
+    var color=(gameData.player)?"Black":"White";
+    gameInfo.currentUID=gameInfo.players[(gameData.player)?"Black":"White"].uid;
     gameData.from=msg.from;
     gameData.to=msg.to;
     gameData.newPiece=msg.newPiece;
-    if (msg.special) gameData.special=msg.special;
-    else gameData.special=null;
+    if (msg.special) gameData.special=msg.special; else gameData.special=null;
     gameData.movedPiece=msg.movedPiece;
-    pr1=db.ref('game/'+msg.game+'/'+msg.gid).set(gameData);
+    gameData.info=gameInfo;
+    pr1=updateGame(db,msg,gameInfo,gameData);
     pr2=chessChat(db,msg);                                                     // create chess notation message
     return Promise.all([pr1,pr2]);
   }

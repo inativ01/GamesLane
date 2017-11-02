@@ -148,8 +148,8 @@
             <div  style="text-align: center;border-style: groove;padding:10px">
               <button id="startChessButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Start Chess</button>
             </div>
-			<br>
-			<div><b><u>Chess Options</u></b></div>
+            <br>
+            <div><b><u>Chess Options</u></b></div>
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
               <input id="chessRole" class="mdl-textfield__input" type="text" value="White" readonly tabIndex="-1">
               <label for="chessRole" class="mdl-textfield__label">Your player color</label>
@@ -158,27 +158,8 @@
                 <li class="mdl-menu__item">Black</li>
               </ul>
             </div>
-<!-- 
-            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
-              <input class="mdl-textfield__input" type="text" id="gameQ1" value="Anyone" readonly tabIndex="-1">
-              <label for="gameQ1" class="mdl-textfield__label">Who can join the game?</label>
-              <ul for="gameQ1" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
-                <li class="mdl-menu__item">Anyone</li>
-                <li class="mdl-menu__item">Friends</li>
-              </ul>
-            </div>
-            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
-              <input class="mdl-textfield__input" type="text" id="gameQ2" value="Anyone" readonly tabIndex="-1">
-              <label for="gameQ2" class="mdl-textfield__label">Who can watch the game?</label>
-              <ul for="gameQ2" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
-                <li class="mdl-menu__item">Anyone</li>
-                <li class="mdl-menu__item">Friends</li>
-                <li class="mdl-menu__item">Private</li>
-              </ul>
-            </div>
--->
-          <br>
-		  </div>
+            <br>
+          </div>
           <div style="text-align: center;padding: 0px;">
             <button id="chessButtonEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Edit Board</button>
           </div>
@@ -228,43 +209,29 @@
   </header>
 
   <main class="mdl-layout__content">
-    <h4 style="text-align:center"> Chess</h4>
-    <div style="text-align:center">
-      <input id="chessButton" type="image" src="Chess\chessboard_full.gif" width="100" height="100">
+    <div style="width:110px; margin:auto" >
+      <h4 style="text-align:center" > Chess</h4>
+      <div id="ChessBadge"</div>
+      <input id="chessButton" type="image" src="Chess\chessboard_full.gif" width="100" height="100" >
       <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
         <li id="ChessNewButton" class="mdl-menu__item">Start a New Game</li>
-        <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item">Continue an Active Games</li>
+        <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item">Play your turn</li>
         <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item">Join a Game</li>
-        <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item">Watch Ongoing Games</li>
+        <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item">Watch or Wait</li>
       </ul>
     </div>
 
     <div id=ChessActiveModal class="modal allowClose" >
-        <div id="ChessActiveList" class="gameLists"  ></div>
+        <div id="ChessActiveList" class="Active gameLists"  ></div>
     </div>
 
     <div id=ChessPendingModal class="modal allowClose" >
-        <div id="ChessPendingList" class="gameLists"  ></div>
+        <div id="ChessPendingList" class="Pending gameLists"  ></div>
     </div>
 
     <div id=ChessWatchModal class="modal allowClose" >
         <div id="ChessWatchList" class="gameLists"  ></div>
     </div>
-<!--
-    <dialog id="ChessActiveDialog" class="mdl-dialog__content">
-      <div id="ChessActiveList" class="gameLists"  >
-      </div>
-    </dialog>
-    <dialog id="ChessPendingDialog" class="mdl-dialog__content">
-      <div id="ChessPendingList" class="gameLists"  >
-      </div>
-    </dialog>
-    <dialog id="ChessWatchDialog" class="mdl-dialog__content">
-      <div id="ChessWatchList" class="gameLists"  >
-      </div>
-    </dialog>
--->
-
   </main>
 
 </div>

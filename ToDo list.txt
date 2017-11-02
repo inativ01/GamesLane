@@ -20,3 +20,6 @@ To do:
 *** 1 - wait for 1st move
 *** 2 - wait for 2nd move
 *** 3 - new turn started 
+
+* not creating user in DB acter create-user
+* update profile does not update DB
