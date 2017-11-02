@@ -162,6 +162,7 @@
           </div>
           <div style="text-align: center;padding: 0px;">
             <button id="chessButtonEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Edit Board</button>
+            <button id="chessCancelEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
           </div>
         </div>
         <canvas id=chessEditCanvas data-processing-sources="Chess/chessEdit.js" style="margin: auto;"></canvas>
@@ -214,7 +215,7 @@
       <div id="ChessBadge"</div>
       <input id="chessButton" type="image" src="Chess\chessboard_full.gif" width="100" height="100" >
       <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
-        <li id="ChessNewButton" class="mdl-menu__item">Start a New Game</li>
+        <li id="ChessNewButton" class="NewGame mdl-menu__item">Start a New Game</li>
         <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item">Play your turn</li>
         <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item">Join a Game</li>
         <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item">Watch or Wait</li>

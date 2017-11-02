@@ -43,15 +43,24 @@ window.addEventListener('resize', function() {
 });
 
 $("#ChessNewButton").click( function() {
-  $("#chessButtonEdit").show();
-  $("#chessEditCanvas").hide();
-  $("#ChessOptionsBoard").show();
-  for(var i = 0; i < 8; i++) {
-    for(var j = 0; j < 8; j++) {
-      board[i][j] = board1[i][j];
+  if(!this.hasAttribute("disabled")) {
+    mode="passive";
+    $("#chessButtonEdit").show();
+    $("#chessEditCanvas").hide();
+    $("#ChessOptionsBoard").show();
+    $("#ChessOptionsHeader").show();
+    $("#chessButtonEdit").html("Edit Board");
+    for(var i = 0; i < 8; i++) {
+      for(var j = 0; j < 8; j++) {
+        board[i][j] = board1[i][j];
+      }
     }
+    mode="passive";
   }
-  mode="passive";
+});
+
+$("#chessCancelEdit").click(function() {
+    $("#ChessOptionsBoard").hide();
 });
 
 $("#chessButtonEdit").click(function() {

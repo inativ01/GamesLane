@@ -36,14 +36,18 @@ function doSignIn(user) {
   currentUID=user.uid;
   $("#splashPage").hide();
   if (user.isAnonymous) {
-    if (!displayName) displayName="Guest";
-    if (!photoURL) photoURL="silhouette.png";
+    displayName="Guest";
+    photoURL="silhouette.png";
+    $("#editProfileButton").attr("disabled",true);
+    $(".NewGame").attr("disabled",true);
     user.updateProfile({
       displayName: displayName,
       photoURL: photoURL
     });
   }
   else {
+    $("#editProfileButton").attr("disabled",false);
+    $(".NewGame").attr("disabled",false);
     db.ref('users/' + currentUID).set({
       username: displayName,
       profile_picture : photoURL,
