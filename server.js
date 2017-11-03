@@ -22,7 +22,7 @@ firebase.initializeApp({
 });
 console.log("Firebase ready");
 var db = firebase.database();
-db.ref("req1").on("child_added", function(snapshot) {
+db.ref("req").on("child_added", function(snapshot) {
   var req=snapshot.val();
   var uid=req.uid;
   console.log(req.game+" message: "+req.msg);
@@ -44,5 +44,5 @@ db.ref("req1").on("child_added", function(snapshot) {
     // context
     snapshot
   );
-  db.ref("req1/"+uid).remove().catch(function(error){console.log("Unable to remove request");console.log(error)});
+  db.ref("req/"+uid).remove().catch(function(error){console.log("Unable to remove request");console.log(error)});
 });

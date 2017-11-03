@@ -92,7 +92,7 @@ $('#startChessButton').click(function() {
   });
   gameMsg="chess";
   $("#ChessOptionsBoard").hide();
-  $("#chessBoard").show();
+  $(".mdl-spinner").addClass("is-active");
 });
 
 

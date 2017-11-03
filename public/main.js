@@ -25,7 +25,7 @@ function debug(level, msg) {
 }
 
 function sendReq(obj) {
-    db.ref('/req1/'+currentUID).set(obj);
+    db.ref('/req/'+currentUID).set(obj);
     debug(1,obj.game+" message: "+obj.msg);
     debug(2,obj);
 }
@@ -386,9 +386,9 @@ function addGameToList(snapshot) {
 
   $("#"+node.id).click( function() {
     debug(2,"Game selected:"+this.id);
-    newGID=this.value;
     this.parentElement.parentElement.style="display:none";
-    $("#chessBoard").show();
+    $(".mdl-spinner").addClass("is-active");
+    newGID=this.value;
     gameMsg="chess";
   });
 }

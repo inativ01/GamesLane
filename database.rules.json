@@ -1,6 +1,27 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "game": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    "gameInfo": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    "gameChat": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    "req": {
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    }
   }
 }

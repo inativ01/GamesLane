@@ -55,7 +55,7 @@ var players= {White:"", Black:""}
 window.addEventListener('resize', function() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
   $("#chessContent").css("width",sizeSquare*10);
-  printBoard();
+  if($("#chessBoard").is(":visible")) printBoard();
 });
 
 $("#ChessActiveListButton").click( function() {
@@ -98,29 +98,24 @@ $("#endChess").click( function() {
 
 
 $('#chessButtonJoin').click(function() {
-  chessJoinGame(this.value);
-});
-
-function chessJoinGame(role) {
-  if (newGID==-1) { // New game
-    newGID=Math.floor(Math.random() * (1000000000000));
-  }
   sendReq({
     game:"Chess",
-    gid:newGID,
+    gid:gameID,
     uid:currentUID,
     msg: "Join",
-    role: role,
+    role: this.value,
     displayName: auth.currentUser.displayName,
     photoURL: auth.currentUser.photoURL
   });
-  gameMsg="chess";
-}
+//  gameMsg="chess";
+});
 
 //*************************************************************************************************
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 function printBoard() {
+  if ($(".mdl-spinner").hasClass("is-active")) $(".mdl-spinner").removeClass("is-active");
+  $("#chessBoard").show();
   size(sizeSquare*10,sizeSquare*10);
   startX=startY=sizeSquare;
   stroke(0);
@@ -610,7 +605,7 @@ void finalizeMove(movedPiece,newPiece) {
   board[to.y][to.x]=savedPiece;
   sendReq({
     game:"Chess",
-    gid:newGID,
+    gid:gameID,
     uid:currentUID,
     msg: "ChessMove",
     special: special,
