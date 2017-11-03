@@ -58,24 +58,6 @@ window.addEventListener('resize', function() {
   if($("#chessBoard").is(":visible")) printBoard();
 });
 
-$("#ChessActiveListButton").click( function() {
-  if(!this.hasAttribute("disabled"))
-    $("#ChessActiveModal").show();
-//    ChessActiveDialog.showModal();
-});
-
-$("#ChessPendingListButton").click( function() {
-  if(!this.hasAttribute("disabled"))
-    $("#ChessPendingModal").show();
-//    ChessPendingDialog.showModal();
-});
-
-$("#ChessWatchListButton").click( function() {
-  if(!this.hasAttribute("disabled"))
-    $("#ChessWatchModal").show();
-//    ChessWatchDialog.showModal();
-});
-
 $("#closeChess").click( function() {
   newGID= -1;
   gameMsg="chess";

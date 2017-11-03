@@ -22,6 +22,11 @@
       "$uid": {
         ".write": "$uid === auth.uid"
       }
-    }
+    },
+    "req1": {
+      "$uid": {
+        ".write": "$uid === auth.uid"
+      }
+    },
   }
 }

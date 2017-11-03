@@ -381,6 +381,8 @@ function addGameToList(snapshot) {
   else if (game.status=="pending") {
     addToList(game.game,"Pending",node);
   }
+  else if (active)
+    addToList(game.game,"Wait",node);
   else
     addToList(game.game,"Watch",node);
 
@@ -475,3 +477,12 @@ $("#uploadBtn").change(function () {
     };
     reader.readAsDataURL(newPic);
 });
+
+// -----------------------------------  Game buttons --------------------------------------------------------------------------------------
+
+$(".gameButtons").click( function() {
+  if(!this.hasAttribute("disabled"))
+    $("#"+this.getAttribute("game")+this.getAttribute("catag")+"Modal").show();
+});
+
+

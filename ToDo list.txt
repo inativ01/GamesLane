@@ -1,12 +1,9 @@
 To do:
 * Allow email and password change
 * cleanup all unknow stuff from main.css and index.html
-* add database auth rules
 * add "are you sure?" to endGame
 * display names of players in the game
 * test on explorer, ipad
-* not creating user in DB acter create-user
-* update profile does not update DB
 
 * backgammon -
 ** event on game board

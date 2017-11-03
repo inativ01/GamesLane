@@ -216,20 +216,22 @@
       <input id="chessButton" type="image" src="Chess\chessboard_full.gif" width="100" height="100" >
       <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
         <li id="ChessNewButton" class="NewGame mdl-menu__item">Start a New Game</li>
-        <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item">Play your turn</li>
-        <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item">Join a Game</li>
-        <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item">Watch or Wait</li>
+        <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item" game="Chess" catag="Active">Play your turn</li>
+        <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item" game="Chess" catag="Pending">Join a Game</li>
+        <li id="ChessWaitListButton"    disabled class="gameButtons mdl-menu__item" game="Chess" catag="Wait">Wait for your turn</li>
+        <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item" game="Chess" catag="Watch">Watch others play</li>
       </ul>
     </div>
 
     <div id=ChessActiveModal class="modal allowClose" >
         <div id="ChessActiveList" class="Active gameLists"  ></div>
     </div>
-
     <div id=ChessPendingModal class="modal allowClose" >
         <div id="ChessPendingList" class="Pending gameLists"  ></div>
     </div>
-
+    <div id=ChessWaitModal class="modal allowClose" >
+        <div id="ChessWaitList" class="gameLists"  ></div>
+    </div>
     <div id=ChessWatchModal class="modal allowClose" >
         <div id="ChessWatchList" class="gameLists"  ></div>
     </div>
