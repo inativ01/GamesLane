@@ -4,6 +4,7 @@
 // Define global variables
 // -----------------------
 
+var reverse=false;                                                    // display reverse board for black player
 var gameList={};                                                      // List of all gameInfo Chess entries
 var myChessIndex=0;                                                   // 0 - no active player
                                                                       // 1 - White
@@ -105,13 +106,17 @@ function printBoard() {
   textFont(loadFont("Meta-Bold.ttf"));
   if (players.White) text('White: '+players.White,startX,sizeSquare/2);
   if (players.Black) text('Black: '+players.Black,startX+4*sizeSquare,sizeSquare/2);
-
   for(var y = 0, ypos=startY; y < 8; y++, ypos+=sizeSquare) {
     for(var x = 0, xpos=startX; x < 8; x++, xpos+=sizeSquare) {
       if((x+y)%2) fill(100); else fill(255);  // select white or black squares
       rect(xpos,ypos,sizeSquare,sizeSquare);  // print an empty square
-      if (board[y][x]> -1)
-        image(images[board[y][x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
+      if (reverse) {
+          if (board[7-y][7-x]> -1)
+            image(images[board[7-y][7-x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
+      } else {
+          if (board[y][x]> -1)
+            image(images[board[y][x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
+      }
     }
   }
   $("#chessCanvas").show();
@@ -122,8 +127,12 @@ function printBoard() {
 //*************************************************************************************************
 function markSquare(location,color,width) {
   if (location.x==-1) return;
-  var xpos=startX+location.x*sizeSquare;
-  var ypos=startY+location.y*sizeSquare;
+  var x=location.x, y=location.y;
+  if (reverse) {
+    x=7-x; y=7-y;
+  }
+  var xpos=startX+x*sizeSquare;
+  var ypos=startY+y*sizeSquare;
   noFill();
   stroke(color);
   strokeWeight(width);
@@ -140,6 +149,10 @@ function mouseSquare()
   if (mouseX >= startX && mouseX < startX+sizeSquare*8 && mouseY >= startY && mouseY < startY+sizeSquare*8) {
     mouse.x=Math.floor((mouseX-startX)/sizeSquare);
     mouse.y=Math.floor((mouseY-startY)/sizeSquare);
+    if (reverse) {
+      mouse.x=7-mouse.x;
+      mouse.y=7-mouse.y;
+    }
   }
   return mouse;
 }
@@ -370,6 +383,7 @@ function chessMoveEvent(snapshot) {
   switch(data.info.status) {
     case "pending":
       var color= (!data.info.players.White) ? "White" : "Black";
+      reverse=(color=="Black");
       $("#chessButtonJoin").val(color);
       $("#chessButtonJoin").html("Join as "+color);
       $("#chessButtonJoin").show();
@@ -377,15 +391,23 @@ function chessMoveEvent(snapshot) {
       printBoard();
       break;
     case "active":
+      reverse=((myChessIndex==2)||(myChessIndex==3 && player==1));
       printBoard();
       if (data.movedPiece > -1) {
          animation.movedPiece=data.movedPiece;
          animation.newPiece=data.newPiece;
          animation.startMillis=millis();
-         animation.sourceX= startX+sizeSquare*from.x;
-         animation.sourceY= startY+sizeSquare*from.y;
-         animation.distanceX= sizeSquare*(to.x-from.x);
-         animation.distanceY= sizeSquare*(to.y-from.y);
+         if (reverse) {
+           animation.sourceX= startX+sizeSquare*(7-from.x);
+           animation.sourceY= startY+sizeSquare*(7-from.y);
+           animation.distanceX= sizeSquare*(from.x-to.x);
+           animation.distanceY= sizeSquare*(from.y-to.y);
+         } else {
+           animation.sourceX= startX+sizeSquare*from.x;
+           animation.sourceY= startY+sizeSquare*from.y;
+           animation.distanceX= sizeSquare*(to.x-from.x);
+           animation.distanceY= sizeSquare*(to.y-from.y);
+         }
       }
       else {
         animation.movedPiece= -1;

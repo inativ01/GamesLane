@@ -12,7 +12,7 @@ var db = firebase.database();
 var auth = firebase.auth();
 var gameInfo={};
 var gameMsg=null;
-var debugLevel=2;
+var debugLevel=1;
 
 function debug(level, msg) {
   switch (level) {
