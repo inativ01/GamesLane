@@ -10,8 +10,8 @@ module.exports = {  // start of all export functions
           case 'Join':
             pr=joinChess(db,gameSnap,msg);
             break;
-          case 'EndGame':
-            pr=endGameChess(db,gameSnap,msg);
+          case 'Quit':
+            pr=quitChess(db,gameSnap,msg);
             break;
           case 'ExitGame':
             pr=exitGameChess(db,gameSnap,msg);
@@ -47,10 +47,10 @@ function updateGame(db,msg,gameInfo,gameData) {
   debug(1,`Updated game ${msg.gid}`);
   if (gameInfo) {
 	var pr1=db.ref(`gameInfo/${msg.gid}`).set(gameInfo);
-	var pr2=db.ref(`game/${msg.game}/${msg.gid}`).set(gameData);
+	var pr2=db.ref(`gameData/${msg.game}/${msg.gid}`).set(gameData);
 	return Promise.all([pr1,pr2]);
   }
-  else return db.ref(`game/${msg.game}/${msg.gid}`).set(gameData);
+  else return db.ref(`gameData/${msg.game}/${msg.gid}`).set(gameData);
 }
 
 
@@ -78,54 +78,65 @@ function startChess(db,gameSnap,msg) {
 
 
 function joinChess(db,gameSnap,msg) {
-	if (!gameSnap.val()) return Promise.reject(new Error("Game does not exists"));
-	var gameInfo=gameSnap.val().info;
-	if (gameInfo.status=="pending") {
-	  gameInfo.players[msg.role]={uid:msg.uid,displayName:msg.displayName,photoURL:msg.photoURL};
-	  gameInfo.status="active";
-	  gameInfo.currentUID=gameInfo.players["White"].uid;
-	  var gameData=gameSnap.val();
-	  gameData.info=gameInfo;
-	  gameData.player=0;
-	  return updateGame(db,msg,gameInfo,gameData);
-	}
-	else return Promise.reject(new Error("Game not Pending. Can't start"));
+  if (!gameSnap.val()) return Promise.reject(new Error("Game does not exists"));
+  var gameInfo=gameSnap.val().info;
+  if (gameInfo.status=="pending") {
+    gameInfo.players[msg.role]={uid:msg.uid,displayName:msg.displayName,photoURL:msg.photoURL};
+    gameInfo.status="active";
+    gameInfo.currentUID=gameInfo.players["White"].uid;
+    var gameData=gameSnap.val();
+    gameData.info=gameInfo;
+    gameData.player=0;
+    return updateGame(db,msg,gameInfo,gameData);
+  }
+  else return Promise.reject(new Error("Game not Pending. Can't start"));
 }
 
-function endGameChess(db,gameSnap,msg) {
+function quitChess(db,gameSnap,msg) {
   var gameData=gameSnap.val();
+  if (!gameData) return Promise.reject(new Error("Game does not exists"));
+  var gameInfo=gameSnap.val().info;
+  gameInfo.status="quit";
+  gameData.info=gameInfo;
   gameData.special=msg.special;
   gameData.board=msg.board;
   gameData.movedPiece=-1;
-  return db.ref(`game/${msg.game}/${msg.gid}`).set(gameData);
+  return updateGame(db,msg,gameInfo,gameData);
 }
 
 function exitGameChess(db,gameSnap,msg) {
-  var gameInfo=gameSnap.val().info;
-  var count=0;
-  for (var player in gameInfo.players) {
-    if (gameInfo.players[player].uid==msg.uid) delete gameInfo.players[player];
-    else count++;
-  };
-  if (count == 0) {     // any players still in the game?
-    var pr1=db.ref("game/Chess/"+msg["gid"]).remove();
-    var pr2=db.ref("gameInfo/"+msg["gid"]).remove();
-    var pr3=db.ref("gameChat/Chess/"+msg["gid"]);
-    return Promise.all([pr1,pr2,pr3]);
-  }
-  else {
-    var gameData=gameSnap.val();
-    gameData.info=gameInfo;
-    var pr1=db.ref('gameInfo/'+msg.gid).set(gameInfo);
-    var pr2=db.ref('game/'+msg.game+'/'+msg.gid).set(gameData);
-    return Promise.all([pr1,pr2]);
-  }
+  var gameData=gameSnap.val();
+  if (!gameData) return Promise.reject(new Error("Game does not exists"));
+  var gameInfo=gameData.info;
+  var updates={};
+  for (var player in gameInfo.players)
+    if (gameInfo.players[player].uid==msg.uid)
+      updates[player+'/uid']=0;
+  return  db.ref("gameInfo/"+msg["gid"]+"/players/").update(updates)
+  .then(function() {
+     db.ref("gameInfo/"+msg["gid"]+"/players/").once('value',
+       function(Snap) {
+         s=Snap.val(); clean=true;
+         for (var p in s) {
+           if (s[p].uid!=0) clean=false;
+         }
+         if (clean) {
+           up={};
+           x={}; x[msg.gid]={};
+           up["/gameData/Chess"]=x;
+           up["/gameInfo"]=x;
+           up["/gameChat/Chess"]=x;
+           return db.ref().update(up);
+         }
+       });
+  });
 }
 
 function chessMove(db,gameSnap,msg) {
-  var gameInfo=gameSnap.val().info;
+  var gameData=gameSnap.val();
+  if (!gameData) return Promise.reject(new Error("Game does not exists"));
+  var gameInfo=gameData.info;
   if (gameInfo.status=="active") {
-    var gameData=gameSnap.val();
     gameData.board=msg.board;
     gameData.player=1-msg.player;
     var color=(gameData.player)?"Black":"White";

@@ -12,7 +12,7 @@ var db = firebase.database();
 var auth = firebase.auth();
 var gameInfo={};
 var gameMsg=null;
-var debugLevel=1;
+var debugLevel=2;
 
 function debug(level, msg) {
   switch (level) {
@@ -28,34 +28,6 @@ function sendReq(obj) {
     db.ref('/req/'+currentUID).set(obj);
     debug(1,obj.game+" message: "+obj.msg);
     debug(2,obj);
-}
-
-function doSignIn(user) {
-  var displayName=user.displayName;
-  var photoURL=user.photoURL;
-  currentUID=user.uid;
-  $("#splashPage").hide();
-  if (user.isAnonymous) {
-    displayName="Guest";
-    photoURL="silhouette.png";
-    $("#editProfileButton").attr("disabled",true);
-    $(".NewGame").attr("disabled",true);
-    user.updateProfile({
-      displayName: displayName,
-      photoURL: photoURL
-    });
-  }
-  else {
-    $("#editProfileButton").attr("disabled",false);
-    $(".NewGame").attr("disabled",false);
-    db.ref('users/' + currentUID).set({
-      username: displayName,
-      profile_picture : photoURL,
-    });
-  }
-  $("#welcomeMsg").html(displayName);
-  $("#welcomePic").attr('src',photoURL);
-  $("#userMenu").show();
 }
 
 // Bindings on load.
@@ -312,18 +284,58 @@ function onAuthStateChanged(user) {
     return;
   }
   debug(1,"Auth: Login "+user.displayName);
-  doSignIn(user);
 
-  var ref = db.ref("gameInfo");
+  var displayName=user.displayName;
+  var photoURL=user.photoURL;
+  currentUID=user.uid;
+  $("#splashPage").hide();
+  if (user.isAnonymous) {
+    displayName="Guest";
+    photoURL="silhouette.png";
+    $("#editProfileButton").attr("disabled",true);
+    user.updateProfile({
+      displayName: displayName,
+      photoURL: photoURL,
+    });
+    $(".WelcomeGuest").show();
+    $(".WelcomeNewUser").show();
+    $("#WelcomeContent").show();
+  }
+  else {
+    $(".WelcomeGuest").hide();
+    $("#editProfileButton").attr("disabled",false);
+    db.ref('users/' + currentUID).once("value", function(snapshot) {
+      if (!snapshot.val() || !snapshot.val().saw_tutorial) {
+        $(".WelcomeNewUser").show();
+        $("#WelcomeContent").show();
+        snapshot.ref.set({
+          username: displayName,
+          profile_picture : photoURL,
+          saw_tutorial:true
+        })
+      }
+      else
+        $(".WelcomeNewUser").hide();
+    });
+    db.ref('users/' + currentUID).update({
+      username: displayName,
+      profile_picture : photoURL,
+    });
+  }
+  $("#welcomeMsg").html(displayName);
+  $("#welcomePic").attr('src',photoURL);
+  $("#userMenu").show();
 
-  ref.on("child_added", addGameToList);
+  var gameInfoRef = db.ref("gameInfo");
 
-  ref.on("child_changed", function(snapshot) {
+  gameInfoRef.on("child_added", addGameToList);
+
+  gameInfoRef.on("child_changed", function(snapshot) {
     removeFromList(snapshot.val());
     addGameToList(snapshot);
   });
 
-  ref.on("child_removed", function(snapshot) {
+  gameInfoRef.on("child_removed", function(snapshot) {
     removeFromList(snapshot.val());
   });
 }
@@ -375,14 +387,25 @@ function addGameToList(snapshot) {
       }
     }
   }
-  if (game.currentUID==currentUID) {
-    addToList(game.game,"Active",node);
+  if (active && game.status=="quit")
+  {
+    sendReq({
+        game:game.game,
+        gid:game.gid,
+        uid:currentUID,
+        msg: "ExitGame",
+    });
+    $(".WelcomeNews").show();
+    $("#WelcomeContent").show();
   }
+  if (game.currentUID==currentUID)
+    addToList(game.game,"Active",node);
   else if (game.status=="pending") {
     addToList(game.game,"Pending",node);
   }
-  else if (active)
+  else if (active) {
     addToList(game.game,"Wait",node);
+  }
   else
     addToList(game.game,"Watch",node);
 
@@ -440,8 +463,8 @@ $("#profileSend").click( function() {
     auth.currentUser.updateProfile({
       displayName: $("#displayNameUpdate").val(),
     }).then(function(snapshot){
-      $("#welcomeMsg").html(auth.currentUser.displayName);
-      db.ref('users/' + currentUID).set({   // also update in database
+      $("#welcomeMsg").html(auth.currentUser.displayName+auth.currentUser.test);
+      db.ref('users/' + currentUID).update({   // also update in database
         displayName : auth.currentUser.displayName,
       });
     });
@@ -453,7 +476,7 @@ $("#profileSend").click( function() {
         photoURL: snapshot.downloadURL
       }).then(function(snapshot){
           $("#welcomePic").attr('src',auth.currentUser.photoURL);
-          db.ref('users/' + currentUID).set({   // also update in database
+          db.ref('users/' + currentUID).update({   // also update in database
             profile_picture : auth.currentUser.photoURL,
           });
         });
@@ -486,3 +509,11 @@ $(".gameButtons").click( function() {
 });
 
 
+$(".NewGame").click( function() {
+  if (auth.currentUser.isAnonymous)
+    swal("Not Allowed","Guest player can't start a new game. Please sign up for free.","error");
+});
+
+$(".gameMainButton").click( function() {
+  $("#WelcomeContent").hide();
+});

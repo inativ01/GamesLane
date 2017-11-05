@@ -14,3 +14,6 @@ To do:
 *** 2 - wait for 2nd move
 *** 3 - new turn started
 
+
+server: replace multiple sets with single update
+add entries for "What's new"

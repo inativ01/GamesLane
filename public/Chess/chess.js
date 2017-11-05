@@ -70,7 +70,7 @@ $("#endChess").click( function() {
     game:"Chess",
     gid:gameID,
     uid:currentUID,
-    msg: "EndGame",
+    msg: "Quit",
     board: board,
     special: {
       concede: auth.currentUser.displayName
@@ -325,8 +325,8 @@ function checkPlayer() {
 //  ----------------------
 //  Messages:
 //  * chessStatus:
-//      Client to Server:  Observer, White, Black, Leave, EndGame, 
-//      Server to Client:  White, Black, EndGame,  
+//      Client to Server:  Observer, White, Black, Leave, EndGame,
+//      Server to Client:  White, Black, EndGame,
 //  * chessInfo: names of white and black players
 //  * chessMove: active player (white/black/none), from, to, boards, moved piece, new piece (same as moved piece EXCEPT when pawn is upgraded)
 //
@@ -418,22 +418,23 @@ function chessMoveEvent(snapshot) {
       else if (player==1) $("#chessTurn").html("Black player's turn");
       mode="animation";
       break;
-  }
-  if (special && special.concede) {
-    sweetAlert({
-       title: special.concede+" had quit the game",
-       text: "",
-       showConfirmButton: true,
-       imageUrl: "i-quit.png",
-       imageSize: "400x150",
-    });
-    if (myChessIndex) sendReq({
-      game:"Chess",
-      gid:gameID,
-      uid:currentUID,
-      msg: "ExitGame",
-    });
-    $("#chessBoard").hide();
+    case "quit":
+      sweetAlert({
+         title: special.concede+" had quit the game",
+         text: "",
+         showConfirmButton: true,
+         imageUrl: "i-quit.png",
+         imageSize: "400x150",
+      });
+/*
+      if (myChessIndex) sendReq({
+        game:"Chess",
+        gid:gameID,
+        uid:currentUID,
+        msg: "ExitGame",
+      });
+*/
+      $("#chessBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -460,12 +461,12 @@ void draw() {
   if (gameMsg == "chess") {
     debug(2,"New:"+newGID+" Old:"+gameID);
     if (gameID != -1) {
-      db.ref("game/Chess/"+gameID).off();
+      db.ref("gameData/Chess/"+gameID).off();
       db.ref("gameChat/Chess/"+gameID).off();
     }
     gameID=newGID;
     if (gameID != -1) {
-      db.ref("game/Chess/"+gameID).on("value", chessMoveEvent);
+      db.ref("gameData/Chess/"+gameID).on("value", chessMoveEvent);
       db.ref("gameChat/Chess/"+gameID).on("child_added", function(snapshot) {
         debug(2,snapshot.val().sender+": "+snapshot.val().msg);
         var notification = document.querySelector('.mdl-js-snackbar');

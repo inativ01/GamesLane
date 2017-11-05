@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="Demonstrates the use of Google Cloud Database with a Firebase DB">
+  <meta name="description" content="Play popular board and card games against friends and family">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Games Lane</title>
 
@@ -209,11 +209,40 @@
 
   </header>
 
+
+<!-- Welcome screen -->
+  <section>
+    <div id="WelcomeContent"  style="display:none;background-color: rgba(0, 0, 0, 0.3);margin: auto; height:100%;width:100%;position: fixed;">
+      <div class="WelcomeNewUser"  style="display:none;float: right;">
+         <span> Click here to update profile or logout</span>
+         <img src="uparrow.png" height="42" width="42"></img>
+      </div><br>
+      <div style="margin-top:150px; margin-left:10px">
+      <div class="WelcomeNewUser" style="display:none" >
+        <h4 style="color:red;">Welcome new player</h4>
+        <span>Click on one of the game symbols to play in one of these options:
+        <li>Start a new game (and wait for others to join)</li>
+        <b class="WelcomeGuest"  style="color:red;">Since you are a guest, you can't create new games</b>
+        <li>If it's your turn to play, you will see a red badge on the game symbol. You can now play your turn.</li>
+        <li>Join a game that was already opened by other player.</li>
+        <li>Join an active game, even if it's not your turn. Just wait for another player to move.</li>
+        <li>You can even watch the progress of games in which you are not a player.</li>
+        <b>note:</b> You can join a game in more than one role. This allows multiple players in the room to play with each other on one computer.
+        </span>
+      </div>
+      <div class="WelcomeNews" style="display:none" >
+        <h4 style="color:red;">What's new?</h4>
+        <ul id="NewsBlock">
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <main class="mdl-layout__content">
     <div style="width:110px; margin:auto" >
       <h4 style="text-align:center" > Chess</h4>
       <div id="ChessBadge"</div>
-      <input id="chessButton" type="image" src="Chess\chessboard_full.gif" width="100" height="100" >
+      <input id="chessButton" class="gameMainButton" type="image" src="Chess\chessboard_full.gif" width="100" height="100" >
       <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
         <li id="ChessNewButton" class="NewGame mdl-menu__item">Start a New Game</li>
         <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item" game="Chess" catag="Active">Play your turn</li>

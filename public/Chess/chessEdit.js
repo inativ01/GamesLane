@@ -43,7 +43,7 @@ window.addEventListener('resize', function() {
 });
 
 $("#ChessNewButton").click( function() {
-  if(!this.hasAttribute("disabled")) {
+  if (!auth.currentUser.isAnonymous) {
     mode="passive";
     $("#chessButtonEdit").show();
     $("#chessEditCanvas").hide();

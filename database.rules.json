@@ -6,7 +6,7 @@
         ".write": "$uid === auth.uid"
       }
     },
-    "game": {
+    "gameData": {
       ".read": "auth != null",
       ".write": false
     },

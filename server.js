@@ -25,12 +25,11 @@ var db = firebase.database();
 db.ref("req").on("child_added", function(snapshot) {
   var req=snapshot.val();
   var uid=req.uid;
-  console.log(req.game+" message: "+req.msg);
-  db.ref('game/'+req.game+'/'+req.gid).once('value',
+  console.log(req.game+" message: "+req.msg+" from "+uid);
+  db.ref('gameData/'+req.game+'/'+req.gid).once('value',
     // then
     function(gameSnap) {
       var msg=this.val();
-      if (!gameSnap.val) { console.error("gameSnap is Null"); return; };
       var pr1=(lane.handleGame(db,gameSnap,msg));
       pr1.catch(function(error) {console.log("Error Message="+error.message)});
     },
