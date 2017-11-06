@@ -72,9 +72,7 @@ $("#endChess").click( function() {
     uid:currentUID,
     msg: "Quit",
     board: board,
-    special: {
-      concede: auth.currentUser.displayName
-    }
+    concede: auth.currentUser.displayName
   });
 });
 
@@ -420,7 +418,7 @@ function chessMoveEvent(snapshot) {
       break;
     case "quit":
       sweetAlert({
-         title: special.concede+" had quit the game",
+         title: data.info.concede+" had quit the game",
          text: "",
          showConfirmButton: true,
          imageUrl: "i-quit.png",

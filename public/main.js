@@ -38,6 +38,8 @@ window.addEventListener('load', function() {
   var sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
   $(".game-content").css("width",sizeSquare*10);
   $(".game-content").css("height",sizeSquare*12);
+  $(".newsItem").remove();
+//  $("#NewsBlock").empty();
 
   // From Sign-in switch to Forgot password
   $('#forgotPasswordLink').click( function() {
@@ -278,6 +280,7 @@ function onAuthStateChanged(user) {
     debug(1,"Auth: Logout event");
     $(".gameLists").empty();   // clear all the lists
     $("#userMenu").hide();
+    $("#WelcomeContent").hide();
     $("#splashPage").show();
     $(".gameButtons").attr("disabled",true);
     currentUID=-1;
@@ -363,6 +366,7 @@ function addGameToList(snapshot) {
   pic.className="mdl-list__item-secondary-content";
   node.appendChild(pic);
   var first=true;
+  var partner="yourself";
   for  (var player in game.players) {
     var thisPlayer=game.players[player];
     var pnode = document.createElement("span");
@@ -379,6 +383,7 @@ function addGameToList(snapshot) {
       if (first) {
         pic.src=thisPlayer.photoURL;
         first=false;
+        partner=thisPlayer.displayName;
         sp.prepend(pnode);
       }
       else {
@@ -395,16 +400,20 @@ function addGameToList(snapshot) {
         uid:currentUID,
         msg: "ExitGame",
     });
-    $(".WelcomeNews").show();
-    $("#WelcomeContent").show();
+    addLine(game,game.concede+" had quit the "+game.game+" game.");
   }
-  if (game.currentUID==currentUID)
-    addToList(game.game,"Active",node);
+  if (game.currentUID==currentUID)  {
+      addToList(game.game,"Active",node);
+      addLine(game,"It's now your turn to play "+game.game+" with "+partner);
+  }
   else if (game.status=="pending") {
     addToList(game.game,"Pending",node);
+    if (!partner) partner="yourself";
+    addLine(game,"You can join a new "+game.game+" game with "+partner);
   }
   else if (active) {
     addToList(game.game,"Wait",node);
+    if (game.status!="quit") addLine(game,"Waiting for "+partner+" to make "+game.game+" move.");
   }
   else
     addToList(game.game,"Watch",node);
@@ -416,6 +425,17 @@ function addGameToList(snapshot) {
     newGID=this.value;
     gameMsg="chess";
   });
+}
+
+function addLine(game, msg) {
+  if ($("#li"+game.gid).length) {
+    $("#li"+game.gid).html(msg);
+  }
+  else {
+    $("#NewsBlock").append("<li class='newsItem' id='li"+game.gid+"'>"+msg+"</li>");
+  }
+  $(".WelcomeNews").show();
+  $("#WelcomeContent").show();
 }
 
 function addToList(game,list,node) {
@@ -516,4 +536,11 @@ $(".NewGame").click( function() {
 
 $(".gameMainButton").click( function() {
   $("#WelcomeContent").hide();
+  $(".newsItem").remove();
+//  $("#NewsBlock").empty();
+});
+
+$("#helpButton").click( function() {
+  $(".WelcomeNewUser").show();
+  $("#WelcomeContent").show();
 });

@@ -45,12 +45,20 @@ function debug(level, msg) {
 
 function updateGame(db,msg,gameInfo,gameData) {
   debug(1,`Updated game ${msg.gid}`);
+  updates={};
+  updates[`gameData/${msg.game}/${msg.gid}`]=gameData;
+  if (gameInfo) {
+    updates[`gameInfo/${msg.gid}`]=gameInfo;
+  }
+  return db.ref().update(updates);
+/*
   if (gameInfo) {
 	var pr1=db.ref(`gameInfo/${msg.gid}`).set(gameInfo);
 	var pr2=db.ref(`gameData/${msg.game}/${msg.gid}`).set(gameData);
 	return Promise.all([pr1,pr2]);
   }
   else return db.ref(`gameData/${msg.game}/${msg.gid}`).set(gameData);
+*/
 }
 
 
@@ -97,8 +105,8 @@ function quitChess(db,gameSnap,msg) {
   if (!gameData) return Promise.reject(new Error("Game does not exists"));
   var gameInfo=gameSnap.val().info;
   gameInfo.status="quit";
+  gameInfo.concede=msg.concede;
   gameData.info=gameInfo;
-  gameData.special=msg.special;
   gameData.board=msg.board;
   gameData.movedPiece=-1;
   return updateGame(db,msg,gameInfo,gameData);
@@ -207,7 +215,7 @@ function chessChat(db,msg) {
           chessMsg+='=R';
           break;
       }
-  }
+  } 
   return db.ref('gameChat/'+msg.game+'/'+msg.gid+'/'+Math.floor(Date.now() / 1000)).set({msg:chessMsg, sender:"Server"});
 }
 
