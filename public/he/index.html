@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="he">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Play popular board and card games against friends and family">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Games Lane</title>
+
+  <!-- Disable tap highlight on IE -->
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <!-- Add to homescreen for Chrome on Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Firebase Database Quickstart">
+  <meta name="theme-color" content="#303F9F">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Firebase Database Quickstart">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#303F9F">
+
+  <!-- Tile icon for Win8 -->
+  <meta name="msapplication-TileColor" content="#3372DF">
+  <meta name="msapplication-navbutton-color" content="#303F9F">
+
+  <!-- Liraries -->
+  <link rel="stylesheet" href="../Libs/material.min.css">
+  <script src="../Libs/material.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="../Libs/getmdl-select.min.css">
+  <script src="../Libs/getmdl-select.min.js"></script>
+  <script src="../Libs/jquery-3.2.1.min.js"></script>
+  <script src="../Libs/processing.min.js"></script>
+  <script src="../Libs/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../Libs/sweetalert.css">
+  <link rel="stylesheet" href="../main.css">
+
+</head>
+<body dir="rtl">
+<div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-header">
+
+
+  <!-- Splash screen -->
+  <section id="splashPage">
+<!-- Sign in Modal -->
+      <div id="signInModal" style="display:block" class="modal" >
+        <div class="modal-content mdl-color--light-blue-200">
+          <h4>כניסה לנתיב המשחקים</h4>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input"  type="text" id="signInEmail" />
+            <label class="mdl-textfield__label" for="signInEmail">דוא"ל</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input"  type="password" id="signInPass" />
+            <label class="mdl-textfield__label" for="signInPass">סיסמה</label>
+          </div>
+          <p id=loginMsg style="color:red;"></p>
+          <button id="signInEmailButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> כניסה </button>
+          <br>
+          <button id="signInGoogleButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><img src="../google-logo.png" title="Google" width="24" height="24"> גוגל</button>
+          <br>
+          <button id="signInFacebookButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><img src="../facebook-logo.png" title="Facebook" width="24" height="24"> פייסבוק</button>
+          <br>
+          <button id="signInGuestButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> כנס כאורח </button>
+          <br>
+          <br>
+          <a id="signUpLink" href="#" > יצירת חשבון חדש </a>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <a id="forgotPasswordLink" href="#" > שכחת את הסיסמה? </a>
+        </div>
+      </div>
+
+<!-- Forgot Password Modal -->
+      <div id="forgotModal" class="modal" >
+        <div class="modal-content  mdl-color--light-blue-200">
+          <h4>איתחול סיסמה בדוא"ל</h4>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input"  type="text" id="forgotEmail" />
+            <label class="mdl-textfield__label" for="forgotEmail">דוא"ל</label>
+          </div>
+          <p id=forgotMsg style="color:red;"></p>
+          <button id="sendEmailButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"> שלח דוא"ל </button>
+          <button id="cancelForgetButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"> ביטול </button>
+        </div>
+      </div>
+
+<!-- Sign up Modal -->
+      <div id="signUpModal" class="modal" >
+        <div class="modal-content mdl-color--light-blue-200">
+          <h4>פרטי חשבון חדש</h4>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input"  type="text" id="displayName" />
+            <label class="mdl-textfield__label" for="displayName">שם המשתמש</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input"  type="text" id="signUpEmail" />
+            <label class="mdl-textfield__label" for="signUpEmail">דוא"ל</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input"  type="password" id="signUpPass" />
+            <label class="mdl-textfield__label" for="signUpPass">סיסמה</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input"  type="password" id="signUpPass2" />
+            <label class="mdl-textfield__label" for="signUpPass2">חזור על הסיסמה</label>
+          </div>
+          <p id=signUpMsg style="color:red;"> </p>
+          <button id="createUserButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">צור משתמש חדש</button>
+          <br><br>
+          <a id="signInLink" href="#" >  משתמש קיים </a>
+       </div>
+     </div>
+
+  </section>
+
+  <section>
+<!-- Chess game -->
+    <div id=chessBoard class="modal" style="top:0px" >
+      <div id="chessContent" style="margin:  auto;">
+        <div id=chessHeader class="mdl-color--light-blue-200" style="padding: 20px;">
+          <span id=chessTurn style="font-weight: bold"></span>
+          <span id=chessCheck  ></span>
+          <button id="chessButtonJoin" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
+          <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
+            <i class="material-icons">more_vert</i>
+          </button>
+          <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
+            for="demo-menu-lower-right">
+          <li id="endChess" class="mdl-menu__item mdl-menu__item--full-bleed-divider" disabled>End Game</li>
+          <li id="closeChess" class="mdl-menu__item">Return to Main Menu</li>
+          </ul>
+        </div>
+        <canvas id=chessCanvas data-processing-sources="../Chess/chess.js" ></canvas>
+        <div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar" style="z-index: 10;">
+          <div class="mdl-snackbar__text"></div>
+          <button class="mdl-snackbar__action" type="button"></button>
+        </div>
+      </div>
+    </div>
+
+<!-- Chess startup and board edit -->
+    <div id=ChessOptionsBoard class="modal allowClose" style="top:0px" >
+      <div id="ChessOptionsContent" style="margin:  auto;">
+        <div class="mdl-color--light-blue-200" style="padding: 20px;">
+          <div id=ChessOptionsHeader>
+            <div  style="text-align: center;border-style: groove;padding:10px">
+              <button id="startChessButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Start Chess</button>
+            </div>
+            <br>
+            <div><b><u>Chess Options</u></b></div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
+              <input id="chessRole" class="mdl-textfield__input" type="text" value="White" readonly tabIndex="-1">
+              <label for="chessRole" class="mdl-textfield__label">Your player color</label>
+              <ul for="chessRole" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">White</li>
+                <li class="mdl-menu__item">Black</li>
+              </ul>
+            </div>
+            <br>
+          </div>
+          <div style="text-align: center;padding: 0px;">
+            <button id="chessButtonEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Edit Board</button>
+            <button id="chessCancelEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
+          </div>
+        </div>
+        <canvas id=chessEditCanvas data-processing-sources="../Chess/chessEdit.js" style="margin: auto;"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Header section containing logo and menu -->
+  <header class="header mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
+
+    <div class="mdl-layout__header-row titlebar">
+      <h4 >נתיב המשחקים</h3>
+      <span id="userMenu" style="display:none;left: 0;position: absolute;" href="#">
+        <span id="welcomeMsg"></span>
+        <img id="welcomePic" height="42" width="42"></img>
+      </span>
+    </div>
+
+<!-- profile Menu -->
+    <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="userMenu">
+      <li id="helpButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">Help</li>
+      <li id="editProfileButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">Edit Profile</li>
+      <li id="signOutButton" class="mdl-menu__item">Logout</li>
+    </ul>
+
+<!-- Edit profile Modal -->
+    <div id="editProfileModal" class="modal allowClose" >
+      <div class="modal-content mdl-color--light-blue-200" style="float: right;">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--file">
+          <div>
+            <img id="updatePic" height="50" width="50"></img><span id="uploadFile" style="margin-left:20px"></span>
+            <input type="file" accept='image/*' id="uploadBtn" >
+          </div>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" >
+          <input class="mdl-textfield__input"  type="text" id="displayNameUpdate" value="" />
+          <label class="mdl-textfield__label" for="displayNameUpdate">Display name</label>
+        </div><br>
+        <button id="profileSend" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">עדכן</button>
+        <button id="profileCancel" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" style="float: right;">Cancel</button>
+      </div>
+    </div>
+  </header>
+
+<!-- Main screen -->
+  <main class="mdl-layout__content" style="width:100%;overflow:hidden">
+    <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed;z-index: 1;">
+      <div style="float: left;">
+         <b style="color:red;"> הקש כאן לעדכן פרופיל או לצאת מהחשבון</b>
+         <img src="../uparrow.png" height="42" width="42"></img>
+      </div>
+    </div>
+	
+    <div style="width: calc(100% - 46px);float:right;overflow:auto">
+<!-- Chess -->
+      <div style="width:110px; margin:auto" >
+        <h4 style="text-align:center" > שחמט</h4>
+        <input id="chessButton" class="gameMainButton" type="image" src="../Chess/chessboard_full.gif" width="100" height="100" >
+        <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
+          <li id="ChessNewButton"       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
+          <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Active">שחק את תורך</li>
+          <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Pending">הצטרף למשחק חדש</li>
+          <li id="ChessWaitListButton"    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Wait">המתן לתורך</li>
+          <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item " game="Chess" catag="Watch">צפיה במשחקים פעילים</li>
+        </ul>
+      </div>
+  
+      <div id=ChessActiveModal class="modal allowClose" >
+          <div id="ChessActiveList" class="Active gameLists"  ></div>
+      </div>
+      <div id=ChessPendingModal class="modal allowClose" >
+          <div id="ChessPendingList" class="Pending gameLists"  ></div>
+      </div>
+      <div id=ChessWaitModal class="modal allowClose" >
+          <div id="ChessWaitList" class="gameLists"  ></div>
+      </div>
+      <div id=ChessWatchModal class="modal allowClose" >
+          <div id="ChessWatchList" class="gameLists"  ></div>
+      </div>
+      <div class="mdl-spinner mdl-js-spinner"></div>
+  	
+<!-- Welcome screen -->
+      <div class="WelcomeNewUser" style="display:none;margin:0px 20px" >
+        <h4 style="color:red;margin:0">Welcome new player</h4>
+        <span >Click on one of the game symbols to play in one of these options:
+  	  <ul style="margin:0">
+          <li>Start a new game (and wait for others to join)</li>
+          <b class="WelcomeGuest"  style="color:red;">Since you are a guest, you can't create new games</b>
+          <li>If it's your turn to play, you will see a red badge on the game symbol. You can now play your turn.</li>
+          <li>Join a game that was already opened by other player.</li>
+          <li>Join an active game, even if it's not your turn. Just wait for another player to move.</li>
+          <li>You can even watch the progress of games in which you are not a player.</li>
+  	  </ul>
+        <b>note:</b> You can join a game in more than one role. This allows multiple players in the room to play with each other on one computer.
+        </span>
+      </div>
+      <div class="WelcomeNews" style="display:none;margin:0px 20px" >
+        <h4 style="color:red;margin:0">What's new?</h4>
+        <ul id="NewsBlock" style="margin:0">
+        <li>Please help us improve by filling up a survery at <a href="https://www.surveymonkey.com/r/QKSL2Y6">Survery Monkey</a></li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-right:calc(100% - 46px)">
+      <a id="Lang" style="" href="../en/index.html">
+        <img height="42" width="42"></img>
+      </a>
+    </div >
+  </main>
+
+</div>
+
+
+<script src="https://www.gstatic.com/firebasejs/4.6.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyAs37KjQ_OqCwPIfOXLz12MUIrdxDRABpQ",
+    authDomain: "games-lane.firebaseapp.com",
+    databaseURL: "https://games-lane.firebaseio.com",
+    projectId: "games-lane",
+    storageBucket: "games-lane.appspot.com",
+    messagingSenderId: "934409216598"
+  };
+  firebase.initializeApp(config);
+</script>
+
+<script src="../main.js"></script>
+</body>
+</html>

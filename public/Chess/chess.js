@@ -1,5 +1,5 @@
 // the next line is very important for using images in JS
-/* @pjs preload="Chess/chess-pieces.png,Chess/red-x.png,Chess/chessboard_full.gif"; */
+/* @pjs preload="../Chess/chess-pieces.png,../Chess/red-x.png,../Chess/chessboard_full.gif"; */
 
 // Define global variables
 // -----------------------
@@ -46,7 +46,7 @@ var animation= {
 }
 
 var images=[];                           // array to hold the images of the various pieces
-var pieces=loadImage("Chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
+var pieces=loadImage("../Chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
 var players= {White:"", Black:""}
 
 // Define functions
@@ -421,7 +421,7 @@ function chessMoveEvent(snapshot) {
          title: data.info.concede+" had quit the game",
          text: "",
          showConfirmButton: true,
-         imageUrl: "i-quit.png",
+         imageUrl: "../i-quit.png",
          imageSize: "400x150",
       });
 /*
@@ -517,7 +517,7 @@ void draw() {
                title: "CheckMate",
                text: "",
                showConfirmButton: true,
-               imageUrl: "Chess/checkmate.jpg",
+               imageUrl: "../Chess/checkmate.jpg",
                imageSize: "400x150",
             });
           else
@@ -525,7 +525,7 @@ void draw() {
                title: "StaleMate",
                text: "",
                showConfirmButton: true,
-               imageUrl: "Chess/stalemate.jpg",
+               imageUrl: "../Chess/stalemate.jpg",
                imageSize: "400x150",
             });
           if (myChessIndex) sendReq({
@@ -542,7 +542,7 @@ void draw() {
              text: "",
              timer: 2000,
              showConfirmButton: true,
-             imageUrl: "Chess/check.jpg",
+             imageUrl: "../Chess/check.jpg",
              imageSize: "400x150",
           });
         }

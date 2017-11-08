@@ -280,7 +280,9 @@ function onAuthStateChanged(user) {
     debug(1,"Auth: Logout event");
     $(".gameLists").empty();   // clear all the lists
     $("#userMenu").hide();
-    $("#WelcomeContent").hide();
+    $(".WelcomeGuest").hide();
+    $(".WelcomeNewUser").hide();
+    $(".WelcomeNews").hide();
     $("#splashPage").show();
     $(".gameButtons").attr("disabled",true);
     currentUID=-1;
@@ -302,7 +304,6 @@ function onAuthStateChanged(user) {
     });
     $(".WelcomeGuest").show();
     $(".WelcomeNewUser").show();
-    $("#WelcomeContent").show();
   }
   else {
     $(".WelcomeGuest").hide();
@@ -310,7 +311,6 @@ function onAuthStateChanged(user) {
     db.ref('users/' + currentUID).once("value", function(snapshot) {
       if (!snapshot.val() || !snapshot.val().saw_tutorial) {
         $(".WelcomeNewUser").show();
-        $("#WelcomeContent").show();
         snapshot.ref.set({
           username: displayName,
           profile_picture : photoURL,
@@ -404,7 +404,7 @@ function addGameToList(snapshot) {
   }
   if (game.currentUID==currentUID)  {
       addToList(game.game,"Active",node);
-      addLine(game,"It's now your turn to play "+game.game+" with "+partner);
+      if (game.status!="quit") addLine(game,"It's now your turn to play "+game.game+" with "+partner);
   }
   else if (game.status=="pending") {
     addToList(game.game,"Pending",node);
@@ -435,7 +435,6 @@ function addLine(game, msg) {
     $("#NewsBlock").append("<li class='newsItem' id='li"+game.gid+"'>"+msg+"</li>");
   }
   $(".WelcomeNews").show();
-  $("#WelcomeContent").show();
 }
 
 function addToList(game,list,node) {
@@ -483,7 +482,7 @@ $("#profileSend").click( function() {
     auth.currentUser.updateProfile({
       displayName: $("#displayNameUpdate").val(),
     }).then(function(snapshot){
-      $("#welcomeMsg").html(auth.currentUser.displayName+auth.currentUser.test);
+      $("#welcomeMsg").html(auth.currentUser.displayName);
       db.ref('users/' + currentUID).update({   // also update in database
         displayName : auth.currentUser.displayName,
       });
@@ -535,12 +534,12 @@ $(".NewGame").click( function() {
 });
 
 $(".gameMainButton").click( function() {
-  $("#WelcomeContent").hide();
+  $(".WelcomeNewUser").hide();
+  $(".WelcomeNews").hide();
   $(".newsItem").remove();
-//  $("#NewsBlock").empty();
 });
 
 $("#helpButton").click( function() {
   $(".WelcomeNewUser").show();
-  $("#WelcomeContent").show();
+//  $(".WelcomeNews").hide();
 });

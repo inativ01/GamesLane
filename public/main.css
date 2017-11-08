@@ -31,15 +31,16 @@ a {
 */
 
 /* Header */
-/*
+
 .header .mdl-layout__header-row {
-    max-width: 1024px;
+//    max-width: 1024px;
     width: 100%;
     height: auto;
     padding: 10px 20px;
     margin: auto;
     position: relative;
 }
+/*
 @media screen and (max-width: 840px) {
     .header .mdl-layout__header-row.titlebar {
         height: 56px;

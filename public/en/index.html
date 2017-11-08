@@ -26,16 +26,16 @@
   <meta name="msapplication-navbutton-color" content="#303F9F">
 
   <!-- Liraries -->
-  <link rel="stylesheet" href="Libs/material.min.css">
-  <script src="Libs/material.min.js"></script>
+  <link rel="stylesheet" href="../Libs/material.min.css">
+  <script src="../Libs/material.min.js"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="Libs/getmdl-select.min.css">
-  <script src="Libs/getmdl-select.min.js"></script>
-  <script src="Libs/jquery-3.2.1.min.js"></script>
-  <script src="Libs/processing.min.js"></script>
-  <script src="Libs/sweetalert.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="Libs/sweetalert.css">
-  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="../Libs/getmdl-select.min.css">
+  <script src="../Libs/getmdl-select.min.js"></script>
+  <script src="../Libs/jquery-3.2.1.min.js"></script>
+  <script src="../Libs/processing.min.js"></script>
+  <script src="../Libs/sweetalert.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="../Libs/sweetalert.css">
+  <link rel="stylesheet" href="../main.css">
 
 </head>
 <body>
@@ -59,9 +59,9 @@
           <p id=loginMsg style="color:red;"></p>
           <button id="signInEmailButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Sign in </button>
           <br>
-          <button id="signInGoogleButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><img src="google-logo.png" title="Google" width="24" height="24"> Google</button>
+          <button id="signInGoogleButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><img src="../google-logo.png" title="Google" width="24" height="24"> Google</button>
           <br>
-          <button id="signInFacebookButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><img src="facebook-logo.png" title="Facebook" width="24" height="24"> Facebook</button>
+          <button id="signInFacebookButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><img src="../facebook-logo.png" title="Facebook" width="24" height="24"> Facebook</button>
           <br>
           <button id="signInGuestButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"><i class="material-icons">account_circle</i> Enter as Guest </button>
           <br>
@@ -132,7 +132,7 @@
           <li id="closeChess" class="mdl-menu__item">Return to Main Menu</li>
           </ul>
         </div>
-        <canvas id=chessCanvas data-processing-sources="Chess/chess.js" ></canvas>
+        <canvas id=chessCanvas data-processing-sources="../Chess/chess.js" ></canvas>
         <div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar" style="z-index: 10;">
           <div class="mdl-snackbar__text"></div>
           <button class="mdl-snackbar__action" type="button"></button>
@@ -165,7 +165,7 @@
             <button id="chessCancelEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
           </div>
         </div>
-        <canvas id=chessEditCanvas data-processing-sources="Chess/chessEdit.js" style="margin: auto;"></canvas>
+        <canvas id=chessEditCanvas data-processing-sources="../Chess/chessEdit.js" style="margin: auto;"></canvas>
       </div>
     </div>
 
@@ -202,71 +202,76 @@
           <input class="mdl-textfield__input"  type="text" id="displayNameUpdate" value="" />
           <label class="mdl-textfield__label" for="displayNameUpdate">Display name</label>
         </div><br>
-        <button id="profileSend" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Upload</button>
+        <button id="profileSend" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Update</button>
         <button id="profileCancel" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" style="float: right;">Cancel</button>
       </div>
     </div>
-
-
   </header>
 
-
-<!-- Welcome screen -->
-  <section>
-    <div id="WelcomeContent"  style="width:100%;position: fixed;z-index: 2;">
-      <div class="WelcomeNewUser"  style="display:none;float: right;">
+<!-- Main screen -->
+  <main class="mdl-layout__content" style="width:100%;overflow:hidden">
+    <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed;z-index: 1;">
+      <div style="float: right;">
          <b style="color:red;"> Click here to update profile or logout</b>
-         <img src="uparrow.png" height="42" width="42"></img>
-      </div><br>
-      <div style="margin-top:150px; margin-left:10px">
-      <div class="WelcomeNewUser" style="display:none" >
-        <h4 style="color:red;">Welcome new player</h4>
+         <img src="../uparrow.png" height="42" width="42"></img>
+      </div>
+    </div>
+
+    <div style="width: calc(100% - 46px);float:left">
+<!-- Chess -->
+      <div style="width:110px; margin:auto" >
+        <h4 style="text-align:center" > Chess</h4>
+        <input id="chessButton" class="gameMainButton" type="image" src="../Chess\chessboard_full.gif" width="100" height="100" >
+        <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
+          <li id="ChessNewButton"       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">Start a New Game</li>
+          <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Active">Play your turn</li>
+          <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Pending">Join a Game</li>
+          <li id="ChessWaitListButton"    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Wait">Wait for your turn</li>
+          <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item " game="Chess" catag="Watch">Watch others play</li>
+        </ul>
+      </div>
+  
+      <div id=ChessActiveModal class="modal allowClose" >
+          <div id="ChessActiveList" class="Active gameLists"  ></div>
+      </div>
+      <div id=ChessPendingModal class="modal allowClose" >
+          <div id="ChessPendingList" class="Pending gameLists"  ></div>
+      </div>
+      <div id=ChessWaitModal class="modal allowClose" >
+          <div id="ChessWaitList" class="gameLists"  ></div>
+      </div>
+      <div id=ChessWatchModal class="modal allowClose" >
+          <div id="ChessWatchList" class="gameLists"  ></div>
+      </div>
+      <div class="mdl-spinner mdl-js-spinner"></div>
+  	
+<!-- Welcome screen -->
+      <div class="WelcomeNewUser" style="display:none;margin:0px 20px" >
+        <h4 style="color:red;margin:0">Welcome new player</h4>
         <span >Click on one of the game symbols to play in one of these options:
-        <li>Start a new game (and wait for others to join)</li>
-        <b class="WelcomeGuest"  style="color:red;">Since you are a guest, you can't create new games</b>
-        <li>If it's your turn to play, you will see a red badge on the game symbol. You can now play your turn.</li>
-        <li>Join a game that was already opened by other player.</li>
-        <li>Join an active game, even if it's not your turn. Just wait for another player to move.</li>
-        <li>You can even watch the progress of games in which you are not a player.</li>
+  	  <ul style="margin:0">
+          <li>Start a new game (and wait for others to join)</li>
+          <b class="WelcomeGuest"  style="color:red;">Since you are a guest, you can't create new games</b>
+          <li>If it's your turn to play, you will see a red badge on the game symbol. You can now play your turn.</li>
+          <li>Join a game that was already opened by other player.</li>
+          <li>Join an active game, even if it's not your turn. Just wait for another player to move.</li>
+          <li>You can even watch the progress of games in which you are not a player.</li>
+  	  </ul>
         <b>note:</b> You can join a game in more than one role. This allows multiple players in the room to play with each other on one computer.
         </span>
       </div>
-      <div class="WelcomeNews" style="display:none" >
-        <h4 style="color:red;">What's new?</h4>
-        <ul id="NewsBlock">
+      <div class="WelcomeNews" style="display:none;margin:0px 20px" >
+        <h4 style="color:red;margin:0">What's new?</h4>
+        <ul id="NewsBlock" style="margin:0">
         <li>Please help us improve by filling up a survery at <a href="https://www.surveymonkey.com/r/QKSL2Y6">Survery Monkey</a></li>
         </ul>
       </div>
     </div>
-  </section>
-
-  <main class="mdl-layout__content">
-    <div style="width:110px; margin:auto" >
-      <h4 style="text-align:center" > Chess</h4>
-      <div id="ChessBadge"</div>
-      <input id="chessButton" class="gameMainButton" type="image" src="Chess\chessboard_full.gif" width="100" height="100" >
-      <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
-        <li id="ChessNewButton"       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">Start a New Game</li>
-        <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Active">Play your turn</li>
-        <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Pending">Join a Game</li>
-        <li id="ChessWaitListButton"    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Wait">Wait for your turn</li>
-        <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item " game="Chess" catag="Watch">Watch others play</li>
-      </ul>
-    </div>
-
-    <div id=ChessActiveModal class="modal allowClose" >
-        <div id="ChessActiveList" class="Active gameLists"  ></div>
-    </div>
-    <div id=ChessPendingModal class="modal allowClose" >
-        <div id="ChessPendingList" class="Pending gameLists"  ></div>
-    </div>
-    <div id=ChessWaitModal class="modal allowClose" >
-        <div id="ChessWaitList" class="gameLists"  ></div>
-    </div>
-    <div id=ChessWatchModal class="modal allowClose" >
-        <div id="ChessWatchList" class="gameLists"  ></div>
-    </div>
-    <div class="mdl-spinner mdl-js-spinner"></div>
+    <div style="margin-left:calc(100% - 46px)">
+      <a id="Lang" style="" href="../he/index.html">
+        <img height="42" width="42"></img>
+      </a>
+    </div >
   </main>
 
 </div>
@@ -286,6 +291,6 @@
   firebase.initializeApp(config);
 </script>
 
-<script src="main.js"></script>
+<script src="../main.js"></script>
 </body>
 </html>
