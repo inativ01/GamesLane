@@ -13,6 +13,7 @@ var auth = firebase.auth();
 var gameInfo={};
 var gameMsg=null;
 var debugLevel=2;
+var hints=false;
 
 function debug(level, msg) {
   switch (level) {
@@ -285,6 +286,7 @@ function onAuthStateChanged(user) {
     $(".WelcomeNews").hide();
     $("#splashPage").show();
     $(".gameButtons").attr("disabled",true);
+    hints=false;
     currentUID=-1;
     return;
   }
@@ -304,6 +306,7 @@ function onAuthStateChanged(user) {
     });
     $(".WelcomeGuest").show();
     $(".WelcomeNewUser").show();
+    hints=true;
   }
   else {
     $(".WelcomeGuest").hide();
@@ -311,6 +314,7 @@ function onAuthStateChanged(user) {
     db.ref('users/' + currentUID).once("value", function(snapshot) {
       if (!snapshot.val() || !snapshot.val().saw_tutorial) {
         $(".WelcomeNewUser").show();
+        hints=true;
         snapshot.ref.set({
           username: displayName,
           profile_picture : photoURL,
@@ -319,6 +323,7 @@ function onAuthStateChanged(user) {
       }
       else
         $(".WelcomeNewUser").hide();
+        hints=false;
     });
     db.ref('users/' + currentUID).update({
       username: displayName,
@@ -537,9 +542,16 @@ $(".gameMainButton").click( function() {
   $(".WelcomeNewUser").hide();
   $(".WelcomeNews").hide();
   $(".newsItem").remove();
+  hints=false;
 });
 
 $("#helpButton").click( function() {
-  $(".WelcomeNewUser").show();
-//  $(".WelcomeNews").hide();
+  if (hints) {
+    $(".WelcomeNewUser").hide();
+    hints=false;
+  } 
+  else {
+    $(".WelcomeNewUser").show();
+    hints=true;
+  }
 });

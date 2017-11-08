@@ -178,13 +178,12 @@
       <h4 >נתיב המשחקים</h3>
       <span id="userMenu" style="display:none;left: 0;position: absolute;" href="#">
         <span id="welcomeMsg"></span>
-        <img id="welcomePic" height="42" width="42"></img>
+        <img id="welcomePic" height="42" width="42" style="border-radius: 50%;"></img>
       </span>
     </div>
 
 <!-- profile Menu -->
     <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="userMenu">
-      <li id="helpButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">Help</li>
       <li id="editProfileButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">Edit Profile</li>
       <li id="signOutButton" class="mdl-menu__item">Logout</li>
     </ul>
@@ -210,14 +209,20 @@
 
 <!-- Main screen -->
   <main class="mdl-layout__content" style="width:100%;overflow:hidden">
-    <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed;z-index: 1;">
-      <div style="float: left;">
-         <b style="color:red;"> הקש כאן לעדכן פרופיל או לצאת מהחשבון</b>
-         <img src="../uparrow.png" height="42" width="42"></img>
+    <div style="width: calc(100% - 50px);float:right;position:absolute;height:100%;overflow:auto">
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:2px;margin-right:-60px" align="left" >
+           <b style="color:red;"> שינוי שפה</b>
+           <img src="../Left-Arrow.png" height="40" width="40"></img>
       </div>
-    </div>
-	
-    <div style="width: calc(100% - 46px);float:right;overflow:auto">
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:54px;margin-right:-60px" align="left" >
+           <b style="color:red;"> הצג/הסתר הסברים</b>
+           <img src="../Left-Arrow.png" height="40" width="40"></img>
+      </div>
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:106px;margin-right:-60px" align="left" >
+           <b style="color:red;"> מילוי שאלון</b>
+           <img src="../Left-Arrow.png" height="40" width="40"></img>
+      </div>
+
 <!-- Chess -->
       <div style="width:110px; margin:auto" >
         <h4 style="text-align:center" > שחמט</h4>
@@ -247,29 +252,37 @@
   	
 <!-- Welcome screen -->
       <div class="WelcomeNewUser" style="display:none;margin:0px 20px" >
-        <h4 style="color:red;margin:0">Welcome new player</h4>
-        <span >Click on one of the game symbols to play in one of these options:
-  	  <ul style="margin:0">
-          <li>Start a new game (and wait for others to join)</li>
-          <b class="WelcomeGuest"  style="color:red;">Since you are a guest, you can't create new games</b>
-          <li>If it's your turn to play, you will see a red badge on the game symbol. You can now play your turn.</li>
-          <li>Join a game that was already opened by other player.</li>
-          <li>Join an active game, even if it's not your turn. Just wait for another player to move.</li>
-          <li>You can even watch the progress of games in which you are not a player.</li>
-  	  </ul>
-        <b>note:</b> You can join a game in more than one role. This allows multiple players in the room to play with each other on one computer.
+        <h4 style="color:red;margin:0">איך להשתמש באתר?</h4>
+        <span >יש ללחוץ על תמונת משחק כדי לשחק באחד מהאופנים הבאים:
+         <ul style="margin:0">
+          <li>התחלת משחק חדש (יש להמתין לשחקנים נוספים להצטרף)</li>
+          <b class="WelcomeGuest"  style="color:red;">שחקן אורח אינו יכול להתחיל משחק חדש!</b>
+          <li>כאשר מגיע תורך לשחק, יופיע סימון אדום על תמונת המשחק.</li>
+          <li>הצטרפות למשחק שנפתח על ידי שחקן אחר.</li>
+          <li>כניסה למשחק פעיל, אף שזה לא תורך. יש להמתין לתורך לשחק.</li>
+          <li>ניתן גם לצפות במשחק פעיל אשר ללא השתתפות פעילה.</li>
+         </ul>
+        <b>הערה:</b> ניתן להצטרף למשחק ביותר מתפקיד אחד. זה מאפשר למספר שחקנים בחדר לשחק זה עם זה על מחשב אחד.
         </span>
       </div>
       <div class="WelcomeNews" style="display:none;margin:0px 20px" >
-        <h4 style="color:red;margin:0">What's new?</h4>
+        <h4 style="color:red;margin:0">מה חדש?</h4>
         <ul id="NewsBlock" style="margin:0">
-        <li>Please help us improve by filling up a survery at <a href="https://www.surveymonkey.com/r/QKSL2Y6">Survery Monkey</a></li>
+        <li>אנא עזור לנו להשתפר על ידי מילוי שאלון משוב ב-<a href="https://www.surveymonkey.com/r/XJMSGDR" target="_blank">Survery Monkey</a></li>
         </ul>
       </div>
     </div>
+
+<!-- Side Bar -->
     <div style="margin-right:calc(100% - 46px)">
-      <a id="Lang" style="" href="../en/index.html">
-        <img height="42" width="42"></img>
+      <a style="" href="../en/index.html">
+        <i class="material-icons md-48">language</i>
+      </a>
+      <a id="helpButton" style="" href="#">
+        <i class="material-icons md-48">help</i>
+      </a>
+      <a style="" href="https://www.surveymonkey.com/r/XJMSGDR" target="_blank">
+        <i class="material-icons md-48">feedback</i>
       </a>
     </div >
   </main>

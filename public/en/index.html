@@ -173,18 +173,21 @@
 
   <!-- Header section containing logo and menu -->
   <header class="header mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:20px;margin-left:-50px;z-index:10" align="right" >
+           <b style="color:red;">Edit profile or logout</b>
+           <img src="../Right-Arrow.png" height="40" width="40"></img>
+      </div>
 
     <div class="mdl-layout__header-row titlebar">
       <h4 >The Games Lane</h3>
       <span id="userMenu" style="display:none;right: 0;position: absolute;" href="#">
         <span id="welcomeMsg"></span>
-        <img id="welcomePic" height="42" width="42"></img>
+        <img id="welcomePic" height="42" width="42" style="border-radius: 50%;"></img>
       </span>
     </div>
 
 <!-- profile Menu -->
     <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="userMenu">
-      <li id="helpButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">Help</li>
       <li id="editProfileButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">Edit Profile</li>
       <li id="signOutButton" class="mdl-menu__item">Logout</li>
     </ul>
@@ -209,15 +212,21 @@
   </header>
 
 <!-- Main screen -->
-  <main class="mdl-layout__content" style="width:100%;overflow:hidden">
-    <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed;z-index: 1;">
-      <div style="float: right;">
-         <b style="color:red;"> Click here to update profile or logout</b>
-         <img src="../uparrow.png" height="42" width="42"></img>
+  <main class="mdl-layout__content" style="width:100%;overflow:hidden;">
+    <div style="width: calc(100% - 50px);float:left;position:absolute;height:100%;overflow:auto">
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:2px;margin-left:-50px" align="right" >
+           <b style="color:red;"> Change Language</b>
+           <img src="../Right-Arrow.png" height="40" width="40"></img>
       </div>
-    </div>
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:54px;margin-left:-50px" align="right" >
+           <b style="color:red;"> Hints on/off</b>
+           <img src="../Right-Arrow.png" height="40" width="40"></img>
+      </div>
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:106px;margin-left:-50px" align="right" >
+           <b style="color:red;"> Fill a survey</b>
+           <img src="../Right-Arrow.png" height="40" width="40"></img>
+      </div>
 
-    <div style="width: calc(100% - 46px);float:left">
 <!-- Chess -->
       <div style="width:110px; margin:auto" >
         <h4 style="text-align:center" > Chess</h4>
@@ -247,14 +256,14 @@
   	
 <!-- Welcome screen -->
       <div class="WelcomeNewUser" style="display:none;margin:0px 20px" >
-        <h4 style="color:red;margin:0">Welcome new player</h4>
+        <h4 style="color:red;margin:0">How to use this site?</h4>
         <span >Click on one of the game symbols to play in one of these options:
   	  <ul style="margin:0">
           <li>Start a new game (and wait for others to join)</li>
           <b class="WelcomeGuest"  style="color:red;">Since you are a guest, you can't create new games</b>
-          <li>If it's your turn to play, you will see a red badge on the game symbol. You can now play your turn.</li>
+          <li>If it's your turn to play, you will see a red badge on the game symbol.</li>
           <li>Join a game that was already opened by other player.</li>
-          <li>Join an active game, even if it's not your turn. Just wait for another player to move.</li>
+          <li>Join an active game, even if it's not your turn. Just wait for your turn.</li>
           <li>You can even watch the progress of games in which you are not a player.</li>
   	  </ul>
         <b>note:</b> You can join a game in more than one role. This allows multiple players in the room to play with each other on one computer.
@@ -263,13 +272,21 @@
       <div class="WelcomeNews" style="display:none;margin:0px 20px" >
         <h4 style="color:red;margin:0">What's new?</h4>
         <ul id="NewsBlock" style="margin:0">
-        <li>Please help us improve by filling up a survery at <a href="https://www.surveymonkey.com/r/QKSL2Y6">Survery Monkey</a></li>
+        <li>Please help us improve by filling up a survery at <a href="https://www.surveymonkey.com/r/QKSL2Y6" target="_blank">Survery Monkey</a></li>
         </ul>
       </div>
     </div>
+
+<!-- Side Bar -->
     <div style="margin-left:calc(100% - 46px)">
-      <a id="Lang" style="" href="../he/index.html">
-        <img height="42" width="42"></img>
+      <a style="" href="../he/index.html">
+        <i class="material-icons md-48">language</i>
+      </a>
+      <a id="helpButton" style="" href="#">
+        <i class="material-icons md-48">help</i>
+      </a>
+      <a style="" href="https://www.surveymonkey.com/r/QKSL2Y6" target="_blank">
+        <i class="material-icons md-48">feedback</i>
       </a>
     </div >
   </main>
