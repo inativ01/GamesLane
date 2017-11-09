@@ -119,17 +119,17 @@
 <!-- Chess game -->
     <div id=chessBoard class="modal" style="top:0px" >
       <div id="chessContent" style="margin:  auto;">
-        <div id=chessHeader class="mdl-color--light-blue-200" style="padding: 20px;">
+        <div id=chessHeader class="mdl-color--light-blue-200" style="padding: 20px;position:relative">
           <span id=chessTurn style="font-weight: bold"></span>
           <span id=chessCheck  ></span>
           <button id="chessButtonJoin" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-          <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
+          <button id="chessExitMenu" class="mdl-button mdl-js-button mdl-button--icon" style="float: left;">
             <i class="material-icons">more_vert</i>
           </button>
           <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
-            for="demo-menu-lower-right">
-          <li id="endChess" class="mdl-menu__item mdl-menu__item--full-bleed-divider" disabled>End Game</li>
-          <li id="closeChess" class="mdl-menu__item">Return to Main Menu</li>
+            for="chessExitMenu">
+          <li id="endChess" class="mdl-menu__item mdl-menu__item--full-bleed-divider" disabled>סיום משחק</li>
+          <li id="closeChess" class="mdl-menu__item">חזרה לתפריט הראשי</li>
           </ul>
         </div>
         <canvas id=chessCanvas data-processing-sources="../Chess/chess.js" ></canvas>
@@ -173,6 +173,10 @@
 
   <!-- Header section containing logo and menu -->
   <header class="header mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
+    <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:25px;margin-right:-50px;z-index:10" align="left" >
+      <b style="color:red;">עדכון פרופיל או יציאה</b>
+      <img src="../Left-Arrow.png" height="40" width="40"></img>
+    </div>
 
     <div class="mdl-layout__header-row titlebar">
       <h4 >נתיב המשחקים</h3>
@@ -184,8 +188,8 @@
 
 <!-- profile Menu -->
     <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="userMenu">
-      <li id="editProfileButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">Edit Profile</li>
-      <li id="signOutButton" class="mdl-menu__item">Logout</li>
+      <li id="editProfileButton" class="mdl-menu__item mdl-menu__item--full-bleed-divider">עריכת פרופיל</li>
+      <li id="signOutButton" class="mdl-menu__item">יציאה</li>
     </ul>
 
 <!-- Edit profile Modal -->
@@ -210,24 +214,24 @@
 <!-- Main screen -->
   <main class="mdl-layout__content" style="width:100%;overflow:hidden">
     <div style="width: calc(100% - 50px);float:right;position:absolute;height:100%;overflow:auto">
-      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:2px;margin-right:-60px" align="left" >
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:2px;margin-right:-70px" align="left" >
            <b style="color:red;"> שינוי שפה</b>
            <img src="../Left-Arrow.png" height="40" width="40"></img>
       </div>
-      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:54px;margin-right:-60px" align="left" >
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:54px;margin-right:-70px" align="left" >
            <b style="color:red;"> הצג/הסתר הסברים</b>
            <img src="../Left-Arrow.png" height="40" width="40"></img>
       </div>
-      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:106px;margin-right:-60px" align="left" >
+      <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:106px;margin-right:-70px" align="left" >
            <b style="color:red;"> מילוי שאלון</b>
            <img src="../Left-Arrow.png" height="40" width="40"></img>
       </div>
 
 <!-- Chess -->
-      <div style="width:110px; margin:auto" >
+      <div style="width:110px; margin:auto;position:relative" >
         <h4 style="text-align:center" > שחמט</h4>
         <input id="chessButton" class="gameMainButton" type="image" src="../Chess/chessboard_full.gif" width="100" height="100" >
-        <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="chessButton">
+        <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="chessButton">
           <li id="ChessNewButton"       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
           <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Active">שחק את תורך</li>
           <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Pending">הצטרף למשחק חדש</li>

@@ -48,7 +48,7 @@ a {
 @media screen and (max-width: 840px) {
 	
     .header .mdl-layout__header-row.titlebar {
-        height: 56px;
+//        height: 56px;
     }
     .titlebar h3 {
         font-size: 24px;
