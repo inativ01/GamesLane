@@ -1,7 +1,11 @@
 // the next line is very important for using images in JS
 /* @pjs preload="../Chess/chess-pieces.png,../Chess/red-x.png,../Chess/chessboard_full.gif"; */
 
-// Define global variables
+/************************************************************************************************ 
+*
+*   Define global variables
+*
+************************************************************************************************/
 // -----------------------
 
 var reverse=false;                                                    // display reverse board for black player
@@ -11,6 +15,7 @@ var myChessIndex=0;                                                   // 0 - no 
                                                                       // 2 - Black
                                                                       // 3 - Both (single player)
 
+// Current chess board																	 
 var board=[[-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1],
@@ -20,6 +25,7 @@ var board=[[-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1]];
 
+// for each square on the board, boolean indication if there is a legal move for current player starting from it
 var lglMoves=[[0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0],
@@ -28,7 +34,8 @@ var lglMoves=[[0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0]];
-var sizeSquare = 6, startX = 6, startY = 6;                           // control the size and location of the board
+
+var sizeSquare, startX, startY;                                       // control the size and location of the board
 var player=0;                                                         // 0 for white, 1 for black
 var mode="passive";                                                   // "passive" - my player is not playing
                                                                       // "start" - need to select current player piece (FROM location)
@@ -49,22 +56,33 @@ var images=[];                           // array to hold the images of the vari
 var pieces=loadImage("../Chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
 var players= {White:"", Black:""}
 
-// Define functions
-// -----------------
+/************************************************************************************************ 
+*
+*   User interface Events
+*
+************************************************************************************************/
 
-// Button-click events
+//*************************************************************************************************
+//   This function prints out the board based on the board array
+//*************************************************************************************************
 window.addEventListener('resize', function() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
   $("#chessContent").css("width",sizeSquare*10);
   if($("#chessBoard").is(":visible")) printBoard();
 });
 
+//*************************************************************************************************
+//   User selected to go to main menul
+//*************************************************************************************************
 $("#closeChess").click( function() {
   newGID= -1;
   gameMsg="chess";
   $("#chessBoard").hide();
 });
 
+//*************************************************************************************************
+//   User selected to quit (resign) the game
+//*************************************************************************************************
 $("#endChess").click( function() {
   sendReq({
     game:"Chess",
@@ -76,8 +94,9 @@ $("#endChess").click( function() {
   });
 });
 
-
-
+//*************************************************************************************************
+//   User selected to join the game as a player
+//*************************************************************************************************
 $('#chessButtonJoin').click(function() {
   sendReq({
     game:"Chess",
@@ -88,8 +107,340 @@ $('#chessButtonJoin').click(function() {
     displayName: auth.currentUser.displayName,
     photoURL: auth.currentUser.photoURL
   });
-//  gameMsg="chess";
 });
+
+/************************************************************************************************ 
+*
+*   Firebase events
+*
+************************************************************************************************/
+
+//*************************************************************************************************
+// This function is called when the server updates gameData/Chess/<gid> for the current game
+//*************************************************************************************************
+
+function chessEvent(snapshot) {
+  var data=snapshot.val();
+  if (!data) return; // information not ready yet
+  if (gameID != data.info.gid) {
+    debug(0,"Incorrect Game ID:"+data.info.gid+"/"+gameID);
+    return;
+  }
+  debug(1,"ChessMove GID="+gameID+" status="+data.info.status);
+  debug(2,data);
+  player=data.player;
+  from=data.from;
+  to=data.to;
+  board=data.board;
+  special=data.special;
+  myChessIndex=0;
+  if (data.info.players.White && data.info.players.White.uid==currentUID) myChessIndex|=1;             // turn on bit 0
+  if (data.info.players.Black && data.info.players.Black.uid==currentUID) myChessIndex|=2;             // turn on bit 1
+  debug(2,"myChessIndex="+myChessIndex);
+  $("#chessButtonJoin").hide();
+  if (myChessIndex)
+    $("#endChess").attr("disabled",false);
+  else
+    $("#endChess").attr("disabled",true);
+  $("#chessTurn").css("color","black");
+  $("#chessTurn").html("");
+  switch(data.info.status) {
+    case "pending":
+      var color= (!data.info.players.White) ? "White" : "Black";
+      reverse=(color=="Black");
+      $("#chessButtonJoin").val(color);
+      $("#chessButtonJoin").html("Join as "+color);
+      $("#chessButtonJoin").show();
+      mode="passive";
+      printBoard();
+      break;
+    case "active":
+      reverse=((myChessIndex==2)||(myChessIndex==3 && player==1));
+      printBoard();
+      if (data.movedPiece > -1) {
+         animation.movedPiece=data.movedPiece;
+         animation.newPiece=data.newPiece;
+         animation.startMillis=millis();
+         if (reverse) {
+           animation.sourceX= startX+sizeSquare*(7-from.x);
+           animation.sourceY= startY+sizeSquare*(7-from.y);
+           animation.distanceX= sizeSquare*(from.x-to.x);
+           animation.distanceY= sizeSquare*(from.y-to.y);
+         } else {
+           animation.sourceX= startX+sizeSquare*from.x;
+           animation.sourceY= startY+sizeSquare*from.y;
+           animation.distanceX= sizeSquare*(to.x-from.x);
+           animation.distanceY= sizeSquare*(to.y-from.y);
+         }
+      }
+      else {
+        animation.movedPiece= -1;
+        animation.startMillis= -1000;
+      }
+      if (checkPlayer()) $("#chessTurn").css("color","red");
+      if (player==0) $("#chessTurn").html("White player's turn");
+      else if (player==1) $("#chessTurn").html("Black player's turn");
+      mode="animation";
+      break;
+    case "quit":
+      sweetAlert({
+         title: data.info.concede+" had quit the game",
+         text: "",
+         showConfirmButton: true,
+         imageUrl: "../i-quit.png",
+         imageSize: "400x150",
+      });
+/*
+      if (myChessIndex) sendReq({
+        game:"Chess",
+        gid:gameID,
+        uid:currentUID,
+        msg: "ExitGame",
+      });
+*/
+      $("#chessBoard").hide();
+  }
+  debug(2,"mode="+mode);
+}
+
+/************************************************************************************************ 
+*
+*   Processing.js functions and events
+*
+************************************************************************************************/
+
+//*************************************************************************************************
+// Initialization
+//*************************************************************************************************
+void setup() {
+  sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
+  $("#chessContent").css("width",sizeSquare*10);
+  size(sizeSquare*10,sizeSquare*10);
+  for (var i=0; i<12; i++) {
+    images[i]=createImage(333,333,RGB);
+    if (i<6) images[i].copy (pieces, (i%6)*333,0,333,333,0,0,333,333);  // white pieces
+    else images[i].copy (pieces, (i%6)*333,333,333,333,0,0,333,333);    // black pieces
+  }
+}
+
+//*************************************************************************************************
+// Loop - called 60 times per second
+//*************************************************************************************************
+void draw() {
+
+// gameMsg is set when a user enters or leaves a specific game	
+  if (gameMsg == "chess") {
+    debug(2,"New:"+newGID+" Old:"+gameID);
+// user left the game. Stop listening to firebase events related to this game	
+    if (gameID != -1) {
+      db.ref("gameData/Chess/"+gameID).off();
+      db.ref("gameChat/Chess/"+gameID).off();
+    }
+// user entered the game (either as player or watcher). Start listening to firebase events related to this game	
+    gameID=newGID;
+    if (gameID != -1) {
+// Server updated the game information
+      db.ref("gameData/Chess/"+gameID).on("value", chessEvent);
+// Chat messages related to this game
+      db.ref("gameChat/Chess/"+gameID).on("child_added", function(snapshot) {
+        debug(2,snapshot.val().sender+": "+snapshot.val().msg);
+        var notification = document.querySelector('.mdl-js-snackbar');
+        notification.MaterialSnackbar.showSnackbar(
+          {
+            message: snapshot.val().sender+": "+snapshot.val().msg
+          }
+        );
+      });
+    }
+    gameMsg=null;
+    return;
+  }
+
+// Animation mode: move pieces to a new location
+  if (mode==="animation") {
+    var deltaT=(millis()-animation.startMillis)/1000;                // time in seconds since the begining of the animation
+    if (deltaT >= 1) {        										 // end of animation - over 1 second
+      if (animation.movedPiece > -1)
+      {
+        board[to.y][to.x]=animation.newPiece;                        // put the saved piece in the new location
+        if (animation.newPiece%6==0 && Math.abs(from.x-to.x)==2) {   // castling: king moved two spots
+          printBoard();
+          if (to.x==2) {                                             // castling to left
+            from.x=0;                                                // left rook
+            to.x=3;                                                  // move 3 steps right
+          }
+          else {                                                     // castling to right
+            from.x=7;                                                // right rook
+            to.x=5;                                                  // move 2 steps left
+          }
+          animation.movedPiece=animation.newPiece=board[from.y][from.x];     // Rook
+          animation.startMillis=millis();
+          animation.sourceX= startX+sizeSquare*from.x;
+          animation.sourceY= startY+sizeSquare*from.y;
+          animation.distanceX= sizeSquare*(to.x-from.x);
+          animation.distanceY= sizeSquare*(to.y-from.y);
+          board[from.y][from.x]=-1;                                  // Clear the old location
+          return;
+        }                                                            // end of castling case
+        printBoard();
+        markSquare(from,#FF0000,2);                                  // FROM location is color red
+        markSquare(to,#00FF00,2);                                    // TO location is color green
+      }
+      else printBoard();
+
+// now need to check special messages or end conditions
+      if (special) {
+        if (special.endGame) {
+          if (special.check)
+            sweetAlert({
+               title: "CheckMate",
+               text: "",
+               showConfirmButton: true,
+               imageUrl: "../Chess/checkmate.jpg",
+               imageSize: "400x150",
+            });
+          else
+            sweetAlert({
+               title: "StaleMate",
+               text: "",
+               showConfirmButton: true,
+               imageUrl: "../Chess/stalemate.jpg",
+               imageSize: "400x150",
+            });
+          if (myChessIndex) sendReq({
+            game:"Chess",
+            gid:gameID,
+            uid:currentUID,
+            msg: "ExitGame",
+          });
+          $("#chessBoard").hide();
+        }
+        else if (special.check) {
+          sweetAlert({
+             title: "Check",
+             text: "",
+             timer: 2000,
+             showConfirmButton: true,
+             imageUrl: "../Chess/check.jpg",
+             imageSize: "400x150",
+          });
+        }
+      }
+
+      if (checkPlayer()) {
+        mode="start";
+        if (!analyzeMoves()) { debug(0,"No legal moves") }           // This check MUST not be removed. All legal moves are calculated.
+      }
+      else {
+        mode="passive"
+      }
+    }
+    else  {                                                          // Animation not ended yet. Keep moving the piece
+      printBoard();
+      markSquare(from,#FF0000,2);                                    // FROM location is color red
+      markSquare(to,#00FF00,2);                                      // TO location is color green
+      image(images[animation.movedPiece],
+            animation.sourceX+deltaT*animation.distanceX,
+            animation.sourceY+deltaT*animation.distanceY,
+            sizeSquare,sizeSquare);
+    }
+  }  // end of Animation case
+}
+
+//*************************************************************************************************
+// When mouse is moved and player is active, mark available squares to move to (from pointed square)
+//*************************************************************************************************
+void mouseMoved() {
+  if (mode==="start") {
+    if (!checkPlayer()) return;                                  // only the current player can move
+    var mouse=mouseSquare();                                         // check what square the mouse is in
+    if (mouse.x == -1) return;                                       // exit immediately if mouse no inside the board
+    if (mouse.x==from.x && mouse.y==from.y) return;                  // exit immediately if mouse is still at the same square
+    from=mouse;
+    printBoard();                                                    // clear previous markings
+    if (!lglMoves[from.y][from.x]) return;                           // there is no legel move from this square.
+    markSquare(from,#FF0000,2);                                      // Mark the start square in red
+    for (var j=0;j<8;j++) {
+      for (var i=0;i<8;i++) {
+        to={x:i,y:j};
+        if (checkMove(from,to,true,board)) {
+          markSquare(to,#00FF00,2);                                  // Mark the target square in green
+        }
+      }
+    }
+  }
+}
+
+//*************************************************************************************************
+// When mouse is clicked - behavior depends on the internal mode (state machine)
+//*************************************************************************************************
+void mouseClicked () {
+  debug(2,"mouseClicked. Mode="+mode);
+  debug(0,mouseX+":"+mouseY);
+  switch (mode) {
+    case "active":                                                   // Piece was already selected. click to select where to move the piece
+      mouse=mouseSquare();
+  debug(1,mouse);
+      if(checkMove(from,mouse,true,board)) {                         // check is the target is a legal move
+        to.x=mouse.x; to.y=mouse.y;                                  // remember the target location
+        if ((board[from.y][from.x] % 6) === 5 && (to.y%7) ===  0)    // if it's a pawn and it reached the last line
+        {
+          printBoard();
+          image(images[1+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
+          image(images[2+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
+          image(images[3+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[4+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          mode="pawnUpgrade";
+          return;
+        }
+        var piece=board[from.y][from.x];
+        finalizeMove(piece,piece);
+      }
+      if (mouse.x==from.x && mouse.y==from.y) {						// clicked again on the same piece - cancel selection
+        mode="start";
+        printBoard();
+        return;
+      }
+//      break;         // fall through. This allow the player to change his mind regarding the start position
+
+    case "start":                                                    // click to select which piece to move
+      if (!checkPlayer()) return;                                // only the current player can move
+      var mouse=mouseSquare();                                       // check what square the mouse is in
+      if (mouse.x == -1) return;                                     // Mouse was clicked outside the board. Don't do anything.
+      if (!lglMoves[mouse.y][mouse.x]) return;                       // if there is no legal move, don't do anything
+      from.x=mouse.x; from.y=mouse.y;                                // remember the location of square we're moving FROM
+      mode="active";                                                 // start looking for the target location
+      printBoard();
+      markSquare(from,#FF0000,4);                                    // mark that square in red
+      for (var j=0;j<8;j++) {
+        for (var i=0;i<8;i++) {
+          to={x:i,y:j};
+          if (checkMove(from,to,true,board)) {
+            markSquare(to,#00FF00,4);                                // Mark the target square in green
+          }
+        }
+      }
+      break;
+
+    case "pawnUpgrade":                                              // Click to select the piece to which the pawn is upgraded
+                                                                     // check if I'm clicking in the correct square
+      if(mouseX<(startX+to.x*sizeSquare) || mouseX>(startX+to.x*sizeSquare+sizeSquare) ||
+         mouseY<(startY+to.y*sizeSquare) || mouseY>(startY+to.y*sizeSquare+sizeSquare)) return;
+      var pawn=board[from.y][from.x];
+      var piece=pawn-1;
+      if(mouseY<(startY+to.y*sizeSquare+sizeSquare/2)) piece-=2;
+      if(mouseX<(startX+to.x*sizeSquare+sizeSquare/2)) piece-=1;
+      finalizeMove(pawn,piece);
+      break;
+
+  }
+}
+
+/************************************************************************************************ 
+*
+*   Service funtions (called by events)
+*
+************************************************************************************************/
 
 //*************************************************************************************************
 //   This function prints out the board based on the board array
@@ -317,281 +668,9 @@ function checkPlayer() {
   return (myChessIndex & p)
 }
 
-
 //*************************************************************************************************
-//  Client-Server Messages
-//  ----------------------
-//  Messages:
-//  * chessStatus:
-//      Client to Server:  Observer, White, Black, Leave, EndGame,
-//      Server to Client:  White, Black, EndGame,
-//  * chessInfo: names of white and black players
-//  * chessMove: active player (white/black/none), from, to, boards, moved piece, new piece (same as moved piece EXCEPT when pawn is upgraded)
-//
-//  Process:
-//  1. Client connects -> send chessStatus(Observer)
-//        Server respond -> send chessInfo and chessMove to this client only
-//  2. Client press "Play White" or "Play Black" -> send chessStatus(White/Black)
-//        Server checks if the relevat player is free, if so respond with chessStatus(White/Black) and chessMove to the client (only)
-//        Server also sends chessInfo to everyone (let them know that active playes have changed)
-//        If both white and black player are assigned, server also sends chessMove with initial chess board to everyone
-//  3. Active player (white or black) makes a move -> send chessMove to server
-//        When server receives chessMove -> update the player field (White <-> Black) and send chessMove to everyone
-//        When client receives chessMove -> animate last move (unless moved piece is -1), then only active player (new color) repeats step 3
-//  4a. If active player (white or black) leaves the game -> send chessStaus(Leave)
-//  4b. If active player (white or black) disconnecs -> server gets a disconnect notification
-//        In both cases, server is sending chessInfo to everyone (let them know that active playes have changed)
-//        Server then checks of both White and Black left the game -> server clears the chess board and active playes and sends chessMove to everyone
-//  5. If the active player identifies end of game (no possible moves) -> send chessStatus(EndGame) -> server send this to everyone
-//
-//  Notes:
-//     * No messages are sent when oservers enters or leaves chess game
-//     * If an observer disconnects, server is notified but doesn't send message to other players
+// Let the server know about a completed chess move (called after the user clicked on the destination spot
 //*************************************************************************************************
-
-//*************************************************************************************************
-// When receiving 'chessMove' message initiate animation of the last move
-//*************************************************************************************************
-
-function chessMoveEvent(snapshot) {
-  var data=snapshot.val();
-  if (!data) return; // information not ready yet
-  if (gameID != data.info.gid) {
-    debug(0,"Incorrect Game ID:"+data.info.gid+"/"+gameID);
-    return;
-  }
-  debug(1,"ChessMove GID="+gameID+" status="+data.info.status);
-  debug(2,data);
-  player=data.player;
-  from=data.from;
-  to=data.to;
-  board=data.board;
-  special=data.special;
-  myChessIndex=0;
-  if (data.info.players.White && data.info.players.White.uid==currentUID) myChessIndex|=1;             // turn on bit 0
-  if (data.info.players.Black && data.info.players.Black.uid==currentUID) myChessIndex|=2;             // turn on bit 1
-  debug(2,"myChessIndex="+myChessIndex);
-  $("#chessButtonJoin").hide();
-  if (myChessIndex)
-    $("#endChess").attr("disabled",false);
-  else
-    $("#endChess").attr("disabled",true);
-  $("#chessTurn").css("color","black");
-  $("#chessTurn").html("");
-  switch(data.info.status) {
-    case "pending":
-      var color= (!data.info.players.White) ? "White" : "Black";
-      reverse=(color=="Black");
-      $("#chessButtonJoin").val(color);
-      $("#chessButtonJoin").html("Join as "+color);
-      $("#chessButtonJoin").show();
-      mode="passive";
-      printBoard();
-      break;
-    case "active":
-      reverse=((myChessIndex==2)||(myChessIndex==3 && player==1));
-      printBoard();
-      if (data.movedPiece > -1) {
-         animation.movedPiece=data.movedPiece;
-         animation.newPiece=data.newPiece;
-         animation.startMillis=millis();
-         if (reverse) {
-           animation.sourceX= startX+sizeSquare*(7-from.x);
-           animation.sourceY= startY+sizeSquare*(7-from.y);
-           animation.distanceX= sizeSquare*(from.x-to.x);
-           animation.distanceY= sizeSquare*(from.y-to.y);
-         } else {
-           animation.sourceX= startX+sizeSquare*from.x;
-           animation.sourceY= startY+sizeSquare*from.y;
-           animation.distanceX= sizeSquare*(to.x-from.x);
-           animation.distanceY= sizeSquare*(to.y-from.y);
-         }
-      }
-      else {
-        animation.movedPiece= -1;
-        animation.startMillis= -1000;
-      }
-      if (checkPlayer()) $("#chessTurn").css("color","red");
-      if (player==0) $("#chessTurn").html("White player's turn");
-      else if (player==1) $("#chessTurn").html("Black player's turn");
-      mode="animation";
-      break;
-    case "quit":
-      sweetAlert({
-         title: data.info.concede+" had quit the game",
-         text: "",
-         showConfirmButton: true,
-         imageUrl: "../i-quit.png",
-         imageSize: "400x150",
-      });
-/*
-      if (myChessIndex) sendReq({
-        game:"Chess",
-        gid:gameID,
-        uid:currentUID,
-        msg: "ExitGame",
-      });
-*/
-      $("#chessBoard").hide();
-  }
-  debug(2,"mode="+mode);
-}
-
-
-//*************************************************************************************************
-// Initialization
-//*************************************************************************************************
-void setup() {
-  sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#chessContent").css("width",sizeSquare*10);
-  size(sizeSquare*10,sizeSquare*10);
-  for (var i=0; i<12; i++) {
-    images[i]=createImage(333,333,RGB);
-    if (i<6) images[i].copy (pieces, (i%6)*333,0,333,333,0,0,333,333);  // white pieces
-    else images[i].copy (pieces, (i%6)*333,333,333,333,0,0,333,333);    // black pieces
-  }
-}
-
-//*************************************************************************************************
-// Loop - used only for animation
-//*************************************************************************************************
-void draw() {
-  if (gameMsg == "chess") {
-    debug(2,"New:"+newGID+" Old:"+gameID);
-    if (gameID != -1) {
-      db.ref("gameData/Chess/"+gameID).off();
-      db.ref("gameChat/Chess/"+gameID).off();
-    }
-    gameID=newGID;
-    if (gameID != -1) {
-      db.ref("gameData/Chess/"+gameID).on("value", chessMoveEvent);
-      db.ref("gameChat/Chess/"+gameID).on("child_added", function(snapshot) {
-        debug(2,snapshot.val().sender+": "+snapshot.val().msg);
-        var notification = document.querySelector('.mdl-js-snackbar');
-        notification.MaterialSnackbar.showSnackbar(
-          {
-            message: snapshot.val().sender+": "+snapshot.val().msg
-          }
-        );
-      });
-    }
-    gameMsg=null;
-    return;
-  }
-  if (mode==="animation") {
-    var deltaT=(millis()-animation.startMillis)/1000;                // time in seconds since the begining of the animation
-    if (deltaT >= 1) {        // end of animation - over 1 second
-      if (animation.movedPiece > -1)
-      {
-        board[to.y][to.x]=animation.newPiece;                        // put the saved piece in the new location
-        if (animation.newPiece%6==0 && Math.abs(from.x-to.x)==2) {   // castling: king moved two spots
-          printBoard();
-          if (to.x==2) {                                             // castling to left
-            from.x=0;                                                // left rook
-            to.x=3;                                                  // move 3 steps right
-          }
-          else {                                                     // castling to right
-            from.x=7;                                                // right rook
-            to.x=5;                                                  // move 2 steps left
-          }
-          animation.movedPiece=animation.newPiece=board[from.y][from.x];     // Rook
-          animation.startMillis=millis();
-          animation.sourceX= startX+sizeSquare*from.x;
-          animation.sourceY= startY+sizeSquare*from.y;
-          animation.distanceX= sizeSquare*(to.x-from.x);
-          animation.distanceY= sizeSquare*(to.y-from.y);
-          board[from.y][from.x]=-1;                                  // Clear the old location
-          return;
-        }                                                            // end of castling case
-        printBoard();
-        markSquare(from,#FF0000,2);                                  // FROM location is color red
-        markSquare(to,#00FF00,2);                                    // TO location is color green
-      }
-      else printBoard();
-
-// now need to check special messages or end conditions
-      if (special) {
-        if (special.endGame) {
-          if (special.check)
-            sweetAlert({
-               title: "CheckMate",
-               text: "",
-               showConfirmButton: true,
-               imageUrl: "../Chess/checkmate.jpg",
-               imageSize: "400x150",
-            });
-          else
-            sweetAlert({
-               title: "StaleMate",
-               text: "",
-               showConfirmButton: true,
-               imageUrl: "../Chess/stalemate.jpg",
-               imageSize: "400x150",
-            });
-          if (myChessIndex) sendReq({
-            game:"Chess",
-            gid:gameID,
-            uid:currentUID,
-            msg: "ExitGame",
-          });
-          $("#chessBoard").hide();
-        }
-        else if (special.check) {
-          sweetAlert({
-             title: "Check",
-             text: "",
-             timer: 2000,
-             showConfirmButton: true,
-             imageUrl: "../Chess/check.jpg",
-             imageSize: "400x150",
-          });
-        }
-      }
-
-      if (checkPlayer()) {
-        mode="start";
-        if (!analyzeMoves()) { debug(0,"No legal moves") }           // This check MUST not be removed. All legal moves are calculated.
-      }
-      else {
-        mode="passive"
-      }
-    }
-    else  {                                                          // Animation not ended yet
-      printBoard();
-      markSquare(from,#FF0000,2);                                    // FROM location is color red
-      markSquare(to,#00FF00,2);                                      // TO location is color green
-      image(images[animation.movedPiece],
-            animation.sourceX+deltaT*animation.distanceX,
-            animation.sourceY+deltaT*animation.distanceY,
-            sizeSquare,sizeSquare);
-    }
-  }  // end of Animation case
-}
-
-//*************************************************************************************************
-// When mouse is moved and player is active, mark available squares to move to (from pointed square)
-//*************************************************************************************************
-void mouseMoved() {
-  if (mode==="start") {
-    if (!checkPlayer()) return;                                  // only the current player can move
-    var mouse=mouseSquare();                                         // check what square the mouse is in
-    if (mouse.x == -1) return;                                       // exit immediately if mouse no inside the board
-    if (mouse.x==from.x && mouse.y==from.y) return;                  // exit immediately if mouse is still at the same square
-    from=mouse;
-    printBoard();                                                    // clear previous markings
-    if (!lglMoves[from.y][from.x]) return;                           // there is no legel move from this square.
-    markSquare(from,#FF0000,2);                                      // Mark the start square in red
-    for (var j=0;j<8;j++) {
-      for (var i=0;i<8;i++) {
-        to={x:i,y:j};
-        if (checkMove(from,to,true,board)) {
-          markSquare(to,#00FF00,2);                                  // Mark the target square in green
-        }
-      }
-    }
-  }
-}
-
 void finalizeMove(movedPiece,newPiece) {
   board[from.y][from.x]=-1;                                      // Clear the old location
   var savedPiece=board[to.y][to.x];
@@ -615,68 +694,5 @@ void finalizeMove(movedPiece,newPiece) {
     player:player, from:from, to:to, board:board, movedPiece:movedPiece, newPiece:newPiece
   });
   mode="passive";                                                // end of my turn
-}
-
-//*************************************************************************************************
-// When mouse is clicked - behavior depends on the internal mode (state machine)
-//*************************************************************************************************
-void mouseClicked () {
-  debug(2,"mouseClicked. Mode="+mode);
-  switch (mode) {
-    case "active":                                                   // click to select where to move the piece
-      mouse=mouseSquare();
-      if(checkMove(from,mouse,true,board)) {                         // check is the target is a legal move
-        to.x=mouse.x; to.y=mouse.y;                                  // remember the target location
-        if ((board[from.y][from.x] % 6) === 5 && (to.y%7) ===  0)    // if it's a pawn and it reached the last line
-        {
-          printBoard();
-          image(images[1+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[2+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[3+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          image(images[4+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          mode="pawnUpgrade";
-          return;
-        }
-        var piece=board[from.y][from.x];
-        finalizeMove(piece,piece);
-      }
-      if (mouse.x==from.x && mouse.y==from.y) {						// clicked again on the same piece - cancel selection
-        mode="start";
-        printBoard();
-        return;
-      }
-//      break;         // fall through
-
-    case "start":                                                    // click to select which piece to move
-      if (!checkPlayer()) return;                                // only the current player can move
-      var mouse=mouseSquare();                                       // check what square the mouse is in
-      if (mouse.x == -1) return;                                     // Mouse was clicked outside the board. Don't do anything.
-      if (!lglMoves[mouse.y][mouse.x]) return;                       // if there is no legal move, don't do anything
-      from.x=mouse.x; from.y=mouse.y;                                // remember the location of square we're moving FROM
-      mode="active";                                                 // start looking for the target location
-      printBoard();
-      markSquare(from,#FF0000,4);                                    // mark that square in red
-      for (var j=0;j<8;j++) {
-        for (var i=0;i<8;i++) {
-          to={x:i,y:j};
-          if (checkMove(from,to,true,board)) {
-            markSquare(to,#00FF00,4);                                // Mark the target square in green
-          }
-        }
-      }
-      break;
-
-    case "pawnUpgrade":                                              // Click to select the piece to which the pawn is upgraded
-                                                                     // check if I'm clicking in the correct square
-      if(mouseX<(startX+to.x*sizeSquare) || mouseX>(startX+to.x*sizeSquare+sizeSquare) ||
-         mouseY<(startY+to.y*sizeSquare) || mouseY>(startY+to.y*sizeSquare+sizeSquare)) return;
-      var pawn=board[from.y][from.x];
-      var piece=pawn-1;
-      if(mouseY<(startY+to.y*sizeSquare+sizeSquare/2)) piece-=2;
-      if(mouseX<(startX+to.x*sizeSquare+sizeSquare/2)) piece-=1;
-      finalizeMove(pawn,piece);
-      break;
-
-  }
 }
 

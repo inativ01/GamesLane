@@ -1,9 +1,7 @@
 To do:
 * Allow email and password change
-* cleanup all unknow stuff from main.css and index.html
 * add "are you sure?" to endGame
 * display names of players in the game
-* test on explorer, ipad
 
 * backgammon -
 ** event on game board

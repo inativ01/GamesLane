@@ -14,6 +14,7 @@ var gameInfo={};
 var gameMsg=null;
 var debugLevel=2;
 var hints=false;
+var direction=$('body').attr('dir');
 
 function debug(level, msg) {
   switch (level) {
@@ -350,50 +351,51 @@ function onAuthStateChanged(user) {
 
 /*------------------------------------------------------------------------------
 // Update list of games whenever gameInfo entry is added/removed/changed
+
+<div id="<game><listType>List" class="Active gameLists" >  -- listName
+  <button class="mdl-list__item mdl-list__item--two-line"> -- node
+    <span class="mdl-list__item-primary-content">          -- sp
+	  <span>  </span>                                      -- pnode 1 
+	  <span "mdl-list__item-sub-title">  </span>           -- pnode 2
+    </span> 
+	<img>                                                  -- pic
+  </button>
+</div>
 ------------------------------------------------------------------------------*/
 
 function addGameToList(snapshot) {
   var game=snapshot.val();
   var active=false;
   gameInfo[game.gid]=game;
-  var node = document.createElement("button");
-  node.id="line-"+game.game+"-"+game.gid;
-  node.value=game.gid;
-  node.style="width:350px; margin: auto ";
-//mdl-menu__item--full-bleed-divider
-  node.className = "mdl-list__item mdl-list__item--two-line ";
-  var sp=document.createElement("span");
-  sp.className="mdl-list__item-primary-content";
-  node.appendChild(sp);
-  var pic = document.createElement("img");
-  pic.width="40";
-  pic.height="40";
-  pic.className="mdl-list__item-secondary-content";
-  node.appendChild(pic);
+  var node=$("<button id='line-"+game.game+"-"+game.gid+"' value='"+game.gid+"' style='width:300px; margin: auto' class='mdl-list__item mdl-list__item--two-line'></button>");
+  var sp=$("<span class='mdl-list__item-primary-content'></span>");
+  node.append(sp);
+  var pic=$("<img width='40' height='40' class='mdl-list__item-secondary-content' style='border-radius: 50%;'>");
+  node.append(pic);
   var first=true;
   var partner="yourself";
   for  (var player in game.players) {
     var thisPlayer=game.players[player];
-    var pnode = document.createElement("span");
+	  var pnode = $("<span></span>");
 
     if (thisPlayer.uid==currentUID) {
        active=true;
-       if (first) pic.src=thisPlayer.photoURL;  // use my picture only if I'm the only one
-       pnode.innerHTML="I'm playing "+player;
-       pnode.className = "mdl-list__item-sub-title";
-       sp.appendChild(pnode);
+       if (first) pic.attr('src',thisPlayer.photoURL);  // use my picture only if I'm the only one
+       pnode.html("I'm playing "+player);
+       pnode.addClass("mdl-list__item-sub-title");
+       sp.append(pnode);
     }
     else {
-      pnode.innerHTML=thisPlayer.displayName+" playing "+player;
+      pnode.html(thisPlayer.displayName+" playing "+player);
       if (first) {
-        pic.src=thisPlayer.photoURL;
+        pic.attr('src',thisPlayer.photoURL);
         first=false;
         partner=thisPlayer.displayName;
         sp.prepend(pnode);
       }
       else {
         pnode.className = "mdl-list__item-sub-title";
-        sp.appendChild(pnode);
+        sp.append(pnode);
       }
     }
   }
@@ -423,7 +425,8 @@ function addGameToList(snapshot) {
   else
     addToList(game.game,"Watch",node);
 
-  $("#"+node.id).click( function() {
+// This is the callback function to enter the selected game when the button was pressed
+  $("#"+node.attr('id')).click( function() {
     debug(2,"Game selected:"+this.id);
     this.parentElement.parentElement.style="display:none";
     $(".mdl-spinner").addClass("is-active");
@@ -443,10 +446,11 @@ function addLine(game, msg) {
 }
 
 function addToList(game,list,node) {
-    debug(2,"Add "+node.value+" to "+list);
+    debug(2,"Add "+node.val()+" to "+list);
     debug(3,gameInfo);
     var listName="#"+game+list+"List";
     $(listName).append(node);
+	debug(0,$(listName).get(0));
     if (list=="Active") {
       var nActive=$(listName)[0].children.length;
       if (nActive==1) $("#"+game+"Badge").addClass("mdl-badge");
