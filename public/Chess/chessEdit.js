@@ -1,5 +1,5 @@
 // the next line is very important for using images in JS
-/* @pjs preload="../Chess/chess-pieces.png,../Chess/red-x.png,../Chess/chessboard_full.gif"; */
+/* @pjs preload="../chess/chess-pieces.png,../chess/red-x.png,../chess/chessboard_full.gif"; */
 
 // Define global variables
 // -----------------------
@@ -27,9 +27,9 @@ var mode="passive";                                                   // "passiv
                                                                       // "edit" - edit the board
 var images=[];                           // array to hold the images of the various pieces
 var editPiece= -1;
-var pieces=loadImage("../Chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
-var redx=loadImage("../Chess/red-x.png");
-var fullboard=loadImage("../Chess/chessboard_full.gif");
+var pieces=loadImage("../chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
+var redx=loadImage("../chess/red-x.png");
+var fullboard=loadImage("../chess/chessboard_full.gif");
 
 // Define functions
 // -----------------
@@ -38,17 +38,20 @@ var fullboard=loadImage("../Chess/chessboard_full.gif");
 
 window.addEventListener('resize', function() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#ChessOptionsContent").css("width",sizeSquare*10);
+  $("#chessOptionsContent").css("width",sizeSquare*10);
   printBoard();
 });
 
-$("#ChessNewButton").click( function() {
+//*************************************************************************************************
+//   go to the game Options screen
+//*************************************************************************************************
+$("#chessNewButton").click( function() {
   if (!auth.currentUser.isAnonymous) {
     mode="passive";
     $("#chessButtonEdit").show();
     $("#chessEditCanvas").hide();
-    $("#ChessOptionsBoard").show();
-    $("#ChessOptionsHeader").show();
+    $("#chessOptionsBoard").show();
+    $("#chessOptionsHeader").show();
     $("#chessButtonEdit").html("Edit Board");
     for(var i = 0; i < 8; i++) {
       for(var j = 0; j < 8; j++) {
@@ -59,29 +62,38 @@ $("#ChessNewButton").click( function() {
   }
 });
 
-$("#chessCancelEdit").click(function() {
-    $("#ChessOptionsBoard").hide();
+//*************************************************************************************************
+//   exit the Options screen and don't start the game
+//*************************************************************************************************
+$("#chessCancelOptions").click(function() {
+    $("#chessOptionsBoard").hide();
 });
 
+//*************************************************************************************************
+//   Start/finish editing the board
+//*************************************************************************************************
 $("#chessButtonEdit").click(function() {
   if(mode=="edit") { // end of edit mode
     mode="passive";
-    $("#ChessOptionsHeader").show();
+    $("#chessOptionsHeader").show();
     $("#chessEditCanvas").hide();
     $("#chessButtonEdit").html("Edit Board");
   } else if(mode == "passive") { // start of edit mode
     mode="edit";
-    $("#ChessOptionsHeader").hide();
+    $("#chessOptionsHeader").hide();
     $("#chessButtonEdit").html("Stop Edit");
     $("#chessButtonEdit").show();
     printBoard();
   }
 });
 
-$('#startChessButton').click(function() {
+//*************************************************************************************************
+//   done with Options, start the game
+//*************************************************************************************************
+$('#chessStartButton').click(function() {
   newGID=Math.floor(Math.random() * (1000000000000));
   sendReq({
-    game:"Chess",
+    game:"chess",
     gid:newGID,
     uid:currentUID,
     msg: "Start",
@@ -91,7 +103,7 @@ $('#startChessButton').click(function() {
     photoURL: auth.currentUser.photoURL
   });
   gameMsg="chess";
-  $("#ChessOptionsBoard").hide();
+  $("#chessOptionsBoard").hide();
   $(".mdl-spinner").addClass("is-active");
 });
 
@@ -153,7 +165,7 @@ function mouseSquare()
 //*************************************************************************************************
 void setup() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#ChessOptionsContent").css("width",sizeSquare*10);
+  $("#chessOptionsContent").css("width",sizeSquare*10);
   size(sizeSquare*10,sizeSquare*10);
   for (var i=0; i<12; i++) {
     images[i]=createImage(333,333,RGB);

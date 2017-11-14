@@ -30,8 +30,11 @@ db.ref("req").on("child_added", function(snapshot) {
     // then
     function(gameSnap) {
       var msg=this.val();
-      var pr1=(lane.handleGame(db,gameSnap,msg));
-      pr1.catch(function(error) {console.log("Error Message="+error.message)});
+      return lane.handleGame(db,gameSnap,msg)
+      .then(function() {  
+	    return db.ref("req/"+uid).remove().catch(function(error){console.log("Unable to remove request");console.log(error)});
+      })
+      .catch(function(error) {console.log("Error Message="+error.message)});
     },
     // catch
     function(error) {
@@ -43,5 +46,4 @@ db.ref("req").on("child_added", function(snapshot) {
     // context
     snapshot
   );
-  db.ref("req/"+uid).remove().catch(function(error){console.log("Unable to remove request");console.log(error)});
 });

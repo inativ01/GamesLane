@@ -1,7 +1,7 @@
 // the next line is very important for using images in JS
-/* @pjs preload="../Chess/chess-pieces.png,../Chess/red-x.png,../Chess/chessboard_full.gif"; */
+/* @pjs preload="../chess/chess-pieces.png,../chess/red-x.png,../chess/chessboard_full.gif"; */
 
-/************************************************************************************************ 
+/************************************************************************************************
 *
 *   Define global variables
 *
@@ -9,13 +9,13 @@
 // -----------------------
 
 var reverse=false;                                                    // display reverse board for black player
-var gameList={};                                                      // List of all gameInfo Chess entries
-var myChessIndex=0;                                                   // 0 - no active player
+var gameList={};                                                      // List of all gameInfo chess entries
+var mychessIndex=0;                                                   // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Black
                                                                       // 3 - Both (single player)
 
-// Current chess board																	 
+// Current chess board
 var board=[[-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1],
@@ -44,6 +44,9 @@ var mode="passive";                                                   // "passiv
                                                                       // "pawnUpgrade" - select which piece the pawn upgrade to
 var from=     {x:0, y:0};   // start position
 var to=       {x:0, y:0};   // end position
+var data;                                                             // updated data from Firbase
+var pendingUpdate=false;                                              // update waiting to end of animation
+var gotResponse=false;                                                // Did server respond to a request
 var animation= {
     movedPiece:0,                        // the piece type to move
     newPiece:0,                          // the piece at the end of the move (may only be different if pawn upgraded)
@@ -53,10 +56,10 @@ var animation= {
 }
 
 var images=[];                           // array to hold the images of the various pieces
-var pieces=loadImage("../Chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
+var pieces=loadImage("../chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
 var players= {White:"", Black:""}
 
-/************************************************************************************************ 
+/************************************************************************************************
 *
 *   User interface Events
 *
@@ -74,7 +77,7 @@ window.addEventListener('resize', function() {
 //*************************************************************************************************
 //   User selected to go to main menul
 //*************************************************************************************************
-$("#closeChess").click( function() {
+$("#chessClose").click( function() {
   newGID= -1;
   gameMsg="chess";
   $("#chessBoard").hide();
@@ -83,9 +86,9 @@ $("#closeChess").click( function() {
 //*************************************************************************************************
 //   User selected to quit (resign) the game
 //*************************************************************************************************
-$("#endChess").click( function() {
+$("#chessEnd").click( function() {
   sendReq({
-    game:"Chess",
+    game:"chess",
     gid:gameID,
     uid:currentUID,
     msg: "Quit",
@@ -97,9 +100,9 @@ $("#endChess").click( function() {
 //*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
-$('#chessButtonJoin').click(function() {
+$("#chessButtonJoin").click(function() {
   sendReq({
-    game:"Chess",
+    game:"chess",
     gid:gameID,
     uid:currentUID,
     msg: "Join",
@@ -116,34 +119,23 @@ $('#chessButtonJoin').click(function() {
 ************************************************************************************************/
 
 //*************************************************************************************************
-// This function is called when the server updates gameData/Chess/<gid> for the current game
+// This function is called when the server updates gameData/chess/<gid> for the current game
 //*************************************************************************************************
 
 function chessEvent(snapshot) {
-  var data=snapshot.val();
+  data=snapshot.val();
   if (!data) return; // information not ready yet
   if (gameID != data.info.gid) {
     debug(0,"Incorrect Game ID:"+data.info.gid+"/"+gameID);
     return;
   }
-  debug(1,"ChessMove GID="+gameID+" status="+data.info.status);
+  debug(1,"chessEvent GID="+gameID+" status="+data.info.status);
   debug(2,data);
-  player=data.player;
-  from=data.from;
-  to=data.to;
-  board=data.board;
-  special=data.special;
-  myChessIndex=0;
-  if (data.info.players.White && data.info.players.White.uid==currentUID) myChessIndex|=1;             // turn on bit 0
-  if (data.info.players.Black && data.info.players.Black.uid==currentUID) myChessIndex|=2;             // turn on bit 1
-  debug(2,"myChessIndex="+myChessIndex);
-  $("#chessButtonJoin").hide();
-  if (myChessIndex)
-    $("#endChess").attr("disabled",false);
-  else
-    $("#endChess").attr("disabled",true);
-  $("#chessTurn").css("color","black");
-  $("#chessTurn").html("");
+  if (mode == "animation") {
+    pendingUpdate=true;
+    return;
+  }
+  updateFromData();
   switch(data.info.status) {
     case "pending":
       var color= (!data.info.players.White) ? "White" : "Black";
@@ -155,32 +147,9 @@ function chessEvent(snapshot) {
       printBoard();
       break;
     case "active":
-      reverse=((myChessIndex==2)||(myChessIndex==3 && player==1));
+      reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
       printBoard();
-      if (data.movedPiece > -1) {
-         animation.movedPiece=data.movedPiece;
-         animation.newPiece=data.newPiece;
-         animation.startMillis=millis();
-         if (reverse) {
-           animation.sourceX= startX+sizeSquare*(7-from.x);
-           animation.sourceY= startY+sizeSquare*(7-from.y);
-           animation.distanceX= sizeSquare*(from.x-to.x);
-           animation.distanceY= sizeSquare*(from.y-to.y);
-         } else {
-           animation.sourceX= startX+sizeSquare*from.x;
-           animation.sourceY= startY+sizeSquare*from.y;
-           animation.distanceX= sizeSquare*(to.x-from.x);
-           animation.distanceY= sizeSquare*(to.y-from.y);
-         }
-      }
-      else {
-        animation.movedPiece= -1;
-        animation.startMillis= -1000;
-      }
-      if (checkPlayer()) $("#chessTurn").css("color","red");
-      if (player==0) $("#chessTurn").html("White player's turn");
-      else if (player==1) $("#chessTurn").html("Black player's turn");
-      mode="animation";
+      animationInit(data.movedPiece,data.newPiece);
       break;
     case "quit":
       sweetAlert({
@@ -190,17 +159,11 @@ function chessEvent(snapshot) {
          imageUrl: "../i-quit.png",
          imageSize: "400x150",
       });
-/*
-      if (myChessIndex) sendReq({
-        game:"Chess",
-        gid:gameID,
-        uid:currentUID,
-        msg: "ExitGame",
-      });
-*/
+
       $("#chessBoard").hide();
   }
   debug(2,"mode="+mode);
+  data=null;
 }
 
 /************************************************************************************************ 
@@ -233,16 +196,16 @@ void draw() {
     debug(2,"New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game	
     if (gameID != -1) {
-      db.ref("gameData/Chess/"+gameID).off();
-      db.ref("gameChat/Chess/"+gameID).off();
+      db.ref("gameData/chess/"+gameID).off();
+      db.ref("gameChat/chess/"+gameID).off();
     }
 // user entered the game (either as player or watcher). Start listening to firebase events related to this game	
     gameID=newGID;
     if (gameID != -1) {
 // Server updated the game information
-      db.ref("gameData/Chess/"+gameID).on("value", chessEvent);
+      db.ref("gameData/chess/"+gameID).on("value", chessEvent);
 // Chat messages related to this game
-      db.ref("gameChat/Chess/"+gameID).on("child_added", function(snapshot) {
+      db.ref("gameChat/chess1/"+gameID).on("child_added", function(snapshot) {
         debug(2,snapshot.val().sender+": "+snapshot.val().msg);
         var notification = document.querySelector('.mdl-js-snackbar');
         notification.MaterialSnackbar.showSnackbar(
@@ -259,7 +222,7 @@ void draw() {
 // Animation mode: move pieces to a new location
   if (mode==="animation") {
     var deltaT=(millis()-animation.startMillis)/1000;                // time in seconds since the begining of the animation
-    if (deltaT >= 1) {        										 // end of animation - over 1 second
+    if (deltaT >= 1) {                                               // end of animation - over 1 second
       if (animation.movedPiece > -1)
       {
         board[to.y][to.x]=animation.newPiece;                        // put the saved piece in the new location
@@ -282,50 +245,61 @@ void draw() {
           board[from.y][from.x]=-1;                                  // Clear the old location
           return;
         }                                                            // end of castling case
-        printBoard();
-        markSquare(from,#FF0000,2);                                  // FROM location is color red
-        markSquare(to,#00FF00,2);                                    // TO location is color green
+        if (pendingUpdate) {
+          debug(2,"pendingUpdate");
+          pendingUpdate=false;
+          updateFromData();                                       // get the data from the firebase
+        }
+        if (gotResponse) {  
+          reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
+          printBoard();
+          markSquare(from,#FF0000,2);                                  // FROM location is color red
+          markSquare(to,#00FF00,2);                                    // TO location is color green
+          if (special) {                                               // now need to check special messages or end conditions
+            if (special.endGame) {
+              if (special.check)
+                sweetAlert({
+                   title: "CheckMate",
+                   text: "",
+                   showConfirmButton: true,
+                   imageUrl: "../chess/checkmate.jpg",
+                   imageSize: "400x150",
+                });
+              else
+                sweetAlert({
+                   title: "StaleMate",
+                   text: "",
+                   showConfirmButton: true,
+                   imageUrl: "../chess/stalemate.jpg",
+                   imageSize: "400x150",
+                });
+              if (mychessIndex) sendReq({
+                game:"chess",
+                gid:gameID,
+                uid:currentUID,
+                msg: "ExitGame",
+              });
+              $("#chessBoard").hide();
+            }
+            else if (special.check) {
+              sweetAlert({
+                 title: "Check",
+                 text: "",
+                 timer: 2000,
+                 showConfirmButton: true,
+                 imageUrl: "../chess/check.jpg",
+                 imageSize: "400x150",
+              });
+            }
+          }
+        }
+        else {                                                       // animation ended before firebase update, just wait
+          mode="passive"
+          debug(1,"delayed response from Server. need to do spinner");
+          return;
+        }
       }
       else printBoard();
-
-// now need to check special messages or end conditions
-      if (special) {
-        if (special.endGame) {
-          if (special.check)
-            sweetAlert({
-               title: "CheckMate",
-               text: "",
-               showConfirmButton: true,
-               imageUrl: "../Chess/checkmate.jpg",
-               imageSize: "400x150",
-            });
-          else
-            sweetAlert({
-               title: "StaleMate",
-               text: "",
-               showConfirmButton: true,
-               imageUrl: "../Chess/stalemate.jpg",
-               imageSize: "400x150",
-            });
-          if (myChessIndex) sendReq({
-            game:"Chess",
-            gid:gameID,
-            uid:currentUID,
-            msg: "ExitGame",
-          });
-          $("#chessBoard").hide();
-        }
-        else if (special.check) {
-          sweetAlert({
-             title: "Check",
-             text: "",
-             timer: 2000,
-             showConfirmButton: true,
-             imageUrl: "../Chess/check.jpg",
-             imageSize: "400x150",
-          });
-        }
-      }
 
       if (checkPlayer()) {
         mode="start";
@@ -376,11 +350,9 @@ void mouseMoved() {
 //*************************************************************************************************
 void mouseClicked () {
   debug(2,"mouseClicked. Mode="+mode);
-  debug(0,mouseX+":"+mouseY);
   switch (mode) {
     case "active":                                                   // Piece was already selected. click to select where to move the piece
       mouse=mouseSquare();
-  debug(1,mouse);
       if(checkMove(from,mouse,true,board)) {                         // check is the target is a legal move
         to.x=mouse.x; to.y=mouse.y;                                  // remember the target location
         if ((board[from.y][from.x] % 6) === 5 && (to.y%7) ===  0)    // if it's a pawn and it reached the last line
@@ -660,12 +632,12 @@ function analyzeMoves() {
 
 //*************************************************************************************************
 // Check is I'm currently playing.
-// This is done comparing "player" (0-white, 1-black) with "myChessIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
+// This is done comparing "player" (0-white, 1-black) with "mychessIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
 //*************************************************************************************************
 function checkPlayer() {
   if (player== -1) return false;
   var p= (1 << player);
-  return (myChessIndex & p)
+  return (mychessIndex & p)
 }
 
 //*************************************************************************************************
@@ -686,13 +658,63 @@ void finalizeMove(movedPiece,newPiece) {
 
   board[to.y][to.x]=savedPiece;
   sendReq({
-    game:"Chess",
+    game:"chess",
     gid:gameID,
     uid:currentUID,
     msg: "ChessMove",
     special: special,
     player:player, from:from, to:to, board:board, movedPiece:movedPiece, newPiece:newPiece
   });
-  mode="passive";                                                // end of my turn
+  gotResponse=false;
+//  mode="passive";                                                // end of my turn
+  animationInit(movedPiece,newPiece);                              // start the animation  
 }
 
+function animationInit(movedPiece,newPiece) {
+      if (movedPiece > -1) {
+         animation.movedPiece=movedPiece;
+         animation.newPiece=newPiece;
+         animation.startMillis=millis();
+         if (reverse) {
+           animation.sourceX= startX+sizeSquare*(7-from.x);
+           animation.sourceY= startY+sizeSquare*(7-from.y);
+           animation.distanceX= sizeSquare*(from.x-to.x);
+           animation.distanceY= sizeSquare*(from.y-to.y);
+         } else {
+           animation.sourceX= startX+sizeSquare*from.x;
+           animation.sourceY= startY+sizeSquare*from.y;
+           animation.distanceX= sizeSquare*(to.x-from.x);
+           animation.distanceY= sizeSquare*(to.y-from.y);
+         }
+      }
+      else {
+        animation.movedPiece= -1;
+        animation.startMillis= -1000;
+      }
+      mode="animation";
+}
+
+function updateFromData() {
+  gotResponse=true;
+  player=data.player;
+  from=data.from;
+  to=data.to;
+  board=data.board;
+  special=data.special;
+  mychessIndex=0;
+  if (data.info.players.White && data.info.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
+  if (data.info.players.Black && data.info.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
+  debug(2,"mychessIndex="+mychessIndex);
+  $("#chessButtonJoin").hide();
+  if (mychessIndex)
+    $("#chessEnd").attr("disabled",false);
+  else
+    $("#chessEnd").attr("disabled",true);
+  $("#chessTurn").css("color","black");
+  $("#chessTurn").html("");
+  if (data.info.status=="active") {
+    if (checkPlayer()) $("#chessTurn").css("color","red");
+    if (player==0) $("#chessTurn").html("White player's turn");
+    else if (player==1) $("#chessTurn").html("Black player's turn");
+  }
+}

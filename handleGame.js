@@ -2,7 +2,7 @@ module.exports = {  // start of all export functions
   handleGame: function(db,gameSnap,msg) {
     var pr;
     switch (msg.game) {
-      case 'Chess':
+      case 'chess':
         switch (msg.msg) {
           case 'Start':
             pr=startChess(db,gameSnap,msg);
@@ -23,6 +23,29 @@ module.exports = {  // start of all export functions
             pr=Promise.reject(new Error("Unexpected Chess message:"+msg.msg));
         }
         break;
+
+      case 'backgammon':
+        switch (msg.msg) {
+          case 'Start':
+            pr=startChess(db,gameSnap,msg);
+            break;
+          case 'Join':
+            pr=joinChess(db,gameSnap,msg);
+            break;
+          case 'Quit':
+            pr=quitChess(db,gameSnap,msg);
+            break;
+          case 'ExitGame':
+            pr=exitGameChess(db,gameSnap,msg);
+            break;
+          case 'ChessMove':
+            pr=chessMove(db,gameSnap,msg);
+            break;
+          default:
+            pr=Promise.reject(new Error("Unexpected Chess message:"+msg.msg));
+        }
+        break;
+
       default:
         pr=Promise.reject(new Error("Unexpected game:"+msg.game));
     }
@@ -130,10 +153,9 @@ function exitGameChess(db,gameSnap,msg) {
          }
          if (clean) {
            up={};
-           x={}; x[msg.gid]={};
-           up["/gameData/Chess"]=x;
-           up["/gameInfo"]=x;
-           up["/gameChat/Chess"]=x;
+           up["/gameData/"+msg.game+"/"+msg.gid]={};
+           up["/gameInfo/"+msg.gid]={};
+           up["/gameChat/"+msg.game+"/"+msg.gid]={};
            return db.ref().update(up);
          }
        });

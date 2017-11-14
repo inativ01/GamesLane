@@ -15,6 +15,7 @@ var gameMsg=null;
 var debugLevel=2;
 var hints=false;
 var direction=$('body').attr('dir');
+var lang=$('html').attr('lang');
 
 function debug(level, msg) {
   switch (level) {
@@ -446,13 +447,12 @@ function addLine(game, msg) {
 }
 
 function addToList(game,list,node) {
-    debug(2,"Add "+node.val()+" to "+list);
+    debug(2,"Add "+node.val()+" to "+game+" "+list);
     debug(3,gameInfo);
     var listName="#"+game+list+"List";
     $(listName).append(node);
-	debug(0,$(listName).get(0));
     if (list=="Active") {
-      var nActive=$(listName)[0].children.length;
+      var nActive=$(listName).children().length;
       if (nActive==1) $("#"+game+"Badge").addClass("mdl-badge");
       $("#"+game+"Badge").attr("data-badge",nActive);
     }

@@ -121,18 +121,17 @@
       <div id="chessContent" style="margin:  auto;">
         <div id=chessHeader class="mdl-color--light-blue-200" style="padding: 20px;position:relative">
           <span id=chessTurn style="font-weight: bold"></span>
-          <span id=chessCheck  ></span>
           <button id="chessButtonJoin" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
           <button id="chessExitMenu" class="mdl-button mdl-js-button mdl-button--icon" style="float: left;">
             <i class="material-icons">more_vert</i>
           </button>
           <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect"
             for="chessExitMenu">
-          <li id="endChess" class="mdl-menu__item mdl-menu__item--full-bleed-divider" disabled>סיום משחק</li>
-          <li id="closeChess" class="mdl-menu__item">חזרה לתפריט הראשי</li>
+          <li id=chessEnd class="mdl-menu__item mdl-menu__item--full-bleed-divider" disabled>סיום משחק</li>
+          <li id=chessClose class="mdl-menu__item">חזרה לתפריט הראשי</li>
           </ul>
         </div>
-        <canvas id=chessCanvas data-processing-sources="../Chess/chess.js" ></canvas>
+        <canvas id=chessCanvas data-processing-sources="../chess/chess.js" ></canvas>
         <div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar" style="z-index: 10;">
           <div class="mdl-snackbar__text"></div>
           <button class="mdl-snackbar__action" type="button"></button>
@@ -140,13 +139,13 @@
       </div>
     </div>
 
-<!-- Chess startup and board edit -->
-    <div id=ChessOptionsBoard class="modal allowClose" style="top:0px" >
-      <div id="ChessOptionsContent" style="margin:  auto;">
+<!-- Chess Options -->
+    <div id=chessOptionsBoard class="modal allowClose" style="top:0px" >
+      <div id="chessOptionsContent" style="margin:  auto;">
         <div class="mdl-color--light-blue-200" style="padding: 20px;">
-          <div id=ChessOptionsHeader>
+          <div id=chessOptionsHeader>
             <div  style="text-align: center;border-style: groove;padding:10px">
-              <button id="startChessButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Start Chess</button>
+              <button id="chessStartButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Start Chess</button>
             </div>
             <br>
             <div><b><u>Chess Options</u></b></div>
@@ -162,10 +161,10 @@
           </div>
           <div style="text-align: center;padding: 0px;">
             <button id="chessButtonEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Edit Board</button>
-            <button id="chessCancelEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
+            <button id="chessCancelOptions" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
           </div>
         </div>
-        <canvas id=chessEditCanvas data-processing-sources="../Chess/chessEdit.js" style="margin: auto;"></canvas>
+        <canvas id=chessEditCanvas data-processing-sources="../chess/chessEdit.js" style="margin: auto;"></canvas>
       </div>
     </div>
 
@@ -230,27 +229,28 @@
 <!-- Chess -->
       <div style="width:110px; margin:auto;position:relative" >
         <h4 style="text-align:center" > שחמט</h4>
-        <input id="chessButton" class="gameMainButton" type="image" src="../Chess/chessboard_full.gif" width="100" height="100" >
+        <div id=chessBadge></div>
+        <input id="chessButton" class="gameMainButton" type="image" src="../chess/chessboard_full.gif" width="100" height="100" >
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="chessButton">
-          <li id="ChessNewButton"       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
-          <li id="ChessActiveListButton"  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Active">שחק את תורך</li>
-          <li id="ChessPendingListButton" disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Pending">הצטרף למשחק חדש</li>
-          <li id="ChessWaitListButton"    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="Chess" catag="Wait">המתן לתורך</li>
-          <li id="ChessWatchListButton"   disabled class="gameButtons mdl-menu__item " game="Chess" catag="Watch">צפיה במשחקים פעילים</li>
+          <li id=chessNewButton       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
+          <li id=chessActiveListButton  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Active">שחק את תורך</li>
+          <li id=chessPendingListButton disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Pending">הצטרף למשחק חדש</li>
+          <li id=chessWaitListButton    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Wait">המתן לתורך</li>
+          <li id=chessWatchListButton   disabled class="gameButtons mdl-menu__item " game="chess" catag="Watch">צפיה במשחקים פעילים</li>
         </ul>
       </div>
   
-      <div id=ChessActiveModal class="modal allowClose" >
-          <div id="ChessActiveList" class="Active gameLists"  ></div>
+      <div id=chessActiveModal class="modal allowClose" >
+          <div id=chessActiveList class="Active gameLists"  ></div>
       </div>
-      <div id=ChessPendingModal class="modal allowClose" >
-          <div id="ChessPendingList" class="Pending gameLists"  ></div>
+      <div id=chessPendingModal class="modal allowClose" >
+          <div id=chessPendingList class="Pending gameLists"  ></div>
       </div>
-      <div id=ChessWaitModal class="modal allowClose" >
-          <div id="ChessWaitList" class="gameLists"  ></div>
+      <div id=chessWaitModal class="modal allowClose" >
+          <div id=chessWaitList class="gameLists"  ></div>
       </div>
-      <div id=ChessWatchModal class="modal allowClose" >
-          <div id="ChessWatchList" class="gameLists"  ></div>
+      <div id=chessWatchModal class="modal allowClose" >
+          <div id=chessWatchList class="gameLists"  ></div>
       </div>
       <div class="mdl-spinner mdl-js-spinner"></div>
   	
