@@ -135,6 +135,14 @@ function chessEvent(snapshot) {
     pendingUpdate=true;
     return;
   }
+  from=data.from;
+  to=data.to;
+  board=data.board;
+  special=data.special;
+  mychessIndex=0;
+  if (data.info.players.White && data.info.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
+  if (data.info.players.Black && data.info.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
+  debug(2,"mychessIndex="+mychessIndex);
   updateFromData();
   switch(data.info.status) {
     case "pending":
@@ -147,6 +155,7 @@ function chessEvent(snapshot) {
       printBoard();
       break;
     case "active":
+      $("#chessButtonJoin").hide();
       reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
       printBoard();
       animationInit(data.movedPiece,data.newPiece);
@@ -250,7 +259,7 @@ void draw() {
           pendingUpdate=false;
           updateFromData();                                       // get the data from the firebase
         }
-        if (gotResponse) {  
+        if (gotResponse) {
           reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
           printBoard();
           markSquare(from,#FF0000,2);                                  // FROM location is color red
@@ -667,7 +676,7 @@ void finalizeMove(movedPiece,newPiece) {
   });
   gotResponse=false;
 //  mode="passive";                                                // end of my turn
-  animationInit(movedPiece,newPiece);                              // start the animation  
+  animationInit(movedPiece,newPiece);                              // start the animation
 }
 
 function animationInit(movedPiece,newPiece) {
@@ -697,15 +706,6 @@ function animationInit(movedPiece,newPiece) {
 function updateFromData() {
   gotResponse=true;
   player=data.player;
-  from=data.from;
-  to=data.to;
-  board=data.board;
-  special=data.special;
-  mychessIndex=0;
-  if (data.info.players.White && data.info.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
-  if (data.info.players.Black && data.info.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
-  debug(2,"mychessIndex="+mychessIndex);
-  $("#chessButtonJoin").hide();
   if (mychessIndex)
     $("#chessEnd").attr("disabled",false);
   else

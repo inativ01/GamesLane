@@ -57,13 +57,7 @@ module.exports = {  // start of all export functions
 var debugLevel=2;
 
 function debug(level, msg) {
-  switch (level) {
-    case 0: console.error(msg);
-       break;
-    case 1: console.warn(msg);
-       break
-    default: if (level<=debugLevel) console.log(msg);
-  }
+  if (level<=debugLevel) console.log(msg);
 }
 
 function updateGame(db,msg,gameInfo,gameData) {
