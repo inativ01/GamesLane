@@ -259,10 +259,10 @@ window.onclick = function(event) {
       $("#forgotModal").hide();
       $("#signInModal").show();
   }
-  if (event.target == chessBoard) {
-      $("#chessBoard").hide();
+  if (event.target.classList.contains('gameBoard')) {
+      event.target.style="display:none";
       newGID= -1;
-      gameMsg="chess";
+      gameMsg=event.target.title;
   }
   if (event.target.classList.contains('allowClose')) {
     event.target.style="display:none";
@@ -432,7 +432,7 @@ function addGameToList(snapshot) {
     this.parentElement.parentElement.style="display:none";
     $(".mdl-spinner").addClass("is-active");
     newGID=this.value;
-    gameMsg="chess";
+    gameMsg=game.game;
   });
 }
 

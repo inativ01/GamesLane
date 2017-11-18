@@ -1,5 +1,5 @@
 // the next line is very important for using images in JS
-/* @pjs preload="../chess/chess-pieces.png,../chess/red-x.png,../chess/chessboard_full.gif"; */
+/* @pjs preload="../chess/chess-pieces.png */
 
 /************************************************************************************************
 *
@@ -8,22 +8,20 @@
 ************************************************************************************************/
 // -----------------------
 
+var boardImage=loadImage("../backgammon/board1.jpg");
+var pieces=[loadImage("../backgammon/piece0.png"),loadImage("../backgammon/piece1.png")];
+var sidepieces=[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")];
+
 var reverse=false;                                                    // display reverse board for black player
-var gameList={};                                                      // List of all gameInfo chess entries
-var mychessIndex=0;                                                   // 0 - no active player
-var special={};                                                                      // 1 - White
+var gameList={};                                                      // List of all gameInfo backgammon entries
+var mybackgammonIndex=0;                                                   // 0 - no active player
+                                                                      // 1 - White
                                                                       // 2 - Black
                                                                       // 3 - Both (single player)
 
-// Current chess board
-var board=[[-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1]];
+// Current backgammon board
+var board=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+var board1=[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0];
 
 // for each square on the board, boolean indication if there is a legal move for current player starting from it
 var lglMoves=[[0,0,0,0,0,0,0,0],
@@ -44,9 +42,6 @@ var mode="passive";                                                   // "passiv
                                                                       // "pawnUpgrade" - select which piece the pawn upgrade to
 var from=     {x:0, y:0};   // start position
 var to=       {x:0, y:0};   // end position
-var data;                                                             // updated data from Firbase
-var pendingUpdate=false;                                              // update waiting to end of animation
-var gotResponse=false;                                                // Did server respond to a request
 var animation= {
     movedPiece:0,                        // the piece type to move
     newPiece:0,                          // the piece at the end of the move (may only be different if pawn upgraded)
@@ -55,11 +50,9 @@ var animation= {
     startMillis:0                        // time (in millis) when animation was started
 }
 
-var images=[];                           // array to hold the images of the various pieces
-var pieces=loadImage("../chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
 var players= {White:"", Black:""}
 
-/************************************************************************************************
+/************************************************************************************************ 
 *
 *   User interface Events
 *
@@ -69,26 +62,26 @@ var players= {White:"", Black:""}
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 window.addEventListener('resize', function() {
-  sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#chessContent").css("width",sizeSquare*10);
-  if($("#chessBoard").is(":visible")) printBoard();
+  sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
+  $("#backgammonContent").css("width",sizeSquare*4);
+  if($("#backgammonBoard").is(":visible")) printBoard();
 });
 
 //*************************************************************************************************
 //   User selected to go to main menul
 //*************************************************************************************************
-$("#chessClose").click( function() {
+$("#backgammonClose").click( function() {
   newGID= -1;
-  gameMsg="chess";
-  $("#chessBoard").hide();
+  gameMsg="backgammon";
+  $("#backgammonBoard").hide();
 });
 
 //*************************************************************************************************
 //   User selected to quit (resign) the game
 //*************************************************************************************************
-$("#chessEnd").click( function() {
+$("#backgammonEnd").click( function() {
   sendReq({
-    game:"chess",
+    game:"backgammon",
     gid:gameID,
     uid:currentUID,
     msg: "Quit",
@@ -98,11 +91,52 @@ $("#chessEnd").click( function() {
 });
 
 //*************************************************************************************************
+//   go to the game Options screen
+//*************************************************************************************************
+$("#backgammonNewButton").click( function() {
+  if (!auth.currentUser.isAnonymous) {
+    mode="passive";
+    $("#backgammonOptionsBoard").show();
+    $("#backgammonOptionsHeader").show();
+    for(var i = 0; i < 28; i++) board[i] = board1[i];
+    mode="passive";
+  }
+});
+
+//*************************************************************************************************
+//   exit the Options screen and don't start the game
+//*************************************************************************************************
+$("#backgammonCancelOptions").click(function() {
+    $("#backgammonOptionsBoard").hide();
+});
+
+//*************************************************************************************************
+//   done with Options, start the game
+//*************************************************************************************************
+$('#backgammonStartButton').click(function() {
+  newGID=Math.floor(Math.random() * (1000000000000));
+  sendReq({
+    game:"backgammon",
+    gid:newGID,
+    uid:currentUID,
+    msg: "Start",
+    role: $("#backgammonRole").val(),
+    board: board,
+    displayName: auth.currentUser.displayName,
+    photoURL: auth.currentUser.photoURL
+  });
+  gameMsg="backgammon";
+  $("#backgammonOptionsBoard").hide();
+  $(".mdl-spinner").addClass("is-active");
+});
+
+
+//*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
-$("#chessButtonJoin").click(function() {
+$("#backgammonButtonJoin").click(function() {
   sendReq({
-    game:"chess",
+    game:"backgammon",
     gid:gameID,
     uid:currentUID,
     msg: "Join",
@@ -112,53 +146,78 @@ $("#chessButtonJoin").click(function() {
   });
 });
 
-/************************************************************************************************
+/************************************************************************************************ 
 *
 *   Firebase events
 *
 ************************************************************************************************/
 
 //*************************************************************************************************
-// This function is called when the server updates gameData/chess/<gid> for the current game
+// This function is called when the server updates gameData/backgammon/<gid> for the current game
 //*************************************************************************************************
 
-function chessEvent(snapshot) {
-  data=snapshot.val();
+function backgammonEvent(snapshot) {
+  var data=snapshot.val();
   if (!data) return; // information not ready yet
   if (gameID != data.info.gid) {
     debug(0,"Incorrect Game ID:"+data.info.gid+"/"+gameID);
     return;
   }
-  debug(1,"chessEvent GID="+gameID+" status="+data.info.status);
+  debug(1,"backgammonMove GID="+gameID+" status="+data.info.status);
   debug(2,data);
-  if (mode == "animation") {
-    pendingUpdate=true;
-    return;
-  }
+  player=data.player;
   from=data.from;
   to=data.to;
   board=data.board;
   special=data.special;
-  mychessIndex=0;
-  if (data.info.players.White && data.info.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
-  if (data.info.players.Black && data.info.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
-  debug(2,"mychessIndex="+mychessIndex);
-  updateFromData();
+  mybackgammonIndex=0;
+  if (data.info.players.White && data.info.players.White.uid==currentUID) mybackgammonIndex|=1;             // turn on bit 0
+  if (data.info.players.Black && data.info.players.Black.uid==currentUID) mybackgammonIndex|=2;             // turn on bit 1
+  debug(2,"mybackgammonIndex="+mybackgammonIndex);
+  $("#backgammonButtonJoin").hide();
+  if (mybackgammonIndex)
+    $("#backgammonEnd").attr("disabled",false);
+  else
+    $("#backgammonEnd").attr("disabled",true);
+  $("#backgammonTurn").css("color","black");
+  $("#backgammonTurn").html("");
   switch(data.info.status) {
     case "pending":
       var color= (!data.info.players.White) ? "White" : "Black";
       reverse=(color=="Black");
-      $("#chessButtonJoin").val(color);
-      $("#chessButtonJoin").html("Join as "+color);
-      $("#chessButtonJoin").show();
+      $("#backgammonButtonJoin").val(color);
+      $("#backgammonButtonJoin").html("Join as "+color);
+      $("#backgammonButtonJoin").show();
       mode="passive";
       printBoard();
       break;
     case "active":
-      $("#chessButtonJoin").hide();
-      reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
+      reverse=((mybackgammonIndex==2)||(mybackgammonIndex==3 && player==1));
       printBoard();
-      animationInit(data.movedPiece,data.newPiece);
+      if (data.movedPiece > -1) {
+         animation.movedPiece=data.movedPiece;
+         animation.newPiece=data.newPiece;
+         animation.startMillis=millis();
+         if (reverse) {
+           animation.sourceX= startX+sizeSquare*(7-from.x);
+           animation.sourceY= startY+sizeSquare*(7-from.y);
+           animation.distanceX= sizeSquare*(from.x-to.x);
+           animation.distanceY= sizeSquare*(from.y-to.y);
+         } else {
+           animation.sourceX= startX+sizeSquare*from.x;
+           animation.sourceY= startY+sizeSquare*from.y;
+           animation.distanceX= sizeSquare*(to.x-from.x);
+           animation.distanceY= sizeSquare*(to.y-from.y);
+         }
+      }
+      else {
+        animation.movedPiece= -1;
+        animation.startMillis= -1000;
+      }
+      if (checkPlayer()) $("#backgammonTurn").css("color","red");
+      if (player==0) $("#backgammonTurn").html("White player's turn");
+      else if (player==1) $("#backgammonTurn").html("Black player's turn");
+      mode="animation";
       break;
     case "quit":
       sweetAlert({
@@ -168,14 +227,20 @@ function chessEvent(snapshot) {
          imageUrl: "../i-quit.png",
          imageSize: "400x150",
       });
-
-      $("#chessBoard").hide();
+/*
+      if (mybackgammonIndex) sendReq({
+        game:"backgammon",
+        gid:gameID,
+        uid:currentUID,
+        msg: "ExitGame",
+      });
+*/
+      $("#backgammonBoard").hide();
   }
   debug(2,"mode="+mode);
-  data=null;
 }
 
-/************************************************************************************************
+/************************************************************************************************ 
 *
 *   Processing.js functions and events
 *
@@ -185,14 +250,9 @@ function chessEvent(snapshot) {
 // Initialization
 //*************************************************************************************************
 void setup() {
-  sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#chessContent").css("width",sizeSquare*10);
-  size(sizeSquare*10,sizeSquare*10);
-  for (var i=0; i<12; i++) {
-    images[i]=createImage(333,333,RGB);
-    if (i<6) images[i].copy (pieces, (i%6)*333,0,333,333,0,0,333,333);  // white pieces
-    else images[i].copy (pieces, (i%6)*333,333,333,333,0,0,333,333);    // black pieces
-  }
+  sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
+  $("#backgammonContent").css("width",sizeSquare*4);
+  size(sizeSquare*4,sizeSquare*3);
 }
 
 //*************************************************************************************************
@@ -200,21 +260,21 @@ void setup() {
 //*************************************************************************************************
 void draw() {
 
-// gameMsg is set when a user enters or leaves a specific game
-  if (gameMsg == "chess") {
+// gameMsg is set when a user enters or leaves a specific game	
+  if (gameMsg == "backgammon") {
     debug(2,"New:"+newGID+" Old:"+gameID);
-// user left the game. Stop listening to firebase events related to this game
+// user left the game. Stop listening to firebase events related to this game	
     if (gameID != -1) {
-      db.ref("gameData/chess/"+gameID).off();
-      db.ref("gameChat/chess/"+gameID).off();
+      db.ref("gameData/backgammon/"+gameID).off();
+      db.ref("gameChat/backgammon/"+gameID).off();
     }
-// user entered the game (either as player or watcher). Start listening to firebase events related to this game
+// user entered the game (either as player or watcher). Start listening to firebase events related to this game	
     gameID=newGID;
     if (gameID != -1) {
 // Server updated the game information
-      db.ref("gameData/chess/"+gameID).on("value", chessEvent);
+      db.ref("gameData/backgammon/"+gameID).on("value", backgammonEvent);
 // Chat messages related to this game
-      db.ref("gameChat/chess1/"+gameID).on("child_added", function(snapshot) {
+      db.ref("gameChat/backgammon/"+gameID).on("child_added", function(snapshot) {
         debug(2,snapshot.val().sender+": "+snapshot.val().msg);
         var notification = document.querySelector('.mdl-js-snackbar');
         notification.MaterialSnackbar.showSnackbar(
@@ -231,7 +291,7 @@ void draw() {
 // Animation mode: move pieces to a new location
   if (mode==="animation") {
     var deltaT=(millis()-animation.startMillis)/1000;                // time in seconds since the begining of the animation
-    if (deltaT >= 1) {                                               // end of animation - over 1 second
+    if (deltaT >= 1) {        										 // end of animation - over 1 second
       if (animation.movedPiece > -1)
       {
         board[to.y][to.x]=animation.newPiece;                        // put the saved piece in the new location
@@ -254,61 +314,50 @@ void draw() {
           board[from.y][from.x]=-1;                                  // Clear the old location
           return;
         }                                                            // end of castling case
-        if (pendingUpdate) {
-          debug(2,"pendingUpdate");
-          pendingUpdate=false;
-          updateFromData();                                       // get the data from the firebase
-        }
-        if (gotResponse) {
-          reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
-          printBoard();
-          markSquare(from,#FF0000,2);                                  // FROM location is color red
-          markSquare(to,#00FF00,2);                                    // TO location is color green
-          if (special) {                                               // now need to check special messages or end conditions
-            if (special.endGame) {
-              if (special.check)
-                sweetAlert({
-                   title: "CheckMate",
-                   text: "",
-                   showConfirmButton: true,
-                   imageUrl: "../chess/checkmate.jpg",
-                   imageSize: "400x150",
-                });
-              else
-                sweetAlert({
-                   title: "StaleMate",
-                   text: "",
-                   showConfirmButton: true,
-                   imageUrl: "../chess/stalemate.jpg",
-                   imageSize: "400x150",
-                });
-              if (mychessIndex) sendReq({
-                game:"chess",
-                gid:gameID,
-                uid:currentUID,
-                msg: "ExitGame",
-              });
-              $("#chessBoard").hide();
-            }
-            else if (special.check) {
-              sweetAlert({
-                 title: "Check",
-                 text: "",
-                 timer: 2000,
-                 showConfirmButton: true,
-                 imageUrl: "../chess/check.jpg",
-                 imageSize: "400x150",
-              });
-            }
-          }
-        }
-        else {                                                       // animation ended before firebase update, just wait
-          mode="passive"
-          debug(1,"delayed response from Server. need to do spinner");
-          return;
-        }
+        printBoard();
+        markSquare(from,#FF0000,2);                                  // FROM location is color red
+        markSquare(to,#00FF00,2);                                    // TO location is color green
       }
       else printBoard();
+
+// now need to check special messages or end conditions
+      if (special) {
+        if (special.endGame) {
+          if (special.check)
+            sweetAlert({
+               title: "CheckMate",
+               text: "",
+               showConfirmButton: true,
+               imageUrl: "../backgammon/checkmate.jpg",
+               imageSize: "400x150",
+            });
+          else
+            sweetAlert({
+               title: "StaleMate",
+               text: "",
+               showConfirmButton: true,
+               imageUrl: "../backgammon/stalemate.jpg",
+               imageSize: "400x150",
+            });
+          if (mybackgammonIndex) sendReq({
+            game:"backgammon",
+            gid:gameID,
+            uid:currentUID,
+            msg: "ExitGame",
+          });
+          $("#backgammonBoard").hide();
+        }
+        else if (special.check) {
+          sweetAlert({
+             title: "Check",
+             text: "",
+             timer: 2000,
+             showConfirmButton: true,
+             imageUrl: "../backgammon/check.jpg",
+             imageSize: "400x150",
+          });
+        }
+      }
 
       if (checkPlayer()) {
         mode="start";
@@ -322,10 +371,6 @@ void draw() {
       printBoard();
       markSquare(from,#FF0000,2);                                    // FROM location is color red
       markSquare(to,#00FF00,2);                                      // TO location is color green
-      image(images[animation.movedPiece],
-            animation.sourceX+deltaT*animation.distanceX,
-            animation.sourceY+deltaT*animation.distanceY,
-            sizeSquare,sizeSquare);
     }
   }  // end of Animation case
 }
@@ -334,6 +379,7 @@ void draw() {
 // When mouse is moved and player is active, mark available squares to move to (from pointed square)
 //*************************************************************************************************
 void mouseMoved() {
+/*
   if (mode==="start") {
     if (!checkPlayer()) return;                                  // only the current player can move
     var mouse=mouseSquare();                                         // check what square the mouse is in
@@ -352,6 +398,7 @@ void mouseMoved() {
       }
     }
   }
+*/  
 }
 
 //*************************************************************************************************
@@ -359,18 +406,19 @@ void mouseMoved() {
 //*************************************************************************************************
 void mouseClicked () {
   debug(2,"mouseClicked. Mode="+mode);
+  var mouse=mouseSquare();
+  if (mouse >=0) board[mouse]++;
+  printBoard();
+/*
   switch (mode) {
     case "active":                                                   // Piece was already selected. click to select where to move the piece
       mouse=mouseSquare();
+  debug(1,mouse);
       if(checkMove(from,mouse,true,board)) {                         // check is the target is a legal move
         to.x=mouse.x; to.y=mouse.y;                                  // remember the target location
         if ((board[from.y][from.x] % 6) === 5 && (to.y%7) ===  0)    // if it's a pawn and it reached the last line
         {
           printBoard();
-          image(images[1+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[2+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[3+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          image(images[4+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
           mode="pawnUpgrade";
           return;
         }
@@ -415,9 +463,10 @@ void mouseClicked () {
       break;
 
   }
+*/
 }
 
-/************************************************************************************************ 
+/************************************************************************************************
 *
 *   Service funtions (called by events)
 *
@@ -427,29 +476,35 @@ void mouseClicked () {
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 function printBoard() {
-  if ($(".mdl-spinner").hasClass("is-active")) $(".mdl-spinner").removeClass("is-active");
-  $("#chessBoard").show();
-  size(sizeSquare*10,sizeSquare*10);
-  startX=startY=sizeSquare;
-  stroke(0);
-  fill(#0000FF);
+  size(sizeSquare*4,sizeSquare*3);
+  image(boardImage,0,0,sizeSquare*4,sizeSquare*3);
   textFont(loadFont("Meta-Bold.ttf"));
-  if (players.White) text('White: '+players.White,startX,sizeSquare/2);
-  if (players.Black) text('Black: '+players.Black,startX+4*sizeSquare,sizeSquare/2);
-  for(var y = 0, ypos=startY; y < 8; y++, ypos+=sizeSquare) {
-    for(var x = 0, xpos=startX; x < 8; x++, xpos+=sizeSquare) {
-      if((x+y)%2) fill(100); else fill(255);  // select white or black squares
-      rect(xpos,ypos,sizeSquare,sizeSquare);  // print an empty square
-      if (reverse) {
-          if (board[7-y][7-x]> -1)
-            image(images[board[7-y][7-x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
-      } else {
-          if (board[y][x]> -1)
-            image(images[board[y][x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
-      }
+  for (var i=0;i<24;i++) {
+    var color=(board[i]>0)?1:0;
+//    var offset=(i<12)? sizeSquare*-0.2 : sizeSquare*0.2;
+//    if (abs(board[i])>6) offset*=0.5;
+    for (var j=0;j<abs(board[i]);j++)
+    {
+      var l=bgLocation(i,j);
+      image(pieces[color],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
     }
   }
-  $("#chessCanvas").show();
+  for (var i=24;i<26;i++) {
+    for (var j=0;j<board[i];j++) {
+      l=bgLocation(i,j);
+      image(pieces[i-24],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
+    }
+  }
+  for (var i=26;i<28;i++) {
+    for (var j=0;j<board[i];j++) {
+      l=bgLocation(i,j);
+      image(sidepieces[i-26],l.x,l.y,sizeSquare*0.2,sizeSquare*0.1);
+    }
+  }
+
+  if ($(".mdl-spinner").hasClass("is-active")) $(".mdl-spinner").removeClass("is-active");
+  $("#backgammonBoard").show();
+  $("#backgammonCanvas").show();
 }
 
 //*************************************************************************************************
@@ -475,16 +530,16 @@ function markSquare(location,color,width) {
 //*************************************************************************************************
 function mouseSquare()
 {
-  var mouse={x:-1, y:-1} ;
-  if (mouseX >= startX && mouseX < startX+sizeSquare*8 && mouseY >= startY && mouseY < startY+sizeSquare*8) {
-    mouse.x=Math.floor((mouseX-startX)/sizeSquare);
-    mouse.y=Math.floor((mouseY-startY)/sizeSquare);
-    if (reverse) {
-      mouse.x=7-mouse.x;
-      mouse.y=7-mouse.y;
-    }
-  }
-  return mouse;
+  var x=Math.floor(mouseX/sizeSquare/0.236)-2;
+  var y=Math.floor(mouseY/sizeSquare/1.5);
+  var n;
+
+  if (x<0) n=-1;
+  else if (x<6) n=(y)?(11-x):(12+x);
+  else if (x==6) n=(y)?25:24;
+  else if (x<13) n=(y)?(12-x):(11+x);
+  else n=(y)?27:26;
+  return n;
 }
 
 //*************************************************************************************************
@@ -641,16 +696,16 @@ function analyzeMoves() {
 
 //*************************************************************************************************
 // Check is I'm currently playing.
-// This is done comparing "player" (0-white, 1-black) with "mychessIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
+// This is done comparing "player" (0-white, 1-black) with "mybackgammonIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
 //*************************************************************************************************
 function checkPlayer() {
   if (player== -1) return false;
   var p= (1 << player);
-  return (mychessIndex & p)
+  return (mybackgammonIndex & p)
 }
 
 //*************************************************************************************************
-// Let the server know about a completed chess move (called after the user clicked on the destination spot
+// Let the server know about a completed backgammon move (called after the user clicked on the destination spot
 //*************************************************************************************************
 void finalizeMove(movedPiece,newPiece) {
   board[from.y][from.x]=-1;                                      // Clear the old location
@@ -658,62 +713,56 @@ void finalizeMove(movedPiece,newPiece) {
   board[to.y][to.x]=newPiece;
   player=1-player;
 
+  var special={};
   var check=check4check(board,player);
-  special={};
   if (check) special.check=true;
+//  else special.check=null;
   if (!analyzeMoves()) special.endGame=true;
   player=1-player;
 
   board[to.y][to.x]=savedPiece;
   sendReq({
-    game:"chess",
+    game:"backgammon",
     gid:gameID,
     uid:currentUID,
     msg: "ChessMove",
     special: special,
     player:player, from:from, to:to, board:board, movedPiece:movedPiece, newPiece:newPiece
   });
-  gotResponse=false;
-//  mode="passive";                                                // end of my turn
-  animationInit(movedPiece,newPiece);                              // start the animation
+  mode="passive";                                                // end of my turn
 }
 
-function animationInit(movedPiece,newPiece) {
-      if (movedPiece > -1) {
-         animation.movedPiece=movedPiece;
-         animation.newPiece=newPiece;
-         animation.startMillis=millis();
-         if (reverse) {
-           animation.sourceX= startX+sizeSquare*(7-from.x);
-           animation.sourceY= startY+sizeSquare*(7-from.y);
-           animation.distanceX= sizeSquare*(from.x-to.x);
-           animation.distanceY= sizeSquare*(from.y-to.y);
-         } else {
-           animation.sourceX= startX+sizeSquare*from.x;
-           animation.sourceY= startY+sizeSquare*from.y;
-           animation.distanceX= sizeSquare*(to.x-from.x);
-           animation.distanceY= sizeSquare*(to.y-from.y);
-         }
-      }
-      else {
-        animation.movedPiece= -1;
-        animation.startMillis= -1000;
-      }
-      mode="animation";
-}
-
-function updateFromData() {
-  gotResponse=true;
-  player=data.player;
-  if (mychessIndex)
-    $("#chessEnd").attr("disabled",false);
-  else
-    $("#chessEnd").attr("disabled",true);
-  $("#chessTurn").css("color","black");
-  $("#chessTurn").html("");
-  if (data.info.status=="active") {
-    if (checkPlayer()) $("#chessTurn").css("color","red");
-    if (player==0) $("#chessTurn").html("White player's turn");
-    else if (player==1) $("#chessTurn").html("Black player's turn");
+function bgLocation(index,count) {
+  var factor= (abs(board[index])>6)?1:2;
+  var l={x:0,y:0};
+  if (index<24) {
+    if (index<12)
+      l.y=sizeSquare*(2.65-count*factor*0.1);
+    else
+      l.y=sizeSquare*(0.15+count*factor*0.1);
+    i1=index%6;
+    switch ((index-i1)/6) {
+      case 0:
+        l.x=sizeSquare*(3.3-i1*0.23);
+        break;
+      case 1:
+        l.x=sizeSquare*(1.67-i1*0.23);
+        break;
+      case 2:
+        l.x=sizeSquare*(0.5+i1*0.23);
+        break;
+      case 3:
+        l.x=sizeSquare*(2.15+i1*0.23);
+        break;
+    }
   }
+  else if (index<26) {   // "eaten" pieces
+    l.x=sizeSquare*1.9;
+    l.y=sizeSquare*((index==24) ? 1.2-count*factor*0.1 : 1.6+count*factor*0.1);
+  }
+  else {                 // completed pieces
+    l.x=sizeSquare*3.7;
+    l.y=sizeSquare*((index==26) ? 0.1+count*0.05 : 2.80-count*0.05);
+  }
+  return l;
 }
