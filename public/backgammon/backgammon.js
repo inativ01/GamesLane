@@ -8,20 +8,25 @@
 ************************************************************************************************/
 // -----------------------
 
-var boardImage=loadImage("../backgammon/board1.jpg");
-var pieces=[loadImage("../backgammon/piece0.png"),loadImage("../backgammon/piece1.png")];
-var sidepieces=[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")];
+var cnst={
+  boardImage:loadImage("../backgammon/board1.jpg"),
+  pieces:[loadImage("../backgammon/piece0.png"),loadImage("../backgammon/piece1.png")],
+  sidepieces:[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")],
+  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],
+  dir:[-1,1],
+};
 
+var glb={
+  board:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  currentPlayer:0,
+};
 var reverse=false;                                                    // display reverse board for black player
-var gameList={};                                                      // List of all gameInfo backgammon entries
-var mybackgammonIndex=0;                                                   // 0 - no active player
+var mybackgammonIndex=0;                                              // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Black
                                                                       // 3 - Both (single player)
 
 // Current backgammon board
-var board=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-var board1=[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0];
 
 // for each square on the board, boolean indication if there is a legal move for current player starting from it
 var lglMoves=[[0,0,0,0,0,0,0,0],
@@ -34,7 +39,6 @@ var lglMoves=[[0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0]];
 
 var sizeSquare, startX, startY;                                       // control the size and location of the board
-var player=0;                                                         // 0 for white, 1 for black
 var mode="passive";                                                   // "passive" - my player is not playing
                                                                       // "start" - need to select current player piece (FROM location)
                                                                       // "active" - need to select the target of the move (TO location)
@@ -85,7 +89,7 @@ $("#backgammonEnd").click( function() {
     gid:gameID,
     uid:currentUID,
     msg: "Quit",
-    board: board,
+    board: glb.board,
     concede: auth.currentUser.displayName
   });
 });
@@ -98,7 +102,7 @@ $("#backgammonNewButton").click( function() {
     mode="passive";
     $("#backgammonOptionsBoard").show();
     $("#backgammonOptionsHeader").show();
-    for(var i = 0; i < 28; i++) board[i] = board1[i];
+    for(var i = 0; i < 28; i++) glb.board[i] = cnst.boardStart[i];
     mode="passive";
   }
 });
@@ -121,7 +125,7 @@ $('#backgammonStartButton').click(function() {
     uid:currentUID,
     msg: "Start",
     role: $("#backgammonRole").val(),
-    board: board,
+    board: glb.board,
     displayName: auth.currentUser.displayName,
     photoURL: auth.currentUser.photoURL
   });
@@ -165,10 +169,10 @@ function backgammonEvent(snapshot) {
   }
   debug(1,"backgammonMove GID="+gameID+" status="+data.info.status);
   debug(2,data);
-  player=data.player;
+  glb.player=data.player;
   from=data.from;
   to=data.to;
-  board=data.board;
+  glb.board=data.board;
   special=data.special;
   mybackgammonIndex=0;
   if (data.info.players.White && data.info.players.White.uid==currentUID) mybackgammonIndex|=1;             // turn on bit 0
@@ -192,7 +196,7 @@ function backgammonEvent(snapshot) {
       printBoard();
       break;
     case "active":
-      reverse=((mybackgammonIndex==2)||(mybackgammonIndex==3 && player==1));
+      reverse=((mybackgammonIndex==2)||(mybackgammonIndex==3 && glb.player==1));
       printBoard();
       if (data.movedPiece > -1) {
          animation.movedPiece=data.movedPiece;
@@ -215,9 +219,11 @@ function backgammonEvent(snapshot) {
         animation.startMillis= -1000;
       }
       if (checkPlayer()) $("#backgammonTurn").css("color","red");
-      if (player==0) $("#backgammonTurn").html("White player's turn");
-      else if (player==1) $("#backgammonTurn").html("Black player's turn");
+      if (glb.player==0) $("#backgammonTurn").html("White player's turn");
+      else if (glb.player==1) $("#backgammonTurn").html("Black player's turn");
+/*
       mode="animation";
+*/
       break;
     case "quit":
       sweetAlert({
@@ -227,20 +233,12 @@ function backgammonEvent(snapshot) {
          imageUrl: "../i-quit.png",
          imageSize: "400x150",
       });
-/*
-      if (mybackgammonIndex) sendReq({
-        game:"backgammon",
-        gid:gameID,
-        uid:currentUID,
-        msg: "ExitGame",
-      });
-*/
       $("#backgammonBoard").hide();
   }
   debug(2,"mode="+mode);
 }
 
-/************************************************************************************************ 
+/************************************************************************************************
 *
 *   Processing.js functions and events
 *
@@ -260,15 +258,15 @@ void setup() {
 //*************************************************************************************************
 void draw() {
 
-// gameMsg is set when a user enters or leaves a specific game	
+// gameMsg is set when a user enters or leaves a specific game
   if (gameMsg == "backgammon") {
     debug(2,"New:"+newGID+" Old:"+gameID);
-// user left the game. Stop listening to firebase events related to this game	
+// user left the game. Stop listening to firebase events related to this game
     if (gameID != -1) {
       db.ref("gameData/backgammon/"+gameID).off();
       db.ref("gameChat/backgammon/"+gameID).off();
     }
-// user entered the game (either as player or watcher). Start listening to firebase events related to this game	
+// user entered the game (either as player or watcher). Start listening to firebase events related to this game
     gameID=newGID;
     if (gameID != -1) {
 // Server updated the game information
@@ -289,6 +287,7 @@ void draw() {
   }
 
 // Animation mode: move pieces to a new location
+/*
   if (mode==="animation") {
     var deltaT=(millis()-animation.startMillis)/1000;                // time in seconds since the begining of the animation
     if (deltaT >= 1) {        										 // end of animation - over 1 second
@@ -373,97 +372,43 @@ void draw() {
       markSquare(to,#00FF00,2);                                      // TO location is color green
     }
   }  // end of Animation case
+*/
 }
 
 //*************************************************************************************************
 // When mouse is moved and player is active, mark available squares to move to (from pointed square)
 //*************************************************************************************************
-void mouseMoved() {
-/*
-  if (mode==="start") {
-    if (!checkPlayer()) return;                                  // only the current player can move
-    var mouse=mouseSquare();                                         // check what square the mouse is in
-    if (mouse.x == -1) return;                                       // exit immediately if mouse no inside the board
-    if (mouse.x==from.x && mouse.y==from.y) return;                  // exit immediately if mouse is still at the same square
-    from=mouse;
-    printBoard();                                                    // clear previous markings
-    if (!lglMoves[from.y][from.x]) return;                           // there is no legel move from this square.
-    markSquare(from,#FF0000,2);                                      // Mark the start square in red
-    for (var j=0;j<8;j++) {
-      for (var i=0;i<8;i++) {
-        to={x:i,y:j};
-        if (checkMove(from,to,true,board)) {
-          markSquare(to,#00FF00,2);                                  // Mark the target square in green
-        }
-      }
-    }
-  }
-*/  
-}
 
 //*************************************************************************************************
 // When mouse is clicked - behavior depends on the internal mode (state machine)
 //*************************************************************************************************
-void mouseClicked () {
+void mousePressed () {
   debug(2,"mouseClicked. Mode="+mode);
   var mouse=mouseSquare();
-  if (mouse >=0) board[mouse]++;
-  printBoard();
-/*
-  switch (mode) {
-    case "active":                                                   // Piece was already selected. click to select where to move the piece
-      mouse=mouseSquare();
-  debug(1,mouse);
-      if(checkMove(from,mouse,true,board)) {                         // check is the target is a legal move
-        to.x=mouse.x; to.y=mouse.y;                                  // remember the target location
-        if ((board[from.y][from.x] % 6) === 5 && (to.y%7) ===  0)    // if it's a pawn and it reached the last line
-        {
-          printBoard();
-          mode="pawnUpgrade";
-          return;
-        }
-        var piece=board[from.y][from.x];
-        finalizeMove(piece,piece);
-      }
-      if (mouse.x==from.x && mouse.y==from.y) {						// clicked again on the same piece - cancel selection
-        mode="start";
-        printBoard();
-        return;
-      }
-//      break;         // fall through. This allow the player to change his mind regarding the start position
-
-    case "start":                                                    // click to select which piece to move
-      if (!checkPlayer()) return;                                // only the current player can move
-      var mouse=mouseSquare();                                       // check what square the mouse is in
-      if (mouse.x == -1) return;                                     // Mouse was clicked outside the board. Don't do anything.
-      if (!lglMoves[mouse.y][mouse.x]) return;                       // if there is no legal move, don't do anything
-      from.x=mouse.x; from.y=mouse.y;                                // remember the location of square we're moving FROM
-      mode="active";                                                 // start looking for the target location
-      printBoard();
-      markSquare(from,#FF0000,4);                                    // mark that square in red
-      for (var j=0;j<8;j++) {
-        for (var i=0;i<8;i++) {
-          to={x:i,y:j};
-          if (checkMove(from,to,true,board)) {
-            markSquare(to,#00FF00,4);                                // Mark the target square in green
-          }
-        }
-      }
-      break;
-
-    case "pawnUpgrade":                                              // Click to select the piece to which the pawn is upgraded
-                                                                     // check if I'm clicking in the correct square
-      if(mouseX<(startX+to.x*sizeSquare) || mouseX>(startX+to.x*sizeSquare+sizeSquare) ||
-         mouseY<(startY+to.y*sizeSquare) || mouseY>(startY+to.y*sizeSquare+sizeSquare)) return;
-      var pawn=board[from.y][from.x];
-      var piece=pawn-1;
-      if(mouseY<(startY+to.y*sizeSquare+sizeSquare/2)) piece-=2;
-      if(mouseX<(startX+to.x*sizeSquare+sizeSquare/2)) piece-=1;
-      finalizeMove(pawn,piece);
-      break;
-
+  var myDir=cnst.dir[glb.currentPlayer];                             // 1 for white, -1 for black
+//  if (mouse >= 0) {glb.board[mouse]++; printBoard();}
+  if (mouse >=0 && glb.board[mouse]*cnst.dir[glb.currentPlayer] >0) { // I need to click on my player's piece to start
+    mode='picked';
+    glb.board[mouse]-=cnst.dir[glb.currentPlayer];
+    printBoard();
+    image(cnst.pieces[glb.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
   }
-*/
+}
+
+void mouseDragged() {
+  if (mode=='picked') {
+    printBoard();
+    image(cnst.pieces[glb.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
+  }
+}
+
+voide mouseReleased() {
+  if (mode=='picked') {
+    var mouse=mouseSquare();
+    mode='dropped';
+    glb.board[mouse]+=cnst.dir[glb.currentPlayer];
+    printBoard();
+  }
 }
 
 /************************************************************************************************
@@ -477,28 +422,28 @@ void mouseClicked () {
 //*************************************************************************************************
 function printBoard() {
   size(sizeSquare*4,sizeSquare*3);
-  image(boardImage,0,0,sizeSquare*4,sizeSquare*3);
+  image(cnst.boardImage,0,0,sizeSquare*4,sizeSquare*3);
   textFont(loadFont("Meta-Bold.ttf"));
   for (var i=0;i<24;i++) {
-    var color=(board[i]>0)?1:0;
+    var color=(glb.board[i]>0)?1:0;
 //    var offset=(i<12)? sizeSquare*-0.2 : sizeSquare*0.2;
 //    if (abs(board[i])>6) offset*=0.5;
-    for (var j=0;j<abs(board[i]);j++)
+    for (var j=0;j<abs(glb.board[i]);j++)
     {
       var l=bgLocation(i,j);
-      image(pieces[color],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
+      image(cnst.pieces[color],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
     }
   }
   for (var i=24;i<26;i++) {
-    for (var j=0;j<board[i];j++) {
+    for (var j=0;j<glb.board[i];j++) {
       l=bgLocation(i,j);
-      image(pieces[i-24],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
+      image(cnst.pieces[i-24],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
     }
   }
   for (var i=26;i<28;i++) {
-    for (var j=0;j<board[i];j++) {
+    for (var j=0;j<glb.board[i];j++) {
       l=bgLocation(i,j);
-      image(sidepieces[i-26],l.x,l.y,sizeSquare*0.2,sizeSquare*0.1);
+      image(cnst.sidepieces[i-26],l.x,l.y,sizeSquare*0.2,sizeSquare*0.1);
     }
   }
 
@@ -566,6 +511,8 @@ function check4check(myBoard, player) {
 //*************************************************************************************************
 function checkMove(from,to,checkKing,myBoard)
 {
+/*
+
   if (Math.floor(myBoard[from.y][from.x]/6)==Math.floor(myBoard[to.y][to.x]/6))
      return false;                                                   // can't move on top of my own piece
   var dX=to.x-from.x;
@@ -664,6 +611,7 @@ function checkMove(from,to,checkKing,myBoard)
      if (check4check(boardT,Math.floor(piece/6))) return false;  // check if oponent can attack my king after my move. That's an illigal move
   }
   return true;
+*/
 }
 
 //*************************************************************************************************
@@ -672,6 +620,7 @@ function checkMove(from,to,checkKing,myBoard)
 //  Returns TRUE if there are ANY legal moves
 //*************************************************************************************************
 function analyzeMoves() {
+/*
   debug(3,"analyze");
   var anyLegal=false;
   for (var y=0; y<8; y++) {
@@ -692,6 +641,7 @@ function analyzeMoves() {
   }
   for (var i=0;i<8;i++) debug(3,lglMoves[i]);
   return anyLegal;
+*/
 }
 
 //*************************************************************************************************
@@ -699,14 +649,15 @@ function analyzeMoves() {
 // This is done comparing "player" (0-white, 1-black) with "mybackgammonIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
 //*************************************************************************************************
 function checkPlayer() {
-  if (player== -1) return false;
-  var p= (1 << player);
+  if (glb.player== -1) return false;
+  var p= (1 << glb.player);
   return (mybackgammonIndex & p)
 }
 
 //*************************************************************************************************
 // Let the server know about a completed backgammon move (called after the user clicked on the destination spot
 //*************************************************************************************************
+/*
 void finalizeMove(movedPiece,newPiece) {
   board[from.y][from.x]=-1;                                      // Clear the old location
   var savedPiece=board[to.y][to.x];
@@ -731,9 +682,10 @@ void finalizeMove(movedPiece,newPiece) {
   });
   mode="passive";                                                // end of my turn
 }
+*/
 
 function bgLocation(index,count) {
-  var factor= (abs(board[index])>6)?1:2;
+  var factor= (abs(glb.board[index])>6)?1:2;
   var l={x:0,y:0};
   if (index<24) {
     if (index<12)

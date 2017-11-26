@@ -218,10 +218,12 @@
 
   <!-- Header section containing logo and menu -->
   <header class="header mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
+  <!--
     <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:25px;margin-left:-50px;z-index:10" align="right" >
       <b style="color:red;">Edit profile or logout</b>
       <img src="../Right-Arrow.png" height="40" width="40">
     </div>
+-->
 
     <div class="mdl-layout__header-row titlebar">
       <h3 >The Games Lane</h3>
@@ -259,6 +261,7 @@
 <!-- Main screen -->
   <main class="mdl-layout__content" style="width:100%;overflow:hidden;">
     <div style="width: calc(100% - 50px);float:left;position:absolute;height:100%;overflow:auto">
+  <!--
       <div class="WelcomeNewUser" style="display:none;width:100%;position: fixed; margin-top:2px;margin-left:-50px" align="right" >
            <b style="color:red;"> Change Language</b>
            <img src="../Right-Arrow.png" height="40" width="40">
@@ -271,6 +274,7 @@
            <b style="color:red;"> Fill a survey</b>
            <img src="../Right-Arrow.png" height="40" width="40">
       </div>
+-->
 
 <!-- Chess -->
       <div style="width:110px; margin:auto" >
@@ -300,7 +304,7 @@
       </div>
 
 <!-- backgammon -->
-      <div  style="width:110px; margin:auto" >
+      <div hidden style="width:110px; margin:auto" >
         <h4 style="text-align:center" > Backgammon</h4>
         <div id=backgammonBadge></div>
         <input id="backgammonButton" class="gameMainButton" type="image" src="../backgammon/backgammonboard_full.png" width="100" height="100" >

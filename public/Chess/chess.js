@@ -8,12 +8,16 @@
 ************************************************************************************************/
 // -----------------------
 
+var glb={
+  ignoreNextUpdate:0,
+};
+
 var reverse=false;                                                    // display reverse board for black player
-var gameList={};                                                      // List of all gameInfo chess entries
 var mychessIndex=0;                                                   // 0 - no active player
-var special={};                                                                      // 1 - White
+                                                                      // 1 - White
                                                                       // 2 - Black
                                                                       // 3 - Both (single player)
+var special={};
 
 // Current chess board
 var board=[[-1,-1,-1,-1,-1,-1,-1,-1],
@@ -45,8 +49,6 @@ var mode="passive";                                                   // "passiv
 var from=     {x:0, y:0};   // start position
 var to=       {x:0, y:0};   // end position
 var data;                                                             // updated data from Firbase
-var pendingUpdate=false;                                              // update waiting to end of animation
-var gotResponse=false;                                                // Did server respond to a request
 var animation= {
     movedPiece:0,                        // the piece type to move
     newPiece:0,                          // the piece at the end of the move (may only be different if pawn upgraded)
@@ -131,9 +133,15 @@ function chessEvent(snapshot) {
   }
   debug(1,"chessEvent GID="+gameID+" status="+data.info.status);
   debug(2,data);
-  if (mode == "animation") {
-    pendingUpdate=true;
-    return;
+  if (glb.ignoreNextUpdate==2) {
+    if (mode == "animation") {
+      glb.ignoreNextUpdate=1;                                        // mark that response was received
+      return;
+    }
+    else {                                                           // Late arrival of response - re-do animation
+      glb.ignoreNextUpdate=0;
+      debug(1,"Finally got response. Stop the spinner");
+    }
   }
   from=data.from;
   to=data.to;
@@ -143,7 +151,18 @@ function chessEvent(snapshot) {
   if (data.info.players.White && data.info.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
   if (data.info.players.Black && data.info.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
   debug(2,"mychessIndex="+mychessIndex);
-  updateFromData();
+  player=data.player;
+  if (mychessIndex)
+    $("#chessEnd").attr("disabled",false);
+  else
+    $("#chessEnd").attr("disabled",true);
+  $("#chessTurn").css("color","black");
+  $("#chessTurn").html("");
+  if (data.info.status=="active") {
+    if (checkPlayer()) $("#chessTurn").css("color","red");
+    if (player==0) $("#chessTurn").html("White player's turn");
+    else if (player==1) $("#chessTurn").html("Black player's turn");
+  }
   switch(data.info.status) {
     case "pending":
       var color= (!data.info.players.White) ? "White" : "Black";
@@ -254,17 +273,25 @@ void draw() {
           board[from.y][from.x]=-1;                                  // Clear the old location
           return;
         }                                                            // end of castling case
-        if (pendingUpdate) {
-          debug(2,"pendingUpdate");
-          pendingUpdate=false;
-          updateFromData();                                       // get the data from the firebase
+        if (glb.ignoreNextUpdate==2) {                               // Can't complete the move because server did not respond.
+          mode="passive"
+          debug(1,"delayed response from Server. need to do spinner");
+          return;
         }
-        if (gotResponse) {
-          reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
-          printBoard();
-          markSquare(from,#FF0000,2);                                  // FROM location is color red
-          markSquare(to,#00FF00,2);                                    // TO location is color green
-          if (special) {                                               // now need to check special messages or end conditions
+        else {
+          if (glb.ignoreNextUpdate==1) {                             // received response
+            glb.ignoreNextUpdate=0;
+            player=data.player;
+            if (checkPlayer()) $("#chessTurn").css("color","red");
+            else               $("#chessTurn").css("color","black");
+            reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
+          }
+          printBoard();                                            // board may have flipped due to player change
+          if (player==0) $("#chessTurn").html("White player's turn");
+          else           $("#chessTurn").html("Black player's turn");
+          markSquare(from,#FF0000,2);                                // FROM location is color red
+          markSquare(to,#00FF00,2);                                  // TO location is color green
+          if (special) {                                             // now need to check special messages or end conditions
             if (special.endGame) {
               if (special.check)
                 sweetAlert({
@@ -302,11 +329,6 @@ void draw() {
             }
           }
         }
-        else {                                                       // animation ended before firebase update, just wait
-          mode="passive"
-          debug(1,"delayed response from Server. need to do spinner");
-          return;
-        }
       }
       else printBoard();
 
@@ -335,7 +357,7 @@ void draw() {
 //*************************************************************************************************
 void mouseMoved() {
   if (mode==="start") {
-    if (!checkPlayer()) return;                                  // only the current player can move
+    if (!checkPlayer()) return;                                      // only the current player can move
     var mouse=mouseSquare();                                         // check what square the mouse is in
     if (mouse.x == -1) return;                                       // exit immediately if mouse no inside the board
     if (mouse.x==from.x && mouse.y==from.y) return;                  // exit immediately if mouse is still at the same square
@@ -417,7 +439,7 @@ void mouseClicked () {
   }
 }
 
-/************************************************************************************************ 
+/************************************************************************************************
 *
 *   Service funtions (called by events)
 *
@@ -673,8 +695,7 @@ void finalizeMove(movedPiece,newPiece) {
     special: special,
     player:player, from:from, to:to, board:board, movedPiece:movedPiece, newPiece:newPiece
   });
-  gotResponse=false;
-//  mode="passive";                                                // end of my turn
+  glb.ignoreNextUpdate=2;
   animationInit(movedPiece,newPiece);                              // start the animation
 }
 
@@ -702,18 +723,3 @@ function animationInit(movedPiece,newPiece) {
       mode="animation";
 }
 
-function updateFromData() {
-  gotResponse=true;
-  player=data.player;
-  if (mychessIndex)
-    $("#chessEnd").attr("disabled",false);
-  else
-    $("#chessEnd").attr("disabled",true);
-  $("#chessTurn").css("color","black");
-  $("#chessTurn").html("");
-  if (data.info.status=="active") {
-    if (checkPlayer()) $("#chessTurn").css("color","red");
-    if (player==0) $("#chessTurn").html("White player's turn");
-    else if (player==1) $("#chessTurn").html("Black player's turn");
-  }
-}
