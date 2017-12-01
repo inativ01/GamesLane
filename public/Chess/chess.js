@@ -59,6 +59,9 @@ var animation= {
 
 var images=[];                           // array to hold the images of the various pieces
 var pieces=loadImage("../chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
+var spinner=loadImage("../spinner.png");
+var spinnerAngle=0;
+var spinnerActive=false;
 var players= {White:"", Black:""}
 
 /************************************************************************************************
@@ -141,6 +144,7 @@ function chessEvent(snapshot) {
     else {                                                           // Late arrival of response - re-do animation
       glb.ignoreNextUpdate=0;
       debug(1,"Finally got response. Stop the spinner");
+      spinnerActive=false;
     }
   }
   from=data.from;
@@ -218,7 +222,14 @@ void setup() {
 // Loop - called 60 times per second
 //*************************************************************************************************
 void draw() {
-
+  if (spinnerActive) {
+    translate(sizeSquare*5,sizeSquare*5);
+    spinnerAngle++;
+    rotate(PI/9*(Math.round(spinnerAngle/4)%18));
+    image(spinner,-sizeSquare/2,-sizeSquare/2,sizeSquare,sizeSquare);
+    translate(0,0);
+    rotate(0);
+  }  
 // gameMsg is set when a user enters or leaves a specific game
   if (gameMsg == "chess") {
     debug(2,"New:"+newGID+" Old:"+gameID);
@@ -276,6 +287,7 @@ void draw() {
         if (glb.ignoreNextUpdate==2) {                               // Can't complete the move because server did not respond.
           mode="passive"
           debug(1,"delayed response from Server. need to do spinner");
+          spinnerActive=true;
           return;
         }
         else {

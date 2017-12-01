@@ -127,4 +127,7 @@ a {
     right: 0;
   }
 }
-*/
+
+mdl-spinner {
+  z-inderx: 10;
+}
