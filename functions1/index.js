@@ -9,8 +9,8 @@ var db = admin.database();
 exports.handleRequest = functions.database.ref('req').onCreate(event => {
   var uid=Object.keys(event.data.val())[0];
   var req=event.data.val()[uid];
-  console.log(req.game+" message: "+req.msg);
-  var refGame=db.ref('game/'+req.game+'/'+req.gid).once('value',
+  console.log(req.game+" message: "+req.msg+" from "+uid);
+  var refGame=db.ref('gameData/'+req.game+'/'+req.gid).once('value',
     // then
     function(gameSnap) {
       var msg=this.val()[Object.keys(event.data.val())[0]];

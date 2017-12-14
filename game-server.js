@@ -1,26 +1,16 @@
 'use strict'
-let http = require("http");
-let express = require('express');
 let lane=require('./handleGame');
-
-let app =  express();
-let server = http.createServer(app);
-
-
-app.use(express.static(__dirname));
-//app.use(express.static("h:/Documents/Incoming/JS"));
-server.listen(8000, () => console.log("ready to work "+__dirname));
-
 let firebase = require("firebase-admin");
-
 var serviceAccount = require("games-lane-firebase-adminsdk-blif0-479b944ede.json");
 
 firebase.initializeApp({
   credential: firebase.credential.cert(serviceAccount),
   databaseURL: "https://games-lane.firebaseio.com",
 });
+
 console.log("Firebase ready");
 var db = firebase.database();
+
 db.ref("req").on("child_added", function(snapshot) {
   var req=snapshot.val();
   var uid=req.uid;

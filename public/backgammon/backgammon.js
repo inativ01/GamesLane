@@ -1,6 +1,3 @@
-// the next line is very important for using images in JS
-/* @pjs preload="../chess/chess-pieces.png */
-
 /************************************************************************************************
 *
 *   Define global variables
@@ -12,14 +9,35 @@ var cnst={
   boardImage:loadImage("../backgammon/board1.jpg"),
   pieces:[loadImage("../backgammon/piece0.png"),loadImage("../backgammon/piece1.png")],
   sidepieces:[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")],
-  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],
+  sidepiecesR:[loadImage("../backgammon/sidepiece0R.png"),loadImage("../backgammon/sidepiece1R.png")],
+  diceImg:[0,0,0,0,0,0],
+//  boardStart:[1,0,0,0,0,-5,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0,0,0,0,0],  // negative: white, positive: black/brown
+  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: black/brown
   dir:[-1,1],
+  rollButton:[2.7,1.4,0.4,0.2],
+  diceSize:0.2,
+  diceX1:2.5,
+  diceX2:2.9,
+  diceY:1.4,
+  diceArea:[2.5,1.3,0.8,0.4], // X,Y,W,H
 };
 
 var glb={
   board:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   currentPlayer:0,
+  stage:"rollDice",                                                   // 0-roll dice, 1-move 1st piece, 2-move 2nd piece, 3-turn complete
+  dice:[1,1],
+  moveCnt:0,
+  diceMoves:[0,0,0,0],
+  double:false,
 };
+
+var pieceMoving={
+  from:0,
+  active:false,
+  animateDice:0,
+};
+
 var reverse=false;                                                    // display reverse board for black player
 var mybackgammonIndex=0;                                              // 0 - no active player
                                                                       // 1 - White
@@ -56,7 +74,7 @@ var animation= {
 
 var players= {White:"", Black:""}
 
-/************************************************************************************************ 
+/************************************************************************************************
 *
 *   User interface Events
 *
@@ -251,6 +269,8 @@ void setup() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
   $("#backgammonContent").css("width",sizeSquare*4);
   size(sizeSquare*4,sizeSquare*3);
+  for (var i=0;i<6;i++)
+    cnst.diceImg[i]=loadImage("../die"+(i+1)+".png");
 }
 
 //*************************************************************************************************
@@ -285,128 +305,126 @@ void draw() {
     gameMsg=null;
     return;
   }
-
-// Animation mode: move pieces to a new location
-/*
-  if (mode==="animation") {
-    var deltaT=(millis()-animation.startMillis)/1000;                // time in seconds since the begining of the animation
-    if (deltaT >= 1) {        										 // end of animation - over 1 second
-      if (animation.movedPiece > -1)
-      {
-        board[to.y][to.x]=animation.newPiece;                        // put the saved piece in the new location
-        if (animation.newPiece%6==0 && Math.abs(from.x-to.x)==2) {   // castling: king moved two spots
-          printBoard();
-          if (to.x==2) {                                             // castling to left
-            from.x=0;                                                // left rook
-            to.x=3;                                                  // move 3 steps right
-          }
-          else {                                                     // castling to right
-            from.x=7;                                                // right rook
-            to.x=5;                                                  // move 2 steps left
-          }
-          animation.movedPiece=animation.newPiece=board[from.y][from.x];     // Rook
-          animation.startMillis=millis();
-          animation.sourceX= startX+sizeSquare*from.x;
-          animation.sourceY= startY+sizeSquare*from.y;
-          animation.distanceX= sizeSquare*(to.x-from.x);
-          animation.distanceY= sizeSquare*(to.y-from.y);
-          board[from.y][from.x]=-1;                                  // Clear the old location
-          return;
-        }                                                            // end of castling case
+  if (glb.stage==="diceAnimation") {
+    if (pieceMoving.animateDice--) {                                               // if less then 1/2 sec, keep rolling
+      if (pieceMoving.animateDice%6 == 0) {
+        glb.dice=[Math.floor(Math.random()*6)+1,Math.floor(Math.random()*6)+1];
+        printDice();
+      }
+    }
+    else {                                                                                   // end of dice animation
+      glb.dice=[Math.floor(Math.random()*6)+1,Math.floor(Math.random()*6)+1];
+      printDice();
+      glb.double=(glb.dice[0]==glb.dice[1]);
+      glb.moveCnt=0;
+      glb.diceMoves=[0,0,0,0];
+      glb.stage="movePiece";
+      if (!checkAnyMove()) {
+        glb.currentPlayer=1-glb.currentPlayer;
+        glb.stage="rollDice";
+        glb.moveCnt=0;
         printBoard();
-        markSquare(from,#FF0000,2);                                  // FROM location is color red
-        markSquare(to,#00FF00,2);                                    // TO location is color green
       }
-      else printBoard();
-
-// now need to check special messages or end conditions
-      if (special) {
-        if (special.endGame) {
-          if (special.check)
-            sweetAlert({
-               title: "CheckMate",
-               text: "",
-               showConfirmButton: true,
-               imageUrl: "../backgammon/checkmate.jpg",
-               imageSize: "400x150",
-            });
-          else
-            sweetAlert({
-               title: "StaleMate",
-               text: "",
-               showConfirmButton: true,
-               imageUrl: "../backgammon/stalemate.jpg",
-               imageSize: "400x150",
-            });
-          if (mybackgammonIndex) sendReq({
-            game:"backgammon",
-            gid:gameID,
-            uid:currentUID,
-            msg: "ExitGame",
-          });
-          $("#backgammonBoard").hide();
-        }
-        else if (special.check) {
-          sweetAlert({
-             title: "Check",
-             text: "",
-             timer: 2000,
-             showConfirmButton: true,
-             imageUrl: "../backgammon/check.jpg",
-             imageSize: "400x150",
-          });
-        }
-      }
-
-      if (checkPlayer()) {
-        mode="start";
-        if (!analyzeMoves()) { debug(0,"No legal moves") }           // This check MUST not be removed. All legal moves are calculated.
-      }
-      else {
-        mode="passive"
-      }
+      // send to server
     }
-    else  {                                                          // Animation not ended yet. Keep moving the piece
-      printBoard();
-      markSquare(from,#FF0000,2);                                    // FROM location is color red
-      markSquare(to,#00FF00,2);                                      // TO location is color green
-    }
-  }  // end of Animation case
-*/
+  }
+
 }
 
-//*************************************************************************************************
-// When mouse is moved and player is active, mark available squares to move to (from pointed square)
-//*************************************************************************************************
+function printDice() {
+  var sizeDice=[cnst.diceSize*sizeSquare,cnst.diceSize*sizeSquare];
 
-//*************************************************************************************************
-// When mouse is clicked - behavior depends on the internal mode (state machine)
-//*************************************************************************************************
+  switch (glb.moveCnt) {
+    case 1:
+      if (glb.double) sizeDice[0]*=0.8;
+      else sizeDice[0]*=0.5;
+      break;
+    case 3:
+      sizeDice[1]*=0.8;
+      // fallthrough
+    case 2:
+      sizeDice[0]*=0.5;
+  }
+
+  image(cnst.diceImg[glb.dice[0]-1],cnst.diceX1*sizeSquare, cnst.diceY*sizeSquare, sizeDice[0],sizeDice[0]);
+  image(cnst.diceImg[glb.dice[1]-1],cnst.diceX2*sizeSquare, cnst.diceY*sizeSquare, sizeDice[1],sizeDice[1]);
+}
+
+/************************************************************************************************
+*
+*   Mouse behavior routines
+*
+************************************************************************************************/
+
+
 void mousePressed () {
-  debug(2,"mouseClicked. Mode="+mode);
-  var mouse=mouseSquare();
-  var myDir=cnst.dir[glb.currentPlayer];                             // 1 for white, -1 for black
-//  if (mouse >= 0) {glb.board[mouse]++; printBoard();}
-  if (mouse >=0 && glb.board[mouse]*cnst.dir[glb.currentPlayer] >0) { // I need to click on my player's piece to start
-    mode='picked';
-    glb.board[mouse]-=cnst.dir[glb.currentPlayer];
-    printBoard();
-    image(cnst.pieces[glb.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
+  debug(2,"mousePressed. Stage="+glb.stage);
+
+  switch (glb.stage) {
+    case "rollDice":
+      var x=mouseX/sizeSquare, y=mouseY/sizeSquare;
+      if (x>cnst.rollButton[0] && x<cnst.rollButton[0]+cnst.rollButton[2] && y>cnst.rollButton[1] && y<cnst.rollButton[1]+cnst.rollButton[3]) {
+        glb.stage="diceAnimation";
+        pieceMoving.animateDice=60;
+        pieceMoving.active=false;
+        printBoard();
+      }
+      break;
+
+    case "movePiece":
+      var mouse=mouseSquare();
+      if (mouse>=0 && mouse <26 &&                                    // legal position
+          glb.board[mouse]*cnst.dir[glb.currentPlayer] > 0 &&         // I need to click on my player's piece to start
+          (checkMove(mouse, glb.dice[min(1,glb.moveCnt)]) >= 0 ||     // either this is a valid move with the current die...
+           (glb.moveCnt==0 && checkMove(mouse, glb.dice[1]) >= 0))) { // ... or a valid move with other die (only for 1st move))
+        pieceMoving.active=true;
+        pieceMoving.from=mouse;
+        glb.board[mouse]-=cnst.dir[glb.currentPlayer];
+        printBoard();
+        image(cnst.pieces[glb.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
+      }
+      break;
   }
 }
 
 void mouseDragged() {
-  if (mode=='picked') {
+  if (pieceMoving.active) {
     printBoard();
     image(cnst.pieces[glb.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
   }
 }
 
-voide mouseReleased() {
-  if (mode=='picked') {
+void mouseReleased() {
+  if (pieceMoving.active) {
+    pieceMoving.active=false;
+    var ok=true;
     var mouse=mouseSquare();
-    mode='dropped';
-    glb.board[mouse]+=cnst.dir[glb.currentPlayer];
+    if (mouse!=checkMove(pieceMoving.from, glb.dice[min(1,glb.moveCnt)])) {
+      if (glb.moveCnt==0 && mouse==checkMove(pieceMoving.from, glb.dice[1])) {
+        var tmp=glb.dice[0];
+        glb.dice[0]=glb.dice[1];
+        glb.dice[1]=tmp;
+      }
+      else ok=false;
+    }
+
+    if (ok) {
+      if (glb.board[mouse]*cnst.dir[glb.currentPlayer] == -1) { // capture opponent piece
+        glb.board[mouse]=cnst.dir[glb.currentPlayer];
+        glb.board[25-glb.currentPlayer]-=cnst.dir[glb.currentPlayer];
+      }
+      else glb.board[mouse]+=cnst.dir[glb.currentPlayer];
+      glb.diceMoves[glb.moveCnt]=pieceMoving.from;
+      glb.moveCnt++;
+      if (glb.moveCnt==4 || (glb.dice[0]!=glb.dice[1] && glb.moveCnt==2) || !checkAnyMove()) {              // used up all the dice or no legal move
+        glb.currentPlayer=1-glb.currentPlayer;
+        glb.stage="rollDice";
+        glb.moveCnt=0;
+      }
+    }
+    else {
+      glb.board[pieceMoving.from]+=cnst.dir[glb.currentPlayer];
+    }
     printBoard();
   }
 }
@@ -418,6 +436,80 @@ voide mouseReleased() {
 ************************************************************************************************/
 
 //*************************************************************************************************
+// Check if the move is valid based on piece type. retrun target slot (>=0) or -1 if can't
+//*************************************************************************************************
+int checkMove(from,count) {
+
+  var target;
+  var ok=true;
+
+  if (from==(24+glb.currentPlayer))                               // try getting the captured piece back into play
+    target=(glb.currentPlayer) ? count-1 : 24-count;
+  else if (glb.board[24+glb.currentPlayer] != 0)                  // if there is a captued piece - can't move any other piece
+    ok=false;
+  else
+    target=from+count*cnst.dir[glb.currentPlayer];
+
+  if (ok) {
+    if (target<0) {                                                   // Can white piece get out?
+      var found=false;                                                // check if all white pieces are already at home
+      for (var i=6; i<24; i++)
+        if (glb.board[i]<0) found=true;
+      if (!found && glb.board[24]==0) {                               // good, all white pieces are at home
+        if (target == -1) target=26;                                  // exact move to out
+        else {                                                        // ok to move out with large value only if no larger tiles
+          var found=false;
+          for (var i=5;i>from;i--)
+            if (glb.board[i]<0) found=true;
+          if (found) ok=false;
+          else target=26;
+        }
+      }
+      else ok=false;                                                  // can't take piece out since not all white pieces are at home
+    }
+    else if (target>23) {                                             // Can black piece get out?
+      var found=false;                                                // check if all white pieces are already at home
+      for (var i=0; i<18; i++)
+        if (glb.board[i]>0) found=true;
+      if (!found && glb.board[25]==0) {                               // good, all white pieces are at home
+        if (target == -1) target=27;                                  // exact move to out
+        else {                                                        // ok to move out with large value only if no larger tiles
+          var found=false;
+          for (var i=19;i<from;i++)
+            if (glb.board[i]>0) found=true;
+          if (found) ok=false;
+          else target=27;
+        }
+      }
+      else ok=false;                                                  // can't take piece out since not all white pieces are at home
+    }
+    else                                                              // normal move
+      if (glb.board[target]*cnst.dir[glb.currentPlayer] <  -1)        // target space occupied by 2+ opponent pieces ?
+        ok=false;
+  }
+  if (!ok) target=-1;
+  debug(2,"From:"+from+" Count:"+count+" Target:"+target);
+  return target;
+}
+
+//*************************************************************************************************
+// Check if there is any legal move for this player
+//*************************************************************************************************
+boolean checkAnyMove() {
+  debug(2,"checkAnyMove");
+  for (var i=0;i<26;i++) {
+    if ( glb.board[i]*cnst.dir[glb.currentPlayer] >0 ) {
+      if (checkMove(i, glb.dice[min(1,glb.moveCnt)]) >= 0 ) // valid move with current die
+        return true;
+      if (glb.moveCnt==0 && checkMove(i, glb.dice[1]) >= 0) // valid move with other die (only for 1st move)
+        return true;
+    }
+  }
+  debug(1,"no legal moves");
+  return false;
+}
+
+//*************************************************************************************************
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 function printBoard() {
@@ -426,8 +518,6 @@ function printBoard() {
   textFont(loadFont("Meta-Bold.ttf"));
   for (var i=0;i<24;i++) {
     var color=(glb.board[i]>0)?1:0;
-//    var offset=(i<12)? sizeSquare*-0.2 : sizeSquare*0.2;
-//    if (abs(board[i])>6) offset*=0.5;
     for (var j=0;j<abs(glb.board[i]);j++)
     {
       var l=bgLocation(i,j);
@@ -435,13 +525,13 @@ function printBoard() {
     }
   }
   for (var i=24;i<26;i++) {
-    for (var j=0;j<glb.board[i];j++) {
+    for (var j=0;j<abs(glb.board[i]);j++) {
       l=bgLocation(i,j);
       image(cnst.pieces[i-24],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
     }
   }
   for (var i=26;i<28;i++) {
-    for (var j=0;j<glb.board[i];j++) {
+    for (var j=0;j<abs(glb.board[i]);j++) {
       l=bgLocation(i,j);
       image(cnst.sidepieces[i-26],l.x,l.y,sizeSquare*0.2,sizeSquare*0.1);
     }
@@ -450,6 +540,18 @@ function printBoard() {
   if ($(".mdl-spinner").hasClass("is-active")) $(".mdl-spinner").removeClass("is-active");
   $("#backgammonBoard").show();
   $("#backgammonCanvas").show();
+  if (glb.stage=="rollDice") {                                            // Print "roll" button"
+    fill(#CC6600);
+    rect(cnst.rollButton[0]*sizeSquare,cnst.rollButton[1]*sizeSquare,cnst.rollButton[2]*sizeSquare,cnst.rollButton[3]*sizeSquare,sizeSquare);
+    fill(#000000);
+    text("Roll",(cnst.rollButton[0]+cnst.rollButton[2]*0.4)*sizeSquare,(cnst.rollButton[1]+cnst.rollButton[3]*0.6)*sizeSquare);
+  }
+  else printDice();
+}
+
+function printRect(area) {
+  fill(#FFCC00);
+  rect(area[0]*sizeSquare,area[1]*sizeSquare,area[2]*sizeSquare,area[3]*sizeSquare);
 }
 
 //*************************************************************************************************
@@ -483,136 +585,10 @@ function mouseSquare()
   else if (x<6) n=(y)?(11-x):(12+x);
   else if (x==6) n=(y)?25:24;
   else if (x<13) n=(y)?(12-x):(11+x);
-  else n=(y)?27:26;
+  else n=(y)?26:27;
   return n;
 }
 
-//*************************************************************************************************
-//  Check is king of given player is under attack
-//*************************************************************************************************
-function check4check(myBoard, player) {
-  var king={x:0, y:0};                                               // find the location of my king
-  for (var j=0; j<8; j++)
-    for (var i=0; i<8; i++)
-      if (myBoard[j][i]== player*6) king={x:i, y:j};
-  for (var j=0; j<8; j++)
-    for (var i=0; i<8; i++)
-      if (Math.floor(myBoard[j][i]/6)== (1-player))                    // only looks at enemy pieces
-        if (checkMove({x:i,y:j}, king, false,myBoard)) {
-          debug(3,"CHECK:"+i+","+j+" -> "+king.x+","+king.y);
-          return true;                                               // a CHECK was found
-        }
-  return false;                                                      // search didn't find any check
-}
-
-
-//*************************************************************************************************
-// Check if the move is valid based on piece type
-//*************************************************************************************************
-function checkMove(from,to,checkKing,myBoard)
-{
-/*
-
-  if (Math.floor(myBoard[from.y][from.x]/6)==Math.floor(myBoard[to.y][to.x]/6))
-     return false;                                                   // can't move on top of my own piece
-  var dX=to.x-from.x;
-  var dY=to.y-from.y;
-  var absX=Math.abs(dX);
-  var absY=Math.abs(dY);
-  var piece=myBoard[from.y][from.x];
-  switch (piece) {                                                   // check the type of the moving piece
-    case 0:                                                          //white king
-    case 6:                                                          //black king
-      if ((absX <= 1) && (absY <= 1))                                // one square in any direction
-        break;
-      else if (dY===0 && absX===2 && from.x===4 && (from.y===0 || from.y===7))  // castling
-      {
-        if ((to.x===2 && myBoard[from.y][3]===-1 && myBoard[from.y][2]===-1 && myBoard[from.y][1]===-1 && myBoard[from.y][0]===(myBoard[from.y][4]+4)) ||
-            (to.x===6 && myBoard[from.y][5]===-1 && myBoard[from.y][6]===-1 && myBoard[from.y][7]===(myBoard[from.y][4]+4)))
-               break;
-        else
-             return false;
-      }
-      else return false;
-      break;
-    case 1:                                                          //white queen
-    case 7:                                                          //black queen
-      if (dX===0 || dY===0 || absX===absY) {                         // either straight line or diagonal
-        for (var i=1; i<Math.max(absX,absY); i++) {                  // verify a clear path
-          if (myBoard[from.y+i*Math.sign(dY)][from.x+i*Math.sign(dX)] >=0) // any square is not empty
-             return false;
-        }
-        break;
-      }
-      else return false;
-      break;
-    case 2:                                                          //white bishop
-    case 8:                                                          //black bishop
-      if (absX===absY) {                                             // diagonal move
-        for (var i=1; i<absX; i++) {                                 // verify a clear path
-          if (myBoard[from.y+i*Math.sign(dY)][from.x+i*Math.sign(dX)] >=0) // any square is not empty
-            return false;
-        }
-        break;
-      }
-      else return false;
-      break;
-    case 3:                                                          //white knight
-    case 9:                                                          //black knight
-      if ((absX==1 && absY==2)||(absX==2 && absY==1))
-        break;
-      else return false;
-      break;
-    case 4:                                                          //white rook
-    case 10:                                                         //black rook
-      if (dX===0 || dY===0) {                                        // straight line
-        for (var i=1; i<Math.max(absX,absY); i++) {                  // verify a clear path
-          if (myBoard[from.y+i*Math.sign(dY)][from.x+i*Math.sign(dX)] >=0) // any square is not empty
-            return false;
-        }
-        break;
-      }
-      else return false;
-      break;
-    case 5:                                                         //white pawn
-      if (myBoard[to.y][to.x]=== -1) {                                // if moving to an emply spot
-         if (from.x===to.x && from.y===(to.y+1))                    // single step
-            break;
-         else if (from.x===to.x && from.y===6 && to.y==4 && myBoard[5][from.x]==-1)   // double step on first move
-           break;
-         else return false;
-      }
-      else {  // when taking an opponent piece
-        if (from.y===(to.y+1) && absX===1)
-          break;
-        else return false;
-      }
-      break;
-    case 11:                                                         //black pawn
-      if (myBoard[to.y][to.x]=== -1) {                                 // if moving to an emply spot
-        if (from.x===to.x && from.y===(to.y-1))                      // single step
-          break;
-        else if (from.x===to.x && from.y===1 && to.y==3 && myBoard[2][from.x]==-1)   // double step on first move
-          break;
-        else return false;
-      }
-      else { // when taking an opponent piece
-        if (from.y===(to.y-1) && absX===1)
-          break;
-        else return false;
-      }
-      break;
-  }
-  debug(3,"Move: "+from.x+","+from.y+"->"+to.x+","+to.y);
-  if (checkKing) {
-     var boardT = jQuery.extend(true, {}, board);   // copy the board to a temporary place
-     boardT[from.y][from.x]= -1;
-     boardT[to.y][to.x]= piece;
-     if (check4check(boardT,Math.floor(piece/6))) return false;  // check if oponent can attack my king after my move. That's an illigal move
-  }
-  return true;
-*/
-}
 
 //*************************************************************************************************
 //  Go over all the boards, and check if there are any legal moves from any square
@@ -620,28 +596,6 @@ function checkMove(from,to,checkKing,myBoard)
 //  Returns TRUE if there are ANY legal moves
 //*************************************************************************************************
 function analyzeMoves() {
-/*
-  debug(3,"analyze");
-  var anyLegal=false;
-  for (var y=0; y<8; y++) {
-    for (var x=0; x<8; x++) {
-      var legalMoves=0;                                              // start counting posible moves from this square
-      if (Math.floor(board[y][x]/6)==player) {                       // only looks at squares that contain the current player's pieces
-        for (var j=0;j<8;j++) {
-          for (var i=0;i<8;i++) {
-//            to={x:i,y:j};
-            if (checkMove({x:x,y:y},{x:i,y:j},true,board)) {
-              legalMoves=anyLegal=true;
-            }
-          }
-        }
-      }
-      lglMoves[y][x]=legalMoves;
-    }
-  }
-  for (var i=0;i<8;i++) debug(3,lglMoves[i]);
-  return anyLegal;
-*/
 }
 
 //*************************************************************************************************
@@ -657,32 +611,6 @@ function checkPlayer() {
 //*************************************************************************************************
 // Let the server know about a completed backgammon move (called after the user clicked on the destination spot
 //*************************************************************************************************
-/*
-void finalizeMove(movedPiece,newPiece) {
-  board[from.y][from.x]=-1;                                      // Clear the old location
-  var savedPiece=board[to.y][to.x];
-  board[to.y][to.x]=newPiece;
-  player=1-player;
-
-  var special={};
-  var check=check4check(board,player);
-  if (check) special.check=true;
-//  else special.check=null;
-  if (!analyzeMoves()) special.endGame=true;
-  player=1-player;
-
-  board[to.y][to.x]=savedPiece;
-  sendReq({
-    game:"backgammon",
-    gid:gameID,
-    uid:currentUID,
-    msg: "ChessMove",
-    special: special,
-    player:player, from:from, to:to, board:board, movedPiece:movedPiece, newPiece:newPiece
-  });
-  mode="passive";                                                // end of my turn
-}
-*/
 
 function bgLocation(index,count) {
   var factor= (abs(glb.board[index])>6)?1:2;
@@ -714,7 +642,7 @@ function bgLocation(index,count) {
   }
   else {                 // completed pieces
     l.x=sizeSquare*3.7;
-    l.y=sizeSquare*((index==26) ? 0.1+count*0.05 : 2.80-count*0.05);
+    l.y=sizeSquare*((index==26) ? 2.80-count*0.05 : 0.1+count*0.05 );
   }
   return l;
 }

@@ -277,10 +277,17 @@ void draw() {
           }
           animation.movedPiece=animation.newPiece=board[from.y][from.x];     // Rook
           animation.startMillis=millis();
-          animation.sourceX= startX+sizeSquare*from.x;
-          animation.sourceY= startY+sizeSquare*from.y;
-          animation.distanceX= sizeSquare*(to.x-from.x);
-          animation.distanceY= sizeSquare*(to.y-from.y);
+          if (reverse) {
+           animation.sourceX= startX+sizeSquare*(7-from.x);
+           animation.sourceY= startY+sizeSquare*(7-from.y);
+           animation.distanceX= sizeSquare*(from.x-to.x);
+           animation.distanceY= sizeSquare*(from.y-to.y);
+          } else {
+           animation.sourceX= startX+sizeSquare*from.x;
+           animation.sourceY= startY+sizeSquare*from.y;
+           animation.distanceX= sizeSquare*(to.x-from.x);
+           animation.distanceY= sizeSquare*(to.y-from.y);
+          }
           board[from.y][from.x]=-1;                                  // Clear the old location
           return;
         }                                                            // end of castling case
