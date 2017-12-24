@@ -3,11 +3,10 @@ To do:
 * add "are you sure?" to endGame
 * display names of players in the game
 
-* backgammon -
-** event on game board
-** inside event on last status: dice, 1st move, 2nd move
-** implement state machine:
-*** 0 - need to roll dice
-*** 1 - wait for 1st move
-*** 2 - wait for 2nd move
-*** 3 - new turn started
+** do database updates without a server
+
+--- backgammon ---
+
+* for double, show 4 dice
+* used dice are opaque (tint)
+* allow UNDO

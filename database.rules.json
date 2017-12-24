@@ -8,15 +8,18 @@
     },
     "gameData": {
       ".read": "auth != null",
-      ".write": false
+      ".write": "auth != null"
+//      ".write": false
     },
     "gameInfo": {
       ".read": "auth != null",
-      ".write": false
+      ".write": "auth != null"
+//      ".write": false
     },
     "gameChat": {
       ".read": "auth != null",
-      ".write": false
+      ".write": "auth != null"
+//      ".write": false
     },
     "req": {
       "$uid": {
