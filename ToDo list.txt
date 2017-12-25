@@ -10,3 +10,5 @@ To do:
 * for double, show 4 dice
 * used dice are opaque (tint)
 * allow UNDO
+* animation move
+* skip my own moves

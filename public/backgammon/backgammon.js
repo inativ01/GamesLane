@@ -24,7 +24,7 @@ var cnst={
 
 var ignoreNextUpdate=0;
 var gData={};
-var gameInfo={};
+var gInfo={};
 
 var pieceMoving={
   from:0,
@@ -84,14 +84,10 @@ $("#backgammonClose").click( function() {
 //   User selected to quit (resign) the game
 //*************************************************************************************************
 $("#backgammonEnd").click( function() {
-  sendReq({
-    game:"backgammon",
-    gid:gameID,
-    uid:currentUID,
-    msg: "Quit",
-    board: gData.board,
-    concede: auth.currentUser.displayName
-  });
+  gInfo.status="quit";
+  gInfo.concede=auth.currentUser.displayName;
+  db.ref('gameData/backgammon/'+newGID).set(gData);
+  db.ref('gameInfo/'+newGID).set(gInfo);
 });
 
 //*************************************************************************************************
@@ -102,7 +98,6 @@ $("#backgammonNewButton").click( function() {
     mode="passive";
     $("#backgammonOptionsBoard").show();
     $("#backgammonOptionsHeader").show();
-//    for(var i = 0; i < 28; i++) gData.board[i] = cnst.boardStart[i];
     mode="passive";
   }
 });
@@ -119,7 +114,7 @@ $("#backgammonCancelOptions").click(function() {
 //*************************************************************************************************
 $('#backgammonStartButton').click(function() {
   newGID=Math.floor(Math.random() * (1000000000000));
-  gameInfo={
+  gInfo={
     game:"backgammon",
     gid:newGID,
     players:{},
@@ -133,14 +128,14 @@ $('#backgammonStartButton').click(function() {
     diceMoves:[0,0,0,0],
     dice:[0,0],
   };
-  gameInfo.players[$("#backgammonRole").val()]={
+  gInfo.players[$("#backgammonRole").val()]={
     uid:currentUID,
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL
   };
-  gData.info=gameInfo;
+  gData.info=gInfo;
   db.ref('gameData/backgammon/'+newGID).set(gData);
-  db.ref('gameInfo/'+newGID).set(gameInfo);
+  db.ref('gameInfo/'+newGID).set(gInfo);
   gameMsg="backgammon";
   $("#backgammonOptionsBoard").hide();
   $(".mdl-spinner").addClass("is-active");
@@ -151,17 +146,16 @@ $('#backgammonStartButton').click(function() {
 //   User selected to join the game as a player
 //*************************************************************************************************
 $("#backgammonButtonJoin").click(function() {
-  if (gameInfo.status=="pending") {
-    gameInfo.players[this.value]={
+  if (gInfo.status=="pending") {
+    gInfo.players[this.value]={
       uid:currentUID,
       displayName:auth.currentUser.displayName,
       photoURL:auth.currentUser.photoURL};
-    gameInfo.status="active";
-    gameInfo.currentUID=gameInfo.players["White"].uid;
-//    gameData.info=gameInfo;
+    gInfo.status="active";
+    gInfo.currentUID=gInfo.players["White"].uid;
     gData.currentPlayer=0;
     db.ref('gameData/backgammon/'+newGID).set(gData);
-    db.ref('gameInfo/'+newGID).set(gameInfo);
+    db.ref('gameInfo/'+newGID).set(gInfo);
   }
   else debug(0,"Game not Pending. Can't start");
 });
@@ -179,19 +173,17 @@ $("#backgammonButtonJoin").click(function() {
 function backgammonEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-  gameInfo=gData.info;
-  if (gameID != gameInfo.gid) {
-    debug(0,"Incorrect Game ID:"+gameInfo.gid+"/"+gameID);
+  gInfo=gData.info;
+  if (gameID != gInfo.gid) {
+    debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
   }
-  debug(1,"backgammonMove GID="+gameID+" status="+gameInfo.status);
+  debug(1,"backgammonMove GID="+gameID+" status="+gInfo.status);
   debug(2,gData);
-  debug(2,gameInfo);
-//  gData.currentPlayer=gameData.currentPlayer;
-//  gData.board=gameData.board;
+  debug(2,gInfo);
   mybackgammonIndex=0;
-  if (gameInfo.players.White && gameInfo.players.White.uid==currentUID) mybackgammonIndex|=1;             // turn on bit 0
-  if (gameInfo.players.Black && gameInfo.players.Black.uid==currentUID) mybackgammonIndex|=2;             // turn on bit 1
+  if (gInfo.players.White && gInfo.players.White.uid==currentUID) mybackgammonIndex|=1;             // turn on bit 0
+  if (gInfo.players.Black && gInfo.players.Black.uid==currentUID) mybackgammonIndex|=2;             // turn on bit 1
   debug(2,"mybackgammonIndex="+mybackgammonIndex);
   $("#backgammonButtonJoin").hide();
   if (mybackgammonIndex)
@@ -200,9 +192,9 @@ function backgammonEvent(snapshot) {
     $("#backgammonEnd").attr("disabled",true);
   $("#backgammonTurn").css("color","black");
   $("#backgammonTurn").html("");
-  switch(gameInfo.status) {
+  switch(gInfo.status) {
     case "pending":
-      var color= (!gameInfo.players.White) ? "White" : "Black";
+      var color= (!gInfo.players.White) ? "White" : "Black";
       reverse=(color=="Black");
       $("#backgammonButtonJoin").val(color);
       $("#backgammonButtonJoin").html("Join as "+color);
@@ -220,7 +212,7 @@ function backgammonEvent(snapshot) {
       break;
     case "quit":
       sweetAlert({
-         title: gameInfo.concede+" had quit the game",
+         title: gInfo.concede+" had quit the game",
          text: "",
          showConfirmButton: true,
          imageUrl: "../i-quit.png",
@@ -299,30 +291,14 @@ void draw() {
         gData.dice=[0,0];
         gData.moveCnt=0;
         printBoard();
+        gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Black":"White"].uid;
       }
       mode="active";
       db.ref('gameData/backgammon/'+newGID).set(gData);
-      db.ref('gameInfo/'+newGID).set(gameInfo);
+      db.ref('gameInfo/'+newGID).set(gInfo);
     }
   }
 
-}
-
-function dbBackgammonNewMove() {
-  var gameData=gameSnap.val();
-  if (!gameData) return Promise.reject(new Error("Game does not exists"));
-  var gameInfo=gameData.info;
-  if (gameInfo.status=="active") {
-    gameData.board=msg.board;
-    gameData.currentPlayer=1-msg.currentPlayer;
-    var color=(gameData.currentPlayer)?"Black":"White";
-    gameInfo.currentUID=gameInfo.players[(gameData.currentPlayer)?"Black":"White"].uid;
-    gameData.info=gameInfo;
-    pr1=updateGame(db,msg,gameInfo,gameData);
-    pr2=chessChat(db,msg);                                                     // create chess notation message
-    return Promise.all([pr1,pr2]);
-  }
-  else return Promise.reject(new Error("Game not Active. Can't move"));
 }
 
 function printDice() {
@@ -413,7 +389,7 @@ void mouseReleased() {
         gData.moveCnt=0;
       }
       db.ref('gameData/backgammon/'+newGID).set(gData);
-      db.ref('gameInfo/'+newGID).set(gameInfo);
+      db.ref('gameInfo/'+newGID).set(gInfo);
     }
     else {
       gData.board[pieceMoving.from]+=cnst.dir[gData.currentPlayer];

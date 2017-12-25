@@ -338,11 +338,13 @@ function onAuthStateChanged(user) {
 
   var gameInfoRef = db.ref("gameInfo");
 
-  gameInfoRef.on("child_added", addGameToList);
+  gameInfoRef.on("child_added", function(snapshot) {
+    addGameToList(snapshot.val());
+  });
 
   gameInfoRef.on("child_changed", function(snapshot) {
     removeFromList(snapshot.val());
-    addGameToList(snapshot);
+    addGameToList(snapshot.val());
   });
 
   gameInfoRef.on("child_removed", function(snapshot) {
@@ -364,19 +366,18 @@ function onAuthStateChanged(user) {
 </div>
 ------------------------------------------------------------------------------*/
 
-function addGameToList(snapshot) {
-  var game=snapshot.val();
+function addGameToList(gInfo) {
   var active=false;
-  gameInfo[game.gid]=game;
-  var node=$("<button id='line-"+game.game+"-"+game.gid+"' value='"+game.gid+"' style='width:300px; margin: auto' class='mdl-list__item mdl-list__item--two-line'></button>");
+  gameInfo[gInfo.gid]=gInfo;
+  var node=$("<button id='line-"+gInfo.game+"-"+gInfo.gid+"' value='"+gInfo.gid+"' style='width:300px; margin: auto' class='mdl-list__item mdl-list__item--two-line'></button>");
   var sp=$("<span class='mdl-list__item-primary-content'></span>");
   node.append(sp);
   var pic=$("<img width='40' height='40' class='mdl-list__item-secondary-content' style='border-radius: 50%;'>");
   node.append(pic);
   var first=true;
   var partner="yourself";
-  for  (var player in game.players) {
-    var thisPlayer=game.players[player];
+  for  (var player in gInfo.players) {
+    var thisPlayer=gInfo.players[player];
 	  var pnode = $("<span></span>");
 
     if (thisPlayer.uid==currentUID) {
@@ -400,31 +401,55 @@ function addGameToList(snapshot) {
       }
     }
   }
-  if (active && game.status=="quit")
+  if (active && gInfo.status=="quit")
   {
+    var updates={};
+    for (var player in gInfo.players)
+      if (gInfo.players[player].uid==currentUID)
+        updates[player+'/uid']=0;
+    return  db.ref("gameInfo/"+gInfo.gid+"/players/").update(updates)
+    .then(function() {
+       db.ref("gameInfo/"+gInfo.gid+"/players/").once('value',
+         function(Snap) {
+           var s=Snap.val(); 
+           var clean=true;
+           for (var p in s) {
+             if (s[p].uid!=0) clean=false;
+           }
+           if (clean) {
+             var up={};
+             up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
+             up["/gameInfo/"+gInfo.gid]={};
+//             up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
+             return db.ref().update(up);
+           }
+         });
+    });
+/*
     sendReq({
-        game:game.game,
-        gid:game.gid,
+        game:gInfo.game,
+        gid:gInfo.gid,
         uid:currentUID,
         msg: "ExitGame",
     });
-    addLine(game,game.concede+" had quit the "+game.game+" game.");
+*/
+    addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
   }
-  if (game.currentUID==currentUID)  {
-      addToList(game.game,"Active",node);
-      if (game.status!="quit") addLine(game,"It's now your turn to play "+game.game+" with "+partner);
+  if (gInfo.currentUID==currentUID)  {
+      addToList(gInfo.game,"Active",node);
+      if (gInfo.status!="quit") addLine(gInfo,"It's now your turn to play "+gInfo.game+" with "+partner);
   }
-  else if (game.status=="pending") {
-    addToList(game.game,"Pending",node);
+  else if (gInfo.status=="pending") {
+    addToList(gInfo.game,"Pending",node);
     if (!partner) partner="yourself";
-    addLine(game,"You can join a new "+game.game+" game with "+partner);
+    addLine(gInfo,"You can join a new "+gInfo.game+" game with "+partner);
   }
   else if (active) {
-    addToList(game.game,"Wait",node);
-    if (game.status!="quit") addLine(game,"Waiting for "+partner+" to make "+game.game+" move.");
+    addToList(gInfo.game,"Wait",node);
+    if (gInfo.status!="quit") addLine(gInfo,"Waiting for "+partner+" to make "+gInfo.game+" move.");
   }
   else
-    addToList(game.game,"Watch",node);
+    addToList(gInfo.game,"Watch",node);
 
 // This is the callback function to enter the selected game when the button was pressed
   $("#"+node.attr('id')).click( function() {
@@ -432,16 +457,16 @@ function addGameToList(snapshot) {
     this.parentElement.parentElement.style="display:none";
     $(".mdl-spinner").addClass("is-active");
     newGID=this.value;
-    gameMsg=game.game;
+    gameMsg=gInfo.game;
   });
 }
 
-function addLine(game, msg) {
-  if ($("#li"+game.gid).length) {
-    $("#li"+game.gid).html(msg);
+function addLine(gInfo, msg) {
+  if ($("#li"+gInfo.gid).length) {
+    $("#li"+gInfo.gid).html(msg);
   }
   else {
-    $("#NewsBlock").append("<li class='newsItem' id='li"+game.gid+"'>"+msg+"</li>");
+    $("#NewsBlock").append("<li class='newsItem' id='li"+gInfo.gid+"'>"+msg+"</li>");
   }
   $(".WelcomeNews").show();
 }
@@ -459,15 +484,15 @@ function addToList(game,list,node) {
     $("#"+game+list+"ListButton").attr("disabled", false);
 }
 
-function removeFromList(game) {
-    delete gameInfo[game.gid];
-    var node=$("#line-"+game.game+"-"+game.gid);
+function removeFromList(gInfo) {
+    delete gameInfo[gInfo.gid];
+    var node=$("#line-"+gInfo.game+"-"+gInfo.gid);
     var pnode=node.parent();
     node.remove();
     if (pnode.hasClass("Active")) {
       var nActive=pnode.children().length;
-      if (nActive==0) $("#"+game.game+"Badge").removeClass("mdl-badge");
-      else $("#"+game.game+"Badge").attr("data-badge",nActive);
+      if (nActive==0) $("#"+gInfo.game+"Badge").removeClass("mdl-badge");
+      else $("#"+gInfo.game+"Badge").attr("data-badge",nActive);
     }
     if (pnode.children().length<1)       // No more items in the list
       $("#"+pnode.prop('id')+"Button").attr("disabled",true);
