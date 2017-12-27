@@ -6,28 +6,15 @@
 *   Define global variables
 *
 ************************************************************************************************/
-// -----------------------
 
-var glb={
-  ignoreNextUpdate:0,
-};
-
+var gData={};
+var gInfo={};
+var ignoreNextUpdate=0;
 var reverse=false;                                                    // display reverse board for black player
 var mychessIndex=0;                                                   // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Black
                                                                       // 3 - Both (single player)
-var special={};
-
-// Current chess board
-var board=[[-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1],
-           [-1,-1,-1,-1,-1,-1,-1,-1]];
 
 // for each square on the board, boolean indication if there is a legal move for current player starting from it
 var lglMoves=[[0,0,0,0,0,0,0,0],
@@ -40,15 +27,11 @@ var lglMoves=[[0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0]];
 
 var sizeSquare, startX, startY;                                       // control the size and location of the board
-var player=0;                                                         // 0 for white, 1 for black
 var mode="passive";                                                   // "passive" - my player is not playing
                                                                       // "start" - need to select current player piece (FROM location)
                                                                       // "active" - need to select the target of the move (TO location)
                                                                       // "animation" - shows smooth movement of the piece
                                                                       // "pawnUpgrade" - select which piece the pawn upgrade to
-var from=     {x:0, y:0};   // start position
-var to=       {x:0, y:0};   // end position
-var data;                                                             // updated data from Firbase
 var animation= {
     movedPiece:0,                        // the piece type to move
     newPiece:0,                          // the piece at the end of the move (may only be different if pawn upgraded)
@@ -92,20 +75,41 @@ $("#chessClose").click( function() {
 //   User selected to quit (resign) the game
 //*************************************************************************************************
 $("#chessEnd").click( function() {
+  gInfo.status="quit";
+  gInfo.concede=auth.currentUser.displayName;
+  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+  db.ref("gameInfo/"+gameID).set(gInfo);
+
+/*
   sendReq({
     game:"chess",
     gid:gameID,
     uid:currentUID,
     msg: "Quit",
-    board: board,
+    board: gData.board,
     concede: auth.currentUser.displayName
   });
+*/
 });
 
 //*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
 $("#chessButtonJoin").click(function() {
+  if (gInfo.status=="pending") {
+    gInfo.players[this.value]={
+      uid:currentUID,
+      displayName:auth.currentUser.displayName,
+      photoURL:auth.currentUser.photoURL};
+    gInfo.status="active";
+    gInfo.currentUID=gInfo.players["White"].uid;
+    gData.player=0;
+    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+    db.ref("gameInfo/"+gameID).set(gInfo);
+  }
+  else debug(0,"Game not Pending. Can't start");
+
+/*
   sendReq({
     game:"chess",
     gid:gameID,
@@ -115,6 +119,7 @@ $("#chessButtonJoin").click(function() {
     displayName: auth.currentUser.displayName,
     photoURL: auth.currentUser.photoURL
   });
+*/
 });
 
 /************************************************************************************************
@@ -128,48 +133,45 @@ $("#chessButtonJoin").click(function() {
 //*************************************************************************************************
 
 function chessEvent(snapshot) {
-  data=snapshot.val();
-  if (!data) return; // information not ready yet
-  if (gameID != data.info.gid) {
-    debug(0,"Incorrect Game ID:"+data.info.gid+"/"+gameID);
+  if (!snapshot.val()) return; // information not ready yet
+  gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
+  gInfo=gData.info;
+  if (gameID != gInfo.gid) {
+    debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
   }
-  debug(1,"chessEvent GID="+gameID+" status="+data.info.status);
-  debug(2,data);
-  if (glb.ignoreNextUpdate==2) {
+  debug(1,"chessEvent GID="+gameID+" status="+gInfo.status);
+  debug(2,gData);
+  console.log("ig="+ignoreNextUpdate+" mode="+mode);
+  if (ignoreNextUpdate==2) {
     if (mode == "animation") {
-      glb.ignoreNextUpdate=1;                                        // mark that response was received
+      ignoreNextUpdate=1;                                        // mark that response was received
       return;
     }
     else {                                                           // Late arrival of response - re-do animation
-      glb.ignoreNextUpdate=0;
+      ignoreNextUpdate=0;
       debug(1,"Finally got response. Stop the spinner");
       spinnerActive=false;
     }
   }
-  from=data.from;
-  to=data.to;
-  board=data.board;
-  special=data.special;
   mychessIndex=0;
-  if (data.info.players.White && data.info.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
-  if (data.info.players.Black && data.info.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
+  if (gInfo.players.White && gInfo.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
+  if (gInfo.players.Black && gInfo.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
   debug(2,"mychessIndex="+mychessIndex);
-  player=data.player;
   if (mychessIndex)
     $("#chessEnd").attr("disabled",false);
   else
     $("#chessEnd").attr("disabled",true);
   $("#chessTurn").css("color","black");
   $("#chessTurn").html("");
-  if (data.info.status=="active") {
+  if (gInfo.status=="active") {
     if (checkPlayer()) $("#chessTurn").css("color","red");
-    if (player==0) $("#chessTurn").html("White player's turn");
-    else if (player==1) $("#chessTurn").html("Black player's turn");
+    if (gData.player==0) $("#chessTurn").html("White player's turn");
+    else if (gData.player==1) $("#chessTurn").html("Black player's turn");
   }
-  switch(data.info.status) {
+  switch(gInfo.status) {
     case "pending":
-      var color= (!data.info.players.White) ? "White" : "Black";
+      var color= (!gInfo.players.White) ? "White" : "Black";
       reverse=(color=="Black");
       $("#chessButtonJoin").val(color);
       $("#chessButtonJoin").html("Join as "+color);
@@ -179,13 +181,13 @@ function chessEvent(snapshot) {
       break;
     case "active":
       $("#chessButtonJoin").hide();
-      reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
+      reverse=((mychessIndex==2)||(mychessIndex==3 && gData.player==1));
       printBoard();
-      animationInit(data.movedPiece,data.newPiece);
+      animationInit(gData.movedPiece,gData.newPiece);
       break;
     case "quit":
       sweetAlert({
-         title: data.info.concede+" had quit the game",
+         title: gInfo.concede+" had quit the game",
          text: "",
          showConfirmButton: true,
          imageUrl: "../i-quit.png",
@@ -195,7 +197,6 @@ function chessEvent(snapshot) {
       $("#chessBoard").hide();
   }
   debug(2,"mode="+mode);
-  data=null;
 }
 
 /************************************************************************************************
@@ -264,55 +265,54 @@ void draw() {
     if (deltaT >= 1) {                                               // end of animation - over 1 second
       if (animation.movedPiece > -1)
       {
-        board[to.y][to.x]=animation.newPiece;                        // put the saved piece in the new location
-        if (animation.newPiece%6==0 && Math.abs(from.x-to.x)==2) {   // castling: king moved two spots
+        gData.board[gData.to.y][gData.to.x]=animation.newPiece;                        // put the saved piece in the new location
+        if (animation.newPiece%6==0 && Math.abs(gData.from.x-gData.to.x)==2) {   // castling: king moved two spots
           printBoard();
-          if (to.x==2) {                                             // castling to left
-            from.x=0;                                                // left rook
-            to.x=3;                                                  // move 3 steps right
+          if (gData.to.x==2) {                                             // castling to left
+            gData.from.x=0;                                                // left rook
+            gData.to.x=3;                                                  // move 3 steps right
           }
           else {                                                     // castling to right
-            from.x=7;                                                // right rook
-            to.x=5;                                                  // move 2 steps left
+            gData.from.x=7;                                                // right rook
+            gData.to.x=5;                                                  // move 2 steps left
           }
-          animation.movedPiece=animation.newPiece=board[from.y][from.x];     // Rook
+          animation.movedPiece=animation.newPiece=gData.board[gData.from.y][gData.from.x];     // Rook
           animation.startMillis=millis();
           if (reverse) {
-           animation.sourceX= startX+sizeSquare*(7-from.x);
-           animation.sourceY= startY+sizeSquare*(7-from.y);
-           animation.distanceX= sizeSquare*(from.x-to.x);
-           animation.distanceY= sizeSquare*(from.y-to.y);
+           animation.sourceX= startX+sizeSquare*(7-gData.from.x);
+           animation.sourceY= startY+sizeSquare*(7-gData.from.y);
+           animation.distanceX= sizeSquare*(gData.from.x-gData.to.x);
+           animation.distanceY= sizeSquare*(gData.from.y-gData.to.y);
           } else {
-           animation.sourceX= startX+sizeSquare*from.x;
-           animation.sourceY= startY+sizeSquare*from.y;
-           animation.distanceX= sizeSquare*(to.x-from.x);
-           animation.distanceY= sizeSquare*(to.y-from.y);
+           animation.sourceX= startX+sizeSquare*gData.from.x;
+           animation.sourceY= startY+sizeSquare*gData.from.y;
+           animation.distanceX= sizeSquare*(gData.to.x-gData.from.x);
+           animation.distanceY= sizeSquare*(gData.to.y-gData.from.y);
           }
-          board[from.y][from.x]=-1;                                  // Clear the old location
+          gData.board[gData.from.y][gData.from.x]=-1;                                  // Clear the old location
           return;
         }                                                            // end of castling case
-        if (glb.ignoreNextUpdate==2) {                               // Can't complete the move because server did not respond.
+        if (ignoreNextUpdate==2) {                               // Can't complete the move because server did not respond.
           mode="passive"
           debug(1,"delayed response from Server. need to do spinner");
           spinnerActive=true;
           return;
         }
         else {
-          if (glb.ignoreNextUpdate==1) {                             // received response
-            glb.ignoreNextUpdate=0;
-            player=data.player;
+          if (ignoreNextUpdate==1) {                             // received response
+            ignoreNextUpdate=0;
             if (checkPlayer()) $("#chessTurn").css("color","red");
             else               $("#chessTurn").css("color","black");
-            reverse=((mychessIndex==2)||(mychessIndex==3 && player==1));
+            reverse=((mychessIndex==2)||(mychessIndex==3 && gData.player==1));
           }
           printBoard();                                            // board may have flipped due to player change
-          if (player==0) $("#chessTurn").html("White player's turn");
+          if (gData.player==0) $("#chessTurn").html("White player's turn");
           else           $("#chessTurn").html("Black player's turn");
-          markSquare(from,#FF0000,2);                                // FROM location is color red
-          markSquare(to,#00FF00,2);                                  // TO location is color green
-          if (special) {                                             // now need to check special messages or end conditions
-            if (special.endGame) {
-              if (special.check)
+          markSquare(gData.from,#FF0000,2);                                // FROM location is color red
+          markSquare(gData.to,#00FF00,2);                                  // TO location is color green
+          if (gData.special) {                                             // now need to check special messages or end conditions
+            if (gData.special.endGame) {
+              if (gData.special.check)
                 sweetAlert({
                    title: "CheckMate",
                    text: "",
@@ -328,15 +328,49 @@ void draw() {
                    imageUrl: "../chess/stalemate.jpg",
                    imageSize: "400x150",
                 });
-              if (mychessIndex) sendReq({
-                game:"chess",
-                gid:gameID,
-                uid:currentUID,
-                msg: "ExitGame",
-              });
+              if (mychessIndex) {
+//                newGID= -1;
+//                gameMsg="chess";
+                var updates= new Object();
+                for (var player in gInfo.players)
+                  if (gInfo.players[player].uid==currentUID)
+                    updates[player+'/uid']=0;
+console.log(mode);
+console.log(updates);
+console.log("/gameInfo/"+gInfo.gid+"/players/");
+                db.ref("/gameInfo/"+gInfo.gid+"/players/").update(updates)
+                .then(function() {
+                   db.ref("gameInfo/"+gInfo.gid+"/players/").once('value',
+                     function(Snap) {
+console.log("snap");
+                       var s=Snap.val();
+console.log(s);
+                       var clean=true;
+                       for (var p in s) {
+                         if (s[p].uid!=0) clean=false;
+                       }
+                       if (clean) {
+console.log("clean");
+                         var up=new Object();
+                         up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
+                         up["/gameInfo/"+gInfo.gid]={};
+            //             up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
+                         db.ref().update(up);
+                       }
+                     });
+                });
+/*
+                sendReq({
+                  game:"chess",
+                  gid:gameID,
+                  uid:currentUID,
+                  msg: "ExitGame",
+                });
+*/
+              }
               $("#chessBoard").hide();
             }
-            else if (special.check) {
+            else if (gData.special.check) {
               sweetAlert({
                  title: "Check",
                  text: "",
@@ -361,8 +395,8 @@ void draw() {
     }
     else  {                                                          // Animation not ended yet. Keep moving the piece
       printBoard();
-      markSquare(from,#FF0000,2);                                    // FROM location is color red
-      markSquare(to,#00FF00,2);                                      // TO location is color green
+      markSquare(gData.from,#FF0000,2);                                    // FROM location is color red
+      markSquare(gData.to,#00FF00,2);                                      // TO location is color green
       image(images[animation.movedPiece],
             animation.sourceX+deltaT*animation.distanceX,
             animation.sourceY+deltaT*animation.distanceY,
@@ -379,16 +413,16 @@ void mouseMoved() {
     if (!checkPlayer()) return;                                      // only the current player can move
     var mouse=mouseSquare();                                         // check what square the mouse is in
     if (mouse.x == -1) return;                                       // exit immediately if mouse no inside the board
-    if (mouse.x==from.x && mouse.y==from.y) return;                  // exit immediately if mouse is still at the same square
-    from=mouse;
+    if (mouse.x==gData.from.x && mouse.y==gData.from.y) return;                  // exit immediately if mouse is still at the same square
+    gData.from=mouse;
     printBoard();                                                    // clear previous markings
-    if (!lglMoves[from.y][from.x]) return;                           // there is no legel move from this square.
-    markSquare(from,#FF0000,2);                                      // Mark the start square in red
+    if (!lglMoves[gData.from.y][gData.from.x]) return;                           // there is no legel move from this square.
+    markSquare(gData.from,#FF0000,2);                                      // Mark the start square in red
     for (var j=0;j<8;j++) {
       for (var i=0;i<8;i++) {
-        to={x:i,y:j};
-        if (checkMove(from,to,true,board)) {
-          markSquare(to,#00FF00,2);                                  // Mark the target square in green
+        gData.to={x:i,y:j};
+        if (checkMove(gData.from,gData.to,true,gData.board)) {
+          markSquare(gData.to,#00FF00,2);                                  // Mark the target square in green
         }
       }
     }
@@ -403,22 +437,22 @@ void mouseClicked () {
   switch (mode) {
     case "active":                                                   // Piece was already selected. click to select where to move the piece
       mouse=mouseSquare();
-      if(checkMove(from,mouse,true,board)) {                         // check is the target is a legal move
-        to.x=mouse.x; to.y=mouse.y;                                  // remember the target location
-        if ((board[from.y][from.x] % 6) === 5 && (to.y%7) ===  0)    // if it's a pawn and it reached the last line
+      if(checkMove(gData.from,mouse,true,gData.board)) {                         // check is the target is a legal move
+        gData.to.x=mouse.x; gData.to.y=mouse.y;                                  // remember the target location
+        if ((gData.board[gData.from.y][gData.from.x] % 6) === 5 && (gData.to.y%7) ===  0)    // if it's a pawn and it reached the last line
         {
           printBoard();
-          image(images[1+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[2+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[3+player*6],startX+to.x*sizeSquare, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          image(images[4+player*6],startX+to.x*sizeSquare+sizeSquare/2, startY+to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[1+gData.player*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
+          image(images[2+gData.player*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
+          image(images[3+gData.player*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[4+gData.player*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
           mode="pawnUpgrade";
           return;
         }
-        var piece=board[from.y][from.x];
+        var piece=gData.board[gData.from.y][gData.from.x];
         finalizeMove(piece,piece);
       }
-      if (mouse.x==from.x && mouse.y==from.y) {						// clicked again on the same piece - cancel selection
+      if (mouse.x==gData.from.x && mouse.y==gData.from.y) {						// clicked again on the same piece - cancel selection
         mode="start";
         printBoard();
         return;
@@ -430,15 +464,15 @@ void mouseClicked () {
       var mouse=mouseSquare();                                       // check what square the mouse is in
       if (mouse.x == -1) return;                                     // Mouse was clicked outside the board. Don't do anything.
       if (!lglMoves[mouse.y][mouse.x]) return;                       // if there is no legal move, don't do anything
-      from.x=mouse.x; from.y=mouse.y;                                // remember the location of square we're moving FROM
+      gData.from.x=mouse.x; gData.from.y=mouse.y;                                // remember the location of square we're moving FROM
       mode="active";                                                 // start looking for the target location
       printBoard();
-      markSquare(from,#FF0000,4);                                    // mark that square in red
+      markSquare(gData.from,#FF0000,4);                                    // mark that square in red
       for (var j=0;j<8;j++) {
         for (var i=0;i<8;i++) {
-          to={x:i,y:j};
-          if (checkMove(from,to,true,board)) {
-            markSquare(to,#00FF00,4);                                // Mark the target square in green
+          gData.to={x:i,y:j};
+          if (checkMove(gData.from,gData.to,true,gData.board)) {
+            markSquare(gData.to,#00FF00,4);                                // Mark the target square in green
           }
         }
       }
@@ -446,12 +480,12 @@ void mouseClicked () {
 
     case "pawnUpgrade":                                              // Click to select the piece to which the pawn is upgraded
                                                                      // check if I'm clicking in the correct square
-      if(mouseX<(startX+to.x*sizeSquare) || mouseX>(startX+to.x*sizeSquare+sizeSquare) ||
-         mouseY<(startY+to.y*sizeSquare) || mouseY>(startY+to.y*sizeSquare+sizeSquare)) return;
-      var pawn=board[from.y][from.x];
+      if(mouseX<(startX+gData.to.x*sizeSquare) || mouseX>(startX+gData.to.x*sizeSquare+sizeSquare) ||
+         mouseY<(startY+gData.to.y*sizeSquare) || mouseY>(startY+gData.to.y*sizeSquare+sizeSquare)) return;
+      var pawn=gData.board[gData.from.y][gData.from.x];
       var piece=pawn-1;
-      if(mouseY<(startY+to.y*sizeSquare+sizeSquare/2)) piece-=2;
-      if(mouseX<(startX+to.x*sizeSquare+sizeSquare/2)) piece-=1;
+      if(mouseY<(startY+gData.to.y*sizeSquare+sizeSquare/2)) piece-=2;
+      if(mouseX<(startX+gData.to.x*sizeSquare+sizeSquare/2)) piece-=1;
       finalizeMove(pawn,piece);
       break;
 
@@ -482,11 +516,11 @@ function printBoard() {
       if((x+y)%2) fill(100); else fill(255);  // select white or black squares
       rect(xpos,ypos,sizeSquare,sizeSquare);  // print an empty square
       if (reverse) {
-          if (board[7-y][7-x]> -1)
-            image(images[board[7-y][7-x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
+          if (gData.board[7-y][7-x]> -1)
+            image(images[gData.board[7-y][7-x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
       } else {
-          if (board[y][x]> -1)
-            image(images[board[y][x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
+          if (gData.board[y][x]> -1)
+            image(images[gData.board[y][x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
       }
     }
   }
@@ -644,7 +678,7 @@ function checkMove(from,to,checkKing,myBoard)
   }
   debug(3,"Move: "+from.x+","+from.y+"->"+to.x+","+to.y);
   if (checkKing) {
-     var boardT = jQuery.extend(true, {}, board);   // copy the board to a temporary place
+     var boardT = jQuery.extend(true, {}, gData.board);   // copy the board to a temporary place
      boardT[from.y][from.x]= -1;
      boardT[to.y][to.x]= piece;
      if (check4check(boardT,Math.floor(piece/6))) return false;  // check if oponent can attack my king after my move. That's an illigal move
@@ -663,11 +697,11 @@ function analyzeMoves() {
   for (var y=0; y<8; y++) {
     for (var x=0; x<8; x++) {
       var legalMoves=0;                                              // start counting posible moves from this square
-      if (Math.floor(board[y][x]/6)==player) {                       // only looks at squares that contain the current player's pieces
+      if (Math.floor(gData.board[y][x]/6)==gData.player) {                       // only looks at squares that contain the current player's pieces
         for (var j=0;j<8;j++) {
           for (var i=0;i<8;i++) {
-//            to={x:i,y:j};
-            if (checkMove({x:x,y:y},{x:i,y:j},true,board)) {
+//            gData.to={x:i,y:j};
+            if (checkMove({x:x,y:y},{x:i,y:j},true,gData.board)) {
               legalMoves=anyLegal=true;
             }
           }
@@ -685,8 +719,8 @@ function analyzeMoves() {
 // This is done comparing "player" (0-white, 1-black) with "mychessIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
 //*************************************************************************************************
 function checkPlayer() {
-  if (player== -1) return false;
-  var p= (1 << player);
+  if (gData.player== -1) return false;
+  var p= (1 << gData.player);
   return (mychessIndex & p)
 }
 
@@ -694,28 +728,35 @@ function checkPlayer() {
 // Let the server know about a completed chess move (called after the user clicked on the destination spot
 //*************************************************************************************************
 void finalizeMove(movedPiece,newPiece) {
-  board[from.y][from.x]=-1;                                      // Clear the old location
-  var savedPiece=board[to.y][to.x];
-  board[to.y][to.x]=newPiece;
-  player=1-player;
+  gData.board[gData.from.y][gData.from.x]=-1;                                      // Clear the old location
+  var savedPiece=gData.board[gData.to.y][gData.to.x];
+  gData.board[gData.to.y][gData.to.x]=newPiece;
+  gData.player=1-gData.player;
 
-  var check=check4check(board,player);
-  special={};
-  if (check) special.check=true;
-  if (!analyzeMoves()) special.endGame=true;
-  player=1-player;
+  var check=check4check(gData.board,gData.player);
+  gData.special={};
+  if (check) gData.special.check=true;
+  if (!analyzeMoves()) gData.special.endGame=true;
+  gData.board[gData.to.y][gData.to.x]=savedPiece;
+  gData.movedPiece=movedPiece;
+  gData.newPiece=newPiece;
+  gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Black":"White"].uid;
+  ignoreNextUpdate=2;
+  animationInit(movedPiece,newPiece);                              // start the animation
+  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+  db.ref("gameInfo/"+gameID).set(gInfo);
 
-  board[to.y][to.x]=savedPiece;
+/*
   sendReq({
     game:"chess",
     gid:gameID,
     uid:currentUID,
     msg: "ChessMove",
-    special: special,
-    player:player, from:from, to:to, board:board, movedPiece:movedPiece, newPiece:newPiece
+    special: gData.special,
+    player:gData.player, from:gData.from, to:gData.to, board:gData.board, movedPiece:movedPiece, newPiece:newPiece
   });
-  glb.ignoreNextUpdate=2;
-  animationInit(movedPiece,newPiece);                              // start the animation
+*/
+
 }
 
 function animationInit(movedPiece,newPiece) {
@@ -724,15 +765,15 @@ function animationInit(movedPiece,newPiece) {
          animation.newPiece=newPiece;
          animation.startMillis=millis();
          if (reverse) {
-           animation.sourceX= startX+sizeSquare*(7-from.x);
-           animation.sourceY= startY+sizeSquare*(7-from.y);
-           animation.distanceX= sizeSquare*(from.x-to.x);
-           animation.distanceY= sizeSquare*(from.y-to.y);
+           animation.sourceX= startX+sizeSquare*(7-gData.from.x);
+           animation.sourceY= startY+sizeSquare*(7-gData.from.y);
+           animation.distanceX= sizeSquare*(gData.from.x-gData.to.x);
+           animation.distanceY= sizeSquare*(gData.from.y-gData.to.y);
          } else {
-           animation.sourceX= startX+sizeSquare*from.x;
-           animation.sourceY= startY+sizeSquare*from.y;
-           animation.distanceX= sizeSquare*(to.x-from.x);
-           animation.distanceY= sizeSquare*(to.y-from.y);
+           animation.sourceX= startX+sizeSquare*gData.from.x;
+           animation.sourceY= startY+sizeSquare*gData.from.y;
+           animation.distanceX= sizeSquare*(gData.to.x-gData.from.x);
+           animation.distanceY= sizeSquare*(gData.to.y-gData.from.y);
          }
       }
       else {

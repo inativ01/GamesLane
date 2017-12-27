@@ -403,7 +403,7 @@ function addGameToList(gInfo) {
   }
   if (active && gInfo.status=="quit")
   {
-    var updates={};
+    var updates=new Object();
     for (var player in gInfo.players)
       if (gInfo.players[player].uid==currentUID)
         updates[player+'/uid']=0;
@@ -417,7 +417,7 @@ function addGameToList(gInfo) {
              if (s[p].uid!=0) clean=false;
            }
            if (clean) {
-             var up={};
+             var up=new Object();
              up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
              up["/gameInfo/"+gInfo.gid]={};
 //             up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
@@ -425,14 +425,6 @@ function addGameToList(gInfo) {
            }
          });
     });
-/*
-    sendReq({
-        game:gInfo.game,
-        gid:gInfo.gid,
-        uid:currentUID,
-        msg: "ExitGame",
-    });
-*/
     addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
   }
   if (gInfo.currentUID==currentUID)  {
@@ -485,6 +477,7 @@ function addToList(game,list,node) {
 }
 
 function removeFromList(gInfo) {
+    debug(2,"Remove from list");
     delete gameInfo[gInfo.gid];
     var node=$("#line-"+gInfo.game+"-"+gInfo.gid);
     var pnode=node.parent();

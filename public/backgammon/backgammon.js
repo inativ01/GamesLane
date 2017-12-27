@@ -86,8 +86,8 @@ $("#backgammonClose").click( function() {
 $("#backgammonEnd").click( function() {
   gInfo.status="quit";
   gInfo.concede=auth.currentUser.displayName;
-  db.ref('gameData/backgammon/'+newGID).set(gData);
-  db.ref('gameInfo/'+newGID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+  db.ref("gameInfo/"+gameID).set(gInfo);
 });
 
 //*************************************************************************************************
@@ -134,8 +134,8 @@ $('#backgammonStartButton').click(function() {
     photoURL:auth.currentUser.photoURL
   };
   gData.info=gInfo;
-  db.ref('gameData/backgammon/'+newGID).set(gData);
-  db.ref('gameInfo/'+newGID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
+  db.ref("gameInfo/"+newGID).set(gInfo);
   gameMsg="backgammon";
   $("#backgammonOptionsBoard").hide();
   $(".mdl-spinner").addClass("is-active");
@@ -154,8 +154,8 @@ $("#backgammonButtonJoin").click(function() {
     gInfo.status="active";
     gInfo.currentUID=gInfo.players["White"].uid;
     gData.currentPlayer=0;
-    db.ref('gameData/backgammon/'+newGID).set(gData);
-    db.ref('gameInfo/'+newGID).set(gInfo);
+    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+    db.ref("gameInfo/"+gameID).set(gInfo);
   }
   else debug(0,"Game not Pending. Can't start");
 });
@@ -294,8 +294,8 @@ void draw() {
         gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Black":"White"].uid;
       }
       mode="active";
-      db.ref('gameData/backgammon/'+newGID).set(gData);
-      db.ref('gameInfo/'+newGID).set(gInfo);
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+      db.ref("gameInfo/"+gameID).set(gInfo);
     }
   }
 
@@ -388,8 +388,8 @@ void mouseReleased() {
         gData.dice=[0,0];
         gData.moveCnt=0;
       }
-      db.ref('gameData/backgammon/'+newGID).set(gData);
-      db.ref('gameInfo/'+newGID).set(gInfo);
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+      db.ref("gameInfo/"+gameID).set(gInfo);
     }
     else {
       gData.board[pieceMoving.from]+=cnst.dir[gData.currentPlayer];

@@ -162,7 +162,8 @@ function chessMove(db,gameSnap,msg) {
   var gameInfo=gameData.info;
   if (gameInfo.status=="active") {
     gameData.board=msg.board;
-    gameData.player=1-msg.player;
+    gameData.player=msg.player;
+//    gameData.player=1-msg.player;
     var color=(gameData.player)?"Black":"White";
     gameInfo.currentUID=gameInfo.players[(gameData.player)?"Black":"White"].uid;
     gameData.from=msg.from;

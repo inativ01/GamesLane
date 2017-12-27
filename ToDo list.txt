@@ -4,6 +4,7 @@ To do:
 * display names of players in the game
 
 ** do database updates without a server
+* popup message need to be smaller - relative to screen size
 
 --- backgammon ---
 

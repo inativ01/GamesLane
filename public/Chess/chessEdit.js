@@ -92,6 +92,32 @@ $("#chessButtonEdit").click(function() {
 //*************************************************************************************************
 $('#chessStartButton').click(function() {
   newGID=Math.floor(Math.random() * (1000000000000));
+
+  gInfo={
+    game:"chess",
+    gid:newGID,
+    players:{},
+    currentUID:-1,
+    status:'pending'
+  } ;
+  gData={
+    from:{x:0, y:0},
+    to:{x:0, y:0},
+    board: board,
+    movedPiece:-1,
+    newPiece:-1,
+    player:-1,
+  };
+  gInfo.players[$("#chessRole").val()]={
+    uid:currentUID,
+    displayName:auth.currentUser.displayName,
+    photoURL:auth.currentUser.photoURL
+  };
+  gData.info=gInfo;
+  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
+  db.ref("gameInfo/"+newGID).set(gInfo);
+
+/*
   sendReq({
     game:"chess",
     gid:newGID,
@@ -102,6 +128,7 @@ $('#chessStartButton').click(function() {
     displayName: auth.currentUser.displayName,
     photoURL: auth.currentUser.photoURL
   });
+*/
   gameMsg="chess";
   $("#chessOptionsBoard").hide();
   $(".mdl-spinner").addClass("is-active");
