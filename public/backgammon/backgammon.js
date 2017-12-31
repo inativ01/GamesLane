@@ -11,8 +11,8 @@ var cnst={
   sidepieces:[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")],
   sidepiecesR:[loadImage("../backgammon/sidepiece0R.png"),loadImage("../backgammon/sidepiece1R.png")],
   diceImg:[0,0,0,0,0,0],
-//  boardStart:[1,0,0,0,0,-5,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0,0,0,0,0],  // negative: white, positive: black/brown
-  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: black/brown
+  boardStart:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0],  // negative: white, positive: brown
+//  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
   dir:[-1,1],
   rollButton:[2.7,1.4,0.4,0.2],
   diceSize:0.2,
@@ -20,6 +20,9 @@ var cnst={
   diceX2:2.9,
   diceY:1.4,
   diceArea:[2.5,1.3,0.8,0.4], // X,Y,W,H
+  pipsX: 3.7,
+  pipsY1: 1.2,
+  pipsY2: 1.8,
 };
 
 var ignoreNextUpdate=0;
@@ -32,29 +35,20 @@ var pieceMoving={
   animateDice:0,
 };
 
-var reverse=false;                                                    // display reverse board for black player
+var reverse=false;                                                    // display reverse board for brown player
 var mybackgammonIndex=0;                                              // 0 - no active player
                                                                       // 1 - White
-                                                                      // 2 - Black
+                                                                      // 2 - Brown
                                                                       // 3 - Both (single player)
 
 // Current backgammon board
 
 // for each square on the board, boolean indication if there is a legal move for current player starting from it
-var lglMoves=[[0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0]];
 
-var sizeSquare, startX, startY;                                       // control the size and location of the board
+var sizeSquare;                                                       // control the size and location of the board
 var mode="passive";                                                   // "passive" - my player is not playing
                                                                       // "active" - player can roll dice or move pieces
                                                                       // "animation" - shows smooth movement of the piece or dice rolling
-var players= {White:"", Black:""}
 
 /************************************************************************************************
 *
@@ -86,6 +80,7 @@ $("#backgammonClose").click( function() {
 $("#backgammonEnd").click( function() {
   gInfo.status="quit";
   gInfo.concede=auth.currentUser.displayName;
+  gData.currentPlayer=-1;
   db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   db.ref("gameInfo/"+gameID).set(gInfo);
 });
@@ -127,6 +122,8 @@ $('#backgammonStartButton').click(function() {
     moveCnt:0,
     diceMoves:[0,0,0,0],
     dice:[0,0],
+//    pips:[167,167],
+    pips:[24,24],
   };
   gInfo.players[$("#backgammonRole").val()]={
     uid:currentUID,
@@ -183,7 +180,7 @@ function backgammonEvent(snapshot) {
   debug(2,gInfo);
   mybackgammonIndex=0;
   if (gInfo.players.White && gInfo.players.White.uid==currentUID) mybackgammonIndex|=1;             // turn on bit 0
-  if (gInfo.players.Black && gInfo.players.Black.uid==currentUID) mybackgammonIndex|=2;             // turn on bit 1
+  if (gInfo.players.Brown && gInfo.players.Brown.uid==currentUID) mybackgammonIndex|=2;             // turn on bit 1
   debug(2,"mybackgammonIndex="+mybackgammonIndex);
   $("#backgammonButtonJoin").hide();
   if (mybackgammonIndex)
@@ -194,8 +191,8 @@ function backgammonEvent(snapshot) {
   $("#backgammonTurn").html("");
   switch(gInfo.status) {
     case "pending":
-      var color= (!gInfo.players.White) ? "White" : "Black";
-      reverse=(color=="Black");
+      var color= (!gInfo.players.White) ? "White" : "Brown";
+      reverse=(color=="Brown");
       $("#backgammonButtonJoin").val(color);
       $("#backgammonButtonJoin").html("Join as "+color);
       $("#backgammonButtonJoin").show();
@@ -207,8 +204,27 @@ function backgammonEvent(snapshot) {
       printBoard();
       if (checkPlayer()) $("#backgammonTurn").css("color","red");
       if (gData.currentPlayer==0) $("#backgammonTurn").html("White player's turn");
-      else if (gData.currentPlayer==1) $("#backgammonTurn").html("Black player's turn");
+      else if (gData.currentPlayer==1) $("#backgammonTurn").html("Brown player's turn");
       if (mode !="animation") mode="active";
+      if (gData.special) {                                             // now need to check special messages or end conditions
+        if (gData.special.endGame) {
+          if (gData.pips[gData.currentPlayer]==0)
+            sweetAlert({
+               title: ((gData.currentPlayer)?"Brown":"White")+" player won!",
+               text: "",
+               showConfirmButton: true,
+               imageSize: "400x150",
+            });
+          if (mybackgammonIndex) {                                     // Mark player ready to end
+            var updates= new Object();
+            for (var player in gInfo.players)
+              if (gInfo.players[player].uid==currentUID)
+                updates[player+'/uid']=0;
+            db.ref("/gameInfo/"+gInfo.gid+"/players/").update(updates);
+          }
+        }
+      }
+
       break;
     case "quit":
       sweetAlert({
@@ -216,9 +232,9 @@ function backgammonEvent(snapshot) {
          text: "",
          showConfirmButton: true,
          imageUrl: "../i-quit.png",
-         imageSize: "400x150",
+         imageSize: "200x150",
       });
-      $("#backgammonBoard").hide();
+//      $("#backgammonBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -291,7 +307,7 @@ void draw() {
         gData.dice=[0,0];
         gData.moveCnt=0;
         printBoard();
-        gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Black":"White"].uid;
+        gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Brown":"White"].uid;
       }
       mode="active";
       db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
@@ -339,12 +355,12 @@ void mousePressed () {
       printBoard();
     }
   }
-  else {                                                              // need to move pieces
+  else {                                                                  // need to move pieces
     var mouse=mouseSquare();
-    if (mouse>=0 && mouse <26 &&                                    // legal position
-        gData.board[mouse]*cnst.dir[gData.currentPlayer] > 0 &&         // I need to click on my player's piece to start
-        (checkMove(mouse, gData.dice[min(1,gData.moveCnt)]) >= 0 ||     // either this is a valid move with the current die...
-         (gData.moveCnt==0 && checkMove(mouse, gData.dice[1]) >= 0))) { // ... or a valid move with other die (only for 1st move))
+    if (mouse>=0 && mouse <26 &&                                          // legal position
+        gData.board[mouse]*cnst.dir[gData.currentPlayer] > 0 &&           // I need to click on my player's piece to start
+        (checkMove(mouse, gData.dice[min(1,gData.moveCnt)]) >= 0 ||       // either there is a valid move with the current die...
+         (gData.moveCnt==0 && checkMove(mouse, gData.dice[1]) >= 0))) {   // ... or a valid move with other die (only for 1st move))
       pieceMoving.active=true;
       pieceMoving.from=mouse;
       gData.board[mouse]-=cnst.dir[gData.currentPlayer];
@@ -362,12 +378,13 @@ void mouseDragged() {
 }
 
 void mouseReleased() {
+  var dPips={val:0};
   if (pieceMoving.active) {
     pieceMoving.active=false;
     var ok=true;
     var mouse=mouseSquare();
-    if (mouse!=checkMove(pieceMoving.from, gData.dice[min(1,gData.moveCnt)])) {
-      if (gData.moveCnt==0 && mouse==checkMove(pieceMoving.from, gData.dice[1])) {
+    if (mouse!=checkMove(pieceMoving.from, gData.dice[min(1,gData.moveCnt)],dPips)) {
+      if (gData.moveCnt==0 && mouse==checkMove(pieceMoving.from, gData.dice[1],dPips)) {
         var tmp=gData.dice[0];
         gData.dice[0]=gData.dice[1];
         gData.dice[1]=tmp;
@@ -377,13 +394,19 @@ void mouseReleased() {
 
     if (ok) {
       if (gData.board[mouse]*cnst.dir[gData.currentPlayer] == -1) { // capture opponent piece
+        gData.pips[1-gData.currentPlayer]+=(gData.currentPlayer)?(24-mouse):(1+mouse);
         gData.board[mouse]=cnst.dir[gData.currentPlayer];
         gData.board[25-gData.currentPlayer]-=cnst.dir[gData.currentPlayer];
       }
       else gData.board[mouse]+=cnst.dir[gData.currentPlayer];
       gData.diceMoves[gData.moveCnt]=pieceMoving.from;
       gData.moveCnt++;
-      if (gData.moveCnt==4 || (gData.dice[0]!=gData.dice[1] && gData.moveCnt==2) || !checkAnyMove()) {              // used up all the dice or no legal move
+      gData.pips[gData.currentPlayer]-=dPips.val;
+      if (gData.pips[gData.currentPlayer]==0) {
+        gData.special={};
+        gData.special.endGame=true;
+      }
+      else if (gData.moveCnt==4 || (gData.dice[0]!=gData.dice[1] && gData.moveCnt==2) || !checkAnyMove()) {              // used up all the dice or no legal move
         gData.currentPlayer=1-gData.currentPlayer;
         gData.dice=[0,0];
         gData.moveCnt=0;
@@ -407,10 +430,12 @@ void mouseReleased() {
 //*************************************************************************************************
 // Check if the move is valid based on piece type. retrun target slot (>=0) or -1 if can't
 //*************************************************************************************************
-int checkMove(from,count) {
+int checkMove(from,count,dPips) {
 
   var target;
   var ok=true;
+  if (dPips) dPips.val=count;
+  console.log(dPips);
 
   if (from==(24+gData.currentPlayer))                               // try getting the captured piece back into play
     target=(gData.currentPlayer) ? count-1 : 24-count;
@@ -421,6 +446,7 @@ int checkMove(from,count) {
 
   if (ok) {
     if (target<0) {                                                   // Can white piece get out?
+      if (dPips) dPips.val=from+1;
       var found=false;                                                // check if all white pieces are already at home
       for (var i=6; i<24; i++)
         if (gData.board[i]<0) found=true;
@@ -433,15 +459,16 @@ int checkMove(from,count) {
           if (found) ok=false;
           else target=26;
         }
-0      }
+      }
       else ok=false;                                                  // can't take piece out since not all white pieces are at home
     }
-    else if (target>23) {                                             // Can black piece get out?
+    else if (target>23) {                                             // Can Brown piece get out?
+      if (dPips) dPips.val=24-from;
       var found=false;                                                // check if all white pieces are already at home
       for (var i=0; i<18; i++)
         if (gData.board[i]>0) found=true;
-      if (!found && gData.board[25]==0) {                               // good, all white pieces are at home
-        if (target == -1) target=27;                                  // exact move to out
+      if (!found && gData.board[25]==0) {                             // good, all white pieces are at home
+        if (target == 24) target=27;                                  // exact move to out
         else {                                                        // ok to move out with large value only if no larger tiles
           var found=false;
           for (var i=19;i<from;i++)
@@ -518,6 +545,8 @@ function printBoard() {
     }
   }
   else printDice();
+  text(gData.pips[0],sizeSquare*cnst.pipsX, sizeSquare*cnst.pipsY1);
+  text(gData.pips[1],sizeSquare*cnst.pipsX, sizeSquare*cnst.pipsY2);
 }
 
 function printRect(area) {
@@ -525,23 +554,6 @@ function printRect(area) {
   rect(area[0]*sizeSquare,area[1]*sizeSquare,area[2]*sizeSquare,area[3]*sizeSquare);
 }
 
-//*************************************************************************************************
-// change the color of a selected square
-//*************************************************************************************************
-function markSquare(location,color,width) {
-  if (location.x==-1) return;
-  var x=location.x, y=location.y;
-  if (reverse) {
-    x=7-x; y=7-y;
-  }
-  var xpos=startX+x*sizeSquare;
-  var ypos=startY+y*sizeSquare;
-  noFill();
-  stroke(color);
-  strokeWeight(width);
-  rect(xpos,ypos,sizeSquare,sizeSquare);
-  strokeWeight(1);
-}
 
 //*************************************************************************************************
 // return object with board coordinate of the mouse - if it's inside the board
@@ -563,7 +575,7 @@ function mouseSquare()
 
 //*************************************************************************************************
 // Check is I'm currently playing.
-// This is done comparing "player" (0-white, 1-black) with "mybackgammonIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
+// This is done comparing "player" (0-white, 1-Brown) with "mybackgammonIndex" (bitmap 0-none, 1-white, 2-Brown, 3-both)
 //*************************************************************************************************
 function checkPlayer() {
   if (gData.currentPlayer== -1) return false;

@@ -343,8 +343,22 @@ function onAuthStateChanged(user) {
   });
 
   gameInfoRef.on("child_changed", function(snapshot) {
-    removeFromList(snapshot.val());
-    addGameToList(snapshot.val());
+    var gInfo=snapshot.val();
+    removeFromList(gInfo);
+    var clean=true;
+    for (var p in gInfo.players) {
+     if (gInfo.players[p].uid!=0) clean=false;
+    }
+    if (clean) {
+      var up=new Object();
+      up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
+      up["/gameInfo/"+gInfo.gid]={};
+//    up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
+      return db.ref().update(up);
+    }
+    else {
+      addGameToList(gInfo);
+    }
   });
 
   gameInfoRef.on("child_removed", function(snapshot) {
@@ -358,15 +372,16 @@ function onAuthStateChanged(user) {
 <div id="<game><listType>List" class="Active gameLists" >  -- listName
   <button class="mdl-list__item mdl-list__item--two-line"> -- node
     <span class="mdl-list__item-primary-content">          -- sp
-	  <span>  </span>                                      -- pnode 1 
+	  <span>  </span>                                      -- pnode 1
 	  <span "mdl-list__item-sub-title">  </span>           -- pnode 2
-    </span> 
+    </span>
 	<img>                                                  -- pic
   </button>
 </div>
 ------------------------------------------------------------------------------*/
 
 function addGameToList(gInfo) {
+  debug(2,"addGameToList");
   var active=false;
   gameInfo[gInfo.gid]=gInfo;
   var node=$("<button id='line-"+gInfo.game+"-"+gInfo.gid+"' value='"+gInfo.gid+"' style='width:300px; margin: auto' class='mdl-list__item mdl-list__item--two-line'></button>");
@@ -381,11 +396,11 @@ function addGameToList(gInfo) {
 	  var pnode = $("<span></span>");
 
     if (thisPlayer.uid==currentUID) {
-       active=true;
-       if (first) pic.attr('src',thisPlayer.photoURL);  // use my picture only if I'm the only one
-       pnode.html("I'm playing "+player);
-       pnode.addClass("mdl-list__item-sub-title");
-       sp.append(pnode);
+      active=true;
+      if (first) pic.attr('src',thisPlayer.photoURL);  // use my picture only if I'm the only one
+      pnode.html("I'm playing "+player);
+      pnode.addClass("mdl-list__item-sub-title");
+      sp.append(pnode);
     }
     else {
       pnode.html(thisPlayer.displayName+" playing "+player);
@@ -401,35 +416,20 @@ function addGameToList(gInfo) {
       }
     }
   }
-  if (active && gInfo.status=="quit")
+  if (gInfo.status=="quit")
   {
-    var updates=new Object();
-    for (var player in gInfo.players)
-      if (gInfo.players[player].uid==currentUID)
-        updates[player+'/uid']=0;
-    return  db.ref("gameInfo/"+gInfo.gid+"/players/").update(updates)
-    .then(function() {
-       db.ref("gameInfo/"+gInfo.gid+"/players/").once('value',
-         function(Snap) {
-           var s=Snap.val(); 
-           var clean=true;
-           for (var p in s) {
-             if (s[p].uid!=0) clean=false;
-           }
-           if (clean) {
-             var up=new Object();
-             up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
-             up["/gameInfo/"+gInfo.gid]={};
-//             up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
-             return db.ref().update(up);
-           }
-         });
-    });
-    addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
+    if (active) {
+      var updates=new Object();
+      for (var player in gInfo.players)
+        if (gInfo.players[player].uid==currentUID)
+          updates[player+'/uid']=0;
+      db.ref("gameInfo/"+gInfo.gid+"/players/").update(updates);
+      addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
+    }  
   }
-  if (gInfo.currentUID==currentUID)  {
+  else if (gInfo.currentUID==currentUID)  {
       addToList(gInfo.game,"Active",node);
-      if (gInfo.status!="quit") addLine(gInfo,"It's now your turn to play "+gInfo.game+" with "+partner);
+      addLine(gInfo,"It's now your turn to play "+gInfo.game+" with "+partner);
   }
   else if (gInfo.status=="pending") {
     addToList(gInfo.game,"Pending",node);
@@ -438,7 +438,7 @@ function addGameToList(gInfo) {
   }
   else if (active) {
     addToList(gInfo.game,"Wait",node);
-    if (gInfo.status!="quit") addLine(gInfo,"Waiting for "+partner+" to make "+gInfo.game+" move.");
+    addLine(gInfo,"Waiting for "+partner+" to make "+gInfo.game+" move.");
   }
   else
     addToList(gInfo.game,"Watch",node);

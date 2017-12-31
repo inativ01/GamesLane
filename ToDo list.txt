@@ -1,10 +1,11 @@
 To do:
-* Allow email and password change
+* Allow email and password change(???)
 * add "are you sure?" to endGame
 * display names of players in the game
-
-** do database updates without a server
 * popup message need to be smaller - relative to screen size
+* track score
+* User preferences (for each game)
+** reverse colors for single player?
 
 --- backgammon ---
 
@@ -12,4 +13,10 @@ To do:
 * used dice are opaque (tint)
 * allow UNDO
 * animation move
-* skip my own moves
+* igonore DB updates of my own moves
+* end conditions
+* add doubling die
+* animate end of turn
+* combine two DB updates to one
+
+

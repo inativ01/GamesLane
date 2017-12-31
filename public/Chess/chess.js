@@ -77,19 +77,9 @@ $("#chessClose").click( function() {
 $("#chessEnd").click( function() {
   gInfo.status="quit";
   gInfo.concede=auth.currentUser.displayName;
+  gData.player=-1;
   db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   db.ref("gameInfo/"+gameID).set(gInfo);
-
-/*
-  sendReq({
-    game:"chess",
-    gid:gameID,
-    uid:currentUID,
-    msg: "Quit",
-    board: gData.board,
-    concede: auth.currentUser.displayName
-  });
-*/
 });
 
 //*************************************************************************************************
@@ -108,18 +98,6 @@ $("#chessButtonJoin").click(function() {
     db.ref("gameInfo/"+gameID).set(gInfo);
   }
   else debug(0,"Game not Pending. Can't start");
-
-/*
-  sendReq({
-    game:"chess",
-    gid:gameID,
-    uid:currentUID,
-    msg: "Join",
-    role: this.value,
-    displayName: auth.currentUser.displayName,
-    photoURL: auth.currentUser.photoURL
-  });
-*/
 });
 
 /************************************************************************************************
@@ -142,7 +120,6 @@ function chessEvent(snapshot) {
   }
   debug(1,"chessEvent GID="+gameID+" status="+gInfo.status);
   debug(2,gData);
-  console.log("ig="+ignoreNextUpdate+" mode="+mode);
   if (ignoreNextUpdate==2) {
     if (mode == "animation") {
       ignoreNextUpdate=1;                                        // mark that response was received
@@ -194,7 +171,7 @@ function chessEvent(snapshot) {
          imageSize: "400x150",
       });
 
-      $("#chessBoard").hide();
+//      $("#chessBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -328,47 +305,14 @@ void draw() {
                    imageUrl: "../chess/stalemate.jpg",
                    imageSize: "400x150",
                 });
-              if (mychessIndex) {
-//                newGID= -1;
-//                gameMsg="chess";
+              if (mychessIndex) {                                     // Mark player ready to end
                 var updates= new Object();
                 for (var player in gInfo.players)
                   if (gInfo.players[player].uid==currentUID)
                     updates[player+'/uid']=0;
-console.log(mode);
-console.log(updates);
-console.log("/gameInfo/"+gInfo.gid+"/players/");
-                db.ref("/gameInfo/"+gInfo.gid+"/players/").update(updates)
-                .then(function() {
-                   db.ref("gameInfo/"+gInfo.gid+"/players/").once('value',
-                     function(Snap) {
-console.log("snap");
-                       var s=Snap.val();
-console.log(s);
-                       var clean=true;
-                       for (var p in s) {
-                         if (s[p].uid!=0) clean=false;
-                       }
-                       if (clean) {
-console.log("clean");
-                         var up=new Object();
-                         up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
-                         up["/gameInfo/"+gInfo.gid]={};
-            //             up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
-                         db.ref().update(up);
-                       }
-                     });
-                });
-/*
-                sendReq({
-                  game:"chess",
-                  gid:gameID,
-                  uid:currentUID,
-                  msg: "ExitGame",
-                });
-*/
+                db.ref("/gameInfo/"+gInfo.gid+"/players/").update(updates);
               }
-              $("#chessBoard").hide();
+//              $("#chessBoard").hide();
             }
             else if (gData.special.check) {
               sweetAlert({
@@ -745,18 +689,6 @@ void finalizeMove(movedPiece,newPiece) {
   animationInit(movedPiece,newPiece);                              // start the animation
   db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   db.ref("gameInfo/"+gameID).set(gInfo);
-
-/*
-  sendReq({
-    game:"chess",
-    gid:gameID,
-    uid:currentUID,
-    msg: "ChessMove",
-    special: gData.special,
-    player:gData.player, from:gData.from, to:gData.to, board:gData.board, movedPiece:movedPiece, newPiece:newPiece
-  });
-*/
-
 }
 
 function animationInit(movedPiece,newPiece) {
