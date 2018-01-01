@@ -11,13 +11,13 @@ var cnst={
   sidepieces:[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")],
   sidepiecesR:[loadImage("../backgammon/sidepiece0R.png"),loadImage("../backgammon/sidepiece1R.png")],
   diceImg:[0,0,0,0,0,0],
-  boardStart:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0],  // negative: white, positive: brown
-//  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
+//  boardStart:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0],  // negative: white, positive: brown
+  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
   dir:[-1,1],
   rollButton:[2.7,1.4,0.4,0.2],
   diceSize:0.2,
-  diceX1:2.5,
-  diceX2:2.9,
+  diceX1:[2.5,0.8],
+  diceX2:[2.9,1.2],
   diceY:1.4,
   diceArea:[2.5,1.3,0.8,0.4], // X,Y,W,H
   pipsX: 3.7,
@@ -122,8 +122,8 @@ $('#backgammonStartButton').click(function() {
     moveCnt:0,
     diceMoves:[0,0,0,0],
     dice:[0,0],
-//    pips:[167,167],
-    pips:[24,24],
+    pips:[167,167],
+//    pips:[24,24],
   };
   gInfo.players[$("#backgammonRole").val()]={
     uid:currentUID,
@@ -200,7 +200,7 @@ function backgammonEvent(snapshot) {
       printBoard();
       break;
     case "active":
-      reverse=((mybackgammonIndex==2)||(mybackgammonIndex==3 && gData.currentPlayer==1));
+      reverse=(mybackgammonIndex==2);
       printBoard();
       if (checkPlayer()) $("#backgammonTurn").css("color","red");
       if (gData.currentPlayer==0) $("#backgammonTurn").html("White player's turn");
@@ -308,10 +308,10 @@ void draw() {
         gData.moveCnt=0;
         printBoard();
         gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Brown":"White"].uid;
+        db.ref("gameInfo/"+gameID).set(gInfo);
       }
       mode="active";
       db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-      db.ref("gameInfo/"+gameID).set(gInfo);
     }
   }
 
@@ -331,9 +331,9 @@ function printDice() {
     case 2:
       sizeDice[0]*=0.5;
   }
-
-  image(cnst.diceImg[gData.dice[0]-1],cnst.diceX1*sizeSquare, cnst.diceY*sizeSquare, sizeDice[0],sizeDice[0]);
-  image(cnst.diceImg[gData.dice[1]-1],cnst.diceX2*sizeSquare, cnst.diceY*sizeSquare, sizeDice[1],sizeDice[1]);
+  var i=(reverse)?1-gData.currentPlayer:gData.currentPlayer;
+  image(cnst.diceImg[gData.dice[0]-1],cnst.diceX1[i]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[0],sizeDice[0]);
+  image(cnst.diceImg[gData.dice[1]-1],cnst.diceX2[i]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[1],sizeDice[1]);
 }
 
 /************************************************************************************************
@@ -410,6 +410,7 @@ void mouseReleased() {
         gData.currentPlayer=1-gData.currentPlayer;
         gData.dice=[0,0];
         gData.moveCnt=0;
+        gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Brown":"White"].uid;
       }
       db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       db.ref("gameInfo/"+gameID).set(gInfo);
@@ -562,6 +563,7 @@ function mouseSquare()
 {
   var x=Math.floor(mouseX/sizeSquare/0.236)-2;
   var y=Math.floor(mouseY/sizeSquare/1.5);
+  if (reverse) y=1-y;
   var n;
 
   if (x<0) n=-1;
@@ -584,13 +586,14 @@ function checkPlayer() {
 }
 
 //*************************************************************************************************
-// Let the server know about a completed backgammon move (called after the user clicked on the destination spot
+//
 //*************************************************************************************************
 
 function bgLocation(index,count) {
   var factor= (abs(gData.board[index])>6)?1:2;
   var l={x:0,y:0};
   if (index<24) {
+    if (reverse) index=23-index;
     if (index<12)
       l.y=sizeSquare*(2.65-count*factor*0.1);
     else
@@ -612,10 +615,12 @@ function bgLocation(index,count) {
     }
   }
   else if (index<26) {   // "eaten" pieces
+    if (reverse) index=49-index;
     l.x=sizeSquare*1.9;
     l.y=sizeSquare*((index==24) ? 1.2-count*factor*0.1 : 1.6+count*factor*0.1);
   }
   else {                 // completed pieces
+    if (reverse) index=53-index;
     l.x=sizeSquare*3.7;
     l.y=sizeSquare*((index==26) ? 2.80-count*0.05 : 0.1+count*0.05 );
   }

@@ -77,7 +77,7 @@ $("#chessClose").click( function() {
 $("#chessEnd").click( function() {
   gInfo.status="quit";
   gInfo.concede=auth.currentUser.displayName;
-  gData.player=-1;
+  gData.currentPlayer=-1;
   db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   db.ref("gameInfo/"+gameID).set(gInfo);
 });
@@ -93,7 +93,7 @@ $("#chessButtonJoin").click(function() {
       photoURL:auth.currentUser.photoURL};
     gInfo.status="active";
     gInfo.currentUID=gInfo.players["White"].uid;
-    gData.player=0;
+    gData.currentPlayer=0;
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
     db.ref("gameInfo/"+gameID).set(gInfo);
   }
@@ -143,8 +143,8 @@ function chessEvent(snapshot) {
   $("#chessTurn").html("");
   if (gInfo.status=="active") {
     if (checkPlayer()) $("#chessTurn").css("color","red");
-    if (gData.player==0) $("#chessTurn").html("White player's turn");
-    else if (gData.player==1) $("#chessTurn").html("Black player's turn");
+    if (gData.currentPlayer==0) $("#chessTurn").html("White player's turn");
+    else if (gData.currentPlayer==1) $("#chessTurn").html("Black player's turn");
   }
   switch(gInfo.status) {
     case "pending":
@@ -158,7 +158,7 @@ function chessEvent(snapshot) {
       break;
     case "active":
       $("#chessButtonJoin").hide();
-      reverse=((mychessIndex==2)||(mychessIndex==3 && gData.player==1));
+      reverse=((mychessIndex==2)||(mychessIndex==3 && gData.currentPlayer==1));
       printBoard();
       animationInit(gData.movedPiece,gData.newPiece);
       break;
@@ -280,10 +280,10 @@ void draw() {
             ignoreNextUpdate=0;
             if (checkPlayer()) $("#chessTurn").css("color","red");
             else               $("#chessTurn").css("color","black");
-            reverse=((mychessIndex==2)||(mychessIndex==3 && gData.player==1));
+            reverse=((mychessIndex==2)||(mychessIndex==3 && gData.currentPlayer==1));
           }
           printBoard();                                            // board may have flipped due to player change
-          if (gData.player==0) $("#chessTurn").html("White player's turn");
+          if (gData.currentPlayer==0) $("#chessTurn").html("White player's turn");
           else           $("#chessTurn").html("Black player's turn");
           markSquare(gData.from,#FF0000,2);                                // FROM location is color red
           markSquare(gData.to,#00FF00,2);                                  // TO location is color green
@@ -386,10 +386,10 @@ void mouseClicked () {
         if ((gData.board[gData.from.y][gData.from.x] % 6) === 5 && (gData.to.y%7) ===  0)    // if it's a pawn and it reached the last line
         {
           printBoard();
-          image(images[1+gData.player*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[2+gData.player*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[3+gData.player*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          image(images[4+gData.player*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[1+gData.currentPlayer*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
+          image(images[2+gData.currentPlayer*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
+          image(images[3+gData.currentPlayer*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[4+gData.currentPlayer*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
           mode="pawnUpgrade";
           return;
         }
@@ -641,7 +641,7 @@ function analyzeMoves() {
   for (var y=0; y<8; y++) {
     for (var x=0; x<8; x++) {
       var legalMoves=0;                                              // start counting posible moves from this square
-      if (Math.floor(gData.board[y][x]/6)==gData.player) {                       // only looks at squares that contain the current player's pieces
+      if (Math.floor(gData.board[y][x]/6)==gData.currentPlayer) {                       // only looks at squares that contain the current player's pieces
         for (var j=0;j<8;j++) {
           for (var i=0;i<8;i++) {
 //            gData.to={x:i,y:j};
@@ -663,8 +663,8 @@ function analyzeMoves() {
 // This is done comparing "player" (0-white, 1-black) with "mychessIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
 //*************************************************************************************************
 function checkPlayer() {
-  if (gData.player== -1) return false;
-  var p= (1 << gData.player);
+  if (gData.currentPlayer== -1) return false;
+  var p= (1 << gData.currentPlayer);
   return (mychessIndex & p)
 }
 
@@ -675,9 +675,9 @@ void finalizeMove(movedPiece,newPiece) {
   gData.board[gData.from.y][gData.from.x]=-1;                                      // Clear the old location
   var savedPiece=gData.board[gData.to.y][gData.to.x];
   gData.board[gData.to.y][gData.to.x]=newPiece;
-  gData.player=1-gData.player;
+  gData.currentPlayer=1-gData.currentPlayer;
 
-  var check=check4check(gData.board,gData.player);
+  var check=check4check(gData.board,gData.currentPlayer);
   gData.special={};
   if (check) gData.special.check=true;
   if (!analyzeMoves()) gData.special.endGame=true;
