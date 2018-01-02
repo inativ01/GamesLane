@@ -33,6 +33,9 @@
   <script src="../Libs/getmdl-select.min.js"></script>
   <script src="../Libs/jquery-3.2.1.min.js"></script>
   <script src="../Libs/processing.min.js"></script>
+<!--
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+-->
   <script src="../Libs/sweetalert.min.js"></script>
   <link rel="stylesheet" type="text/css" href="../Libs/sweetalert.css">
   <link rel="stylesheet" href="../main.css">
@@ -122,14 +125,12 @@
         <div id=chessHeader class="mdl-color--light-blue-200" style="padding: 20px;position:relative">
           <span id=chessTurn style="font-weight: bold"></span>
           <button id=chessButtonJoin class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-          <button id=chessExitMenu class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
-            <i class="material-icons">more_vert</i>
+          <button id=chessClose class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
+            <i class="material-icons">clear</i>
           </button>
-          <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
-            for="chessExitMenu">
-          <li id=chessEnd class="mdl-menu__item mdl-menu__item--full-bleed-divider" disabled>End Game</li>
-          <li id=chessClose class="mdl-menu__item">Return to Main Menu</li>
-          </ul>
+          <button id=chessEnd class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
+            <i class="material-icons">exit_to_app</i>
+          </button>
         </div>
         <canvas id=chessCanvas data-processing-sources="../chess/chess.js" ></canvas>
         <div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar" style="z-index: 10;">
@@ -174,15 +175,12 @@
         <div id=backgammonHeader class="mdl-color--light-blue-200" style="padding-top:10px;padding-left:20px;position:relative;height: 50px">
           <span id=backgammonTurn style="font-weight: bold"></span>
           <button id=backgammonButtonJoin class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-          <button hidden id=backgammonButtonRoll class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Roll</button>
-          <button id=backgammonExitMenu class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
-            <i class="material-icons">more_vert</i>
+          <button id=backgammonClose class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
+            <i class="material-icons">clear</i>
           </button>
-          <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
-            for="backgammonExitMenu">
-          <li id=backgammonEnd class="mdl-menu__item mdl-menu__item--full-bleed-divider" disabled>End Game</li>
-          <li id=backgammonClose class="mdl-menu__item">Return to Main Menu</li>
-          </ul>
+          <button id=backgammonEnd class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
+            <i class="material-icons">exit_to_app</i>
+          </button>
         </div>
         <canvas id=backgammonCanvas data-processing-sources="../backgammon/backgammon.js" ></canvas>
       </div>
@@ -284,7 +282,7 @@
       </div>
 
 <!-- backgammon -->
-      <div  style="width:110px; margin:auto" >
+      <div style="width:110px; margin:auto" >
         <h4 style="text-align:center" > Backgammon</h4>
         <div id=backgammonBadge></div>
         <input id="backgammonButton" class="gameMainButton" type="image" src="../backgammon/backgammonboard_full.png" width="100" height="100" >

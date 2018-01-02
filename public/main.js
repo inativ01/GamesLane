@@ -1,6 +1,5 @@
 'use strict';
 
-
 /**
  * The ID of the currently signed-in User. We keep track of this to detect Auth state change events that are just
  * programmatic token refresh but not a User status change.

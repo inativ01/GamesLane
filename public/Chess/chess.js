@@ -75,11 +75,27 @@ $("#chessClose").click( function() {
 //   User selected to quit (resign) the game
 //*************************************************************************************************
 $("#chessEnd").click( function() {
-  gInfo.status="quit";
-  gInfo.concede=auth.currentUser.displayName;
-  gData.currentPlayer=-1;
-  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-  db.ref("gameInfo/"+gameID).set(gInfo);
+  sweetAlert({
+    title: "Are you sure?",
+    text: "You will forfeit the game!",
+    type: "warning",
+    showCancelButton: true,
+    confirmButtonClass: "btn-danger",
+    confirmButtonText: "Yes, I quit!",
+    cancelButtonText: "No, keep playing",
+    closeOnConfirm: false
+  },
+  function(isConfirm) {
+    if (isConfirm) {
+      gInfo.status="quit";
+      gInfo.concede=auth.currentUser.displayName;
+      gData.currentPlayer=-1;
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+      db.ref("gameInfo/"+gameID).set(gInfo);
+    } else {
+      sweetAlert("Cancelled", "Keep Playing", "error");
+    }
+  });
 });
 
 //*************************************************************************************************

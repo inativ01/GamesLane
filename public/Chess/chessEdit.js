@@ -106,7 +106,7 @@ $('#chessStartButton').click(function() {
     board: board,
     movedPiece:-1,
     newPiece:-1,
-    player:-1,
+    currentPlayer:-1,
   };
   gInfo.players[$("#chessRole").val()]={
     uid:currentUID,

@@ -1,7 +1,7 @@
 [General]
 Signature=ConTEXT project file
 FilesCount=8
-ActiveFile=2
+ActiveFile=8
 Maximized=1
 RelativePath=0
 Root=
@@ -13,35 +13,35 @@ Left=78
 Top=78
 Width=1302
 Height=471
-TopLine=245
-CursorX=12
-CursorY=263
+TopLine=0
+CursorX=0
+CursorY=1
 Highlighter=
 BookmarkCount=0
 
 [File2]
 Name=public\chess\chess.js
 Open=1
-Left=156
-Top=156
+Left=130
+Top=130
 Width=1302
 Height=471
-TopLine=303
-CursorX=31
-CursorY=322
+TopLine=162
+CursorX=0
+CursorY=187
 Highlighter=
 BookmarkCount=0
 
 [File3]
 Name=public\chess\chessEdit.js
-Open=0
-Left=0
-Top=0
+Open=1
+Left=182
+Top=182
 Width=1302
 Height=471
-TopLine=104
-CursorX=14
-CursorY=122
+TopLine=90
+CursorX=4
+CursorY=108
 Highlighter=
 BookmarkCount=0
 
@@ -65,15 +65,15 @@ Left=104
 Top=104
 Width=1302
 Height=471
-TopLine=269
-CursorX=17
-CursorY=291
+TopLine=9
+CursorX=0
+CursorY=38
 Highlighter=
 BookmarkCount=0
 
 [File6]
 Name=handleGame.js
-Open=1
+Open=0
 Left=52
 Top=52
 Width=1302
@@ -104,8 +104,8 @@ Left=130
 Top=130
 Width=1302
 Height=471
-TopLine=372
+TopLine=228
 CursorX=0
-CursorY=392
+CursorY=251
 Highlighter=
 BookmarkCount=0
