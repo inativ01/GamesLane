@@ -6,23 +6,20 @@
 // -----------------------
 
 var cnst={
-  boardImage:loadImage("../backgammon/board1.jpg"),
+  boardPic:[loadImage("../backgammon/board.jpg"),loadImage("../backgammon/boardR.jpg")],
   pieces:[loadImage("../backgammon/piece0.png"),loadImage("../backgammon/piece1.png")],
-  sidepieces:[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")],
-  sidepiecesR:[loadImage("../backgammon/sidepiece0R.png"),loadImage("../backgammon/sidepiece1R.png")],
+  sidepieces:[[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")],
+              [loadImage("../backgammon/sidepiece0R.png"),loadImage("../backgammon/sidepiece1R.png")]],
   diceImg:[0,0,0,0,0,0],
-//  boardStart:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0],  // negative: white, positive: brown
+//  boardStart:[2,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-7,-2,0,0,1,2],  // negative: white, positive: brown
   boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
   dir:[-1,1],
-  rollButton:[2.7,1.4,0.4,0.2],
   diceSize:0.2,
+  rollButton:[2.7,0.95,1.4,0.4,0.2],
   diceX1:[2.5,0.8],
   diceX2:[2.9,1.2],
   diceY:1.4,
-  diceArea:[2.5,1.3,0.8,0.4], // X,Y,W,H
-  pipsX: 3.7,
-  pipsY1: 1.2,
-  pipsY2: 1.8,
+  pips:[[3.7,1.2,1.8],[0.15,1.82,1.22]],
 };
 
 var ignoreNextUpdate=0;
@@ -35,7 +32,7 @@ var pieceMoving={
   animateDice:0,
 };
 
-var reverse=false;                                                    // display reverse board for brown player
+var reverse=0;                                                    // display reverse board for brown player
 var mybackgammonIndex=0;                                              // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Brown
@@ -86,6 +83,8 @@ $("#backgammonEnd").click( function() {
     confirmButtonClass: "btn-danger",
     confirmButtonText: "Yes, I quit!",
     cancelButtonText: "No, keep playing",
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
     closeOnConfirm: false
   },
   function(isConfirm) {
@@ -208,7 +207,6 @@ function backgammonEvent(snapshot) {
   switch(gInfo.status) {
     case "pending":
       var color= (!gInfo.players.White) ? "White" : "Brown";
-      reverse=(color=="Brown");
       $("#backgammonButtonJoin").val(color);
       $("#backgammonButtonJoin").html("Join as "+color);
       $("#backgammonButtonJoin").show();
@@ -216,7 +214,7 @@ function backgammonEvent(snapshot) {
       printBoard();
       break;
     case "active":
-      reverse=(mybackgammonIndex==2);
+      reverse=(mybackgammonIndex==2)?1:0;
       printBoard();
       if (checkPlayer()) $("#backgammonTurn").css("color","red");
       if (gData.currentPlayer==0) $("#backgammonTurn").html("White player's turn");
@@ -347,9 +345,8 @@ function printDice() {
     case 2:
       sizeDice[0]*=0.5;
   }
-  var i=(reverse)?1-gData.currentPlayer:gData.currentPlayer;
-  image(cnst.diceImg[gData.dice[0]-1],cnst.diceX1[i]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[0],sizeDice[0]);
-  image(cnst.diceImg[gData.dice[1]-1],cnst.diceX2[i]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[1],sizeDice[1]);
+  image(cnst.diceImg[gData.dice[0]-1],cnst.diceX1[gData.currentPlayer]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[0],sizeDice[0]);
+  image(cnst.diceImg[gData.dice[1]-1],cnst.diceX2[gData.currentPlayer]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[1],sizeDice[1]);
 }
 
 /************************************************************************************************
@@ -364,7 +361,7 @@ void mousePressed () {
   if (!checkPlayer() || mode!="active") return;
   if (gData.dice[0]==0) {                                             // need to role dice
     var x=mouseX/sizeSquare, y=mouseY/sizeSquare;
-    if (x>cnst.rollButton[0] && x<cnst.rollButton[0]+cnst.rollButton[2] && y>cnst.rollButton[1] && y<cnst.rollButton[1]+cnst.rollButton[3]) {
+    if (x>cnst.rollButton[gData.currentPlayer] && x<cnst.rollButton[gData.currentPlayer]+cnst.rollButton[3] && y>cnst.rollButton[2] && y<cnst.rollButton[2]+cnst.rollButton[4]) {
       mode="animation";
       pieceMoving.animateDice=60;
       pieceMoving.active=false;
@@ -527,26 +524,26 @@ boolean checkAnyMove() {
 //*************************************************************************************************
 function printBoard() {
   size(sizeSquare*4,sizeSquare*3);
-  image(cnst.boardImage,0,0,sizeSquare*4,sizeSquare*3);
+  image(cnst.boardPic[reverse],0,0,sizeSquare*4,sizeSquare*3);
   textFont(loadFont("Meta-Bold.ttf"));
   for (var i=0;i<24;i++) {
     var color=(gData.board[i]>0)?1:0;
     for (var j=0;j<abs(gData.board[i]);j++)
     {
       var l=bgLocation(i,j);
-      image(cnst.pieces[color],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
+      image(cnst.pieces[color],l.x,l.y,l.sx,l.sy);
     }
   }
   for (var i=24;i<26;i++) {
     for (var j=0;j<abs(gData.board[i]);j++) {
       l=bgLocation(i,j);
-      image(cnst.pieces[i-24],l.x,l.y,sizeSquare*0.2,sizeSquare*0.2);
+      image(cnst.pieces[i-24],l.x,l.y,l.sx,l.sy);
     }
   }
   for (var i=26;i<28;i++) {
     for (var j=0;j<abs(gData.board[i]);j++) {
       l=bgLocation(i,j);
-      image(cnst.sidepieces[i-26],l.x,l.y,sizeSquare*0.2,sizeSquare*0.1);
+      image(cnst.sidepieces[reverse][i-26],l.x,l.y,l.sx,l.sy);
     }
   }
 
@@ -556,14 +553,14 @@ function printBoard() {
   if (gData.dice[0]==0) {                                             // no dice
     if (checkPlayer()) {                                              // Print "roll" button"
       fill(#CC6600);
-      rect(cnst.rollButton[0]*sizeSquare,cnst.rollButton[1]*sizeSquare,cnst.rollButton[2]*sizeSquare,cnst.rollButton[3]*sizeSquare,sizeSquare);
+      rect(cnst.rollButton[gData.currentPlayer]*sizeSquare,cnst.rollButton[2]*sizeSquare,cnst.rollButton[3]*sizeSquare,cnst.rollButton[4]*sizeSquare,sizeSquare);
       fill(#000000);
-      text("Roll",(cnst.rollButton[0]+cnst.rollButton[2]*0.4)*sizeSquare,(cnst.rollButton[1]+cnst.rollButton[3]*0.6)*sizeSquare);
+      text("Roll",(cnst.rollButton[gData.currentPlayer]+cnst.rollButton[3]*0.4)*sizeSquare,(cnst.rollButton[2]+cnst.rollButton[4]*0.6)*sizeSquare);
     }
   }
   else printDice();
-  text(gData.pips[0],sizeSquare*cnst.pipsX, sizeSquare*cnst.pipsY1);
-  text(gData.pips[1],sizeSquare*cnst.pipsX, sizeSquare*cnst.pipsY2);
+  text(gData.pips[0],sizeSquare*cnst.pips[reverse][0], sizeSquare*cnst.pips[reverse][1]);
+  text(gData.pips[1],sizeSquare*cnst.pips[reverse][0], sizeSquare*cnst.pips[reverse][2]);
 }
 
 function printRect(area) {
@@ -579,7 +576,10 @@ function mouseSquare()
 {
   var x=Math.floor(mouseX/sizeSquare/0.236)-2;
   var y=Math.floor(mouseY/sizeSquare/1.5);
-  if (reverse) y=1-y;
+  if (reverse) {
+    y=1-y;
+    x=12-x;
+  }
   var n;
 
   if (x<0) n=-1;
@@ -607,9 +607,8 @@ function checkPlayer() {
 
 function bgLocation(index,count) {
   var factor= (abs(gData.board[index])>6)?1:2;
-  var l={x:0,y:0};
+  var l={x:0,y:0,sx:sizeSquare*0.2,sy:sizeSquare*0.2};
   if (index<24) {
-    if (reverse) index=23-index;
     if (index<12)
       l.y=sizeSquare*(2.65-count*factor*0.1);
     else
@@ -631,14 +630,17 @@ function bgLocation(index,count) {
     }
   }
   else if (index<26) {   // "eaten" pieces
-    if (reverse) index=49-index;
     l.x=sizeSquare*1.9;
     l.y=sizeSquare*((index==24) ? 1.2-count*factor*0.1 : 1.6+count*factor*0.1);
   }
   else {                 // completed pieces
-    if (reverse) index=53-index;
     l.x=sizeSquare*3.7;
     l.y=sizeSquare*((index==26) ? 2.80-count*0.05 : 0.1+count*0.05 );
+    l.sy=sizeSquare*0.1;
+  }
+  if (reverse) {
+    l.x=4*sizeSquare-l.sx-l.x;
+    l.y=3*sizeSquare-l.sy-l.y;
   }
   return l;
 }
