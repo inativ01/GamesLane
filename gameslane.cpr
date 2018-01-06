@@ -1,7 +1,7 @@
 [General]
 Signature=ConTEXT project file
 FilesCount=8
-ActiveFile=8
+ActiveFile=0
 Maximized=1
 RelativePath=0
 Root=
@@ -104,8 +104,8 @@ Left=130
 Top=130
 Width=1302
 Height=471
-TopLine=0
-CursorX=0
-CursorY=0
+TopLine=609
+CursorX=13
+CursorY=640
 Highlighter=
 BookmarkCount=0

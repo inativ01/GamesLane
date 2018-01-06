@@ -1,8 +1,6 @@
 To do:
 * Allow email and password change(???)
-* add "are you sure?" to endGame
 * display names of players in the game
-* popup message need to be smaller - relative to screen size
 * track score
 * User preferences (for each game)
 ** reverse colors for single player?
@@ -12,11 +10,9 @@ To do:
 * for double, show 4 dice
 * used dice are opaque (tint)
 * allow UNDO
-* animation move
+* animation move (not for player)
 * igonore DB updates of my own moves
-* end conditions
-* add doubling die
+* add doubling die - game series
 * animate end of turn
-* combine two DB updates to one
 
 

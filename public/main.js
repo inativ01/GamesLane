@@ -15,6 +15,11 @@ var debugLevel=2;
 var hints=false;
 var direction=$('body').attr('dir');
 var lang=$('html').attr('lang');
+var roleColors={
+  'White':'#ffffff',
+  'Brown':'#9b4e0f',
+  'Black':'#000000'
+}
 
 function debug(level, msg) {
   switch (level) {
@@ -383,35 +388,19 @@ function addGameToList(gInfo) {
   debug(2,"addGameToList");
   var active=false;
   gameInfo[gInfo.gid]=gInfo;
-  var node=$("<button id='line-"+gInfo.game+"-"+gInfo.gid+"' value='"+gInfo.gid+"' style='width:300px; margin: auto' class='mdl-list__item mdl-list__item--two-line'></button>");
-  var sp=$("<span class='mdl-list__item-primary-content'></span>");
-  node.append(sp);
-  var pic=$("<img width='40' height='40' class='mdl-list__item-secondary-content' style='border-radius: 50%;'>");
-  node.append(pic);
-  var first=true;
+  var node=$("<button id='line-"+gInfo.game+"-"+gInfo.gid+"' value='"+gInfo.gid+"' style='width:300px; margin: auto' class='mdl-list__item '></button>");
+  var justMe=true;
   var partner="yourself";
   for  (var player in gInfo.players) {
     var thisPlayer=gInfo.players[player];
-	  var pnode = $("<span></span>");
-
+    node.append("<div style='background:"+roleColors[player]+";border:medium "+((thisPlayer.uid==gInfo.currentUID)?"solid":"none")+" red;margin: auto'><img  style='border-radius: 50%;padding:5px;width:40px;height:40px' src='"+thisPlayer.photoURL+"'></div>");
     if (thisPlayer.uid==currentUID) {
       active=true;
-      if (first) pic.attr('src',thisPlayer.photoURL);  // use my picture only if I'm the only one
-      pnode.html("I'm playing "+player);
-      pnode.addClass("mdl-list__item-sub-title");
-      sp.append(pnode);
     }
     else {
-      pnode.html(thisPlayer.displayName+" playing "+player);
-      if (first) {
-        pic.attr('src',thisPlayer.photoURL);
-        first=false;
+      if (justMe) {
+        justMe=false;
         partner=thisPlayer.displayName;
-        sp.prepend(pnode);
-      }
-      else {
-        pnode.className = "mdl-list__item-sub-title";
-        sp.append(pnode);
       }
     }
   }
@@ -424,7 +413,7 @@ function addGameToList(gInfo) {
           updates[player+'/uid']=0;
       db.ref("gameInfo/"+gInfo.gid+"/players/").update(updates);
       addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
-    }  
+    }
   }
   else if (gInfo.currentUID==currentUID)  {
       addToList(gInfo.game,"Active",node);
