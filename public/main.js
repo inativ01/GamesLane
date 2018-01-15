@@ -391,9 +391,13 @@ function addGameToList(gInfo) {
   var node=$("<button id='line-"+gInfo.game+"-"+gInfo.gid+"' value='"+gInfo.gid+"' style='width:300px; margin: auto' class='mdl-list__item '></button>");
   var justMe=true;
   var partner="yourself";
-  for  (var player in gInfo.players) {
-    var thisPlayer=gInfo.players[player];
-    node.append("<div style='background:"+roleColors[player]+";border:medium "+((thisPlayer.uid==gInfo.currentUID)?"solid":"none")+" red;margin: auto'><img  style='border-radius: 50%;padding:5px;width:40px;height:40px' src='"+thisPlayer.photoURL+"'></div>");
+  for  (var p in gInfo.players) {
+    var thisPlayer=gInfo.players[p];
+    var element= $("<div><img  style='border-radius: 50%;padding:5px;width:40px;height:40px' src='"+thisPlayer.photoURL+"'></div>");
+    element.css({'background':roleColors[p], 'border':"medium "+((thisPlayer.uid==gInfo.currentUID)?"solid":"none")+" red",'margin': 'auto' });
+    element.prop('title', gInfo.players[p].displayName);
+    node.append(element);
+//    node.append("<div style='background:"+roleColors[p]+";border:medium "+((thisPlayer.uid==gInfo.currentUID)?"solid":"none")+" red;margin: auto'><img  style='border-radius: 50%;padding:5px;width:40px;height:40px' src='"+thisPlayer.photoURL+"'></div>");
     if (thisPlayer.uid==currentUID) {
       active=true;
     }
@@ -408,9 +412,9 @@ function addGameToList(gInfo) {
   {
     if (active) {
       var updates=new Object();
-      for (var player in gInfo.players)
-        if (gInfo.players[player].uid==currentUID)
-          updates[player+'/uid']=0;
+      for (var p in gInfo.players)
+        if (gInfo.players[p].uid==currentUID)
+          updates[p+'/uid']=0;
       db.ref("gameInfo/"+gInfo.gid+"/players/").update(updates);
       addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
     }

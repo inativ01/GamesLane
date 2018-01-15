@@ -131,3 +131,49 @@ a {
 mdl-spinner {
   z-inderx: 10;
 }
+
+.playerPics {
+  float:left;
+  width:50%;
+  line-height:0px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.playerPics div {
+  margin:auto;
+}
+  
+.playerPics img {
+  border-radius: 50%;
+  padding:5px;
+  width:40px;
+  height:40px
+}
+/*
+.playerPics div {
+  display: inline-block;
+}
+
+.playerPics:after {
+  content: '';
+  font-size:0;
+  width: 100%;
+  display: inline-block;
+}
+*/
+
+.gameHeader {
+  position:relative;
+  height: 50px;
+  line-height: 50px;
+  text-align: justify;
+}
+
+.gameContent {
+  margin:  auto;
+}
+
+.gameTurn {
+  font-weight: bold;
+}

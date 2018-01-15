@@ -1,6 +1,5 @@
 To do:
 * Allow email and password change(???)
-* display names of players in the game
 * track score
 * User preferences (for each game)
 ** reverse colors for single player?

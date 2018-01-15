@@ -58,14 +58,14 @@ var players= {White:"", Black:""}
 //*************************************************************************************************
 window.addEventListener('resize', function() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#chessContent").css("width",sizeSquare*10);
+  $("#chessBoard .gameContent").css("width",sizeSquare*10);
   if($("#chessBoard").is(":visible")) printBoard();
 });
 
 //*************************************************************************************************
 //   User selected to go to main menul
 //*************************************************************************************************
-$("#chessClose").click( function() {
+$("#chessBoard .gameButtonClose").click( function() {
   newGID= -1;
   gameMsg="chess";
   $("#chessBoard").hide();
@@ -74,7 +74,7 @@ $("#chessClose").click( function() {
 //*************************************************************************************************
 //   User selected to quit (resign) the game
 //*************************************************************************************************
-$("#chessEnd").click( function() {
+$("#chessBoard .gameButtonEnd").click( function() {
   sweetAlert({
     title: "Are you sure?",
     text: "You will forfeit the game!",
@@ -101,7 +101,7 @@ $("#chessEnd").click( function() {
 //*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
-$("#chessButtonJoin").click(function() {
+$("#chessBoard .gameButtonJoin").click(function() {
   if (gInfo.status=="pending") {
     gInfo.players[this.value]={
       uid:currentUID,
@@ -136,6 +136,14 @@ function chessEvent(snapshot) {
   }
   debug(1,"chessEvent GID="+gameID+" status="+gInfo.status);
   debug(2,gData);
+  for (var p in gInfo.players) {
+    if (!$("#chessBoard .playerPics .player"+p).length) {                         // still don't have pic of player
+      var element= $("<div class='player"+p+"' ><img src='"+gInfo.players[p].photoURL+"'></div>");
+      element.css('background',roleColors[p]);
+      element.prop('title', gInfo.players[p].displayName);
+      $("#chessBoard .playerPics").append(element);
+    }
+  }
   if (ignoreNextUpdate==2) {
     if (mode == "animation") {
       ignoreNextUpdate=1;                                        // mark that response was received
@@ -151,30 +159,31 @@ function chessEvent(snapshot) {
   if (gInfo.players.White && gInfo.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
   if (gInfo.players.Black && gInfo.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
   debug(2,"mychessIndex="+mychessIndex);
-  if (mychessIndex)
-    $("#chessEnd").attr("disabled",false);
+  if (mychessIndex && gInfo.status!="quit")
+    $("#chessBoard .gameButtonEnd").attr("disabled",false);
   else
-    $("#chessEnd").attr("disabled",true);
-  $("#chessTurn").css("color","black");
-  $("#chessTurn").html("");
+    $("#chessBoard .gameButtonEnd").attr("disabled",true);
+  $("#chessBoard .gameTurn").css("color","black");
+  $("#chessBoard .gameTurn").html("");
   if (gInfo.status=="active") {
-    if (checkPlayer()) $("#chessTurn").css("color","red");
-    if (gData.currentPlayer==0) $("#chessTurn").html("White player's turn");
-    else if (gData.currentPlayer==1) $("#chessTurn").html("Black player's turn");
+    if (checkPlayer()) $("#chessBoard .gameTurn").css("color","red");
+    if (gData.currentPlayer==0) $("#chessBoard .gameTurn").html("White player's turn");
+    else if (gData.currentPlayer==1) $("#chessBoard .gameTurn").html("Black player's turn");
   }
+  $("#chessBoard .gameButtonJoin").hide();
   switch(gInfo.status) {
     case "pending":
       var color= (!gInfo.players.White) ? "White" : "Black";
       reverse=(color=="Black");
-      $("#chessButtonJoin").val(color);
-      $("#chessButtonJoin").html("Join as "+color);
-      $("#chessButtonJoin").show();
+      $("#chessBoard .gameButtonJoin").val(color);
+      $("#chessBoard .gameButtonJoin").html("Join as "+color);
+      $("#chessBoard .gameButtonJoin").show();
       mode="passive";
       printBoard();
       break;
     case "active":
-      $("#chessButtonJoin").hide();
-      reverse=((mychessIndex==2)||(mychessIndex==3 && gData.currentPlayer==1));
+//      reverse=((mychessIndex==2)||(mychessIndex==3 && gData.currentPlayer==1));
+      reverse=(mychessIndex==2);
       printBoard();
       animationInit(gData.movedPiece,gData.newPiece);
       break;
@@ -203,7 +212,7 @@ function chessEvent(snapshot) {
 //*************************************************************************************************
 void setup() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#chessContent").css("width",sizeSquare*10);
+  $("#chessBoard .gameContent").css("width",sizeSquare*10);
   size(sizeSquare*10,sizeSquare*10);
   for (var i=0; i<12; i++) {
     images[i]=createImage(333,333,RGB);
@@ -228,6 +237,7 @@ void draw() {
   if (gameMsg == "chess") {
     debug(2,"New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game
+    $("#chessBoard .playerPics").empty();         // remove pictures of players
     if (gameID != -1) {
       db.ref("gameData/chess/"+gameID).off();
       db.ref("gameChat/chess/"+gameID).off();
@@ -294,13 +304,13 @@ void draw() {
         else {
           if (ignoreNextUpdate==1) {                             // received response
             ignoreNextUpdate=0;
-            if (checkPlayer()) $("#chessTurn").css("color","red");
-            else               $("#chessTurn").css("color","black");
+            if (checkPlayer()) $("#chessBoard .gameTurn").css("color","red");
+            else               $("#chessBoard .gameTurn").css("color","black");
             reverse=((mychessIndex==2)||(mychessIndex==3 && gData.currentPlayer==1));
           }
           printBoard();                                            // board may have flipped due to player change
-          if (gData.currentPlayer==0) $("#chessTurn").html("White player's turn");
-          else           $("#chessTurn").html("Black player's turn");
+          if (gData.currentPlayer==0) $("#chessBoard .gameTurn").html("White player's turn");
+          else           $("#chessBoard .gameTurn").html("Black player's turn");
           markSquare(gData.from,#FF0000,2);                                // FROM location is color red
           markSquare(gData.to,#00FF00,2);                                  // TO location is color green
           if (gData.special) {                                             // now need to check special messages or end conditions
@@ -402,10 +412,12 @@ void mouseClicked () {
         if ((gData.board[gData.from.y][gData.from.x] % 6) === 5 && (gData.to.y%7) ===  0)    // if it's a pawn and it reached the last line
         {
           printBoard();
-          image(images[1+gData.currentPlayer*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[2+gData.currentPlayer*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare,sizeSquare/2,sizeSquare/2);
-          image(images[3+gData.currentPlayer*6],startX+gData.to.x*sizeSquare, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          image(images[4+gData.currentPlayer*6],startX+gData.to.x*sizeSquare+sizeSquare/2, startY+gData.to.y*sizeSquare+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          if (reverse) {toX=startX+(7-gData.to.x)*sizeSquare; toY=startY+(7-gData.to.y)*sizeSquare }
+          else         {toX=startX+gData.to.x*sizeSquare;     toY=startY+gData.to.y*sizeSquare }
+          image(images[1+gData.currentPlayer*6],toX,              toY,sizeSquare/2,sizeSquare/2);
+          image(images[2+gData.currentPlayer*6],toX+sizeSquare/2, toY,sizeSquare/2,sizeSquare/2);
+          image(images[3+gData.currentPlayer*6],toX,              toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[4+gData.currentPlayer*6],toX+sizeSquare/2, toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
           mode="pawnUpgrade";
           return;
         }

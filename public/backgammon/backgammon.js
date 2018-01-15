@@ -58,14 +58,14 @@ var mode="passive";                                                   // "passiv
 //*************************************************************************************************
 window.addEventListener('resize', function() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
-  $("#backgammonContent").css("width",sizeSquare*4);
+  $("#backgammonBoard .gameContent").css("width",sizeSquare*4);
   if($("#backgammonBoard").is(":visible")) printBoard();
 });
 
 //*************************************************************************************************
 //   User selected to go to main menul
 //*************************************************************************************************
-$("#backgammonClose").click( function() {
+$("#backgammonBoard .gameButtonClose").click( function() {
   newGID= -1;
   gameMsg="backgammon";
   $("#backgammonBoard").hide();
@@ -74,7 +74,7 @@ $("#backgammonClose").click( function() {
 //*************************************************************************************************
 //   User selected to quit (resign) the game
 //*************************************************************************************************
-$("#backgammonEnd").click( function() {
+$("#backgammonBoard .gameButtonEnd").click( function() {
   sweetAlert({
     title: "Are you sure?",
     text: "You will forfeit the game!",
@@ -157,7 +157,7 @@ $('#backgammonStartButton').click(function() {
 //*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
-$("#backgammonButtonJoin").click(function() {
+$("#backgammonBoard .gameButtonJoin").click(function() {
   if (gInfo.status=="pending") {
     gInfo.players[this.value]={
       uid:currentUID,
@@ -193,32 +193,40 @@ function backgammonEvent(snapshot) {
   debug(1,"backgammonMove GID="+gameID+" status="+gInfo.status);
   debug(2,gData);
   debug(2,gInfo);
+  for (var p in gInfo.players) {
+    if (!$("#backgammonBoard .playerPics .player"+p).length) {                         // still don't have pic of player
+      var element= $("<div class='player"+p+"' ><img src='"+gInfo.players[p].photoURL+"'></div>");
+      element.css('background',roleColors[p]);
+      element.prop('title', gInfo.players[p].displayName);
+      $("#backgammonBoard .playerPics").append(element);
+    }
+  }
   mybackgammonIndex=0;
   if (gInfo.players.White && gInfo.players.White.uid==currentUID) mybackgammonIndex|=1;             // turn on bit 0
   if (gInfo.players.Brown && gInfo.players.Brown.uid==currentUID) mybackgammonIndex|=2;             // turn on bit 1
   debug(2,"mybackgammonIndex="+mybackgammonIndex);
-  $("#backgammonButtonJoin").hide();
-  if (mybackgammonIndex)
-    $("#backgammonEnd").attr("disabled",false);
+  $("#backgammonBoard .gameButtonJoin").hide();
+  if (mybackgammonIndex && gInfo.status!="quit")
+    $("#backgammonBoard .gameButtonEnd").attr("disabled",false);
   else
-    $("#backgammonEnd").attr("disabled",true);
-  $("#backgammonTurn").css("color","black");
-  $("#backgammonTurn").html("");
+    $("#backgammonBoard .gameButtonEnd").attr("disabled",true);
+  $("#backgammonBoard .gameTurn").css("color","black");
+  $("#backgammonBoard .gameTurn").html("");
   switch(gInfo.status) {
     case "pending":
       var color= (!gInfo.players.White) ? "White" : "Brown";
-      $("#backgammonButtonJoin").val(color);
-      $("#backgammonButtonJoin").html("Join as "+color);
-      $("#backgammonButtonJoin").show();
+      $("#backgammonBoard .gameButtonJoin").val(color);
+      $("#backgammonBoard .gameButtonJoin").html("Join as "+color);
+      $("#backgammonBoard .gameButtonJoin").show();
       mode="passive";
       printBoard();
       break;
     case "active":
       reverse=(mybackgammonIndex==2)?1:0;
       printBoard();
-      if (checkPlayer()) $("#backgammonTurn").css("color","red");
-      if (gData.currentPlayer==0) $("#backgammonTurn").html("White player's turn");
-      else if (gData.currentPlayer==1) $("#backgammonTurn").html("Brown player's turn");
+      if (checkPlayer()) $("#backgammonBoard .gameTurn").css("color","red");
+      if (gData.currentPlayer==0) $("#backgammonBoard .gameTurn").html("White player's turn");
+      else if (gData.currentPlayer==1) $("#backgammonBoard .gameTurn").html("Brown player's turn");
       if (mode !="animation") mode="active";
       if (gData.special) {                                             // now need to check special messages or end conditions
         if (gData.special.endGame) {
@@ -264,7 +272,7 @@ function backgammonEvent(snapshot) {
 //*************************************************************************************************
 void setup() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
-  $("#backgammonContent").css("width",sizeSquare*4);
+  $("#backgammonBoard .gameContent").css("width",sizeSquare*4);
   size(sizeSquare*4,sizeSquare*3);
   for (var i=0;i<6;i++)
     cnst.diceImg[i]=loadImage("../die"+(i+1)+".png");
@@ -279,6 +287,7 @@ void draw() {
   if (gameMsg == "backgammon") {
     debug(2,"New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game
+    $("#backgammonBoard .playerPics").empty();         // remove pictures of players
     if (gameID != -1) {
       db.ref("gameData/backgammon/"+gameID).off();
       db.ref("gameChat/backgammon/"+gameID).off();

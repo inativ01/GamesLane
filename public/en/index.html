@@ -120,17 +120,23 @@
 
   <section>
 <!-- Chess game -->
-    <div id=chessBoard class="modal gameBoard" title="chess" style="top:0px" >
-      <div id=chessContent style="margin:  auto;">
-        <div id=chessHeader class="mdl-color--light-blue-200" style="padding: 20px;position:relative">
-          <span id=chessTurn style="font-weight: bold"></span>
-          <button id=chessButtonJoin class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-          <button id=chessClose class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
-            <i class="material-icons">clear</i>
-          </button>
-          <button id=chessEnd class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
-            <i class="material-icons">exit_to_app</i>
-          </button>
+    <div id=chessBoard class="modal gameBoard" style="top:0px" >
+      <div class="gameContent" >
+        <div class="gameHeader mdl-color--light-blue-200" >
+          <div style="float:left;padding-left:10px;min-width:20%;">
+            <p style="display: inline-block;"></p>
+            <span class="gameTurn" ></span>
+            <button class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect gameButtonJoin"></button>
+          </div>
+          <div class="playerPics"></div>
+          <div style="float:right;">
+            <button title="Quit the game" class="mdl-button mdl-js-button mdl-button--icon gameButtonEnd" >
+              <i class="material-icons">exit_to_app</i>
+            </button>
+            <button title="Exit to main menu"  class="mdl-button mdl-js-button mdl-button--icon gameButtonClose" >
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
         </div>
         <canvas id=chessCanvas data-processing-sources="../chess/chess.js" ></canvas>
         <div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar" style="z-index: 10;">
@@ -170,17 +176,23 @@
     </div>
 
 <!-- Backgammon game -->
-    <div id=backgammonBoard class="modal gameBoard" title="backgammon" style="top:0px" >
-      <div id=backgammonContent style="margin:  auto;">
-        <div id=backgammonHeader class="mdl-color--light-blue-200" style="padding-top:10px;padding-left:20px;position:relative;height: 50px">
-          <span id=backgammonTurn style="font-weight: bold"></span>
-          <button id=backgammonButtonJoin class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-          <button id=backgammonClose class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
-            <i class="material-icons">clear</i>
-          </button>
-          <button id=backgammonEnd class="mdl-button mdl-js-button mdl-button--icon" style="float: right;">
-            <i class="material-icons">exit_to_app</i>
-          </button>
+    <div id=backgammonBoard class="modal gameBoard" style="top:0px" >
+      <div class="gameContent" >
+        <div class="gameHeader mdl-color--light-blue-200" >
+          <div style="float:left;padding-left:10px;min-width:20%;">
+            <p style="display: inline-block;"></p>
+            <span class="gameTurn" ></span>
+            <button class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect gameButtonJoin"></button>
+          </div>
+          <div class="playerPics"></div>
+          <div style="float:right;">
+            <button title="Quit the game" class="mdl-button mdl-js-button mdl-button--icon gameButtonEnd" >
+              <i class="material-icons">exit_to_app</i>
+            </button>
+            <button title="Exit to main menu"  class="mdl-button mdl-js-button mdl-button--icon gameButtonClose" >
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
         </div>
         <canvas id=backgammonCanvas data-processing-sources="../backgammon/backgammon.js" ></canvas>
       </div>
