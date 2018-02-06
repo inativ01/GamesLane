@@ -10,14 +10,15 @@ var cnst={
   pieces:[loadImage("../backgammon/piece0.png"),loadImage("../backgammon/piece1.png")],
   sidepieces:[[loadImage("../backgammon/sidepiece0.png"),loadImage("../backgammon/sidepiece1.png")],
               [loadImage("../backgammon/sidepiece0R.png"),loadImage("../backgammon/sidepiece1R.png")]],
+  undoImg: loadImage("../undo.png"),
   diceImg:[0,0,0,0,0,0],
 //  boardStart:[2,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-7,-2,0,0,1,2],  // negative: white, positive: brown
   boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
   dir:[-1,1],
   diceSize:0.2,
   rollButton:[2.7,0.95,1.4,0.4,0.2],
-  diceX1:[2.5,0.8],
-  diceX2:[2.9,1.2],
+  undoX: 1.9,
+  diceX:[2.5,0.8],
   diceY:1.4,
   pips:[[3.7,1.2,1.8],[0.15,1.82,1.22]],
 };
@@ -136,9 +137,9 @@ $('#backgammonStartButton').click(function() {
     currentPlayer:-1,
     moveCnt:0,
     diceMoves:[0,0,0,0],
+    diceKills:[0,0,0,0],
     dice:[0,0],
     pips:[167,167],
-//    pips:[24,24],
   };
   gInfo.players[$("#backgammonRole").val()]={
     uid:currentUID,
@@ -325,6 +326,7 @@ void draw() {
       printDice();
       gData.moveCnt=0;
       gData.diceMoves=[0,0,0,0];
+      gData.diceKills=[0,0,0,0];
       if (!checkAnyMove()) {
         gData.currentPlayer=1-gData.currentPlayer;
         gData.dice=[0,0];
@@ -341,21 +343,31 @@ void draw() {
 }
 
 function printDice() {
-  var sizeDice=[cnst.diceSize*sizeSquare,cnst.diceSize*sizeSquare];
+  var currentSize=[cnst.diceSize*sizeSquare,cnst.diceSize*sizeSquare];
 
   switch (gData.moveCnt) {
     case 1:
-      if (gData.dice[0]==gData.dice[1]) sizeDice[0]*=0.8;
-      else sizeDice[0]*=0.5;
+      if (gData.dice[0]==gData.dice[1]) currentSize[0]*=0.8;
+      else currentSize[0]*=0.5;
       break;
     case 3:
-      sizeDice[1]*=0.8;
+      currentSize[1]*=0.8;
       // fallthrough
     case 2:
-      sizeDice[0]*=0.5;
+      currentSize[0]*=0.5;
   }
-  image(cnst.diceImg[gData.dice[0]-1],cnst.diceX1[gData.currentPlayer]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[0],sizeDice[0]);
-  image(cnst.diceImg[gData.dice[1]-1],cnst.diceX2[gData.currentPlayer]*sizeSquare, cnst.diceY*sizeSquare, sizeDice[1],sizeDice[1]);
+  for (i=0;i<2;i++) {
+    image(cnst.diceImg[gData.dice[i]-1],
+          (cnst.diceX[gData.currentPlayer]+2*i*cnst.diceSize)*sizeSquare,
+          cnst.diceY*sizeSquare,
+          currentSize[i],currentSize[i]);
+  }
+  if (checkPlayer() && gData.moveCnt) {                   // show undo button
+    image(cnst.undoImg,
+          cnst.undoX*sizeSquare,
+          cnst.diceY*sizeSquare,
+          cnst.diceSize*sizeSquare,cnst.diceSize*sizeSquare);
+  }
 }
 
 /************************************************************************************************
@@ -366,10 +378,10 @@ function printDice() {
 
 
 void mousePressed () {
-  debug(2,"mousePressed");
+  var x=mouseX/sizeSquare, y=mouseY/sizeSquare;
   if (!checkPlayer() || mode!="active") return;
+  debug(2,"mousePressed");
   if (gData.dice[0]==0) {                                             // need to role dice
-    var x=mouseX/sizeSquare, y=mouseY/sizeSquare;
     if (x>cnst.rollButton[gData.currentPlayer] && x<cnst.rollButton[gData.currentPlayer]+cnst.rollButton[3] && y>cnst.rollButton[2] && y<cnst.rollButton[2]+cnst.rollButton[4]) {
       mode="animation";
       pieceMoving.animateDice=60;
@@ -377,17 +389,34 @@ void mousePressed () {
       printBoard();
     }
   }
-  else {                                                                  // need to move pieces
-    var mouse=mouseSquare();
-    if (mouse>=0 && mouse <26 &&                                          // legal position
+  else {
+    if (gData.moveCnt && x>cnst.undoX && x< cnst.undoX+cnst.diceSize && y> cnst.diceY && y<cnst.diceY+cnst.diceSize) { // undo button was pressed
+      gData.moveCnt--;
+      var dPips={val:0};                                                  // change in the number of pips
+      var backTo=gData.diceMoves[gData.moveCnt];
+      var backFrom=checkMove(backTo, gData.dice[min(1,gData.moveCnt)],dPips);
+      gData.pips[gData.currentPlayer]+=dPips.val;
+      gData.board[backTo]+=cnst.dir[gData.currentPlayer];
+      gData.board[backFrom]-=cnst.dir[gData.currentPlayer];
+      if (gData.diceKills[gData.moveCnt]) {
+        gData.board[25-gData.currentPlayer]+=cnst.dir[gData.currentPlayer];
+        gData.board[backFrom]=-cnst.dir[gData.currentPlayer];
+      }
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+      printBoard();
+    }
+    else {                                                            // need to move pieces
+      var mouse=mouseSquare();
+      if (mouse>=0 && mouse <26 &&                                    // legal position
         gData.board[mouse]*cnst.dir[gData.currentPlayer] > 0 &&           // I need to click on my player's piece to start
         (checkMove(mouse, gData.dice[min(1,gData.moveCnt)]) >= 0 ||       // either there is a valid move with the current die...
          (gData.moveCnt==0 && checkMove(mouse, gData.dice[1]) >= 0))) {   // ... or a valid move with other die (only for 1st move))
-      pieceMoving.active=true;
-      pieceMoving.from=mouse;
-      gData.board[mouse]-=cnst.dir[gData.currentPlayer];
-      printBoard();
-      image(cnst.pieces[gData.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
+        pieceMoving.active=true;
+        pieceMoving.from=mouse;
+        gData.board[mouse]-=cnst.dir[gData.currentPlayer];
+        printBoard();
+        image(cnst.pieces[gData.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
+      }
     }
   }
 }
@@ -400,8 +429,9 @@ void mouseDragged() {
 }
 
 void mouseReleased() {
-  var dPips={val:0};
+  var dPips={val:0};                                                  // change in the number of pips
   if (pieceMoving.active) {
+    debug(2,"mouseReleased");
     pieceMoving.active=false;
     var ok=true;
     var mouse=mouseSquare();
@@ -419,8 +449,12 @@ void mouseReleased() {
         gData.pips[1-gData.currentPlayer]+=(gData.currentPlayer)?(24-mouse):(1+mouse);
         gData.board[mouse]=cnst.dir[gData.currentPlayer];
         gData.board[25-gData.currentPlayer]-=cnst.dir[gData.currentPlayer];
+        gData.diceKills[gData.moveCnt]=1;
       }
-      else gData.board[mouse]+=cnst.dir[gData.currentPlayer];
+      else {
+        gData.board[mouse]+=cnst.dir[gData.currentPlayer];
+        gData.diceKills[gData.moveCnt]=0;
+      }
       gData.diceMoves[gData.moveCnt]=pieceMoving.from;
       gData.moveCnt++;
       gData.pips[gData.currentPlayer]-=dPips.val;
@@ -433,9 +467,9 @@ void mouseReleased() {
         gData.dice=[0,0];
         gData.moveCnt=0;
         gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Brown":"White"].uid;
+        db.ref("gameInfo/"+gameID).set(gInfo);
       }
       db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-      db.ref("gameInfo/"+gameID).set(gInfo);
     }
     else {
       gData.board[pieceMoving.from]+=cnst.dir[gData.currentPlayer];
@@ -452,13 +486,13 @@ void mouseReleased() {
 
 //*************************************************************************************************
 // Check if the move is valid based on piece type. retrun target slot (>=0) or -1 if can't
+// dPips is sent by value to return the change in PIPs
 //*************************************************************************************************
 int checkMove(from,count,dPips) {
 
   var target;
   var ok=true;
   if (dPips) dPips.val=count;
-  console.log(dPips);
 
   if (from==(24+gData.currentPlayer))                               // try getting the captured piece back into play
     target=(gData.currentPlayer) ? count-1 : 24-count;
