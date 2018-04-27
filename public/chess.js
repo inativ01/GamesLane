@@ -1,5 +1,5 @@
 // the next line is very important for using images in JS
-/* @pjs preload="../chess/chess-pieces.png,../chess/red-x.png,../chess/chessboard_full.gif"; */
+/* @pjs preload="../pics/CHESS-pieces.png"; */
 
 /************************************************************************************************
 *
@@ -41,7 +41,7 @@ var animation= {
 }
 
 var images=[];                           // array to hold the images of the various pieces
-var pieces=loadImage("../chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
+var pieces=loadImage("../pics/CHESS-pieces.png");                                        // fill up array of images of all black and white pieces
 var spinner=loadImage("../spinner.png");
 var spinnerAngle=0;
 var spinnerActive=false;
@@ -196,7 +196,7 @@ function chessEvent(snapshot) {
          title: gInfo.concede+" had quit the game",
          text: "",
          showConfirmButton: true,
-         imageUrl: "../i-quit.png",
+         imageUrl: "../pics/i-quit.png",
          imageSize: "400x150",
       });
 
@@ -322,7 +322,7 @@ void draw() {
                    title: "CheckMate",
                    text: "",
                    showConfirmButton: true,
-                   imageUrl: "../chess/checkmate.jpg",
+                   imageUrl: "../pics/CHESS-checkmate.jpg",
                    imageSize: "400x150",
                 });
               else
@@ -330,7 +330,7 @@ void draw() {
                    title: "StaleMate",
                    text: "",
                    showConfirmButton: true,
-                   imageUrl: "../chess/stalemate.jpg",
+                   imageUrl: "../pics/CHESS-stalemate.jpg",
                    imageSize: "400x150",
                 });
               if (mychessIndex) {                                     // Mark player ready to end
@@ -348,7 +348,7 @@ void draw() {
                  text: "",
                  timer: 2000,
                  showConfirmButton: true,
-                 imageUrl: "../chess/check.jpg",
+                 imageUrl: "../pics/CHESS-check.jpg",
                  imageSize: "400x150",
               });
             }

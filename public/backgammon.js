@@ -1,5 +1,5 @@
 // the next line is very important for using images in JS
-/* @pjs preload="../backgammon/p0White.png,../backgammon/p0Brown.png,../backgammon/p1White.png,../backgammon/p1Brown.png,../backgammon/p2White.png,../backgammon/p2Brown.png"; */
+/* @pjs preload="../pics/BG-p0White.png,../pics/BG-p0Brown.png,../pics/BG-p1White.png,../pics/BG-p1Brown.png,../pics/BG-p2White.png,../pics/BG-p2Brown.png"; */
 
 /************************************************************************************************
 *
@@ -9,10 +9,10 @@
 // -----------------------
 
 var cnst={
-  boardPic:[loadImage("../backgammon/board.jpg"),loadImage("../backgammon/boardR.jpg")],
+  boardPic:[loadImage("../pics/BG-board.jpg"),loadImage("../pics/BG-boardR.jpg")],
   pieces:[],
   sidepieces:[[],[]],
-  undoImg: loadImage("../undo.png"),
+  undoImg: loadImage("../pics/undo.png"),
   diceImg:[0,0,0,0,0,0],
   boardStart:[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
 //  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
@@ -222,9 +222,9 @@ function backgammonEvent(snapshot) {
   $("#backgammonBoard .gameTurn").css("color","black");
   $("#backgammonBoard .gameTurn").html("");
   var color= (gInfo.playerList[0].role != "White") ? "White" : "Brown";
-  cnst.pieces=[loadImage("../backgammon/p0"+gInfo.playerList[0].role+".png"),loadImage("../backgammon/p0"+color+".png")];
-  cnst.sidepieces=[[loadImage("../backgammon/p1"+gInfo.playerList[0].role+".png"),loadImage("../backgammon/p1"+color+".png")],
-				  [loadImage("../backgammon/p2"+gInfo.playerList[0].role+".png"),loadImage("../backgammon/p2"+color+".png")]];
+  cnst.pieces=[loadImage("../pics/BG-p0"+gInfo.playerList[0].role+".png"),loadImage("../pics/BG-p0"+color+".png")];
+  cnst.sidepieces=[[loadImage("../pics/BG-p1"+gInfo.playerList[0].role+".png"),loadImage("../pics/BG-p1"+color+".png")],
+				  [loadImage("../pics/BG-p2"+gInfo.playerList[0].role+".png"),loadImage("../pics/BG-p2"+color+".png")]];
   switch(gInfo.status) {
     case "pending":
       $("#backgammonBoard .gameButtonJoin").val(color);
@@ -264,7 +264,7 @@ function backgammonEvent(snapshot) {
          title: gInfo.concede+" had quit the game",
          text: "",
          showConfirmButton: true,
-         imageUrl: "../i-quit.png",
+         imageUrl: "../pics/i-quit.png",
          imageSize: "400x150",
       });
 //      $("#backgammonBoard").hide();
@@ -286,7 +286,7 @@ void setup() {
   $("#backgammonBoard .gameContent").css("width",sizeSquare*4);
   size(sizeSquare*4,sizeSquare*3);
   for (var i=0;i<6;i++)
-    cnst.diceImg[i]=loadImage("../die"+(i+1)+".png");
+    cnst.diceImg[i]=loadImage("../pics/die"+(i+1)+".png");
 }
 
 //*************************************************************************************************

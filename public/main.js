@@ -159,7 +159,7 @@ window.addEventListener('load', function() {
       .then(function () {
         auth.currentUser.updateProfile({
           displayName: $("#displayName").val(),
-          photoURL: "../silhouette.png"
+          photoURL: "../pics/silhouette.png"
         }).then(function() {
 /* email verification - currently disabled
           auth.currentUser.sendEmailVerification();
@@ -298,7 +298,7 @@ function onAuthStateChanged(user) {
   $("#splashPage").hide();
   if (user.isAnonymous) {
     displayName="Guest";
-    photoURL="../silhouette.png";
+    photoURL="../pics/silhouette.png";
     $("#editProfileButton").attr("disabled",true);
     user.updateProfile({
       displayName: displayName,

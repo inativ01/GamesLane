@@ -1,5 +1,5 @@
 // the next line is very important for using images in JS
-/* @pjs preload="../chess/chess-pieces.png,../chess/red-x.png,../chess/chessboard_full.gif"; */
+/* @pjs preload="../pics/CHESS-pieces.png"; */
 
 // Define global variables
 // -----------------------
@@ -27,9 +27,9 @@ var mode="passive";                                                   // "passiv
                                                                       // "edit" - edit the board
 var images=[];                           // array to hold the images of the various pieces
 var editPiece= -1;
-var pieces=loadImage("../chess/chess-pieces.png");                                        // fill up array of images of all black and white pieces
-var redx=loadImage("../chess/red-x.png");
-var fullboard=loadImage("../chess/chessboard_full.gif");
+var pieces=loadImage("../pics/CHESS-pieces.png");                                        // fill up array of images of all black and white pieces
+var redx=loadImage("../pics/red-x.png");
+var fullboard=loadImage("../pics/CHESS-icon.gif");
 
 // Define functions
 // -----------------
