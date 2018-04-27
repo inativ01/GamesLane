@@ -31,12 +31,6 @@ function debug(level, msg) {
   }
 }
 
-function sendReq(obj) {
-    db.ref('/req/'+currentUID).set(obj);
-    debug(1,obj.game+" message: "+obj.msg);
-    debug(2,obj);
-}
-
 // Bindings on load.
 window.addEventListener('load', function() {
   debug(2,"loading now");
@@ -350,8 +344,8 @@ function onAuthStateChanged(user) {
     var gInfo=snapshot.val();
     removeFromList(gInfo);
     var clean=true;
-    for (var p in gInfo.players) {
-     if (gInfo.players[p].uid!=0) clean=false;
+    for (var p in gInfo.playerList) {
+     if (gInfo.playerList[p].uid!=0) clean=false;
     }
     if (clean) {
       var up=new Object();
@@ -391,13 +385,13 @@ function addGameToList(gInfo) {
   var node=$("<button id='line-"+gInfo.game+"-"+gInfo.gid+"' value='"+gInfo.gid+"' style='width:300px; margin: auto' class='mdl-list__item '></button>");
   var justMe=true;
   var partner="yourself";
-  for  (var p in gInfo.players) {
-    var thisPlayer=gInfo.players[p];
+  for  (var p in gInfo.playerList) {
+    var thisPlayer=gInfo.playerList[p];
     var element= $("<div><img  style='border-radius: 50%;padding:5px;width:40px;height:40px' src='"+thisPlayer.photoURL+"'></div>");
-    element.css({'background':roleColors[p], 'border':"medium "+((thisPlayer.uid==gInfo.currentUID)?"solid":"none")+" red",'margin': 'auto' });
-    element.prop('title', gInfo.players[p].displayName);
+//    element.css({'background':roleColors[thisPlayer.role], 'border':"medium "+((thisPlayer.uid==gInfo.playerList[gInfo.currentPlayer].uid)?"solid":"none")+" red",'margin': 'auto' });
+    element.css({'background':roleColors[thisPlayer.role], 'border':"medium "+((gInfo.currentPlayer==p)?"solid":"none")+" red",'margin': 'auto' });
+    element.prop('title', thisPlayer.displayName);
     node.append(element);
-//    node.append("<div style='background:"+roleColors[p]+";border:medium "+((thisPlayer.uid==gInfo.currentUID)?"solid":"none")+" red;margin: auto'><img  style='border-radius: 50%;padding:5px;width:40px;height:40px' src='"+thisPlayer.photoURL+"'></div>");
     if (thisPlayer.uid==currentUID) {
       active=true;
     }
@@ -412,21 +406,21 @@ function addGameToList(gInfo) {
   {
     if (active) {
       var updates=new Object();
-      for (var p in gInfo.players)
-        if (gInfo.players[p].uid==currentUID)
+      for (var p in gInfo.playerList)
+        if (gInfo.playerList[p].uid==currentUID)
           updates[p+'/uid']=0;
-      db.ref("gameInfo/"+gInfo.gid+"/players/").update(updates);
+      db.ref("gameInfo/"+gInfo.gid+"/playerList/").update(updates);
       addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
     }
-  }
-  else if (gInfo.currentUID==currentUID)  {
-      addToList(gInfo.game,"Active",node);
-      addLine(gInfo,"It's now your turn to play "+gInfo.game+" with "+partner);
   }
   else if (gInfo.status=="pending") {
     addToList(gInfo.game,"Pending",node);
     if (!partner) partner="yourself";
     addLine(gInfo,"You can join a new "+gInfo.game+" game with "+partner);
+  }
+  else if (gInfo.playerList[gInfo.currentPlayer].uid==currentUID)  {
+      addToList(gInfo.game,"Active",node);
+      addLine(gInfo,"It's now your turn to play "+gInfo.game+" with "+partner);
   }
   else if (active) {
     addToList(gInfo.game,"Wait",node);

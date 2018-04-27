@@ -217,6 +217,19 @@
               </ul>
             </div>
             <br>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
+              <input id="backgammonPlayTo" class="mdl-textfield__input" type="text" value=5 readonly tabIndex="-1">
+              <label for="backgammonPlayTo" class="mdl-textfield__label">Play To</label>
+              <ul for="backgammonPlayTo" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">1</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">3</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">5</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">7</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">11</li>
+                <li class="mdl-menu__item">15</li>
+              </ul>
+            </div>
+            <br>
           </div>
           <div style="text-align: center;padding: 0px;">
             <button id="backgammonCancelOptions" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
@@ -225,6 +238,52 @@
       </div>
     </div>
 
+<!-- Uno game -->
+    <div id=unoBoard class="modal gameBoard" style="top:0px" >
+      <div class="gameContent" >
+        <div class="gameHeader mdl-color--light-blue-200" >
+          <div style="float:left;padding-left:10px;min-width:20%;">
+            <p style="display: inline-block;"></p>
+            <span class="gameTurn" ></span>
+            <button class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect gameButtonJoin"></button>
+          </div>
+          <div class="playerPics"></div>
+          <div style="float:right;">
+            <button title="Quit the game" class="mdl-button mdl-js-button mdl-button--icon gameButtonEnd" >
+              <i class="material-icons">exit_to_app</i>
+            </button>
+            <button title="Exit to main menu"  class="mdl-button mdl-js-button mdl-button--icon gameButtonClose" >
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
+        </div>
+        <canvas id=unoCanvas data-processing-sources="../uno/uno.js" ></canvas>
+      </div>
+    </div>
+
+<!-- Uno Options -->
+    <div id=unoOptionsBoard class="modal allowClose" style="top:0px" >
+      <div id="unoOptionsContent" style="margin:  auto;">
+        <div class="mdl-color--light-blue-200" style="padding: 20px;">
+          <div id=unoOptionsHeader>
+            <div  style="text-align: center;border-style: groove;padding:10px">
+              <button id="unoStartButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Start Uno</button>
+            </div>
+            <br>
+            <div><b><u>Uno Options</u></b></div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
+              <input id="unoRole" class="mdl-textfield__input" type="text" value="White" readonly tabIndex="-1">
+              <label for="unoRole" class="mdl-textfield__label">Your player color</label>
+              <ul for="unoRole" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">White</li>
+                <li class="mdl-menu__item">Black</li>
+              </ul>
+            </div>
+            <br>
+          </div>
+        </div>
+      </div>
+    	
   </section>
 
 <!-- Header section containing logo and menu -->
@@ -318,6 +377,33 @@
       </div>
       <div id=backgammonWatchModal class="modal allowClose" >
           <div id=backgammonWatchList class="gameLists"  ></div>
+      </div>
+
+<!-- Uno -->
+      <div style="width:110px; margin:auto" >
+        <h4 style="text-align:center" > Uno</h4>
+        <div id=unoBadge></div>	
+        <input id="unoButton" class="gameMainButton" type="image" src="../uno/uno-logo.jpg" width="100" height="100" >
+        <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="unoButton">
+          <li id=unoNewButton       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">Start a New Game</li>
+          <li id=unoActiveListButton  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="uno" catag="Active">Play your turn</li>
+          <li id=unoPendingListButton disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="uno" catag="Pending">Join a Game</li>
+          <li id=unoWaitListButton    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="uno" catag="Wait">Wait for your turn</li>
+          <li id=unoWatchListButton   disabled class="gameButtons mdl-menu__item " game="uno" catag="Watch">Watch others play</li>
+        </ul>
+      </div>
+
+      <div id=unoActiveModal class="modal allowClose" >
+          <div id=unoActiveList class="Active gameLists"  ></div>
+      </div>
+      <div id=unoPendingModal class="modal allowClose" >
+          <div id=unoPendingList class="Pending gameLists"  ></div>
+      </div>
+      <div id=unoWaitModal class="modal allowClose" >
+          <div id=unoWaitList class="gameLists"  ></div>
+      </div>
+      <div id=unoWatchModal class="modal allowClose" >
+          <div id=unoWatchList class="gameLists"  ></div>
       </div>
 
 <!-- Spinner -->

@@ -1,3 +1,15 @@
+Initial setup:
+https://nodejs.org/
+npm install -g firebase-tools
+firebase login
+
+git commit -a
+git push
+firebase deploy
+
+to run HTML locally (for debugging) just run "node simple" and in browser go to http://127.0.0.1:8000/public/en/
+
+
 To do:
 * Allow email and password change(???)
 * track score
@@ -5,13 +17,13 @@ To do:
 ** reverse colors for single player?
 
 --- backgammon ---
-
-* for double, show 4 dice
-* used dice are opaque (tint)
-* allow UNDO
 * animation move (not for player)
+* animation undo (for all)
 * igonore DB updates of my own moves
 * add doubling die - game series
-* animate end of turn
+* animate end of turn (dice slowly disappear)
 
-
+bugs:
+* in BG when brown starts he actally playing white tiles
+* in Chess when 2nd player is white, both icons are of the black player
+* get rid off myXXXindex

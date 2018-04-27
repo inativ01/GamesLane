@@ -45,7 +45,6 @@ var pieces=loadImage("../chess/chess-pieces.png");                              
 var spinner=loadImage("../spinner.png");
 var spinnerAngle=0;
 var spinnerActive=false;
-var players= {White:"", Black:""}
 
 /************************************************************************************************
 *
@@ -89,7 +88,6 @@ $("#chessBoard .gameButtonEnd").click( function() {
     if (isConfirm) {
       gInfo.status="quit";
       gInfo.concede=auth.currentUser.displayName;
-      gData.currentPlayer=-1;
       db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       db.ref("gameInfo/"+gameID).set(gInfo);
     } else {
@@ -103,13 +101,17 @@ $("#chessBoard .gameButtonEnd").click( function() {
 //*************************************************************************************************
 $("#chessBoard .gameButtonJoin").click(function() {
   if (gInfo.status=="pending") {
-    gInfo.players[this.value]={
-      uid:currentUID,
+	if (this.value == "White") gInfo.playerList.splice(0,0,{  // if new player is White, push as first player
+	  role:this.value,
+	  uid:currentUID,
       displayName:auth.currentUser.displayName,
-      photoURL:auth.currentUser.photoURL};
-    gInfo.status="active";
-    gInfo.currentUID=gInfo.players["White"].uid;
-    gData.currentPlayer=0;
+      photoURL:auth.currentUser.photoURL});
+	else gInfo.playerList.push({
+	  role:this.value,
+	  uid:currentUID,
+      displayName:auth.currentUser.displayName,
+      photoURL:auth.currentUser.photoURL});
+    gInfo.status="active"; // two-player game. Start automatically when the 2nd player joins
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
     db.ref("gameInfo/"+gameID).set(gInfo);
   }
@@ -136,13 +138,13 @@ function chessEvent(snapshot) {
   }
   debug(1,"chessEvent GID="+gameID+" status="+gInfo.status);
   debug(2,gData);
-  for (var p in gInfo.players) {
-    if (!$("#chessBoard .playerPics .player"+p).length) {                         // still don't have pic of player
-      var element= $("<div class='player"+p+"' ><img src='"+gInfo.players[p].photoURL+"'></div>");
-      element.css('background',roleColors[p]);
-      element.prop('title', gInfo.players[p].displayName);
-      $("#chessBoard .playerPics").append(element);
-    }
+  $("#chessBoard .playerPics").empty();         // pictures of Players
+  for (var p in gInfo.playerList) {
+    var element= $("<div><img src='"+gInfo.playerList[p].photoURL+"'></div>");
+    element.css('background',roleColors[gInfo.playerList[p].role]);
+    element.css('border',"medium "+((gInfo.currentPlayer==p)?"solid":"none")+" red");
+    element.prop('title', gInfo.playerList[p].displayName);
+    $("#chessBoard .playerPics").append(element);
   }
   if (ignoreNextUpdate==2) {
     if (mode == "animation") {
@@ -156,8 +158,11 @@ function chessEvent(snapshot) {
     }
   }
   mychessIndex=0;
-  if (gInfo.players.White && gInfo.players.White.uid==currentUID) mychessIndex|=1;             // turn on bit 0
-  if (gInfo.players.Black && gInfo.players.Black.uid==currentUID) mychessIndex|=2;             // turn on bit 1
+  var i=1;
+  for (var p in gInfo.playerList) {
+	if (gInfo.playerList[p].uid==currentUID) mychessIndex|=i;
+	i=i*2;
+  }
   debug(2,"mychessIndex="+mychessIndex);
   if (mychessIndex && gInfo.status!="quit")
     $("#chessBoard .gameButtonEnd").attr("disabled",false);
@@ -167,13 +172,12 @@ function chessEvent(snapshot) {
   $("#chessBoard .gameTurn").html("");
   if (gInfo.status=="active") {
     if (checkPlayer()) $("#chessBoard .gameTurn").css("color","red");
-    if (gData.currentPlayer==0) $("#chessBoard .gameTurn").html("White player's turn");
-    else if (gData.currentPlayer==1) $("#chessBoard .gameTurn").html("Black player's turn");
+    $("#chessBoard .gameTurn").html(gInfo.playerList[gInfo.currentPlayer].role+" player's turn");
   }
   $("#chessBoard .gameButtonJoin").hide();
   switch(gInfo.status) {
     case "pending":
-      var color= (!gInfo.players.White) ? "White" : "Black";
+      var color= (gInfo.playerList[0].role != "White") ? "White" : "Black";
       reverse=(color=="Black");
       $("#chessBoard .gameButtonJoin").val(color);
       $("#chessBoard .gameButtonJoin").html("Join as "+color);
@@ -182,8 +186,8 @@ function chessEvent(snapshot) {
       printBoard();
       break;
     case "active":
-//      reverse=((mychessIndex==2)||(mychessIndex==3 && gData.currentPlayer==1));
-      reverse=(mychessIndex==2);
+//      reverse=(mychessIndex==2);
+      reverse=(gInfo.playerList[1].uid==currentUID && gInfo.playerList[0].uid!=currentUID);  // reverse the board if I'm playing Black only
       printBoard();
       animationInit(gData.movedPiece,gData.newPiece);
       break;
@@ -237,7 +241,6 @@ void draw() {
   if (gameMsg == "chess") {
     debug(2,"New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game
-    $("#chessBoard .playerPics").empty();         // remove pictures of players
     if (gameID != -1) {
       db.ref("gameData/chess/"+gameID).off();
       db.ref("gameChat/chess/"+gameID).off();
@@ -306,11 +309,10 @@ void draw() {
             ignoreNextUpdate=0;
             if (checkPlayer()) $("#chessBoard .gameTurn").css("color","red");
             else               $("#chessBoard .gameTurn").css("color","black");
-            reverse=((mychessIndex==2)||(mychessIndex==3 && gData.currentPlayer==1));
+			reverse=(gInfo.playerList[1].uid==currentUID && gInfo.playerList[0].uid!=currentUID);  // reverse the board if I'm playing Black only
           }
           printBoard();                                            // board may have flipped due to player change
-          if (gData.currentPlayer==0) $("#chessBoard .gameTurn").html("White player's turn");
-          else           $("#chessBoard .gameTurn").html("Black player's turn");
+          $("#chessBoard .gameTurn").html(gInfo.playerList[gInfo.currentPlayer].role+" player's turn");
           markSquare(gData.from,#FF0000,2);                                // FROM location is color red
           markSquare(gData.to,#00FF00,2);                                  // TO location is color green
           if (gData.special) {                                             // now need to check special messages or end conditions
@@ -333,10 +335,10 @@ void draw() {
                 });
               if (mychessIndex) {                                     // Mark player ready to end
                 var updates= new Object();
-                for (var player in gInfo.players)
-                  if (gInfo.players[player].uid==currentUID)
+                for (var player in gInfo.playerList)
+                  if (gInfo.playerList[player].uid==currentUID)
                     updates[player+'/uid']=0;
-                db.ref("/gameInfo/"+gInfo.gid+"/players/").update(updates);
+                db.ref("/gameInfo/"+gInfo.gid+"/playerList/").update(updates);
               }
 //              $("#chessBoard").hide();
             }
@@ -414,10 +416,10 @@ void mouseClicked () {
           printBoard();
           if (reverse) {toX=startX+(7-gData.to.x)*sizeSquare; toY=startY+(7-gData.to.y)*sizeSquare }
           else         {toX=startX+gData.to.x*sizeSquare;     toY=startY+gData.to.y*sizeSquare }
-          image(images[1+gData.currentPlayer*6],toX,              toY,sizeSquare/2,sizeSquare/2);
-          image(images[2+gData.currentPlayer*6],toX+sizeSquare/2, toY,sizeSquare/2,sizeSquare/2);
-          image(images[3+gData.currentPlayer*6],toX,              toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          image(images[4+gData.currentPlayer*6],toX+sizeSquare/2, toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[1+gInfo.currentPlayer*6],toX,              toY,sizeSquare/2,sizeSquare/2);
+          image(images[2+gInfo.currentPlayer*6],toX+sizeSquare/2, toY,sizeSquare/2,sizeSquare/2);
+          image(images[3+gInfo.currentPlayer*6],toX,              toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          image(images[4+gInfo.currentPlayer*6],toX+sizeSquare/2, toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
           mode="pawnUpgrade";
           return;
         }
@@ -481,8 +483,6 @@ function printBoard() {
   stroke(0);
   fill(#0000FF);
   textFont(loadFont("Meta-Bold.ttf"));
-  if (players.White) text('White: '+players.White,startX,sizeSquare/2);
-  if (players.Black) text('Black: '+players.Black,startX+4*sizeSquare,sizeSquare/2);
   for(var y = 0, ypos=startY; y < 8; y++, ypos+=sizeSquare) {
     for(var x = 0, xpos=startX; x < 8; x++, xpos+=sizeSquare) {
       if((x+y)%2) fill(100); else fill(255);  // select white or black squares
@@ -669,7 +669,7 @@ function analyzeMoves() {
   for (var y=0; y<8; y++) {
     for (var x=0; x<8; x++) {
       var legalMoves=0;                                              // start counting posible moves from this square
-      if (Math.floor(gData.board[y][x]/6)==gData.currentPlayer) {                       // only looks at squares that contain the current player's pieces
+      if (Math.floor(gData.board[y][x]/6)==gInfo.currentPlayer) {                       // only looks at squares that contain the current player's pieces
         for (var j=0;j<8;j++) {
           for (var i=0;i<8;i++) {
 //            gData.to={x:i,y:j};
@@ -688,12 +688,9 @@ function analyzeMoves() {
 
 //*************************************************************************************************
 // Check is I'm currently playing.
-// This is done comparing "player" (0-white, 1-black) with "mychessIndex" (bitmap 0-none, 1-white, 2-black, 3-both)
 //*************************************************************************************************
 function checkPlayer() {
-  if (gData.currentPlayer== -1) return false;
-  var p= (1 << gData.currentPlayer);
-  return (mychessIndex & p)
+  return (gInfo.playerList[gInfo.currentPlayer].uid==currentUID);
 }
 
 //*************************************************************************************************
@@ -703,16 +700,15 @@ void finalizeMove(movedPiece,newPiece) {
   gData.board[gData.from.y][gData.from.x]=-1;                                      // Clear the old location
   var savedPiece=gData.board[gData.to.y][gData.to.x];
   gData.board[gData.to.y][gData.to.x]=newPiece;
-  gData.currentPlayer=1-gData.currentPlayer;
+  gInfo.currentPlayer=1-gInfo.currentPlayer;
 
-  var check=check4check(gData.board,gData.currentPlayer);
+  var check=check4check(gData.board,gInfo.currentPlayer);
   gData.special={};
   if (check) gData.special.check=true;
   if (!analyzeMoves()) gData.special.endGame=true;
   gData.board[gData.to.y][gData.to.x]=savedPiece;
   gData.movedPiece=movedPiece;
   gData.newPiece=newPiece;
-  gInfo.currentUID=gInfo.players[(gData.currentPlayer)?"Black":"White"].uid;
   ignoreNextUpdate=2;
   animationInit(movedPiece,newPiece);                              // start the animation
   db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
