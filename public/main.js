@@ -345,9 +345,9 @@ function onAuthStateChanged(user) {
     removeFromList(gInfo);
     var clean=true;
     for (var p in gInfo.playerList) {
-     if (gInfo.playerList[p].uid!=0) clean=false;
+     if (gInfo.playerList[p].uid!=0) clean=false;   // is there an active player (with valid uid) ?
     }
-    if (clean) {
+    if (clean) {									// if there are no more valid players (Everybody left) than remove the game.
       var up=new Object();
       up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
       up["/gameInfo/"+gInfo.gid]={};
@@ -433,7 +433,7 @@ function addGameToList(gInfo) {
   $("#"+node.attr('id')).click( function() {
     debug(2,"Game selected:"+this.id);
     this.parentElement.parentElement.style="display:none";
-    $(".mdl-spinner").addClass("is-active");
+//    $(".mdl-spinner").addClass("is-active");
     newGID=this.value;
     gameMsg=gInfo.game;
   });
@@ -563,3 +563,20 @@ $("#helpButton").click( function() {
     hints=true;
   }
 });
+
+// ---------------------------------------- Global Functions -------------------------------------------------------------------------------------
+/*-------------------------------------------------------------------------------------------------
+This function shuffles the top "count" cards in the "deck"
+ This is done by selecting pair of cards and switching thier order, repeated 200 times
+-------------------------------------------------------------------------------------------------*/
+function shuffleCards(deck, count) {
+  var a,b,c;
+  for(var i = 0;i<200;i++) {
+    a=Math.floor(Math.random() * count);
+    b=Math.floor(Math.random() * count);
+    c=deck[a];
+    deck[a]=deck[b];
+    deck[b]=c;
+  }
+}
+

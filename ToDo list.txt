@@ -11,19 +11,32 @@ to run HTML locally (for debugging) just run "node simple" and in browser go to 
 
 
 To do:
+* update all SweetAlert to version 2.0
+* replace size with "Scale"
+* track scores per user per game
+* get back messages from gData
+ - popup last message
+ - click to view all messages
+* Game icons side-by-side-by-side
+* Game dropdown menu in fixed location
 * Allow email and password change(???)
-* track score
 * User preferences (for each game)
-** reverse colors for single player?
+
+--- Chess ---
+* Single game/ match
 
 --- backgammon ---
-* animation move (not for player)
+* Single game/ 5-points match
+- doubling die
+- resign button
+* animation move (not for current player)
 * animation undo (for all)
-* igonore DB updates of my own moves
-* add doubling die - game series
+* igonore DB updates of my own moves (??)
 * animate end of turn (dice slowly disappear)
+* game information
 
-bugs:
-* in BG when brown starts he actally playing white tiles
-* in Chess when 2nd player is white, both icons are of the black player
-* get rid off myXXXindex
+--- Uno ---
+Display top of open deck
+When clicking on ANY user card, it will drop to open desk
+When clicking on closed deck, will add card to my pile
+Display only my pile. Shade when it's not my turn

@@ -12,17 +12,16 @@ var cnst={
   boardPic:[loadImage("../pics/BG-board.jpg"),loadImage("../pics/BG-boardR.jpg")],
   pieces:[],
   sidepieces:[[],[]],
-  undoImg: loadImage("../pics/undo.png"),
   diceImg:[0,0,0,0,0,0],
-  boardStart:[2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
+  boardStart:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0],  // negative: white, positive: brown
 //  boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
   dir:[-1,1],
   diceSize:0.2,
-  rollButton:[2.7,0.95,1.4,0.4,0.2],
-  undoX: 1.9,
-  diceX:[2.5,0.8],
-  diceY:1.4,
-  pips:[[3.7,1.2,1.8],[0.15,1.82,1.22]],
+  rollButton:[2.7,0.95,1.4,0.4,0.2],  // X right, X left, Y, X size, Y size
+  dice:[2.5,0.8,1.4], // X right, X left, Y
+//  pips:[[3.7,1.2,1.8],[0.15,1.82,1.22]],
+  totalPips:24, // should be 167
+  doubleDie:[3.7,0.1,1.4,0.2],   // X, X reverse, Y, size
 };
 
 var ignoreNextUpdate=0;
@@ -36,7 +35,7 @@ var pieceMoving={
 };
 
 var reverse=0;                                                    // display reverse board for brown player
-var mybackgammonIndex=0;                                              // 0 - no active player
+var mybackgammonIndex;                                              // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Brown
                                                                       // 3 - Both (single player)
@@ -66,40 +65,77 @@ window.addEventListener('resize', function() {
 });
 
 //*************************************************************************************************
+//   Undo last move
+//*************************************************************************************************
+$("#backgammonBoard .gameButtonUndo").click( function() {
+  gData.moveCnt--;
+  var dPips={val:0};                                                  // change in the number of pips
+  var backTo=gData.diceMoves[gData.moveCnt];
+  var backFrom=checkMove(backTo, gData.dice[min(1,gData.moveCnt)],dPips);
+  gData.pips[gInfo.currentPlayer]+=dPips.val;
+  gData.board[backTo]+=cnst.dir[gInfo.currentPlayer];
+  gData.board[backFrom]-=cnst.dir[gInfo.currentPlayer];
+  if (gData.diceKills[gData.moveCnt]) {
+	gData.board[25-gInfo.currentPlayer]+=cnst.dir[gInfo.currentPlayer];  // slot 24,25 for the Bar
+	gData.board[backFrom]=-cnst.dir[gInfo.currentPlayer];
+  }
+  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+  printBoard();
+});
+
+//*************************************************************************************************
 //   User selected to go to main menul
 //*************************************************************************************************
 $("#backgammonBoard .gameButtonClose").click( function() {
   newGID= -1;
   gameMsg="backgammon";
   $("#backgammonBoard").hide();
+  debug(1,$("#backgammonBoard")[0]);
 });
 
 //*************************************************************************************************
 //   User selected to quit (resign) the game
 //*************************************************************************************************
 $("#backgammonBoard .gameButtonEnd").click( function() {
-  sweetAlert({
+  swal({
     title: "Are you sure?",
-    text: "You will forfeit the game!",
-    type: "warning",
-    showCancelButton: true,
-    confirmButtonClass: "btn-danger",
-    confirmButtonText: "Yes, I quit!",
-    cancelButtonText: "No, keep playing",
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    closeOnConfirm: false
-  },
-  function(isConfirm) {
-    if (isConfirm) {
-      gInfo.status="quit";
-      gInfo.concede=auth.currentUser.displayName;
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-      db.ref("gameInfo/"+gameID).set(gInfo);
-    } else {
-      sweetAlert("Cancelled", "Keep Playing", "error");
-    }
-  });
+    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
+    icon: "warning",
+	dangerMode: true,
+	buttons: {
+		cancel: {
+		  visible: true,
+		  text: "No, keep playing",
+		  value: false,
+		  closeModal: true,
+		},
+		confirm: {
+		  text: "Yes, I quit!",
+		  value: "endAll",
+		  closeModal: true,
+		},
+	}
+  })
+  .then(function(value){
+	  switch (value) {
+		case "endAll":
+		  gInfo.status="quit";
+		  gInfo.concede=auth.currentUser.displayName;
+		  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+		  db.ref("gameInfo/"+gameID).set(gInfo);
+		  break;
+	 
+		default:
+		  swal({
+			  title: "Cancelled", 
+			  text: "Keep Playing", 
+			  icon: "error",
+			  buttons: false,
+			  timer: 1000
+		  });
+	  }
+  })
+  	  
 });
 
 //*************************************************************************************************
@@ -139,10 +175,11 @@ $('#backgammonStartButton').click(function() {
     diceMoves:[0,0,0,0],
     diceKills:[0,0,0,0],
     dice:[0,0],
-//    pips:[24,24],
-    pips:[167,167],
+	doubleDie:1,
+    pips:[cnst.totalPips,cnst.totalPips],
     points:[0,0],
     playTo:parseInt($("#backgammonPlayTo").val()),
+	info:gInfo,
   };
   gInfo.playerList.push({
 	role:$("#backgammonRole").val(),
@@ -150,12 +187,10 @@ $('#backgammonStartButton').click(function() {
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
   });
-  gData.info=gInfo;
   db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   db.ref("gameInfo/"+newGID).set(gInfo);
   gameMsg="backgammon";
   $("#backgammonOptionsBoard").hide();
-  $(".mdl-spinner").addClass("is-active");
 });
 
 
@@ -170,10 +205,9 @@ $("#backgammonBoard .gameButtonJoin").click(function() {
       displayName:auth.currentUser.displayName,
       photoURL:auth.currentUser.photoURL});
     gInfo.status="active"; // two-player game. Start automatically when the 2nd player joins
-    gInfo.currentPlayer=0;
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
     db.ref("gameInfo/"+gameID).set(gInfo);
-  }
+}
   else debug(0,"Game not Pending. Can't start");
 });
 
@@ -204,18 +238,18 @@ function backgammonEvent(snapshot) {
     var element= $("<div><img src='"+gInfo.playerList[p].photoURL+"'></div>");
     element.css('background',roleColors[gInfo.playerList[p].role]);
     element.css('border',"medium "+((gInfo.currentPlayer==p)?"solid":"none")+" red");
-    element.prop('title', gInfo.playerList[p].displayName);
+    element.prop('title', gInfo.playerList[p].displayName+" [PIPS="+gData.pips[p]+((gData.playTo>1)?", Score="+gData.points[p]:"")+"]");
     $("#backgammonBoard .playerPics").append(element);
   }
-  mybackgammonIndex=0;
+  mybackgammonIndex=[];
   var i=1;
   for (var p in gInfo.playerList) {
-	if (gInfo.playerList[p].uid==currentUID) mybackgammonIndex|=i;
-	i=i*2;
+	if (gInfo.playerList[p].uid==currentUID) mybackgammonIndex.push(parseInt(p));
   }
   debug(2,"mybackgammonIndex="+mybackgammonIndex);
   $("#backgammonBoard .gameButtonJoin").hide();
-  if (mybackgammonIndex && gInfo.status!="quit")
+  $("#backgammonBoard .gameButtonUndo").hide(); 
+  if (mybackgammonIndex.length && gInfo.status!="quit")
     $("#backgammonBoard .gameButtonEnd").attr("disabled",false);
   else
     $("#backgammonBoard .gameButtonEnd").attr("disabled",true);
@@ -234,40 +268,92 @@ function backgammonEvent(snapshot) {
       printBoard();
       break;
     case "active":
-      reverse=(mybackgammonIndex==2)?1:0;
+      reverse=(mybackgammonIndex.length==1 && mybackgammonIndex[0]==1)?1:0;
       printBoard();
-      if (checkPlayer()) $("#backgammonBoard .gameTurn").css("color","red");
+      if (checkPlayer()) {
+		$("#backgammonBoard .gameTurn").css("color","red");
+		if (gData.moveCnt) $("#backgammonBoard .gameButtonUndo").show(); 
+	  }
       $("#backgammonBoard .gameTurn").html(gInfo.playerList[gInfo.currentPlayer].role+" player's turn");
       if (mode !="animation") mode="active";
       if (gData.special) {                                             // now need to check special messages or end conditions
         if (gData.special.endGame) {
-          if (gData.pips[gInfo.currentPlayer]==0)
-            sweetAlert({
-               title: gInfo.playerList[gInfo.currentPlayer].role+" player won!",
-               text: "",
-               showConfirmButton: true,
-               imageSize: "400x150",
-            });
-          if (mybackgammonIndex) {                                     // Mark player ready to end
-            var updates= new Object();                                 // remove my Players from gameInfo
-            for (var player in gInfo.playerList)
-              if (gInfo.playerList[player].uid==currentUID)
-                updates[player+'/uid']=0;
-            db.ref("/gameInfo/"+gInfo.gid+"/playerList/").update(updates);
+		  if (gData.points[gInfo.currentPlayer] < gData.playTo) {
+			sweetAlert({
+			  title: gInfo.playerList[gInfo.currentPlayer].role+" player win round",
+			  text: gData.special.msg+"\nWhite:"+gInfo.playerList[0].displayName+"-"+gData.points[0]+"\nBrown:"+gInfo.playerList[1].displayName+"-"+gData.points[1],
+			}); 
+		  }
+		  else {
+		    sweetAlert({
+			  title: gInfo.playerList[gInfo.currentPlayer].role+" player won!",
+			  text: (gData.playTo==1)?"":gData.special.msg+"\nWhite:"+gInfo.playerList[0].displayName+"-"+gData.points[0]+"\nBrown:"+gInfo.playerList[1].displayName+"-"+gData.points[1],
+			  showConfirmButton: true,
+			  icon: "../pics/winner-gold-ribbon.png",
+		    }); 
+            if (mybackgammonIndex.length) {                                     // Mark player ready to end
+              var updates= new Object();                                 // remove my Players from gameInfo
+              for (var player in gInfo.playerList)
+                if (gInfo.playerList[player].uid==currentUID)
+                  updates[player+'/uid']=0;
+              db.ref("/gameInfo/"+gInfo.gid+"/playerList/").update(updates);
+			}
+			newGID= -1;
+			gameMsg="backgammon";
+			$("#backgammonBoard").hide();
           }
         }
+		else if (gData.special.doubleRequest) {
+		  debug(2,"Double request");
+		  if (mybackgammonIndex.includes(1-gInfo.currentPlayer)) {
+			  swal({
+				title: "Double",
+				text: "Accept it?",
+				icon: "warning",
+				dangerMode: true,
+				buttons: {
+					dbl: {
+					  visible: true,
+					  text: "Let's Double",
+					  closeModal: true,
+					  value:false,
+					},
+					frft: {
+					  text: "No double, I forfeit this round",
+					  closeModal: true,
+					  value:true,
+					},
+				},
+				closeOnClickOutside:false,
+				closeOnEsc:false
+			  })
+			  .then(function(value){
+				  if (value) {
+					endGame(false);
+					db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+				  }
+				  else {
+					gData.special="";
+					gData.doubleDie *=2;
+					db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+				  }
+			  })
+		  }	  
+		}
       }
 
       break;
     case "quit":
-      sweetAlert({
+      swal({
          title: gInfo.concede+" had quit the game",
-         text: "",
-         showConfirmButton: true,
-         imageUrl: "../pics/i-quit.png",
-         imageSize: "400x150",
+         text: "  ",
+         buttons: false,
+         icon: "../pics/swal-quit.jpg",
+		 timer: 2000,
       });
-//      $("#backgammonBoard").hide();
+	  newGID= -1;
+	  gameMsg="backgammon";
+      $("#backgammonBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -327,7 +413,7 @@ void draw() {
       if (pieceMoving.animateDice%6 == 0) {
         var before=gData.dice[0];
         gData.dice=[Math.floor(Math.random()*6)+1,Math.floor(Math.random()*6)+1];
-        if (before) printDice(); else printBoard();                   // cause the "drow" button to disappear after dice started changing
+        if (before) printDice(); else printBoard();                   // cause the "draw" button to disappear after dice started changing
       }
     }
     else {                                                            // end of dice animation
@@ -344,6 +430,7 @@ void draw() {
         db.ref("gameInfo/"+gameID).set(gInfo);
       }
       mode="active";
+	  gData.special={};
       db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
     }
   }
@@ -366,15 +453,9 @@ function printDice() {
   }
   for (i=0;i<2;i++) {
     image(cnst.diceImg[gData.dice[i]-1],
-          (cnst.diceX[gInfo.currentPlayer]+2*i*cnst.diceSize)*sizeSquare,
-          cnst.diceY*sizeSquare,
+          (cnst.dice[gInfo.currentPlayer]+2*i*cnst.diceSize)*sizeSquare,
+          cnst.dice[2]*sizeSquare,
           currentSize[i],currentSize[i]);
-  }
-  if (checkPlayer() && gData.moveCnt) {                   // show undo button
-    image(cnst.undoImg,
-          cnst.undoX*sizeSquare,
-          cnst.diceY*sizeSquare,
-          cnst.diceSize*sizeSquare,cnst.diceSize*sizeSquare);
   }
 }
 
@@ -390,41 +471,30 @@ void mousePressed () {
   if (!checkPlayer() || mode!="active") return;
   debug(2,"mousePressed");
   if (gData.dice[0]==0) {                                             // need to role dice
+																	// roll button clicked
     if (x>cnst.rollButton[gInfo.currentPlayer] && x<cnst.rollButton[gInfo.currentPlayer]+cnst.rollButton[3] && y>cnst.rollButton[2] && y<cnst.rollButton[2]+cnst.rollButton[4]) {
       mode="animation";
       pieceMoving.animateDice=60;
       pieceMoving.active=false;
       printBoard();
     }
+																	// roll button clicked
+    if (x>cnst.doubleDie[reverse] && x<cnst.doubleDie[reverse]+cnst.doubleDie[3] && y>cnst.doubleDie[2] && y<cnst.doubleDie[2]+cnst.doubleDie[3]) {
+	  gData.special={doubleRequest:true}; // request to double the die
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+    }
   }
   else {
-    if (gData.moveCnt && x>cnst.undoX && x< cnst.undoX+cnst.diceSize && y> cnst.diceY && y<cnst.diceY+cnst.diceSize) { // undo button was pressed
-      gData.moveCnt--;
-      var dPips={val:0};                                                  // change in the number of pips
-      var backTo=gData.diceMoves[gData.moveCnt];
-      var backFrom=checkMove(backTo, gData.dice[min(1,gData.moveCnt)],dPips);
-      gData.pips[gInfo.currentPlayer]+=dPips.val;
-      gData.board[backTo]+=cnst.dir[gInfo.currentPlayer];
-      gData.board[backFrom]-=cnst.dir[gInfo.currentPlayer];
-      if (gData.diceKills[gData.moveCnt]) {
-        gData.board[25-gInfo.currentPlayer]+=cnst.dir[gInfo.currentPlayer];
-        gData.board[backFrom]=-cnst.dir[gInfo.currentPlayer];
-      }
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+    var mouse=mouseSquare();
+    if (mouse>=0 && mouse <26 &&                                    // legal position
+      gData.board[mouse]*cnst.dir[gInfo.currentPlayer] > 0 &&           // I need to click on my player's piece to start
+      (checkMove(mouse, gData.dice[min(1,gData.moveCnt)]) >= 0 ||       // either there is a valid move with the current die...
+       (gData.moveCnt==0 && checkMove(mouse, gData.dice[1]) >= 0))) {   // ... or a valid move with other die (only for 1st move))
+      pieceMoving.active=true;
+      pieceMoving.from=mouse;
+      gData.board[mouse]-=cnst.dir[gInfo.currentPlayer];
       printBoard();
-    }
-    else {                                                            // need to move pieces
-      var mouse=mouseSquare();
-      if (mouse>=0 && mouse <26 &&                                    // legal position
-        gData.board[mouse]*cnst.dir[gInfo.currentPlayer] > 0 &&           // I need to click on my player's piece to start
-        (checkMove(mouse, gData.dice[min(1,gData.moveCnt)]) >= 0 ||       // either there is a valid move with the current die...
-         (gData.moveCnt==0 && checkMove(mouse, gData.dice[1]) >= 0))) {   // ... or a valid move with other die (only for 1st move))
-        pieceMoving.active=true;
-        pieceMoving.from=mouse;
-        gData.board[mouse]-=cnst.dir[gInfo.currentPlayer];
-        printBoard();
-        image(cnst.pieces[gInfo.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
-      }
+      image(cnst.pieces[gInfo.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
     }
   }
 }
@@ -467,9 +537,7 @@ void mouseReleased() {
       gData.moveCnt++;
       gData.pips[gInfo.currentPlayer]-=dPips.val;
       if (gData.pips[gInfo.currentPlayer]==0) {
-        gData.special={};
-        gData.moveCnt=0;
-        gData.special.endGame=true;
+		endGame(true);
       }
       else if (gData.moveCnt==4 || (gData.dice[0]!=gData.dice[1] && gData.moveCnt==2) || !checkAnyMove()) {              // used up all the dice or no legal move
         gInfo.currentPlayer=1-gInfo.currentPlayer;
@@ -481,8 +549,8 @@ void mouseReleased() {
     }
     else {
       gData.board[pieceMoving.from]+=cnst.dir[gInfo.currentPlayer];
+      printBoard();
     }
-    printBoard();
   }
 }
 
@@ -574,6 +642,7 @@ boolean checkAnyMove() {
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 function printBoard() {
+  debug(3,"printBoard");
   size(sizeSquare*4,sizeSquare*3);
   image(cnst.boardPic[reverse],0,0,sizeSquare*4,sizeSquare*3);
   textFont(loadFont("Meta-Bold.ttf"));
@@ -600,11 +669,15 @@ function printBoard() {
     image(cnst.sidepieces[1-reverse][1],l.x,l.y,l.sx,l.sy);
   }
 
-  if ($(".mdl-spinner").hasClass("is-active")) $(".mdl-spinner").removeClass("is-active");
+  // doubling die
+  fill(#FFFFFF);
+  rect(sizeSquare*cnst.doubleDie[reverse], sizeSquare*cnst.doubleDie[2], sizeSquare*cnst.doubleDie[3], sizeSquare*cnst.doubleDie[3],sizeSquare/20);
+  fill(#000000);
+  text(gData.doubleDie,sizeSquare*(cnst.doubleDie[reverse]+cnst.doubleDie[3]*0.4),sizeSquare*(cnst.doubleDie[2]+cnst.doubleDie[3]*0.6));
   $("#backgammonBoard").show();
   $("#backgammonCanvas").show();
   if (gData.dice[0]==0) {                                             // no dice
-    if (checkPlayer()) {                                              // Print "roll" button"
+    if (checkPlayer() && gInfo.status=="active") {                                              // Print "roll" button"
       fill(#CC6600);
       rect(cnst.rollButton[gInfo.currentPlayer]*sizeSquare,cnst.rollButton[2]*sizeSquare,cnst.rollButton[3]*sizeSquare,cnst.rollButton[4]*sizeSquare,sizeSquare);
       fill(#000000);
@@ -612,8 +685,8 @@ function printBoard() {
     }
   }
   else printDice();
-  text(gData.pips[0],sizeSquare*cnst.pips[reverse][0], sizeSquare*cnst.pips[reverse][1]);
-  text(gData.pips[1],sizeSquare*cnst.pips[reverse][0], sizeSquare*cnst.pips[reverse][2]);
+//  text(gData.pips[0],sizeSquare*cnst.pips[reverse][0], sizeSquare*cnst.pips[reverse][1]);
+//  text(gData.pips[1],sizeSquare*cnst.pips[reverse][0], sizeSquare*cnst.pips[reverse][2]);
 }
 
 function printRect(area) {
@@ -621,6 +694,56 @@ function printRect(area) {
   rect(area[0]*sizeSquare,area[1]*sizeSquare,area[2]*sizeSquare,area[3]*sizeSquare);
 }
 
+//*************************************************************************************************
+// Activity when the round is over
+//*************************************************************************************************
+
+function endGame(bonus) {
+	debug(2,"End of the round");
+	// calculate how many points were won.
+	var pt=0, msg=gData.doubleDie+"x ";
+	if (gData.board[27-gInfo.currentPlayer]==0 && bonus) {
+	  if (gData.board[25-gInfo.currentPlayer]>0) { // opponent piece on the bar
+		pt=gData.doubleDie*4; 									// Double Backgammon
+		msg+="Double Backgammon (4) = "+pt;
+	  }
+	  else {
+		var empty=true;  // check if any opponent piece at home
+		for (var i=0;i<6;i++) {
+		  if (gData.board[gInfo.currentPlayer*18+i]!=0) empty=false;
+		}
+		if (empty) {
+		  pt=gData.doubleDie*2;  // Gammon
+		  msg+="Gammon (2) = "+pt;
+		}
+		else {
+		  pt=gData.doubleDie*3;		  // Backgammon
+		  msg+="Backgammon (3) = "+pt;
+		}
+	  }			  
+	}
+	else {
+	  pt=gData.doubleDie;					// Standard win
+	  msg+="Simple win (1) = "+pt;
+	}
+	gData.points[gInfo.currentPlayer]+=pt;
+	gData={
+	  board: cnst.boardStart,
+	  moveCnt:0,
+	  diceMoves:[0,0,0,0],
+	  diceKills:[0,0,0,0],
+	  dice:[0,0],
+	  doubleDie:1,
+	  pips:[cnst.totalPips,cnst.totalPips],
+	  points:gData.points,
+	  playTo:gData.playTo,
+	  info:gInfo,
+	  special:{
+		endGame:true,
+		msg:msg,
+	  }
+	};
+}
 
 //*************************************************************************************************
 // return object with board coordinate of the mouse - if it's inside the board

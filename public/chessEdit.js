@@ -106,6 +106,7 @@ $('#chessStartButton').click(function() {
     board: board,
     movedPiece:-1,
     newPiece:-1,
+	info:gInfo,
   };
   gInfo.playerList.push({
 	role:$("#chessRole").val(),
@@ -113,22 +114,9 @@ $('#chessStartButton').click(function() {
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
   });
-  gData.info=gInfo;
   db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   db.ref("gameInfo/"+newGID).set(gInfo);
 
-/*
-  sendReq({
-    game:"chess",
-    gid:newGID,
-    uid:currentUID,
-    msg: "Start",
-    role: $("#chessRole").val(),
-    board: board,
-    displayName: auth.currentUser.displayName,
-    photoURL: auth.currentUser.photoURL
-  });
-*/
   gameMsg="chess";
   $("#chessOptionsBoard").hide();
   $(".mdl-spinner").addClass("is-active");

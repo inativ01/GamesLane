@@ -128,10 +128,6 @@ a {
   }
 }
 
-mdl-spinner {
-  z-inderx: 10;
-}
-
 .playerPics {
   float:left;
   width:50%;
@@ -176,4 +172,11 @@ mdl-spinner {
 
 .gameTurn {
   font-weight: bold;
+}
+
+.swal-overlay {
+  background-color: rgba(43, 165, 137, 0.45);
+}
+.red-bg {
+	background-color: red;
 }

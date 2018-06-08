@@ -42,7 +42,7 @@ var animation= {
 
 var images=[];                           // array to hold the images of the various pieces
 var pieces=loadImage("../pics/CHESS-pieces.png");                                        // fill up array of images of all black and white pieces
-var spinner=loadImage("../spinner.png");
+var spinner=loadImage("../pics/spinner.png");
 var spinnerAngle=0;
 var spinnerActive=false;
 
@@ -74,26 +74,45 @@ $("#chessBoard .gameButtonClose").click( function() {
 //   User selected to quit (resign) the game
 //*************************************************************************************************
 $("#chessBoard .gameButtonEnd").click( function() {
-  sweetAlert({
+  swal({
     title: "Are you sure?",
     text: "You will forfeit the game!",
-    type: "warning",
-    showCancelButton: true,
-    confirmButtonClass: "btn-danger",
-    confirmButtonText: "Yes, I quit!",
-    cancelButtonText: "No, keep playing",
-    closeOnConfirm: false
-  },
-  function(isConfirm) {
-    if (isConfirm) {
-      gInfo.status="quit";
-      gInfo.concede=auth.currentUser.displayName;
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-      db.ref("gameInfo/"+gameID).set(gInfo);
-    } else {
-      sweetAlert("Cancelled", "Keep Playing", "error");
-    }
-  });
+//    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
+    icon: "warning",
+	dangerMode: true,
+	buttons: {
+		cancel: {
+		  visible: true,
+		  text: "No, keep playing",
+		  value: false,
+		  closeModal: true,
+		},
+		confirm: {
+		  text: "Yes, I quit!",
+		  value: "endAll",
+		  closeModal: true,
+		},
+	}
+  })
+  .then(function(value){
+	  switch (value) {
+		case "endAll":
+		  gInfo.status="quit";
+		  gInfo.concede=auth.currentUser.displayName;
+		  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+		  db.ref("gameInfo/"+gameID).set(gInfo);
+		  break;
+	 
+		default:
+		  swal({
+			  title: "Cancelled", 
+			  text: "Keep Playing", 
+			  icon: "error",
+			  buttons: false,
+			  timer: 1000
+		  });
+	  }
+  })
 });
 
 //*************************************************************************************************
@@ -192,15 +211,17 @@ function chessEvent(snapshot) {
       animationInit(gData.movedPiece,gData.newPiece);
       break;
     case "quit":
-      sweetAlert({
+      swal({
          title: gInfo.concede+" had quit the game",
-         text: "",
-         showConfirmButton: true,
-         imageUrl: "../pics/i-quit.png",
-         imageSize: "400x150",
+         text: "  ",
+         buttons: false,
+         icon: "../pics/swal-quit.jpg",
+		 timer: 2000,
       });
 
-//      $("#chessBoard").hide();
+	  newGID= -1;
+	  gameMsg="chess";
+      $("#chessBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -340,7 +361,9 @@ void draw() {
                     updates[player+'/uid']=0;
                 db.ref("/gameInfo/"+gInfo.gid+"/playerList/").update(updates);
               }
-//              $("#chessBoard").hide();
+			  newGID= -1;
+			  gameMsg="chess";
+              $("#chessBoard").hide();
             }
             else if (gData.special.check) {
               sweetAlert({
