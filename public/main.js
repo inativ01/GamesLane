@@ -7,6 +7,7 @@
 var currentUID=-1;
 var gameID=-1;
 var newGID=-1;
+var currentGame=null;
 var db = firebase.database();
 var auth = firebase.auth();
 var gameInfo={};
@@ -337,17 +338,20 @@ function onAuthStateChanged(user) {
   var gameInfoRef = db.ref("gameInfo");
 
   gameInfoRef.on("child_added", function(snapshot) {
+    debug(2,"child_added");
     addGameToList(snapshot.val());
   });
 
   gameInfoRef.on("child_changed", function(snapshot) {
+    debug(2,"child_changed");
     var gInfo=snapshot.val();
     removeFromList(gInfo);
     var clean=true;
     for (var p in gInfo.playerList) {
      if (gInfo.playerList[p].uid!=0) clean=false;   // is there an active player (with valid uid) ?
     }
-    if (clean) {									// if there are no more valid players (Everybody left) than remove the game.
+    if (clean) {                  // if there are no more valid players (Everybody left) than remove the game.
+      debug(2,"clean");
       var up=new Object();
       up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
       up["/gameInfo/"+gInfo.gid]={};
@@ -360,6 +364,7 @@ function onAuthStateChanged(user) {
   });
 
   gameInfoRef.on("child_removed", function(snapshot) {
+    debug(2,"child_removed");
     removeFromList(snapshot.val());
   });
 }
@@ -370,10 +375,10 @@ function onAuthStateChanged(user) {
 <div id="<game><listType>List" class="Active gameLists" >  -- listName
   <button class="mdl-list__item mdl-list__item--two-line"> -- node
     <span class="mdl-list__item-primary-content">          -- sp
-	  <span>  </span>                                      -- pnode 1
-	  <span "mdl-list__item-sub-title">  </span>           -- pnode 2
+    <span>  </span>                                      -- pnode 1
+    <span "mdl-list__item-sub-title">  </span>           -- pnode 2
     </span>
-	<img>                                                  -- pic
+  <img>                                                  -- pic
   </button>
 </div>
 ------------------------------------------------------------------------------*/
@@ -419,8 +424,8 @@ function addGameToList(gInfo) {
     addLine(gInfo,"You can join a new "+gInfo.game+" game with "+partner);
   }
   else if (gInfo.playerList[gInfo.currentPlayer].uid==currentUID)  {
-      addToList(gInfo.game,"Active",node);
-      addLine(gInfo,"It's now your turn to play "+gInfo.game+" with "+partner);
+    addToList(gInfo.game,"Active",node);
+    addLine(gInfo,"It's now your turn to play "+gInfo.game+" with "+partner);
   }
   else if (active) {
     addToList(gInfo.game,"Wait",node);
@@ -452,7 +457,7 @@ function addLine(gInfo, msg) {
 function addToList(game,list,node) {
     debug(2,"Add "+node.val()+" to "+game+" "+list);
     debug(3,gameInfo);
-    var listName="#"+game+list+"List";
+    var listName="."+game+"Class ."+list+" .gameLists";
     $(listName).append(node);
     if (list=="Active") {
       var nActive=$(listName).children().length;
@@ -466,15 +471,16 @@ function removeFromList(gInfo) {
     debug(2,"Remove from list");
     delete gameInfo[gInfo.gid];
     var node=$("#line-"+gInfo.game+"-"+gInfo.gid);
+    if (node[0] === undefined) return;
     var pnode=node.parent();
     node.remove();
-    if (pnode.hasClass("Active")) {
+    if (pnode.parent().hasClass("Active")) {
       var nActive=pnode.children().length;
       if (nActive==0) $("#"+gInfo.game+"Badge").removeClass("mdl-badge");
       else $("#"+gInfo.game+"Badge").attr("data-badge",nActive);
     }
     if (pnode.children().length<1)       // No more items in the list
-      $("#"+pnode.prop('id')+"Button").attr("disabled",true);
+      $("#"+gInfo.game+pnode.attr("value")+"ListButton").attr("disabled",true);
 }
 
 
@@ -523,8 +529,8 @@ $("#profileCancel").click( function() {
 
 
 $("#uploadBtn").change(function () {
-	var img=document.getElementById("updatePic");
-	var newPic=this.files[0];
+  var img=document.getElementById("updatePic");
+  var newPic=this.files[0];
     $("#uploadFile").html(newPic.name);
     var reader = new FileReader();
     reader.onload = function(){
@@ -536,8 +542,10 @@ $("#uploadBtn").change(function () {
 // -----------------------------------  Game buttons --------------------------------------------------------------------------------------
 
 $(".gameButtons").click( function() {
-  if(!this.hasAttribute("disabled"))
-    $("#"+this.getAttribute("game")+this.getAttribute("catag")+"Modal").show();
+  if(!this.hasAttribute("disabled")) {
+    $("."+this.getAttribute("game")+"Class "+".modal."+this.getAttribute("catag")).show();
+//    $("#"+this.getAttribute("game")+this.getAttribute("catag")+"Modal").show();
+  }
 });
 
 

@@ -13,14 +13,14 @@ var board=[[-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1],
            [-1,-1,-1,-1,-1,-1,-1,-1]];
 
-var board1=[	[10, 9, 8, 7, 6, 8, 9,10],                            // -1 is an empty slot, 0-5 white pieces, 6-11 black pieces
-		[11,11,11,11,11,11,11,11],
-		[-1,-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1,-1],
-		[-1,-1,-1,-1,-1,-1,-1,-1],
-		[ 5, 5, 5, 5, 5, 5, 5, 5],
-		[ 4, 3, 2, 1, 0, 2, 3, 4]];
+var board1=[  [10, 9, 8, 7, 6, 8, 9,10],                            // -1 is an empty slot, 0-5 white pieces, 6-11 black pieces
+    [11,11,11,11,11,11,11,11],
+    [-1,-1,-1,-1,-1,-1,-1,-1],
+    [-1,-1,-1,-1,-1,-1,-1,-1],
+    [-1,-1,-1,-1,-1,-1,-1,-1],
+    [-1,-1,-1,-1,-1,-1,-1,-1],
+    [ 5, 5, 5, 5, 5, 5, 5, 5],
+    [ 4, 3, 2, 1, 0, 2, 3, 4]];
 
 var sizeSquare = 6, startX = 6, startY = 6;                           // control the size and location of the board
 var mode="passive";                                                   // "passive" - my player is not playing
@@ -96,7 +96,7 @@ $('#chessStartButton').click(function() {
   gInfo={
     game:"chess",
     gid:newGID,
-	playerList:[],
+  playerList:[],
     currentPlayer:0,
     status:'pending'
   } ;
@@ -106,10 +106,10 @@ $('#chessStartButton').click(function() {
     board: board,
     movedPiece:-1,
     newPiece:-1,
-	info:gInfo,
+  info:gInfo,
   };
   gInfo.playerList.push({
-	role:$("#chessRole").val(),
+  role:$("#chessRole").val(),
     uid:currentUID,
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,

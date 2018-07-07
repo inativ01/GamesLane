@@ -67,6 +67,7 @@ window.addEventListener('resize', function() {
 $("#chessBoard .gameButtonClose").click( function() {
   newGID= -1;
   gameMsg="chess";
+  $("#sjButtons").hide();
   $("#chessBoard").hide();
 });
 
@@ -79,55 +80,59 @@ $("#chessBoard .gameButtonEnd").click( function() {
     text: "You will forfeit the game!",
 //    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
     icon: "warning",
-	dangerMode: true,
-	buttons: {
-		cancel: {
-		  visible: true,
-		  text: "No, keep playing",
-		  value: false,
-		  closeModal: true,
-		},
-		confirm: {
-		  text: "Yes, I quit!",
-		  value: "endAll",
-		  closeModal: true,
-		},
-	}
+  dangerMode: true,
+  buttons: {
+    cancel: {
+      visible: true,
+      text: "No, keep playing",
+      value: false,
+      closeModal: true,
+    },
+    confirm: {
+      text: "Yes, I quit!",
+      value: "endAll",
+      closeModal: true,
+    },
+  }
   })
   .then(function(value){
-	  switch (value) {
-		case "endAll":
-		  gInfo.status="quit";
-		  gInfo.concede=auth.currentUser.displayName;
-		  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-		  db.ref("gameInfo/"+gameID).set(gInfo);
-		  break;
-	 
-		default:
-		  swal({
-			  title: "Cancelled", 
-			  text: "Keep Playing", 
-			  icon: "error",
-			  buttons: false,
-			  timer: 1000
-		  });
-	  }
+    switch (value) {
+    case "endAll":
+      gInfo.status="quit";
+      gInfo.concede=auth.currentUser.displayName;
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+      db.ref("gameInfo/"+gameID).set(gInfo);
+      break;
+   
+    default:
+      swal({
+        title: "Cancelled", 
+        text: "Keep Playing", 
+        icon: "error",
+        buttons: false,
+        timer: 1000
+      });
+    }
   })
 });
 
 //*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
-$("#chessBoard .gameButtonJoin").click(function() {
+$("#gameButtonJoin").click(function() {
+  if (currentGame != "chess") {
+    debug(0,"not in Chess");
+    return;
+  }
   if (gInfo.status=="pending") {
-	if (this.value == "White") gInfo.playerList.splice(0,0,{  // if new player is White, push as first player
-	  role:this.value,
-	  uid:currentUID,
+  if (this.value == "White") gInfo.playerList.splice(0,0,{  // if new player is White, push as first player
+    role:this.value,
+    uid:currentUID,
       displayName:auth.currentUser.displayName,
       photoURL:auth.currentUser.photoURL});
-	else gInfo.playerList.push({
-	  role:this.value,
-	  uid:currentUID,
+  else gInfo.playerList.push({
+    role:this.value,
+    uid:currentUID,
       displayName:auth.currentUser.displayName,
       photoURL:auth.currentUser.photoURL});
     gInfo.status="active"; // two-player game. Start automatically when the 2nd player joins
@@ -179,8 +184,8 @@ function chessEvent(snapshot) {
   mychessIndex=0;
   var i=1;
   for (var p in gInfo.playerList) {
-	if (gInfo.playerList[p].uid==currentUID) mychessIndex|=i;
-	i=i*2;
+  if (gInfo.playerList[p].uid==currentUID) mychessIndex|=i;
+  i=i*2;
   }
   debug(2,"mychessIndex="+mychessIndex);
   if (mychessIndex && gInfo.status!="quit")
@@ -193,14 +198,17 @@ function chessEvent(snapshot) {
     if (checkPlayer()) $("#chessBoard .gameTurn").css("color","red");
     $("#chessBoard .gameTurn").html(gInfo.playerList[gInfo.currentPlayer].role+" player's turn");
   }
-  $("#chessBoard .gameButtonJoin").hide();
+  $("#sjButtons").hide();
+  $("#gameButtonJoin").hide();
+  $("#gameButtonStart").hide();
   switch(gInfo.status) {
     case "pending":
       var color= (gInfo.playerList[0].role != "White") ? "White" : "Black";
       reverse=(color=="Black");
-      $("#chessBoard .gameButtonJoin").val(color);
-      $("#chessBoard .gameButtonJoin").html("Join as "+color);
-      $("#chessBoard .gameButtonJoin").show();
+      $("#gameButtonJoin").val(color);
+      $("#gameButtonJoin").html("Join as "+color);
+      $("#gameButtonJoin").show();
+      $("#sjButtons").show();
       mode="passive";
       printBoard();
       break;
@@ -216,12 +224,12 @@ function chessEvent(snapshot) {
          text: "  ",
          buttons: false,
          icon: "../pics/swal-quit.jpg",
-		 timer: 2000,
+     timer: 2000,
       });
 
-	  newGID= -1;
-	  gameMsg="chess";
-      $("#chessBoard").hide();
+    newGID= -1;
+    gameMsg="chess";
+    $("#chessBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -269,6 +277,7 @@ void draw() {
 // user entered the game (either as player or watcher). Start listening to firebase events related to this game
     gameID=newGID;
     if (gameID != -1) {
+      currentGame=gameMsg;
 // Server updated the game information
       db.ref("gameData/chess/"+gameID).on("value", chessEvent);
 // Chat messages related to this game
@@ -330,7 +339,7 @@ void draw() {
             ignoreNextUpdate=0;
             if (checkPlayer()) $("#chessBoard .gameTurn").css("color","red");
             else               $("#chessBoard .gameTurn").css("color","black");
-			reverse=(gInfo.playerList[1].uid==currentUID && gInfo.playerList[0].uid!=currentUID);  // reverse the board if I'm playing Black only
+            reverse=(gInfo.playerList[1].uid==currentUID && gInfo.playerList[0].uid!=currentUID);  // reverse the board if I'm playing Black only
           }
           printBoard();                                            // board may have flipped due to player change
           $("#chessBoard .gameTurn").html(gInfo.playerList[gInfo.currentPlayer].role+" player's turn");
@@ -361,8 +370,8 @@ void draw() {
                     updates[player+'/uid']=0;
                 db.ref("/gameInfo/"+gInfo.gid+"/playerList/").update(updates);
               }
-			  newGID= -1;
-			  gameMsg="chess";
+        newGID= -1;
+        gameMsg="chess";
               $("#chessBoard").hide();
             }
             else if (gData.special.check) {
@@ -449,7 +458,7 @@ void mouseClicked () {
         var piece=gData.board[gData.from.y][gData.from.x];
         finalizeMove(piece,piece);
       }
-      if (mouse.x==gData.from.x && mouse.y==gData.from.y) {						// clicked again on the same piece - cancel selection
+      if (mouse.x==gData.from.x && mouse.y==gData.from.y) {            // clicked again on the same piece - cancel selection
         mode="start";
         printBoard();
         return;

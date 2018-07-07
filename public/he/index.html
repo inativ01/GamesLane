@@ -33,7 +33,7 @@
   <script src="../Libs/getmdl-select.min.js"></script>
   <script src="../Libs/jquery-3.2.1.min.js"></script>
   <script src="../Libs/processing.min.js"></script>
-  <script src="../Libs/sweetalert.min.js"></script>
+  <script src="../Libs/sweetalert-2.1.0.min.js"></script>
   <link rel="stylesheet" type="text/css" href="../Libs/sweetalert.css">
   <link rel="stylesheet" href="../main.css">
 
@@ -117,19 +117,25 @@
 
   <section>
 <!-- Chess game -->
-    <div id=chessBoard class="modal gameBoard" title="chess" style="top:0px" >
-      <div id=chessContent style="margin:  auto;">
-        <div id=chessHeader class="mdl-color--light-blue-200" style="padding: 20px;position:relative">
-          <span id=chessTurn style="font-weight: bold"></span>
-          <button id=chessButtonJoin class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-          <button id=chessClose class="mdl-button mdl-js-button mdl-button--icon" style="float: left;">
-            <i class="material-icons">clear</i>
-          </button>
-          <button id=chessEnd class="mdl-button mdl-js-button mdl-button--icon" style="float: left;">
-            <i class="material-icons">exit_to_app</i>
-          </button>
+    <div id=chessBoard class="modal gameBoard" style="top:0px" >
+      <div class="gameContent" >
+        <div class="gameHeader mdl-color--light-blue-200" >
+          <div style="float:left;padding-left:10px;min-width:20%;">
+            <p style="display: inline-block;"></p>
+            <span class="gameTurn" ></span>
+            <button class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect gameButtonJoin"></button>
+          </div>
+          <div class="playerPics"></div>
+          <div style="float:right;">
+            <button title="Quit the game" class="mdl-button mdl-js-button mdl-button--icon gameButtonEnd" >
+              <i class="material-icons">exit_to_app</i>
+            </button>
+            <button title="Exit to main menu"  class="mdl-button mdl-js-button mdl-button--icon gameButtonClose" >
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
         </div>
-        <canvas id=chessCanvas data-processing-sources="../chess/chess.js" ></canvas>
+        <canvas id=chessCanvas data-processing-sources="../chess.js" ></canvas>
         <div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar" style="z-index: 10;">
           <div class="mdl-snackbar__text"></div>
           <button class="mdl-snackbar__action" type="button"></button>
@@ -162,24 +168,36 @@
             <button id="chessCancelOptions" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
           </div>
         </div>
-        <canvas id=chessEditCanvas data-processing-sources="../chess/chessEdit.js" style="margin: auto;"></canvas>
+        <canvas id=chessEditCanvas data-processing-sources="../chessEdit.js" style="margin: auto;"></canvas>
       </div>
     </div>
 
 <!-- Backgammon game -->
-    <div id=backgammonBoard class="modal gameBoard" title="backgammon" style="top:0px" >
-      <div id=backgammonContent style="margin:  auto;">
-        <div id=backgammonHeader class="mdl-color--light-blue-200" style="padding-top:10px;padding-left:20px;position:relative;height: 50px">
-          <span id=backgammonTurn style="font-weight: bold"></span>
-          <button id=backgammonButtonJoin class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect"></button>
-          <button id=backgammonClose class="mdl-button mdl-js-button mdl-button--icon" style="float: left;">
-            <i class="material-icons">clear</i>
-          </button>
-          <button id=backgammonEnd class="mdl-button mdl-js-button mdl-button--icon" style="float: left;">
-            <i class="material-icons">exit_to_app</i>
-          </button>
+    <div id=backgammonBoard class="modal gameBoard" style="top:0px" >
+      <div class="gameContent" >
+        <div class="gameHeader mdl-color--light-blue-200" >
+          <div style="float:left;padding-left:10px;min-width:20%;">
+            <p style="display: inline-block;"></p>
+            <span class="gameTurn" ></span>
+            <button class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect gameButtonJoin"></button>
+          </div>
+          <div class="playerPics"></div>
+          <div style="float:right;">
+            <button title="Undo last move" class="mdl-button mdl-js-button mdl-button--icon gameButtonUndo" >
+              <i class="material-icons">undo</i>
+            </button>
+            <button title="Information" class="mdl-button mdl-js-button mdl-button--icon gameButtonInfo" >
+              <i class="material-icons">info</i>
+            </button>
+            <button title="Quit the game" class="mdl-button mdl-js-button mdl-button--icon gameButtonEnd" >
+              <i class="material-icons">exit_to_app</i>
+            </button>
+            <button title="Exit to main menu"  class="mdl-button mdl-js-button mdl-button--icon gameButtonClose" >
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
         </div>
-        <canvas id=backgammonCanvas data-processing-sources="../backgammon/backgammon.js" ></canvas>
+        <canvas id=backgammonCanvas data-processing-sources="../backgammon.js" ></canvas>
       </div>
     </div>
 
@@ -198,19 +216,94 @@
               <label for="backgammonRole" class="mdl-textfield__label">Your player color</label>
               <ul for="backgammonRole" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
                 <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">White</li>
-                <li class="mdl-menu__item">Black</li>
+                <li class="mdl-menu__item">Brown</li>
               </ul>
             </div>
             <br>
-          </div>
-          <div style="text-align: center;padding: 0px;">
-            <button id="backgammonCancelOptions" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
+              <input id="backgammonPlayTo" class="mdl-textfield__input" type="text" value=5 readonly tabIndex="-1">
+              <label for="backgammonPlayTo" class="mdl-textfield__label">Play To</label>
+              <ul for="backgammonPlayTo" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">1</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">3</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">5</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">7</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">11</li>
+                <li class="mdl-menu__item">15</li>
+              </ul>
+            </div>
+            <br>
+            <div style="text-align: center;padding: 0px;">
+              <button id="backgammonCancelOptions" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
+<!-- Uno game -->
+    <div id=unoBoard class="modal gameBoard" style="top:0px" >
+      <div class="gameContent" >
+        <div class="gameHeader mdl-color--light-blue-200" >
+          <div style="float:left;padding-left:10px;min-width:20%;">
+            <p style="display: inline-block;"></p>
+            <span class="gameTurn" ></span>
+            <button class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect gameButtonJoin"></button>
+            <button class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect gameButtonStart">Start</button>
+          </div>
+          <div class="playerPics"></div>
+          <div style="float:right;">
+            <button title="Quit the game" class="mdl-button mdl-js-button mdl-button--icon gameButtonEnd" >
+              <i class="material-icons">exit_to_app</i>
+            </button>
+            <button title="Exit to main menu"  class="mdl-button mdl-js-button mdl-button--icon gameButtonClose" >
+              <i class="material-icons">clear</i>
+            </button>
+          </div>
+        </div>
+        <canvas id=unoCanvas data-processing-sources="../uno.js" ></canvas>
+      </div>
+    </div>
+
+<!-- Uno Options -->
+    <div id=unoOptionsBoard class="modal allowClose" style="top:0px" >
+      <div id="unoOptionsContent" style="margin:  auto;">
+        <div class="mdl-color--light-blue-200" style="padding: 20px;">
+          <div id=unoOptionsHeader>
+            <div  style="text-align: center;border-style: groove;padding:10px">
+              <button id="unoStartButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Start Uno</button>
+            </div>
+            <br>
+            <div><b><u>Uno Options</u></b></div>
+            <br>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
+              <input id="unoMaxPlayers" class="mdl-textfield__input" type="text" value=5 readonly tabIndex="-1">
+              <label for="unoMaxPlayers" class="mdl-textfield__label">Max Players</label>
+              <ul for="unoMaxPlayers" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">2</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">3</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">4</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">5</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">6</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">7</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">8</li>
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">9</li>
+                <li class="mdl-menu__item">10</li>
+              </ul>
+            </div>
+            <br>
+            <div style="text-align: center;padding: 0px;">
+              <button id="unoCancelOptions" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
   </section>
+<!-- Spinner -->
+      <div style="width:50px; z-index:100; position:absolute; left:40%; top:50%" >
+        <div  class="mdl-spinner mdl-js-spinner"></div>
+      </div>
 
 <!-- Header section containing logo and menu -->
   <header class="header mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
@@ -250,77 +343,107 @@
 <!-- Main screen -->
   <main class="mdl-layout__content" style="width:100%;overflow:hidden">
     <div style="width: calc(100% - 50px);float:right;position:absolute;height:100%;overflow:auto">
+      <div class="mdl-grid">
+  <!-- Chess -->
+        <div class="mdl-cell mdl-cell--1-col gameIcons">
+          <h5 style="text-align:center" > שחמט</h5>
+          <div id=chessBadge></div>
+          <input id="chessButton" class="gameMainButton" type="image" src="../pics/CHESS-icon.gif" width="100" height="100" >
+          <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="chessButton">
+            <li id=chessNewButton       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
+            <li id=chessActiveListButton  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Active">שחק את תורך</li>
+            <li id=chessPendingListButton disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Pending">הצטרף למשחק חדש</li>
+            <li id=chessWaitListButton    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Wait">המתן לתורך</li>
+            <li id=chessWatchListButton   disabled class="gameButtons mdl-menu__item " game="chess" catag="Watch">צפיה במשחקים פעילים</li>
+          </ul>
+        </div>
 
-<!-- Chess -->
-      <div style="width:110px; margin:auto;position:relative" >
-        <h4 style="text-align:center" > שחמט</h4>
-        <div id=chessBadge></div>
-        <input id="chessButton" class="gameMainButton" type="image" src="../chess/chessboard_full.gif" width="100" height="100" >
-        <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="chessButton">
-          <li id=chessNewButton       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
-          <li id=chessActiveListButton  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Active">שחק את תורך</li>
-          <li id=chessPendingListButton disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Pending">הצטרף למשחק חדש</li>
-          <li id=chessWaitListButton    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Wait">המתן לתורך</li>
-          <li id=chessWatchListButton   disabled class="gameButtons mdl-menu__item " game="chess" catag="Watch">צפיה במשחקים פעילים</li>
-        </ul>
-      </div>
+  <!-- backgammon -->
+        <div class="mdl-cell mdl-cell--1-col gameIcons">
+          <h5 style="text-align:center" > שש-בש</h5>
+          <div id=backgammonBadge></div>
+          <input id="backgammonButton" class="gameMainButton" type="image" src="../pics/BG-icon.png" width="100" height="100" >
+          <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="backgammonButton">
+            <li id=backgammonNewButton       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
+            <li id=backgammonActiveListButton  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Active">שחק את תורך</li>
+            <li id=backgammonPendingListButton disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Pending">הצטרף למשחק חדש</li>
+            <li id=backgammonWaitListButton    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Wait">המתן לתורך</li>
+            <li id=backgammonWatchListButton   disabled class="gameButtons mdl-menu__item " game="chess" catag="Watch">צפיה במשחקים פעילים</li>
+          </ul>
+        </div>
 
-      <div id=chessActiveModal class="modal allowClose" >
-          <div id=chessActiveList class="Active gameLists"  ></div>
-      </div>
-      <div id=chessPendingModal class="modal allowClose" >
-          <div id=chessPendingList class="Pending gameLists"  ></div>
-      </div>
-      <div id=chessWaitModal class="modal allowClose" >
-          <div id=chessWaitList class="gameLists"  ></div>
-      </div>
-      <div id=chessWatchModal class="modal allowClose" >
-          <div id=chessWatchList class="gameLists"  ></div>
-      </div>
-
-<!-- backgammon -->
-      <div style="width:110px; margin:auto" >
-        <h4 style="text-align:center" > שש-בש</h4>
-        <div id=backgammonBadge></div>
-        <input id="backgammonButton" class="gameMainButton" type="image" src="../backgammon/backgammonboard_full.png" width="100" height="100" >
-        <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="backgammonButton">
-          <li id=backgammonNewButton       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">Start a New Game</li>
-          <li id=backgammonActiveListButton  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="backgammon" catag="Active">Play your turn</li>
-          <li id=backgammonPendingListButton disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="backgammon" catag="Pending">Join a Game</li>
-          <li id=backgammonWaitListButton    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="backgammon" catag="Wait">Wait for your turn</li>
-          <li id=backgammonWatchListButton   disabled class="gameButtons mdl-menu__item " game="backgammon" catag="Watch">Watch others play</li>
-        </ul>
-      </div>
-
-      <div id=backgammonActiveModal class="modal allowClose" >
-          <div id=backgammonActiveList class="Active gameLists"  ></div>
-      </div>
-      <div id=backgammonPendingModal class="modal allowClose" >
-          <div id=backgammonPendingList class="Pending gameLists"  ></div>
-      </div>
-      <div id=backgammonWaitModal class="modal allowClose" >
-          <div id=backgammonWaitList class="gameLists"  ></div>
-      </div>
-      <div id=backgammonWatchModal class="modal allowClose" >
-          <div id=backgammonWatchList class="gameLists"  ></div>
+  <!-- Uno -->
+        <div class="mdl-cell mdl-cell--1-col gameIcons" hidden>
+          <h5 style="text-align:center" >Uno</h4>
+          <div id=unoBadge></div>
+          <input id="unoButton" class="gameMainButton" type="image" src="../pics/UNO-icon.jpg" width="100" height="100" >
+          <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="unoButton">
+            <li id=unoNewButton       class="NewGame mdl-menu__item mdl-menu__item mdl-menu__item--full-bleed-divider">התחל משחק חדש</li>
+            <li id=unoActiveListButton  disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Active">שחק את תורך</li>
+            <li id=unoPendingListButton disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Pending">הצטרף למשחק חדש</li>
+            <li id=unoWaitListButton    disabled class="gameButtons mdl-menu__item mdl-menu__item--full-bleed-divider" game="chess" catag="Wait">המתן לתורך</li>
+            <li id=unoWatchListButton   disabled class="gameButtons mdl-menu__item " game="chess" catag="Watch">צפיה במשחקים פעילים</li>
+          </ul>
+        </div>
       </div>
 
-<!-- Spinner -->
-      <div style="width:50px; z-index:100">
-        <div  class="mdl-spinner mdl-js-spinner"></div>
+<!-- various lists. Need to make this section dynamic (ZZZ) -->
+      <div class="chessClass">
+        <div class="Active modal allowClose" >
+            <div class="gameLists" value="Active" ></div>
+        </div>
+        <div class="Pending modal allowClose" >
+            <div class="gameLists" value="Pending" ></div>
+        </div>
+        <div class="Wait modal allowClose" >
+            <div class="gameLists" value="Wait" ></div>
+        </div>
+        <div class="Watch modal allowClose" >
+            <div class="gameLists" value="Watch" ></div>
+        </div>
       </div>
+      <div class="backgammonClass">
+        <div class="Active modal allowClose" >
+            <div class="gameLists" value="Active" ></div>
+        </div>
+        <div class="Pending modal allowClose" >
+            <div class="gameLists" value="Pending" ></div>
+        </div>
+        <div class="Wait modal allowClose" >
+            <div class="gameLists" value="Wait" ></div>
+        </div>
+        <div class="Watch modal allowClose" >
+            <div class="gameLists" value="Watch" ></div>
+        </div>
+      </div>
+      <div class="unoClass">
+        <div class="Active modal allowClose" >
+            <div class="gameLists" value="Active" ></div>
+        </div>
+        <div class="Pending modal allowClose" >
+            <div class="gameLists" value="Pending" ></div>
+        </div>
+        <div class="Wait modal allowClose" >
+            <div class="gameLists" value="Wait" ></div>
+        </div>
+        <div class="Watch modal allowClose" >
+            <div class="gameLists" value="Watch" ></div>
+        </div>
+      </div>
+
 <!-- Welcome screen -->
+      <br><br>
       <div class="WelcomeNewUser" style="display:none;margin:0px 20px" >
         <h4 style="color:red;margin:0">איך להשתמש באתר?</h4>
         <span >יש ללחוץ על תמונת משחק כדי לשחק באחד מהאופנים הבאים:
-         <ul style="margin:0">
+        <ul style="margin:0">
           <li>התחלת משחק חדש (יש להמתין לשחקנים נוספים להצטרף)</li>
           <b class="WelcomeGuest"  style="color:red;">שחקן אורח אינו יכול להתחיל משחק חדש!</b>
           <li>כאשר מגיע תורך לשחק, יופיע סימון אדום על תמונת המשחק.</li>
           <li>הצטרפות למשחק שנפתח על ידי שחקן אחר.</li>
           <li>כניסה למשחק פעיל, אף שזה לא תורך. יש להמתין לתורך לשחק.</li>
           <li>ניתן גם לצפות במשחק פעיל אשר ללא השתתפות פעילה.</li>
-         </ul>
+        </ul>
         <b>הערה:</b> ניתן להצטרף למשחק ביותר מתפקיד אחד. זה מאפשר למספר שחקנים בחדר לשחק זה עם זה על מחשב אחד.
         </span>
       </div>

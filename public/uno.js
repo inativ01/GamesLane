@@ -105,6 +105,7 @@ var uno_count=[1,2,2,2,2,2,2,2,2,2,2,2,2,
 //*************************************************************************************************
 window.addEventListener('resize', function() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
+  debug(2,"SizeSquare="+sizeSquare);
   $("#unoBoard .gameContent").css("width",sizeSquare*4);
   if($("#unoBoard").is(":visible")) printBoard();
 });
@@ -115,6 +116,7 @@ window.addEventListener('resize', function() {
 $("#unoBoard .gameButtonClose").click( function() {
   newGID= -1;
   gameMsg="uno";
+  $("#sjButtons").hide();
   $("#unoBoard").hide();
 });
 
@@ -127,39 +129,39 @@ $("#unoBoard .gameButtonEnd").click( function() {
     text: "You will forfeit the game!",
 //    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
     icon: "warning",
-	dangerMode: true,
-	buttons: {
-		cancel: {
-		  visible: true,
-		  text: "No, keep playing",
-		  value: false,
-		  closeModal: true,
-		},
-		confirm: {
-		  text: "Yes, I quit!",
-		  value: "endAll",
-		  closeModal: true,
-		},
-	}
+  dangerMode: true,
+  buttons: {
+    cancel: {
+      visible: true,
+      text: "No, keep playing",
+      value: false,
+      closeModal: true,
+    },
+    confirm: {
+      text: "Yes, I quit!",
+      value: "endAll",
+      closeModal: true,
+    },
+  }
   })
   .then(function(value){
-	  switch (value) {
-		case "endAll":
-		  gInfo.status="quit";
-		  gInfo.concede=auth.currentUser.displayName;
-		  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-		  db.ref("gameInfo/"+gameID).set(gInfo);
-		  break;
-	 
-		default:
-		  swal({
-			  title: "Cancelled", 
-			  text: "Keep Playing", 
-			  icon: "error",
-			  buttons: false,
-			  timer: 1000
-		  });
-	  }
+    switch (value) {
+    case "endAll":
+      gInfo.status="quit";
+      gInfo.concede=auth.currentUser.displayName;
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+      db.ref("gameInfo/"+gameID).set(gInfo);
+      break;
+   
+    default:
+      swal({
+        title: "Cancelled", 
+        text: "Keep Playing", 
+        icon: "error",
+        buttons: false,
+        timer: 1000
+      });
+    }
   })
 });
 
@@ -201,11 +203,11 @@ $('#unoStartButton').click(function() {
   });
   
   gData={
-	  nPlayers:1,
-	  openDeck:[],
-	  closedDeck:[],
-	  playerDeck:[[]],
-	  info:gInfo,
+    nPlayers:1,
+    openDeck:[],
+    closedDeck:[],
+    playerDeck:[[]],
+    info:gInfo,
   };
 
   for(var c=0;c<54;c++)
@@ -216,7 +218,7 @@ $('#unoStartButton').click(function() {
   
   gData.playerDeck.push([]);
   for (var i=0; i<7; i++) {
-	gData.playerDeck[0].push(gData.closedDeck.pop());  
+  gData.playerDeck[0].push(gData.closedDeck.pop());  
   }
  
   db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
@@ -229,19 +231,23 @@ $('#unoStartButton').click(function() {
 //*************************************************************************************************
 //   User selected to join the game as a player 
 //*************************************************************************************************
-$("#unoBoard .gameButtonJoin").click(function() {
+$("#gameButtonJoin").click(function() {
+  if (currentGame != "uno") {
+    debug(0,"not in Uno");
+    return;
+  }
   if (gInfo.status=="pending") {
     gInfo.playerList.push({
-	  uid:currentUID,
+    uid:currentUID,
       displayName:auth.currentUser.displayName,
       photoURL:auth.currentUser.photoURL});
     gData.playerDeck.push([]);
     for (var i=0; i<7; i++) {
-	  gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());  
+    gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());
     }
     gData.nPlayers++;
-	if (gData.nPlayers==$("#unoMaxPlayers").val()) 
-	  gInfo.status="active";
+  if (gData.nPlayers==$("#unoMaxPlayers").val())
+    gInfo.status="active";
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
     db.ref("gameInfo/"+gameID).set(gInfo);
   }
@@ -250,13 +256,16 @@ $("#unoBoard .gameButtonJoin").click(function() {
 
 
 //*************************************************************************************************
-//   User selected to start the game without the maximum players 
+//   User selected to start the game without the maximum players
 //*************************************************************************************************
-$("#unoBoard .gameButtonStart").click(function() {
+$("#gameButtonStart").click(function() {
+  if (currentGame != "uno") {
+    debug(0,"not in Uno");
+    return;
+  }
   gInfo.status="active";
   db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   db.ref("gameInfo/"+gameID).set(gInfo);
-  
 });
 
 /************************************************************************************************
@@ -291,32 +300,30 @@ function unoEvent(snapshot) {
   myunoIndex=0;
   var i=1;
   for (var p in gInfo.playerList) {
-	if (gInfo.playerList[p].uid==currentUID) myunoIndex|=i;
-	i=i*2;
+  if (gInfo.playerList[p].uid==currentUID) myunoIndex|=i;
+  i=i*2;
   }
   debug(2,"myunoIndex="+myunoIndex);
-  $("#unoBoard .gameButtonJoin").hide();
-  $("#unoBoard .gameButtonStart").hide();
+  $("#sjButtons").hide();
+  $("#gameButtonJoin").hide();
+  $("#gameButtonStart").hide();
   if (myunoIndex && gInfo.status!="quit")
     $("#unoBoard .gameButtonEnd").attr("disabled",false);
   else
     $("#unoBoard .gameButtonEnd").attr("disabled",true);
-  $("#unoBoard .gameTurn").css("color","black");
-  $("#unoBoard .gameTurn").html("");
   switch(gInfo.status) {
     case "pending":
-      $("#unoBoard .gameButtonJoin").val(0);
-      $("#unoBoard .gameButtonJoin").html("Join");
-      $("#unoBoard .gameButtonJoin").show();
-	  if (gData.nPlayers>=2 && gInfo.playerList[0].uid==currentUID)
-	     $("#unoBoard .gameButtonStart").show();
+      $("#gameButtonJoin").val(0);
+      $("#gameButtonJoin").html("Join");
+      $("#gameButtonJoin").show();
+      $("#sjButtons").show();
+      if (gData.nPlayers>=2 && gInfo.playerList[0].uid==currentUID)
+         $("#gameButtonStart").show();
       mode="passive";
       printBoard();
       break;
     case "active":
       printBoard();
-      if (checkPlayer()) $("#unoBoard .gameTurn").css("color","red");
-      $("#unoBoard .gameTurn").html(gInfo.playerList[gInfo.currentPlayer].displayName+"'s turn");
       if (mode !="animation") mode="active";
       if (gData.special) {                                             // now need to check special messages or end conditions
         if (gData.special.endGame) {
@@ -337,9 +344,11 @@ function unoEvent(snapshot) {
          text: "  ",
          buttons: false,
          icon: "../pics/swal-quit.jpg",
-		 timer: 2000,
+         timer: 2000,
       });
-//      $("#unoBoard").hide();
+      newGID= -1;
+      gameMsg="uno";
+      $("#unoBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -355,6 +364,7 @@ function unoEvent(snapshot) {
 //*************************************************************************************************
 void setup() {
   sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
+  debug(2,"SizeSquare="+sizeSquare);
   $("#unoBoard .gameContent").css("width",sizeSquare*4);
   size(sizeSquare*4,sizeSquare*3);
   uno_all_cards=loadImage("../pics/UNO_cards_deck.png");
@@ -363,6 +373,8 @@ void setup() {
   for (var j=0; j<4; j++)
     for (var i=0; i<13; i++)
       uno_cards[i+j*13].c_image.copy (uno_all_cards, i*73,j*109,73,109,0,0,73,109); 
+  for (var i=0; i<2; i++)
+      uno_cards[i+52].c_image.copy (uno_all_cards, 13*73,i*109,73,109,0,0,73,109); 
 }
 
 //*************************************************************************************************
@@ -372,7 +384,7 @@ void draw() {
 
 // gameMsg is set when a user enters or leaves a specific game
   if (gameMsg == "uno") {
-    debug(2,"New:"+newGID+" Old:"+gameID);
+    debug(2,"Uno New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game
     if (gameID != -1) {
       db.ref("gameData/uno/"+gameID).off();
@@ -381,9 +393,10 @@ void draw() {
 // user entered the game (either as player or watcher). Start listening to firebase events related to this game
     gameID=newGID;
     if (gameID != -1) {
-// Server updated the game information
+      currentGame=gameMsg;
+      // Server updated the game information
       db.ref("gameData/uno/"+gameID).on("value", unoEvent);
-// Chat messages related to this game
+      // Chat messages related to this game
       db.ref("gameChat/uno/"+gameID).on("child_added", function(snapshot) {
         debug(2,snapshot.val().sender+": "+snapshot.val().msg);
         var notification = document.querySelector('.mdl-js-snackbar');
@@ -409,10 +422,10 @@ void draw() {
 
 
 void mouseClicked () {
-	gInfo.currentPlayer++;
-	if (gInfo.currentPlayer >= gData.nPlayers) gInfo.currentPlayer=0;
+  gInfo.currentPlayer++;
+  if (gInfo.currentPlayer >= gData.nPlayers) gInfo.currentPlayer=0;
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-	db.ref("gameInfo/"+gameID).set(gInfo);
+  db.ref("gameInfo/"+gameID).set(gInfo);
 }
 
 /************************************************************************************************

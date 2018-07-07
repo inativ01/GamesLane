@@ -11,32 +11,47 @@ to run HTML locally (for debugging) just run "node simple" and in browser go to 
 
 
 To do:
-* update all SweetAlert to version 2.0
-* replace size with "Scale"
+* issue with narrow screen - get rid of message/button on header
+ - get rid of players's turn
+ - join/start buttons on top of board
+* combine behavior of QUIT and ENDGAME
+* User preferences (for each game)
+- copied from/to the last game played
 * track scores per user per game
 * get back messages from gData
  - popup last message
  - click to view all messages
-* Game icons side-by-side-by-side
-* Game dropdown menu in fixed location
-* Allow email and password change(???)
-* User preferences (for each game)
+* make section dynamic (ZZZ in index.html)
+* add game info (i)
+* Allow email and password change
 
 --- Chess ---
 * Single game/ match
 
 --- backgammon ---
 * Single game/ 5-points match
-- doubling die
+- crowford 
 - resign button
 * animation move (not for current player)
 * animation undo (for all)
 * igonore DB updates of my own moves (??)
 * animate end of turn (dice slowly disappear)
 * game information
+* reverse the direction of 2nd player
+* brown and white dice, same location
+* highlight double cube when allowed to click
+* during move, highlight possible target
+* allow combined move (if space in the middle is free)
+* enable two-click move (like chess)
 
 --- Uno ---
 Display top of open deck
 When clicking on ANY user card, it will drop to open desk
 When clicking on closed deck, will add card to my pile
 Display only my pile. Shade when it's not my turn
+
+--- Add games ---
+Island
+Mini bridge
+Hearts
+Bridge 
