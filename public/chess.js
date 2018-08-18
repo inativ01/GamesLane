@@ -26,7 +26,7 @@ var lglMoves=[[0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0,0]];
 
-var sizeSquare, startX, startY;                                       // control the size and location of the board
+var pixelSize;                                                        // translate game pixes to real pixels
 var mode="passive";                                                   // "passive" - my player is not playing
                                                                       // "start" - need to select current player piece (FROM location)
                                                                       // "active" - need to select the target of the move (TO location)
@@ -56,19 +56,9 @@ var spinnerActive=false;
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 window.addEventListener('resize', function() {
-  sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#chessBoard .gameContent").css("width",sizeSquare*10);
+  pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
+  $("#chessBoard .gameContent").css("width",pixelSize*1000);
   if($("#chessBoard").is(":visible")) printBoard();
-});
-
-//*************************************************************************************************
-//   User selected to go to main menul
-//*************************************************************************************************
-$("#chessBoard .gameButtonClose").click( function() {
-  newGID= -1;
-  gameMsg="chess";
-  $("#sjButtons").hide();
-  $("#chessBoard").hide();
 });
 
 //*************************************************************************************************
@@ -227,7 +217,7 @@ function chessEvent(snapshot) {
      timer: 2000,
       });
 
-    newGID= -1;
+    newGID= 0;
     gameMsg="chess";
     $("#chessBoard").hide();
   }
@@ -244,9 +234,8 @@ function chessEvent(snapshot) {
 // Initialization
 //*************************************************************************************************
 void setup() {
-  sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $("#chessBoard .gameContent").css("width",sizeSquare*10);
-  size(sizeSquare*10,sizeSquare*10);
+  pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
+  $("#chessBoard .gameContent").css("width",pixelSize*1000);
   for (var i=0; i<12; i++) {
     images[i]=createImage(333,333,RGB);
     if (i<6) images[i].copy (pieces, (i%6)*333,0,333,333,0,0,333,333);  // white pieces
@@ -259,10 +248,10 @@ void setup() {
 //*************************************************************************************************
 void draw() {
   if (spinnerActive) {
-    translate(sizeSquare*5,sizeSquare*5);
+    translate(500,500);
     spinnerAngle++;
     rotate(PI/9*(Math.round(spinnerAngle/4)%18));
-    image(spinner,-sizeSquare/2,-sizeSquare/2,sizeSquare,sizeSquare);
+    image(spinner,-50,-50,100,100);
     translate(0,0);
     rotate(0);
   }  
@@ -270,13 +259,13 @@ void draw() {
   if (gameMsg == "chess") {
     debug(2,"New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game
-    if (gameID != -1) {
+    if (gameID) {
       db.ref("gameData/chess/"+gameID).off();
       db.ref("gameChat/chess/"+gameID).off();
     }
 // user entered the game (either as player or watcher). Start listening to firebase events related to this game
     gameID=newGID;
-    if (gameID != -1) {
+    if (gameID) {
       currentGame=gameMsg;
 // Server updated the game information
       db.ref("gameData/chess/"+gameID).on("value", chessEvent);
@@ -315,15 +304,15 @@ void draw() {
           animation.movedPiece=animation.newPiece=gData.board[gData.from.y][gData.from.x];     // Rook
           animation.startMillis=millis();
           if (reverse) {
-           animation.sourceX= startX+sizeSquare*(7-gData.from.x);
-           animation.sourceY= startY+sizeSquare*(7-gData.from.y);
-           animation.distanceX= sizeSquare*(gData.from.x-gData.to.x);
-           animation.distanceY= sizeSquare*(gData.from.y-gData.to.y);
+           animation.sourceX= 100*(8-gData.from.x);
+           animation.sourceY= 100*(8-gData.from.y);
+           animation.distanceX= 100*(gData.from.x-gData.to.x);
+           animation.distanceY= 100*(gData.from.y-gData.to.y);
           } else {
-           animation.sourceX= startX+sizeSquare*gData.from.x;
-           animation.sourceY= startY+sizeSquare*gData.from.y;
-           animation.distanceX= sizeSquare*(gData.to.x-gData.from.x);
-           animation.distanceY= sizeSquare*(gData.to.y-gData.from.y);
+           animation.sourceX= 100*(gData.from.x+1);
+           animation.sourceY= 100*(gData.from.y+1);
+           animation.distanceX= 100*(gData.to.x-gData.from.x);
+           animation.distanceY= 100*(gData.to.y-gData.from.y);
           }
           gData.board[gData.from.y][gData.from.x]=-1;                                  // Clear the old location
           return;
@@ -370,7 +359,7 @@ void draw() {
                     updates[player+'/uid']=0;
                 db.ref("/gameInfo/"+gInfo.gid+"/playerList/").update(updates);
               }
-        newGID= -1;
+        newGID= 0;
         gameMsg="chess";
               $("#chessBoard").hide();
             }
@@ -404,7 +393,7 @@ void draw() {
       image(images[animation.movedPiece],
             animation.sourceX+deltaT*animation.distanceX,
             animation.sourceY+deltaT*animation.distanceY,
-            sizeSquare,sizeSquare);
+            100,100);
     }
   }  // end of Animation case
 }
@@ -446,12 +435,12 @@ void mouseClicked () {
         if ((gData.board[gData.from.y][gData.from.x] % 6) === 5 && (gData.to.y%7) ===  0)    // if it's a pawn and it reached the last line
         {
           printBoard();
-          if (reverse) {toX=startX+(7-gData.to.x)*sizeSquare; toY=startY+(7-gData.to.y)*sizeSquare }
-          else         {toX=startX+gData.to.x*sizeSquare;     toY=startY+gData.to.y*sizeSquare }
-          image(images[1+gInfo.currentPlayer*6],toX,              toY,sizeSquare/2,sizeSquare/2);
-          image(images[2+gInfo.currentPlayer*6],toX+sizeSquare/2, toY,sizeSquare/2,sizeSquare/2);
-          image(images[3+gInfo.currentPlayer*6],toX,              toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
-          image(images[4+gInfo.currentPlayer*6],toX+sizeSquare/2, toY+sizeSquare/2,sizeSquare/2,sizeSquare/2);
+          if (reverse) {toX=(8-gData.to.x)*100; toY=(8-gData.to.y)*100 }
+          else         {toX=(1+gData.to.x)*100; toY=(1+gData.to.y)*100 }
+          image(images[1+gInfo.currentPlayer*6],toX,              toY,50,50);
+          image(images[2+gInfo.currentPlayer*6],toX+50, toY,50,50);
+          image(images[3+gInfo.currentPlayer*6],toX,              toY+50,50,50);
+          image(images[4+gInfo.currentPlayer*6],toX+50, toY+50,50,50);
           mode="pawnUpgrade";
           return;
         }
@@ -486,12 +475,12 @@ void mouseClicked () {
 
     case "pawnUpgrade":                                              // Click to select the piece to which the pawn is upgraded
                                                                      // check if I'm clicking in the correct square
-      if(mouseX<(startX+gData.to.x*sizeSquare) || mouseX>(startX+gData.to.x*sizeSquare+sizeSquare) ||
-         mouseY<(startY+gData.to.y*sizeSquare) || mouseY>(startY+gData.to.y*sizeSquare+sizeSquare)) return;
+      if((mouseX/pixelSize)<((gData.to.x+1)*100) || (mouseX/pixelSize)>((gData.to.x+2)*100) ||
+         (mouseY/pixelSize)<((gData.to.y+1)*100) || (mouseY/pixelSize)>((gData.to.y+2)*100)) return;
       var pawn=gData.board[gData.from.y][gData.from.x];
       var piece=pawn-1;
-      if(mouseY<(startY+gData.to.y*sizeSquare+sizeSquare/2)) piece-=2;
-      if(mouseX<(startX+gData.to.x*sizeSquare+sizeSquare/2)) piece-=1;
+      if((mouseY/pixelSize)<(gData.to.y*100+150)) piece-=2;
+      if((mouseX/pixelSize)<(gData.to.x*100+150)) piece-=1;
       finalizeMove(pawn,piece);
       break;
 
@@ -510,21 +499,21 @@ void mouseClicked () {
 function printBoard() {
   if ($(".mdl-spinner").hasClass("is-active")) $(".mdl-spinner").removeClass("is-active");
   $("#chessBoard").show();
-  size(sizeSquare*10,sizeSquare*10);
-  startX=startY=sizeSquare;
+  size(pixelSize*1000,pixelSize*1000);
+  scale(pixelSize,pixelSize); 
   stroke(0);
   fill(#0000FF);
   textFont(loadFont("Meta-Bold.ttf"));
-  for(var y = 0, ypos=startY; y < 8; y++, ypos+=sizeSquare) {
-    for(var x = 0, xpos=startX; x < 8; x++, xpos+=sizeSquare) {
+  for(var y = 0, ypos=100; y < 8; y++, ypos+=100) {
+    for(var x = 0, xpos=100; x < 8; x++, xpos+=100) {
       if((x+y)%2) fill(100); else fill(255);  // select white or black squares
-      rect(xpos,ypos,sizeSquare,sizeSquare);  // print an empty square
+      rect(xpos,ypos,100,100);  // print an empty square
       if (reverse) {
           if (gData.board[7-y][7-x]> -1)
-            image(images[gData.board[7-y][7-x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
+            image(images[gData.board[7-y][7-x]], xpos, ypos ,100,100);  // print the image of the piece based on the value
       } else {
           if (gData.board[y][x]> -1)
-            image(images[gData.board[y][x]], xpos, ypos ,sizeSquare,sizeSquare);  // print the image of the piece based on the value
+            image(images[gData.board[y][x]], xpos, ypos ,100,100);  // print the image of the piece based on the value
       }
     }
   }
@@ -540,12 +529,12 @@ function markSquare(location,color,width) {
   if (reverse) {
     x=7-x; y=7-y;
   }
-  var xpos=startX+x*sizeSquare;
-  var ypos=startY+y*sizeSquare;
+  var xpos=(x+1)*100;
+  var ypos=(y+1)*100;
   noFill();
   stroke(color);
   strokeWeight(width);
-  rect(xpos,ypos,sizeSquare,sizeSquare);
+  rect(xpos,ypos,100,100);
   strokeWeight(1);
 }
 
@@ -555,9 +544,10 @@ function markSquare(location,color,width) {
 function mouseSquare()
 {
   var mouse={x:-1, y:-1} ;
-  if (mouseX >= startX && mouseX < startX+sizeSquare*8 && mouseY >= startY && mouseY < startY+sizeSquare*8) {
-    mouse.x=Math.floor((mouseX-startX)/sizeSquare);
-    mouse.y=Math.floor((mouseY-startY)/sizeSquare);
+  if ((mouseX/pixelSize) >= 100 && (mouseX/pixelSize) < 900 && 
+      (mouseY/pixelSize) >= 100 && (mouseY/pixelSize) < 900) {
+    mouse.x=Math.floor((mouseX/pixelSize)/100)-1;
+    mouse.y=Math.floor((mouseY/pixelSize)/100)-1;
     if (reverse) {
       mouse.x=7-mouse.x;
       mouse.y=7-mouse.y;
@@ -753,15 +743,15 @@ function animationInit(movedPiece,newPiece) {
          animation.newPiece=newPiece;
          animation.startMillis=millis();
          if (reverse) {
-           animation.sourceX= startX+sizeSquare*(7-gData.from.x);
-           animation.sourceY= startY+sizeSquare*(7-gData.from.y);
-           animation.distanceX= sizeSquare*(gData.from.x-gData.to.x);
-           animation.distanceY= sizeSquare*(gData.from.y-gData.to.y);
+           animation.sourceX= 100*(8-gData.from.x);
+           animation.sourceY= 100*(8-gData.from.y);
+           animation.distanceX= 100*(gData.from.x-gData.to.x);
+           animation.distanceY= 100*(gData.from.y-gData.to.y);
          } else {
-           animation.sourceX= startX+sizeSquare*gData.from.x;
-           animation.sourceY= startY+sizeSquare*gData.from.y;
-           animation.distanceX= sizeSquare*(gData.to.x-gData.from.x);
-           animation.distanceY= sizeSquare*(gData.to.y-gData.from.y);
+           animation.sourceX= 100*(1+gData.from.x);
+           animation.sourceY= 100*(1+gData.from.y);
+           animation.distanceX= 100*(gData.to.x-gData.from.x);
+           animation.distanceY= 100*(gData.to.y-gData.from.y);
          }
       }
       else {

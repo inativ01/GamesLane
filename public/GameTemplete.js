@@ -3,7 +3,6 @@
 *   Define global variables
 *
 ************************************************************************************************/
-/* @pjs preload="../pics/UNO_cards_deck.png"; */
 // -----------------------
 
 var cnst={
@@ -12,12 +11,9 @@ var cnst={
 var gData={};
 var gInfo={};
 
-var myunoIndex=0;                                              // 0 - no active player
-                                                                      // 1 - White
-                                                                      // 2 - Brown
-                                                                      // 3 - Both (single player)
+var myGAMEIndex;                                              // array of active players
 
-// Current uno board
+// Current GAME board
 
 // for each square on the board, boolean indication if there is a legal move for current player starting from it
 
@@ -25,74 +21,6 @@ var pixelSize;                                                        // transla
 var mode="passive";                                                   // "passive" - my player is not playing
                                                                       // "active" - player can roll dice or move pieces
                                                                       // "animation" - shows smooth movement of the piece or dice rolling
-var uno_colors=[#000000, // no color
-                #FF0000, // red
-                #FFFF00, // yellow
-                #00FF00, // green
-                #0000FF];// blue
-
-var uno_cards=[
-           {c_type:0, c_color:1, c_number:0, c_image:-1},//red
-           {c_type:0, c_color:1, c_number:1, c_image:-1},
-           {c_type:0, c_color:1, c_number:2, c_image:-1},
-           {c_type:0, c_color:1, c_number:3, c_image:-1},
-           {c_type:0, c_color:1, c_number:4, c_image:-1},
-           {c_type:0, c_color:1, c_number:5, c_image:-1},
-           {c_type:0, c_color:1, c_number:6, c_image:-1},
-           {c_type:0, c_color:1, c_number:7, c_image:-1},
-           {c_type:0, c_color:1, c_number:8, c_image:-1},
-           {c_type:0, c_color:1, c_number:9, c_image:-1},
-           {c_type:1, c_color:1, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:1, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:1, c_number:-1,c_image:-1},// +2
-           {c_type:0, c_color:2, c_number:0, c_image:-1},//yellow
-           {c_type:0, c_color:2, c_number:1, c_image:-1},
-           {c_type:0, c_color:2, c_number:2, c_image:-1},
-           {c_type:0, c_color:2, c_number:3, c_image:-1},
-           {c_type:0, c_color:2, c_number:4, c_image:-1},
-           {c_type:0, c_color:2, c_number:5, c_image:-1},
-           {c_type:0, c_color:2, c_number:6, c_image:-1},
-           {c_type:0, c_color:2, c_number:7, c_image:-1},
-           {c_type:0, c_color:2, c_number:8, c_image:-1},
-           {c_type:0, c_color:2, c_number:9, c_image:-1},
-           {c_type:1, c_color:2, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:2, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:2, c_number:-1,c_image:-1},// +2
-           {c_type:0, c_color:3, c_number:0, c_image:-1},//green
-           {c_type:0, c_color:3, c_number:1, c_image:-1},
-           {c_type:0, c_color:3, c_number:2, c_image:-1},
-           {c_type:0, c_color:3, c_number:3, c_image:-1},
-           {c_type:0, c_color:3, c_number:4, c_image:-1},
-           {c_type:0, c_color:3, c_number:5, c_image:-1},
-           {c_type:0, c_color:3, c_number:6, c_image:-1},
-           {c_type:0, c_color:3, c_number:7, c_image:-1},
-           {c_type:0, c_color:3, c_number:8, c_image:-1},
-           {c_type:0, c_color:3, c_number:9, c_image:-1},
-           {c_type:1, c_color:3, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:3, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:3, c_number:-1,c_image:-1},// +2
-           {c_type:0, c_color:4, c_number:0, c_image:-1},//blue
-           {c_type:0, c_color:4, c_number:1, c_image:-1},
-           {c_type:0, c_color:4, c_number:2, c_image:-1},
-           {c_type:0, c_color:4, c_number:3, c_image:-1},
-           {c_type:0, c_color:4, c_number:4, c_image:-1},
-           {c_type:0, c_color:4, c_number:5, c_image:-1},
-           {c_type:0, c_color:4, c_number:6, c_image:-1},
-           {c_type:0, c_color:4, c_number:7, c_image:-1},
-           {c_type:0, c_color:4, c_number:8, c_image:-1},
-           {c_type:0, c_color:4, c_number:9, c_image:-1},
-           {c_type:1, c_color:4, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:4, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:4, c_number:-1,c_image:-1},// +2
-           {c_type:4, c_color:0, c_number:-1,c_image:-1},// choose color
-           {c_type:5, c_color:0, c_number:-1,c_image:-1} // choose color +4
-];
-
-var uno_count=[1,2,2,2,2,2,2,2,2,2,2,2,2,
-               1,2,2,2,2,2,2,2,2,2,2,2,2,
-               1,2,2,2,2,2,2,2,2,2,2,2,2,
-               1,2,2,2,2,2,2,2,2,2,2,2,2,
-               4,4];
 
 /************************************************************************************************
 *
@@ -105,14 +33,14 @@ var uno_count=[1,2,2,2,2,2,2,2,2,2,2,2,2,
 //*************************************************************************************************
 window.addEventListener('resize', function() {
   pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
-  $("#unoBoard .gameContent").css("width",pixelSize*1000);
-  if($("#unoBoard").is(":visible")) printBoard();
+  $("#GAMEBoard .gameContent").css("width",pixelSize*1000);
+  if($("#GAMEBoard").is(":visible")) printBoard();
 });
 
 //*************************************************************************************************
 //   User selected to quit (resign) the game
 //*************************************************************************************************
-$("#unoBoard .gameButtonEnd").click( function() {
+$("#GAMEBoard .gameButtonEnd").click( function() {
   swal({
     title: "Are you sure?",
     text: "You will forfeit the game!",
@@ -157,11 +85,11 @@ $("#unoBoard .gameButtonEnd").click( function() {
 //*************************************************************************************************
 //   go to the game Options screen
 //*************************************************************************************************
-$("#unoNewButton").click( function() {
+$("#GAMENewButton").click( function() {
   if (!auth.currentUser.isAnonymous) {
     mode="passive";
-    $("#unoOptionsBoard").show();
-    $("#unoOptionsHeader").show();
+    $("#GAMEOptionsBoard").show();
+    $("#GAMEOptionsHeader").show();
     mode="passive";
   }
 });
@@ -169,53 +97,39 @@ $("#unoNewButton").click( function() {
 //*************************************************************************************************
 //   exit the Options screen and don't start the game
 //*************************************************************************************************
-$("#unoCancelOptions").click(function() {
-    $("#unoOptionsBoard").hide();
+$("#GAMECancelOptions").click(function() {
+    $("#GAMEOptionsBoard").hide();
 });
 
 //*************************************************************************************************
 //   done with Options, start the game
 //*************************************************************************************************
-$('#unoStartButton').click(function() {
+$('#GAMEStartButton').click(function() {
   do {
     newGID=Math.floor(Math.random() * (1000000000000))+1;
   } while (gameInfo[newGID]); // need to try again just in case the GID is taken
   gInfo={
-    game:"uno",
+    game:"GAME",
     gid:newGID,
     playerList:[],
     currentPlayer:0,
     status:'pending'
   } ;
+  gData={
+    // ### specific fields for this game
+  };
   gInfo.playerList.push({
+  role:$("#GAMERole").val(), // ### assuming that a role was defined in the game options
     uid:currentUID,
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
   });
-  
-  gData={
-    nPlayers:1,
-    openDeck:[],
-    closedDeck:[],
-    playerDeck:[[]],
-    info:gInfo,
-  };
-
-  for(var c=0;c<54;c++)
-    for(var i=0;i<uno_count[c];i++)
-      gData.closedDeck.push(c);
-  for(var i=0;i<10;i++)
-    shuffleCards(gData.closedDeck, 108);
-  
-  gData.playerDeck.push([]);
-  for (var i=0; i<7; i++) {
-    gData.playerDeck[0].push(gData.closedDeck.pop());  
-  }
- 
+  gData.info=gInfo;
   db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   db.ref("gameInfo/"+newGID).set(gInfo);
-  gameMsg="uno";
-  $("#unoOptionsBoard").hide();
+  gameMsg="GAME";
+  $("#GAMEOptionsBoard").hide();
+  $(".mdl-spinner").addClass("is-active");
 });
 
 
@@ -223,40 +137,21 @@ $('#unoStartButton').click(function() {
 //   User selected to join the game as a player 
 //*************************************************************************************************
 $("#gameButtonJoin").click(function() {
-  if (currentGame != "uno") {
-    debug(0,"not in Uno");
+  if (currentGame != "GAME") {
+    debug(0,"not in GAME");
     return;
   }
   if (gInfo.status=="pending") {
     gInfo.playerList.push({
+    role:this.value, // ### optional - assuming role was added to the JOIN button
     uid:currentUID,
       displayName:auth.currentUser.displayName,
       photoURL:auth.currentUser.photoURL});
-    gData.playerDeck.push([]);
-    for (var i=0; i<7; i++) {
-      gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());
-    }
-    gData.nPlayers++;
-  if (gData.nPlayers==$("#unoMaxPlayers").val())
-    gInfo.status="active";
+    gInfo.status="active"; // ### in the condition that this is the last player to join
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
     db.ref("gameInfo/"+gameID).set(gInfo);
   }
   else debug(0,"Game not Pending. Can't start");
-});
-
-
-//*************************************************************************************************
-//   User selected to start the game without the maximum players
-//*************************************************************************************************
-$("#gameButtonStart").click(function() {
-  if (currentGame != "uno") {
-    debug(0,"not in Uno");
-    return;
-  }
-  gInfo.status="active";
-  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-  db.ref("gameInfo/"+gameID).set(gInfo);
 });
 
 /************************************************************************************************
@@ -266,10 +161,10 @@ $("#gameButtonStart").click(function() {
 ************************************************************************************************/
 
 //*************************************************************************************************
-// This function is called when the server updates gameData/uno/<gid> for the current game
+// This function is called when the server updates gameData/GAME/<gid> for the current game
 //*************************************************************************************************
 
-function unoEvent(snapshot) {
+function GAMEEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
   gInfo=gData.info;
@@ -277,48 +172,49 @@ function unoEvent(snapshot) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
   }
-  debug(1,"unoMove GID="+gameID+" status="+gInfo.status);
+  debug(1,"GAMEMove GID="+gameID+" status="+gInfo.status);
   debug(2,gData);
   debug(2,gInfo);
-  $("#unoBoard .playerPics").empty();         // pictures of Players
+  $("#GAMEBoard .playerPics").empty();         // pictures of Players
   for (var p in gInfo.playerList) {
     var element= $("<div><img src='"+gInfo.playerList[p].photoURL+"'></div>");
-    element.css('background','white');
+    element.css('background',roleColors[gInfo.playerList[p].role]);
     element.css('border',"medium "+((gInfo.currentPlayer==p)?"solid":"none")+" red");
-    element.prop('title', gInfo.playerList[p].displayName+"("+gData.playerDeck[p].length+")");
-    $("#unoBoard .playerPics").append(element);
+    element.prop('title', gInfo.playerList[p].displayName);
+    $("#GAMEBoard .playerPics").append(element);
   }
-  myunoIndex=0;
-  var i=1;
+  myGAMEIndex=[];
   for (var p in gInfo.playerList) {
-  if (gInfo.playerList[p].uid==currentUID) myunoIndex|=i;
-  i=i*2;
+    if (gInfo.playerList[p].uid==currentUID) myGAMEIndex.push(parseInt(p));
   }
-  debug(2,"myunoIndex="+myunoIndex);
+  debug(2,"myGAMEIndex="+myGAMEIndex);
   $("#sjButtons").hide();
   $("#gameButtonJoin").hide();
   $("#gameButtonStart").hide();
-  if (myunoIndex && gInfo.status!="quit")
-    $("#unoBoard .gameButtonEnd").attr("disabled",false);
+  if (myGAMEIndex.length && gInfo.status!="quit")
+    $("#GAMEBoard .gameButtonEnd").attr("disabled",false);
   else
-    $("#unoBoard .gameButtonEnd").attr("disabled",true);
+    $("#GAMEBoard .gameButtonEnd").attr("disabled",true);
+  $("#GAMEBoard .gameTurn").css("color","black");
+  $("#GAMEBoard .gameTurn").html("");
   switch(gInfo.status) {
     case "pending":
-      $("#gameButtonJoin").val(0);
-      $("#gameButtonJoin").html("Join");
+      var color= (gInfo.playerList[0].role != "White") ? "White" : "Brown";
+      $("#gameButtonJoin").val(color); // ### setting a specific role to the button
+      $("#gameButtonJoin").html("Join as "+color);
       $("#gameButtonJoin").show();
       $("#sjButtons").show();
-      if (gData.nPlayers>=2 && gInfo.playerList[0].uid==currentUID)
-         $("#gameButtonStart").show();
       mode="passive";
       printBoard();
       break;
     case "active":
       printBoard();
+      if (checkPlayer()) $("#GAMEBoard .gameTurn").css("color","red");
+      $("#GAMEBoard .gameTurn").html(gInfo.playerList[gInfo.currentPlayer].role+" player's turn");
       if (mode !="animation") mode="active";
       if (gData.special) {                                             // now need to check special messages or end conditions
         if (gData.special.endGame) {
-          if (myunoIndex) {                                     // Mark player ready to end
+          if (myGAMEIndex.length) {                                     // Mark player ready to end
             var updates= new Object();                                 // remove my Players from gameInfo
             for (var player in gInfo.playerList)
               if (gInfo.playerList[player].uid==currentUID)
@@ -335,11 +231,11 @@ function unoEvent(snapshot) {
          text: "  ",
          buttons: false,
          icon: "../pics/swal-quit.jpg",
-         timer: 2000,
+     timer: 2000,
       });
       newGID= 0;
-      gameMsg="uno";
-      $("#unoBoard").hide();
+      gameMsg="GAME";
+      $("#GAMEBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -355,15 +251,7 @@ function unoEvent(snapshot) {
 //*************************************************************************************************
 void setup() {
   pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
-  $("#unoBoard .gameContent").css("width",pixelSize*1000);
-  uno_all_cards=loadImage("../pics/UNO_cards_deck.png");
-  for (var i=0; i<54; i++)
-    uno_cards[i].c_image=createImage(73,109,RGB);
-  for (var j=0; j<4; j++)
-    for (var i=0; i<13; i++)
-      uno_cards[i+j*13].c_image.copy (uno_all_cards, i*73,j*109,73,109,0,0,73,109); 
-  for (var i=0; i<2; i++)
-      uno_cards[i+52].c_image.copy (uno_all_cards, 13*73,i*109,73,109,0,0,73,109); 
+  $("#GAMEBoard .gameContent").css("width",pixelSize*1000);
 }
 
 //*************************************************************************************************
@@ -372,21 +260,20 @@ void setup() {
 void draw() {
 
 // gameMsg is set when a user enters or leaves a specific game
-  if (gameMsg == "uno") {
-    debug(2,"Uno New:"+newGID+" Old:"+gameID);
+  if (gameMsg == "GAME") {
+    debug(2,"New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game
     if (gameID) {
-      db.ref("gameData/uno/"+gameID).off();
-      db.ref("gameChat/uno/"+gameID).off();
+      db.ref("gameData/GAME/"+gameID).off();
+      db.ref("gameChat/GAME/"+gameID).off();
     }
 // user entered the game (either as player or watcher). Start listening to firebase events related to this game
     gameID=newGID;
     if (gameID) {
-      currentGame=gameMsg;
-      // Server updated the game information
-      db.ref("gameData/uno/"+gameID).on("value", unoEvent);
-      // Chat messages related to this game
-      db.ref("gameChat/uno/"+gameID).on("child_added", function(snapshot) {
+// Server updated the game information
+      db.ref("gameData/GAME/"+gameID).on("value", GAMEEvent);
+// Chat messages related to this game
+      db.ref("gameChat/GAME/"+gameID).on("child_added", function(snapshot) {
         debug(2,snapshot.val().sender+": "+snapshot.val().msg);
         var notification = document.querySelector('.mdl-js-snackbar');
         notification.MaterialSnackbar.showSnackbar(
@@ -410,9 +297,17 @@ void draw() {
 ************************************************************************************************/
 
 
+void mousePressed () {
+}
+
+void mouseDragged() {
+}
+
+void mouseReleased() {
+}
+
 void mouseClicked () {
-  gInfo.currentPlayer++;
-  if (gInfo.currentPlayer >= gData.nPlayers) gInfo.currentPlayer=0;
+  gInfo.currentPlayer=1-gInfo.currentPlayer;
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   db.ref("gameInfo/"+gameID).set(gInfo);
 }
@@ -437,19 +332,4 @@ function checkPlayer() {
 function printBoard() {
   size(pixelSize*1000,pixelSize*1000);
   scale(pixelSize,pixelSize); 
-  $("#unoBoard").show();
-  $("#unoCanvas").show();
-  if (gInfo.status=="active") {
-    var ncards=gData.playerDeck[gInfo.currentPlayer].length;
-    var cardsize=Math.min(70,1000/(ncards+1));
-    var leftcard=(1000-(cardsize*(ncards+1)))/2;
-    for (var i=0;i<ncards;i++) {
-      image(uno_cards[gData.playerDeck[gInfo.currentPlayer][i]].c_image, leftcard+i*cardsize, 700, cardsize*2, cardsize*3);
-    }
-  }
-
 }
-
-
-
-

@@ -11,9 +11,7 @@ to run HTML locally (for debugging) just run "node simple" and in browser go to 
 
 
 To do:
-* issue with narrow screen - get rid of message/button on header
- - get rid of players's turn
- - join/start buttons on top of board
+* gInfo should not be inside gData. Instead gInfo=gameInfo[gameID]
 * combine behavior of QUIT and ENDGAME
 * User preferences (for each game)
 - copied from/to the last game played
@@ -39,10 +37,7 @@ To do:
 * game information
 * reverse the direction of 2nd player
 * brown and white dice, same location
-* highlight double cube when allowed to click
-* during move, highlight possible target
 * allow combined move (if space in the middle is free)
-* enable two-click move (like chess)
 
 --- Uno ---
 Display top of open deck

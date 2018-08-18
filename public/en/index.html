@@ -117,7 +117,7 @@
 
   <section>
 <!-- Chess game -->
-    <div id=chessBoard class="modal gameBoard" style="top:0px" >
+    <div id=chessBoard class="modal gameBoard" style="top:0px" title="chess">
       <div class="gameContent" >
         <div class="gameHeader mdl-color--light-blue-200" >
           <div class="playerPics"></div>
@@ -141,8 +141,8 @@
 <!-- Chess Options -->
     <div id=chessOptionsBoard class="modal allowClose" style="top:0px" >
       <div id="chessOptionsContent" style="margin:  auto;">
-        <div class="mdl-color--light-blue-200" style="padding: 20px;">
-          <div id=chessOptionsHeader>
+        <div class="mdl-color--light-blue-200">
+          <div id=chessOptionsHeader style="padding: 20px;">
             <div  style="text-align: center;border-style: groove;padding:10px">
               <button id="chessStartButton" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect">Start Chess</button>
             </div>
@@ -158,7 +158,7 @@
             </div>
             <br>
           </div>
-          <div style="text-align: center;padding: 0px;">
+          <div style="text-align: center;padding: 0px;  height: 54px; line-height: 50px;">
             <button id="chessButtonEdit" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Edit Board</button>
             <button id="chessCancelOptions" class="mdl-button--raised mdl-button mdl-js-button mdl-js-ripple-effect" >Cancel</button>
           </div>
@@ -168,7 +168,7 @@
     </div>
 
 <!-- Backgammon game -->
-    <div id=backgammonBoard class="modal gameBoard" style="top:0px" >
+    <div id=backgammonBoard class="modal gameBoard" style="top:0px" title="backgammon">
       <div class="gameContent" >
         <div class="gameHeader mdl-color--light-blue-200" >
           <div class="playerPics"></div>
@@ -361,7 +361,7 @@
         </div>
 
   <!-- Uno -->
-        <div class="mdl-cell mdl-cell--1-col gameIcons" >
+        <div class="mdl-cell mdl-cell--1-col gameIcons"  >
           <h5 style="text-align:center" >Uno</h4>
           <div id=unoBadge></div>
           <input id="unoButton" class="gameMainButton" type="image" src="../pics/UNO-icon.jpg" width="100" height="100" >

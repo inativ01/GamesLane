@@ -5,12 +5,12 @@
  * programmatic token refresh but not a User status change.
  */
 var currentUID=-1;
-var gameID=-1;
-var newGID=-1;
+var gameID=0;   // Unique ID of the current active game (or 0 if none is active)
+var newGID=0;
 var currentGame=null;
 var db = firebase.database();
 var auth = firebase.auth();
-var gameInfo={};
+var gameInfo={}; // list of all gameInfo elements
 var gameMsg=null;
 var debugLevel=2;
 var hints=false;
@@ -25,9 +25,11 @@ var roleColors={
 function debug(level, msg) {
   switch (level) {
     case 0: console.error(msg);
-       break;
+      break;
     case 1: console.warn(msg);
-       break
+      break;
+    case 5: addLine(0,msg);
+      break;
     default: if (level<=debugLevel) console.log(msg);
   }
 }
@@ -37,9 +39,9 @@ window.addEventListener('load', function() {
   debug(2,"loading now");
   $("#signInEmail").parent().get(0).MaterialTextfield.checkDirty();
   $("#signInPass").parent().get(0).MaterialTextfield.checkDirty();
-  var sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
-  $(".game-content").css("width",sizeSquare*10);
-  $(".game-content").css("height",sizeSquare*12);
+//  var sizeSquare=Math.floor(Math.min(window.innerWidth/10,window.innerHeight/12));
+//  $(".game-content").css("width",sizeSquare*10);
+//  $(".game-content").css("height",sizeSquare*12);
   $(".newsItem").remove();
 //  $("#NewsBlock").empty();
 
@@ -259,14 +261,25 @@ window.onclick = function(event) {
       $("#signInModal").show();
   }
   if (event.target.classList.contains('gameBoard')) {
-      event.target.style="display:none";
-      newGID= -1;
+//      event.target.style="display:none";
+      $(".gameBoard").hide();
+      $("#sjButtons").hide();
+      newGID= 0;
       gameMsg=event.target.title;
+      debug(2,"Stopped playing "+gameMsg);
   }
   if (event.target.classList.contains('allowClose')) {
     event.target.style="display:none";
   }
 }
+
+$(".gameButtonClose").click( function() {
+  $(".gameBoard").hide();
+  $("#sjButtons").hide();
+  newGID= 0;
+  gameMsg=this.parentElement.parentElement.parentElement.parentElement.title;
+  debug(2,"Stopped playing "+gameMsg);
+});
 
 
 /*------------------------------------------------------------------------------
@@ -448,8 +461,11 @@ function addLine(gInfo, msg) {
   if ($("#li"+gInfo.gid).length) {
     $("#li"+gInfo.gid).html(msg);
   }
-  else {
+  else if (gInfo){
     $("#NewsBlock").append("<li class='newsItem' id='li"+gInfo.gid+"'>"+msg+"</li>");
+  }
+  else {
+    $("#NewsBlock").append("<li class='newsItem'>"+msg+"</li>");
   }
   $(".WelcomeNews").show();
 }

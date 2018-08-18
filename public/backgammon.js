@@ -16,33 +16,30 @@ var cnst={
 //  boardStart:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0],  // negative: white, positive: brown
   boardStart:[2,0,0,0,0,-5,0,-3,0,0,0,5,-5,0,0,0,3,0,5,0,0,0,0,-2,0,0,0,0],  // negative: white, positive: brown
   dir:[-1,1],
-  diceSize:0.2,
-  rollButton:[2.7,0.95,1.4,0.4,0.2],  // X right, X left, Y, X size, Y size
-  dice:[2.5,0.8,1.4], // X right, X left, Y
-  doubleDie:[3.7,0.1,1.4,0.2],   // X, X reverse, Y, size
+  diceSize:20,
+  rollButton:[270,95,140,40,20],  // X right, X left, Y, X size, Y size
+  dice:[250,80,140], // X right, X left, Y
+  doubleDie:[370,10,140,20],   // X, X reverse, Y, size
 };
 
-var ignoreNextUpdate=0;
 var gData={};
 var gInfo={};
 
 var pieceMoving={
   from:0,
+  to:[],
   active:false,
   animateDice:0,
 };
 
 var reverse=0;                                                    // display reverse board for brown player
-var mybackgammonIndex;                                              // 0 - no active player
-                                                                      // 1 - White
-                                                                      // 2 - Brown
-                                                                      // 3 - Both (single player)
+var mybackgammonIndex;                                              // array of active players
 
 // Current backgammon board
 
 // for each square on the board, boolean indication if there is a legal move for current player starting from it
 
-var sizeSquare;                                                       // control the size and location of the board
+var pixelSize;                                                        // translate game pixes to real pixels
 var mode="passive";                                                   // "passive" - my player is not playing
                                                                       // "active" - player can roll dice or move pieces
                                                                       // "animation" - shows smooth movement of the piece or dice rolling
@@ -57,8 +54,8 @@ var mode="passive";                                                   // "passiv
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 window.addEventListener('resize', function() {
-  sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
-  $("#backgammonBoard .gameContent").css("width",sizeSquare*4);
+  pixelSize=Math.min(window.innerWidth/400,(window.innerHeight-60)/300);
+  $("#backgammonBoard .gameContent").css("width",pixelSize*400);
   if($("#backgammonBoard").is(":visible")) printBoard();
 });
 
@@ -79,17 +76,6 @@ $("#backgammonBoard .gameButtonUndo").click( function() {
   }
   db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   printBoard();
-});
-
-//*************************************************************************************************
-//   User selected to go to main menul
-//*************************************************************************************************
-$("#backgammonBoard .gameButtonClose").click( function() {
-  newGID= -1;
-  gameMsg="backgammon";
-  $("#sjButtons").hide();
-  $("#backgammonBoard").hide();
-  debug(1,$("#backgammonBoard")[0]);
 });
 
 //*************************************************************************************************
@@ -160,7 +146,9 @@ $("#backgammonCancelOptions").click(function() {
 //   done with Options, start the game
 //*************************************************************************************************
 $('#backgammonStartButton').click(function() {
-  newGID=Math.floor(Math.random() * (1000000000000));
+  do {
+    newGID=Math.floor(Math.random() * (1000000000000))+1;
+  } while (gameInfo[newGID]); // need to try again just in case the GID is taken
   gInfo={
     game:"backgammon",
     gid:newGID,
@@ -236,7 +224,6 @@ function backgammonEvent(snapshot) {
   }
   if (swal && swal.getState().isOpen) debug(0,swal.close());  // if there is an open SweetAlert window, close it
   mybackgammonIndex=[];
-  var i=1;
   for (var p in gInfo.playerList) {
     if (gInfo.playerList[p].uid==currentUID) mybackgammonIndex.push(parseInt(p));
   }
@@ -296,7 +283,7 @@ function backgammonEvent(snapshot) {
                   updates[player+'/uid']=0;
               db.ref("/gameInfo/"+gInfo.gid+"/playerList/").update(updates);
             }
-            newGID= -1;
+            newGID= 0;
             gameMsg="backgammon";
             $("#backgammonBoard").hide();
           }
@@ -359,7 +346,7 @@ function backgammonEvent(snapshot) {
         icon: "../pics/swal-quit.jpg",
         timer: 2000,
       });
-      newGID= -1;
+      newGID= 0;
       gameMsg="backgammon";
       $("#backgammonBoard").hide();
       
@@ -377,9 +364,9 @@ function backgammonEvent(snapshot) {
 // Initialization
 //*************************************************************************************************
 void setup() {
-  sizeSquare=Math.floor(Math.min(window.innerWidth/4,(window.innerHeight-60)/3));
-  $("#backgammonBoard .gameContent").css("width",sizeSquare*4);
-  size(sizeSquare*4,sizeSquare*3);
+  textSize(7);
+  pixelSize=Math.min(window.innerWidth/4,(window.innerHeight-60)/3)/100;
+  $("#backgammonBoard .gameContent").css("width",pixelSize*400);
   for (var i=0;i<6;i++)
     cnst.diceImg[i]=loadImage("../pics/die"+(i+1)+".png");
 }
@@ -393,13 +380,13 @@ void draw() {
   if (gameMsg == "backgammon") {
     debug(2,"New:"+newGID+" Old:"+gameID);
 // user left the game. Stop listening to firebase events related to this game
-    if (gameID != -1) {
+    if (gameID) {
       db.ref("gameData/backgammon/"+gameID).off();
       db.ref("gameChat/backgammon/"+gameID).off();
     }
 // user entered the game (either as player or watcher). Start listening to firebase events related to this game
     gameID=newGID;
-    if (gameID != -1) {
+    if (gameID) {
       currentGame=gameMsg;
 // Server updated the game information
       db.ref("gameData/backgammon/"+gameID).on("value", backgammonEvent);
@@ -448,7 +435,7 @@ void draw() {
 }
 
 function printDice() {
-  var currentSize=[cnst.diceSize*sizeSquare,cnst.diceSize*sizeSquare];
+  var currentSize=[cnst.diceSize,cnst.diceSize];
 
   switch (gData.moveCnt) {
     case 1:
@@ -463,8 +450,8 @@ function printDice() {
   }
   for (i=0;i<2;i++) {
     image(cnst.diceImg[gData.dice[i]-1],
-          (cnst.dice[gInfo.currentPlayer]+2*i*cnst.diceSize)*sizeSquare,
-          cnst.dice[2]*sizeSquare,
+          (cnst.dice[gInfo.currentPlayer]+2*i*cnst.diceSize),
+          cnst.dice[2],
           currentSize[i],currentSize[i]);
   }
 }
@@ -477,7 +464,11 @@ function printDice() {
 
 
 void mousePressed () {
-  var x=mouseX/sizeSquare, y=mouseY/sizeSquare;
+  if (pieceMoving.active) {
+    debug(0,"ignore press");
+    return;
+  }
+  var x=mouseX/pixelSize, y=mouseY/pixelSize;
   if (!checkPlayer() || mode!="active") return;
   debug(2,"mousePressed");
   if (gData.dice[0]==0) {                                             // need to role dice
@@ -502,9 +493,16 @@ void mousePressed () {
        (gData.moveCnt==0 && checkMove(mouse, gData.dice[1]) >= 0))) {   // ... or a valid move with other die (only for 1st move))
       pieceMoving.active=true;
       pieceMoving.from=mouse;
+      var l=checkMove(pieceMoving.from, gData.dice[min(1,gData.moveCnt)]);
+      if (l>=0) pieceMoving.to=[l];
+      if (gData.moveCnt==0 && gData.dice[0]!=gData.dice[1]) {
+        l=checkMove(pieceMoving.from, gData.dice[1]);
+        if (l>=0) pieceMoving.to.push(l);
+      }
+      debug(3,pieceMoving);
       gData.board[mouse]-=cnst.dir[gInfo.currentPlayer];
       printBoard();
-      image(cnst.pieces[gInfo.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
+      image(cnst.pieces[gInfo.currentPlayer],mouseX/pixelSize-10,mouseY/pixelSize-10,20,20);
     }
   }
 }
@@ -512,7 +510,14 @@ void mousePressed () {
 void mouseDragged() {
   if (pieceMoving.active) {
     printBoard();
-    image(cnst.pieces[gInfo.currentPlayer],mouseX-sizeSquare*0.1,mouseY-sizeSquare*0.1,sizeSquare*0.2,sizeSquare*0.2);
+    image(cnst.pieces[gInfo.currentPlayer],mouseX/pixelSize-10,mouseY/pixelSize-10,20,20);
+  }
+}
+
+void mouseMoved() {
+  if (pieceMoving.active) {
+    printBoard();
+    image(cnst.pieces[gInfo.currentPlayer],mouseX/pixelSize-10,mouseY/pixelSize-10,20,20);
   }
 }
 
@@ -520,9 +525,13 @@ void mouseReleased() {
   var dPips={val:0};                                                  // change in the number of pips
   if (pieceMoving.active) {
     debug(2,"mouseReleased");
+    var mouse=mouseSquare();
+    if (mouse==pieceMoving.from) {
+      debug(0,"no move");
+      return;
+    }
     pieceMoving.active=false;
     var ok=true;
-    var mouse=mouseSquare();
     if (mouse!=checkMove(pieceMoving.from, gData.dice[min(1,gData.moveCnt)],dPips)) {
       if (gData.moveCnt==0 && mouse==checkMove(pieceMoving.from, gData.dice[1],dPips)) {
         var tmp=gData.dice[0];
@@ -653,9 +662,11 @@ boolean checkAnyMove() {
 //*************************************************************************************************
 function printBoard() {
   debug(3,"printBoard");
-  size(sizeSquare*4,sizeSquare*3);
-  image(cnst.boardPic[reverse],0,0,sizeSquare*4,sizeSquare*3);
+  size(pixelSize*400,pixelSize*300);
+  scale(pixelSize,pixelSize); 
+  image(cnst.boardPic[reverse],0,0,400,300);
   textFont(loadFont("Meta-Bold.ttf"));
+  // print pieces on the board
   for (var i=0;i<24;i++) {
     var color=(gData.board[i]>0)?1:0;
     for (var j=0;j<abs(gData.board[i]);j++)
@@ -664,12 +675,16 @@ function printBoard() {
       image(cnst.pieces[color],l.x,l.y,l.sx,l.sy);
     }
   }
+
+  // print pieces on the bar
   for (var i=24;i<26;i++) {
     for (var j=0;j<abs(gData.board[i]);j++) {
       l=bgLocation(i,j);
       image(cnst.pieces[i-24],l.x,l.y,l.sx,l.sy);
     }
   }
+
+  // print pieces on the outside
   for (var j=0;j<abs(gData.board[26]);j++) {
     l=bgLocation(26,j);
     image(cnst.sidepieces[reverse][0],l.x,l.y,l.sx,l.sy);
@@ -679,32 +694,39 @@ function printBoard() {
     image(cnst.sidepieces[1-reverse][1],l.x,l.y,l.sx,l.sy);
   }
 
+  // if during a move, point out valid target
+  if (pieceMoving.active) {
+    for (var i in pieceMoving.to) {
+      var l=bgLocation(pieceMoving.to[i],-1);
+      fill(#00ff00);
+      ellipse(l.x+l.sx/2,l.y+l.sy/2,l.sx/4,l.sx/4);
+    }
+  } 
+  
   $("#backgammonBoard").show();
   $("#backgammonCanvas").show();
   var doubleActive=false;
+
+  // Print "roll" button"
   if (gData.dice[0]==0) {                                             // no dice
-    if (checkPlayer() && gInfo.status=="active") {                                              // Print "roll" button"
+    if (checkPlayer() && gInfo.status=="active") {                                              
       fill(#CC6600);
-      rect(cnst.rollButton[gInfo.currentPlayer]*sizeSquare,cnst.rollButton[2]*sizeSquare,cnst.rollButton[3]*sizeSquare,cnst.rollButton[4]*sizeSquare,sizeSquare);
+      rect(cnst.rollButton[gInfo.currentPlayer],cnst.rollButton[2],cnst.rollButton[3],cnst.rollButton[4],100);
       fill(#000000);
-      text("Roll",(cnst.rollButton[gInfo.currentPlayer]+cnst.rollButton[3]*0.4)*sizeSquare,(cnst.rollButton[2]+cnst.rollButton[4]*0.6)*sizeSquare);
+      text("Roll",cnst.rollButton[gInfo.currentPlayer]+cnst.rollButton[3]*0.35,cnst.rollButton[2]+cnst.rollButton[4]*0.65);
       if (gData.canDouble.includes(gInfo.currentPlayer)) doubleActive=true;
     }
   }
+  // Print dice
   else printDice();
 
   // pring doubling cube
   if (doubleActive) stroke (#FF0000);
   fill(#FFFFFF);
-  rect(sizeSquare*cnst.doubleDie[reverse], sizeSquare*cnst.doubleDie[2], sizeSquare*cnst.doubleDie[3], sizeSquare*cnst.doubleDie[3],sizeSquare/20);
+  rect(cnst.doubleDie[reverse], cnst.doubleDie[2], cnst.doubleDie[3], cnst.doubleDie[3],5);
   fill(#000000);
-  text(gData.doubleDie,sizeSquare*(cnst.doubleDie[reverse]+cnst.doubleDie[3]*0.4),sizeSquare*(cnst.doubleDie[2]+cnst.doubleDie[3]*0.6));
+  text(gData.doubleDie,cnst.doubleDie[reverse]+cnst.doubleDie[3]*0.4,cnst.doubleDie[2]+cnst.doubleDie[3]*0.65);
   stroke(0);
-}
-
-function printRect(area) {
-  fill(#FFCC00);
-  rect(area[0]*sizeSquare,area[1]*sizeSquare,area[2]*sizeSquare,area[3]*sizeSquare);
 }
 
 //*************************************************************************************************
@@ -782,8 +804,8 @@ function endGame(bonus) {
 //*************************************************************************************************
 function mouseSquare()
 {
-  var x=Math.floor(mouseX/sizeSquare/0.236)-2;
-  var y=Math.floor(mouseY/sizeSquare/1.5);
+  var x=Math.floor(mouseX/pixelSize/23.6)-2;
+  var y=Math.floor(mouseY/pixelSize/150);
   if (reverse) {
     y=1-y;
     x=12-x;
@@ -811,41 +833,41 @@ function checkPlayer() {
 //*************************************************************************************************
 
 function bgLocation(index,count) {
-  var factor= (abs(gData.board[index])>6)?1:2;
-  var l={x:0,y:0,sx:sizeSquare*0.2,sy:sizeSquare*0.2};
+  var factor= (abs(gData.board[index])>6)?10:20;
+  var l={x:0,y:0,sx:20,sy:20};
   if (index<24) {
     if (index<12)
-      l.y=sizeSquare*(2.65-count*factor*0.1);
+      l.y=265-count*factor;
     else
-      l.y=sizeSquare*(0.15+count*factor*0.1);
+      l.y=15+count*factor;
     i1=index%6;
     switch ((index-i1)/6) {
       case 0:
-        l.x=sizeSquare*(3.3-i1*0.23);
+        l.x=330-i1*23;
         break;
       case 1:
-        l.x=sizeSquare*(1.67-i1*0.23);
+        l.x=167-i1*23;
         break;
       case 2:
-        l.x=sizeSquare*(0.5+i1*0.23);
+        l.x=50+i1*23;
         break;
       case 3:
-        l.x=sizeSquare*(2.15+i1*0.23);
+        l.x=215+i1*23;
         break;
     }
   }
   else if (index<26) {   // "eaten" pieces
-    l.x=sizeSquare*1.9;
-    l.y=sizeSquare*((index==24) ? 1.2-count*factor*0.1 : 1.6+count*factor*0.1);
+    l.x=190;
+    l.y=(index==24) ? 120-count*factor : 160+count*factor;
   }
   else {                 // completed pieces
-    l.x=sizeSquare*3.7;
-    l.y=sizeSquare*((index==26) ? 2.80-count*0.05 : 0.1+count*0.05 );
-    l.sy=sizeSquare*0.1;
+    l.x=370;
+    l.y=(index==26) ? 280-count*5 : 10+count*5 ;
+    l.sy=10;
   }
   if (reverse) {
-    l.x=4*sizeSquare-l.sx-l.x;
-    l.y=3*sizeSquare-l.sy-l.y;
+    l.x=400-l.sx-l.x;
+    l.y=300-l.sy-l.y;
   }
   return l;
 }
