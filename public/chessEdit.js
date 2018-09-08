@@ -97,7 +97,7 @@ $('#chessStartButton').click(function() {
   gInfo={
     game:"chess",
     gid:newGID,
-  playerList:[],
+    playerList:[],
     currentPlayer:0,
     status:'pending'
   } ;
@@ -107,16 +107,16 @@ $('#chessStartButton').click(function() {
     board: board,
     movedPiece:-1,
     newPiece:-1,
-  info:gInfo,
+    toggle:0,
   };
   gInfo.playerList.push({
-  role:$("#chessRole").val(),
+    role:$("#chessRole").val(),
     uid:currentUID,
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
   });
-  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   db.ref("gameInfo/"+newGID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
 
   gameMsg="chess";
   $("#chessOptionsBoard").hide();

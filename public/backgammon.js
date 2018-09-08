@@ -22,9 +22,6 @@ var cnst={
   doubleDie:[370,10,140,20],   // X, X reverse, Y, size
 };
 
-var gData={};
-var gInfo={};
-
 var pieceMoving={
   from:0,
   to:[],
@@ -106,8 +103,8 @@ $("#backgammonBoard .gameButtonEnd").click( function() {
     case "endAll":
       gInfo.status="quit";
       gInfo.concede=auth.currentUser.displayName;
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       db.ref("gameInfo/"+gameID).set(gInfo);
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -158,38 +155,15 @@ $('#backgammonStartButton').click(function() {
   } ;
   gdataInit(true);
   gInfo.playerList.push({
-  role:$("#backgammonRole").val(),
+    role:$("#backgammonRole").val(),
     uid:currentUID,
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
   });
-  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   db.ref("gameInfo/"+newGID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   gameMsg="backgammon";
   $("#backgammonOptionsBoard").hide();
-});
-
-
-//*************************************************************************************************
-//   User selected to join the game as a player
-//*************************************************************************************************
-$("#gameButtonJoin").click(function() {
-  if (currentGame != "backgammon") {
-    debug(0,"not in Backgammon");
-    return;
-  }
-  if (gInfo.status=="pending") {
-    gInfo.playerList.push({
-      role:this.value,
-      uid:currentUID,
-      displayName:auth.currentUser.displayName,
-      photoURL:auth.currentUser.photoURL
-    });
-    gInfo.status="active"; // two-player game. Start automatically when the 2nd player joins
-    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-    db.ref("gameInfo/"+gameID).set(gInfo);
-}
-  else debug(0,"Game not Pending. Can't start");
 });
 
 /************************************************************************************************
@@ -205,7 +179,8 @@ $("#gameButtonJoin").click(function() {
 function backgammonEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-  gInfo=gData.info;
+//  gInfo=gData.info;
+  gInfo=gameInfo[gameID];
   if (gameID != gInfo.gid) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
@@ -744,7 +719,7 @@ function gdataInit(first) {
     if (cnst.boardStart[i]>0) pips += (24-i)*cnst.boardStart[i];
   
   gData={
-    info:gInfo,
+//    info:gInfo,
     board: cnst.boardStart,
     moveCnt:0,
     diceMoves:[0,0,0,0],
@@ -755,6 +730,7 @@ function gdataInit(first) {
     points:points,
     playTo:playTo,
     pips:[pips,pips],
+    toggle:0,
   }; 
 }
 

@@ -4,6 +4,8 @@
  * The ID of the currently signed-in User. We keep track of this to detect Auth state change events that are just
  * programmatic token refresh but not a User status change.
  */
+var gData={};
+var gInfo={};
 var currentUID=-1;
 var gameID=0;   // Unique ID of the current active game (or 0 if none is active)
 var newGID=0;
@@ -17,6 +19,7 @@ var hints=false;
 var direction=$('body').attr('dir');
 var lang=$('html').attr('lang');
 var roleColors={
+  0:'#ffffff',
   'White':'#ffffff',
   'Brown':'#9b4e0f',
   'Black':'#000000'
@@ -273,6 +276,10 @@ window.onclick = function(event) {
   }
 }
 
+
+//*************************************************************************************************
+//   User selected to exit the current game
+//*************************************************************************************************
 $(".gameButtonClose").click( function() {
   $(".gameBoard").hide();
   $("#sjButtons").hide();
@@ -280,6 +287,58 @@ $(".gameButtonClose").click( function() {
   gameMsg=this.parentElement.parentElement.parentElement.parentElement.title;
   debug(2,"Stopped playing "+gameMsg);
 });
+
+//*************************************************************************************************
+//   User selected to join the game as a player
+//*************************************************************************************************
+$("#gameButtonJoin").click(function() {
+  if (gInfo.status=="pending") {
+    if (currentGame == "chess" && this.value == "White") {
+      gInfo.playerList.splice(0,0,{  // if new player is White, push as first player
+        role:this.value,
+        uid:currentUID,
+        displayName:auth.currentUser.displayName,
+        photoURL:auth.currentUser.photoURL});
+    }
+    else { 
+      gInfo.playerList.push({
+        role:this.value,
+        uid:currentUID,
+        displayName:auth.currentUser.displayName,
+        photoURL:auth.currentUser.photoURL});
+    }
+    switch (currentGame) {
+      case "chess":
+      case "backgammon":
+        gInfo.status="active"; // two-player game. Start automatically when the 2nd player joins
+        gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
+        break;
+      case "uno":
+        gData.playerDeck.push([]);
+        for (var i=0; i<7; i++) {
+          gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());
+        }
+        gData.nPlayers++;
+        if (gData.nPlayers==$("#unoMaxPlayers").val())
+          gInfo.status="active";
+        break;
+    }
+    db.ref("gameInfo/"+gameID).set(gInfo);
+    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+  }
+  else debug(0,"Game not Pending. Can't start");
+});
+
+//*************************************************************************************************
+//   User selected to start the game without the maximum players
+//*************************************************************************************************
+$("#gameButtonStart").click(function() {
+  gInfo.status="active";
+  gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
+  db.ref("gameInfo/"+gameID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+});
+
 
 
 /*------------------------------------------------------------------------------
@@ -351,12 +410,12 @@ function onAuthStateChanged(user) {
   var gameInfoRef = db.ref("gameInfo");
 
   gameInfoRef.on("child_added", function(snapshot) {
-    debug(2,"child_added");
+    debug(1,"child_added");
     addGameToList(snapshot.val());
   });
 
   gameInfoRef.on("child_changed", function(snapshot) {
-    debug(2,"child_changed");
+    debug(1,"child_changed");
     var gInfo=snapshot.val();
     removeFromList(gInfo);
     var clean=true;
@@ -377,7 +436,7 @@ function onAuthStateChanged(user) {
   });
 
   gameInfoRef.on("child_removed", function(snapshot) {
-    debug(2,"child_removed");
+    debug(1,"child_removed");
     removeFromList(snapshot.val());
   });
 }

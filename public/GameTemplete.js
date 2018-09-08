@@ -8,9 +8,6 @@
 var cnst={
 };
 
-var gData={};
-var gInfo={};
-
 var myGAMEIndex;                                              // array of active players
 
 // Current GAME board
@@ -66,8 +63,8 @@ $("#GAMEBoard .gameButtonEnd").click( function() {
     case "endAll":
       gInfo.status="quit";
       gInfo.concede=auth.currentUser.displayName;
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       db.ref("gameInfo/"+gameID).set(gInfo);
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -117,42 +114,22 @@ $('#GAMEStartButton').click(function() {
   } ;
   gData={
     // ### specific fields for this game
+    toggle:0,
   };
   gInfo.playerList.push({
   role:$("#GAMERole").val(), // ### assuming that a role was defined in the game options
+    role:0,
     uid:currentUID,
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
   });
-  gData.info=gInfo;
-  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   db.ref("gameInfo/"+newGID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   gameMsg="GAME";
   $("#GAMEOptionsBoard").hide();
   $(".mdl-spinner").addClass("is-active");
 });
 
-
-//*************************************************************************************************
-//   User selected to join the game as a player 
-//*************************************************************************************************
-$("#gameButtonJoin").click(function() {
-  if (currentGame != "GAME") {
-    debug(0,"not in GAME");
-    return;
-  }
-  if (gInfo.status=="pending") {
-    gInfo.playerList.push({
-    role:this.value, // ### optional - assuming role was added to the JOIN button
-    uid:currentUID,
-      displayName:auth.currentUser.displayName,
-      photoURL:auth.currentUser.photoURL});
-    gInfo.status="active"; // ### in the condition that this is the last player to join
-    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-    db.ref("gameInfo/"+gameID).set(gInfo);
-  }
-  else debug(0,"Game not Pending. Can't start");
-});
 
 /************************************************************************************************
 *
@@ -167,7 +144,7 @@ $("#gameButtonJoin").click(function() {
 function GAMEEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-  gInfo=gData.info;
+  gInfo=gameInfo[gameID];
   if (gameID != gInfo.gid) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
@@ -307,9 +284,6 @@ void mouseReleased() {
 }
 
 void mouseClicked () {
-  gInfo.currentPlayer=1-gInfo.currentPlayer;
-    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-  db.ref("gameInfo/"+gameID).set(gInfo);
 }
 
 /************************************************************************************************

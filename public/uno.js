@@ -9,9 +9,6 @@
 var cnst={
 };
 
-var gData={};
-var gInfo={};
-
 var myunoIndex=0;                                              // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Brown
@@ -138,8 +135,8 @@ $("#unoBoard .gameButtonEnd").click( function() {
     case "endAll":
       gInfo.status="quit";
       gInfo.concede=auth.currentUser.displayName;
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       db.ref("gameInfo/"+gameID).set(gInfo);
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -188,6 +185,7 @@ $('#unoStartButton').click(function() {
     status:'pending'
   } ;
   gInfo.playerList.push({
+    role:0,
     uid:currentUID,
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
@@ -198,7 +196,7 @@ $('#unoStartButton').click(function() {
     openDeck:[],
     closedDeck:[],
     playerDeck:[[]],
-    info:gInfo,
+    toggle:0,
   };
 
   for(var c=0;c<54;c++)
@@ -212,51 +210,10 @@ $('#unoStartButton').click(function() {
     gData.playerDeck[0].push(gData.closedDeck.pop());  
   }
  
-  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   db.ref("gameInfo/"+newGID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+newGID).set(gData);
   gameMsg="uno";
   $("#unoOptionsBoard").hide();
-});
-
-
-//*************************************************************************************************
-//   User selected to join the game as a player 
-//*************************************************************************************************
-$("#gameButtonJoin").click(function() {
-  if (currentGame != "uno") {
-    debug(0,"not in Uno");
-    return;
-  }
-  if (gInfo.status=="pending") {
-    gInfo.playerList.push({
-    uid:currentUID,
-      displayName:auth.currentUser.displayName,
-      photoURL:auth.currentUser.photoURL});
-    gData.playerDeck.push([]);
-    for (var i=0; i<7; i++) {
-      gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());
-    }
-    gData.nPlayers++;
-  if (gData.nPlayers==$("#unoMaxPlayers").val())
-    gInfo.status="active";
-    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-    db.ref("gameInfo/"+gameID).set(gInfo);
-  }
-  else debug(0,"Game not Pending. Can't start");
-});
-
-
-//*************************************************************************************************
-//   User selected to start the game without the maximum players
-//*************************************************************************************************
-$("#gameButtonStart").click(function() {
-  if (currentGame != "uno") {
-    debug(0,"not in Uno");
-    return;
-  }
-  gInfo.status="active";
-  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-  db.ref("gameInfo/"+gameID).set(gInfo);
 });
 
 /************************************************************************************************
@@ -272,7 +229,8 @@ $("#gameButtonStart").click(function() {
 function unoEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-  gInfo=gData.info;
+//  gInfo=gData.info;
+  gInfo=gameInfo[gameID];
   if (gameID != gInfo.gid) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
@@ -304,7 +262,7 @@ function unoEvent(snapshot) {
     $("#unoBoard .gameButtonEnd").attr("disabled",true);
   switch(gInfo.status) {
     case "pending":
-      $("#gameButtonJoin").val(0);
+      $("#gameButtonJoin").val(gData.nPlayers);
       $("#gameButtonJoin").html("Join");
       $("#gameButtonJoin").show();
       $("#sjButtons").show();
@@ -413,8 +371,9 @@ void draw() {
 void mouseClicked () {
   gInfo.currentPlayer++;
   if (gInfo.currentPlayer >= gData.nPlayers) gInfo.currentPlayer=0;
-    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+  gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
   db.ref("gameInfo/"+gameID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
 }
 
 /************************************************************************************************

@@ -11,7 +11,6 @@ to run HTML locally (for debugging) just run "node simple" and in browser go to 
 
 
 To do:
-* gInfo should not be inside gData. Instead gInfo=gameInfo[gameID]
 * combine behavior of QUIT and ENDGAME
 * User preferences (for each game)
 - copied from/to the last game played

@@ -7,8 +7,6 @@
 *
 ************************************************************************************************/
 
-var gData={};
-var gInfo={};
 var ignoreNextUpdate=0;
 var reverse=false;                                                    // display reverse board for black player
 var mychessIndex=0;                                                   // 0 - no active player
@@ -90,8 +88,8 @@ $("#chessBoard .gameButtonEnd").click( function() {
     case "endAll":
       gInfo.status="quit";
       gInfo.concede=auth.currentUser.displayName;
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       db.ref("gameInfo/"+gameID).set(gInfo);
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -104,32 +102,6 @@ $("#chessBoard .gameButtonEnd").click( function() {
       });
     }
   })
-});
-
-//*************************************************************************************************
-//   User selected to join the game as a player
-//*************************************************************************************************
-$("#gameButtonJoin").click(function() {
-  if (currentGame != "chess") {
-    debug(0,"not in Chess");
-    return;
-  }
-  if (gInfo.status=="pending") {
-  if (this.value == "White") gInfo.playerList.splice(0,0,{  // if new player is White, push as first player
-    role:this.value,
-    uid:currentUID,
-      displayName:auth.currentUser.displayName,
-      photoURL:auth.currentUser.photoURL});
-  else gInfo.playerList.push({
-    role:this.value,
-    uid:currentUID,
-      displayName:auth.currentUser.displayName,
-      photoURL:auth.currentUser.photoURL});
-    gInfo.status="active"; // two-player game. Start automatically when the 2nd player joins
-    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-    db.ref("gameInfo/"+gameID).set(gInfo);
-  }
-  else debug(0,"Game not Pending. Can't start");
 });
 
 /************************************************************************************************
@@ -145,7 +117,12 @@ $("#gameButtonJoin").click(function() {
 function chessEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-  gInfo=gData.info;
+//  gInfo=gData.info;
+  gInfo=gameInfo[gameID];
+  debug(0,gameID);
+  debug(0,gameInfo);
+  debug(0,gInfo);
+  
   if (gameID != gInfo.gid) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
@@ -733,8 +710,8 @@ void finalizeMove(movedPiece,newPiece) {
   gData.newPiece=newPiece;
   ignoreNextUpdate=2;
   animationInit(movedPiece,newPiece);                              // start the animation
-  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   db.ref("gameInfo/"+gameID).set(gInfo);
+  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
 }
 
 function animationInit(movedPiece,newPiece) {
