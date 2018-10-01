@@ -3,12 +3,14 @@
 *   Define global variables
 *
 ************************************************************************************************/
-/* @pjs preload="../pics/UNO_cards_deck.png"; */
+/* @pjs preload="../pics/UNO_cards_deck.svg.png,../pics/UNO-back.png" */
 // -----------------------
 
 var cnst={
 };
 
+var SZ=500;
+var uno_back=-1; // image back of UNO card
 var myunoIndex=0;                                              // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Brown
@@ -101,8 +103,8 @@ var uno_count=[1,2,2,2,2,2,2,2,2,2,2,2,2,
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 window.addEventListener('resize', function() {
-  pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
-  $("#unoBoard .gameContent").css("width",pixelSize*1000);
+  pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/SZ;
+  $("#unoBoard .gameContent").css("width",pixelSize*SZ);
   if($("#unoBoard").is(":visible")) printBoard();
 });
 
@@ -134,9 +136,9 @@ $("#unoBoard .gameButtonEnd").click( function() {
     switch (value) {
     case "endAll":
       gInfo.status="quit";
-      gInfo.concede=auth.currentUser.displayName;
+      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
       db.ref("gameInfo/"+gameID).set(gInfo);
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+//      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -199,11 +201,18 @@ $('#unoStartButton').click(function() {
     toggle:0,
   };
 
-  for(var c=0;c<54;c++)
+  for(var c=0;c<54;c++) // fill the closed pile with all the cards (by order)
     for(var i=0;i<uno_count[c];i++)
       gData.closedDeck.push(c);
   for(var i=0;i<10;i++)
     shuffleCards(gData.closedDeck, 108);
+  
+  var firstCard;
+  do {
+    firstCard=gData.closedDeck.pop(); // take the top card off the closed pile
+    if (firstCard>52) gData.closedDeck.splice(Math.floor(Math.random()*gData.closedDeck.length),0,firstCard); // can't be change color
+  } while (firstCard>52);
+  gData.openDeck.push(firstCard);
   
   gData.playerDeck.push([]);
   for (var i=0; i<7; i++) {
@@ -229,7 +238,6 @@ $('#unoStartButton').click(function() {
 function unoEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-//  gInfo=gData.info;
   gInfo=gameInfo[gameID];
   if (gameID != gInfo.gid) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
@@ -287,17 +295,6 @@ function unoEvent(snapshot) {
       }
 
       break;
-    case "quit":
-      swal({
-         title: gInfo.concede+" had quit the game",
-         text: "  ",
-         buttons: false,
-         icon: "../pics/swal-quit.jpg",
-         timer: 2000,
-      });
-      newGID= 0;
-      gameMsg="uno";
-      $("#unoBoard").hide();
   }
   debug(2,"mode="+mode);
 }
@@ -312,16 +309,18 @@ function unoEvent(snapshot) {
 // Initialization
 //*************************************************************************************************
 void setup() {
-  pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
-  $("#unoBoard .gameContent").css("width",pixelSize*1000);
-  uno_all_cards=loadImage("../pics/UNO_cards_deck.png");
+  pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/SZ;
+  $("#unoBoard .gameContent").css("width",pixelSize*SZ);
+  uno_all_cards=loadImage("../pics/UNO_cards_deck.svg.png");
+  uno_back=loadImage("../pics/UNO-back.png");
+  var h=360, w=240;
   for (var i=0; i<54; i++)
-    uno_cards[i].c_image=createImage(73,109,RGB);
+    uno_cards[i].c_image=createImage(w,h,RGB);
   for (var j=0; j<4; j++)
     for (var i=0; i<13; i++)
-      uno_cards[i+j*13].c_image.copy (uno_all_cards, i*73,j*109,73,109,0,0,73,109); 
-  for (var i=0; i<2; i++)
-      uno_cards[i+52].c_image.copy (uno_all_cards, 13*73,i*109,73,109,0,0,73,109); 
+      uno_cards[i+j*13].c_image.copy (uno_all_cards, i*w,j*h,w,h,0,0,w,h); 
+  uno_cards[52].c_image.copy (uno_all_cards, 13*w,h,w,h,0,0,w,h); // change color
+  uno_cards[53].c_image.copy (uno_all_cards, 13*w,4*h,w,h,0,0,w,h); // change color +4
 }
 
 //*************************************************************************************************
@@ -369,11 +368,40 @@ void draw() {
 
 
 void mouseClicked () {
-  gInfo.currentPlayer++;
-  if (gInfo.currentPlayer >= gData.nPlayers) gInfo.currentPlayer=0;
+  var ok=false;
+  var x=mouseX/pixelSize, y=mouseY/pixelSize;
+  var ncards=gData.playerDeck[gInfo.currentPlayer].length;
+  var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
+  var leftcard=(SZ-(cardsize*(ncards+1)))/2;
+  // if clicking on a card, discart it to open pile
+  if (x>leftcard && x<(SZ-leftcard) && y>(SZ*0.7) && y<(SZ*0.7+cardsize*3)) {
+    var i=min(Math.floor((x-leftcard)/cardsize),ncards-1);
+    gData.openDeck.push(gData.playerDeck[gInfo.currentPlayer][i]);
+    gData.playerDeck[gInfo.currentPlayer].splice(i,1);
+    ok=true;
+  }
+  
+  // if clicking on closed pile, take card from closed pile
+  if (x>(SZ*0.5) && x<(SZ*0.64) && y>(SZ*0.3) && y<(SZ*0.51)) {
+    gData.playerDeck[gInfo.currentPlayer].push(gData.closedDeck.pop());  
+    ok=true;
+  }
+  
+/*   
   gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
-  db.ref("gameInfo/"+gameID).set(gInfo);
-  db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+*/  
+  if (ok) {
+    if (gData.playerDeck[gInfo.currentPlayer].length>0) {
+      gInfo.currentPlayer++;
+      if (gInfo.currentPlayer >= gData.nPlayers) gInfo.currentPlayer=0;
+      db.ref("gameInfo/"+gameID).set(gInfo);
+      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+    } else {
+      gInfo.status="quit";
+      gInfo.overMsg=auth.currentUser.displayName+" had won the game";
+      db.ref("gameInfo/"+gameID).set(gInfo);
+    }
+  }
 }
 
 /************************************************************************************************
@@ -394,17 +422,22 @@ function checkPlayer() {
 //   This function prints out the board based on the board array
 //*************************************************************************************************
 function printBoard() {
-  size(pixelSize*1000,pixelSize*1000);
+  size(pixelSize*SZ,pixelSize*SZ);
   scale(pixelSize,pixelSize); 
   $("#unoBoard").show();
   $("#unoCanvas").show();
   if (gInfo.status=="active") {
     var ncards=gData.playerDeck[gInfo.currentPlayer].length;
-    var cardsize=Math.min(70,1000/(ncards+1));
-    var leftcard=(1000-(cardsize*(ncards+1)))/2;
+    var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
+    var leftcard=(SZ-(cardsize*(ncards+1)))/2;
     for (var i=0;i<ncards;i++) {
-      image(uno_cards[gData.playerDeck[gInfo.currentPlayer][i]].c_image, leftcard+i*cardsize, 700, cardsize*2, cardsize*3);
+      image(uno_cards[gData.playerDeck[gInfo.currentPlayer][i]].c_image, leftcard+i*cardsize, SZ*0.7, cardsize*2, cardsize*3);
     }
+    image(uno_cards[gData.openDeck[gData.openDeck.length-1]].c_image, SZ*0.3, SZ*0.3, SZ*0.14, SZ*0.21);
+    image(uno_back, SZ*0.5, SZ*0.3, SZ*0.14, SZ*0.21);
+    fill(0);
+    text(gData.openDeck.length,SZ*0.35,SZ*0.28);
+    text(gData.closedDeck.length,SZ*0.55,SZ*0.28);
   }
 
 }

@@ -87,9 +87,9 @@ $("#chessBoard .gameButtonEnd").click( function() {
     switch (value) {
     case "endAll":
       gInfo.status="quit";
-      gInfo.concede=auth.currentUser.displayName;
+      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
       db.ref("gameInfo/"+gameID).set(gInfo);
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+//      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -117,11 +117,7 @@ $("#chessBoard .gameButtonEnd").click( function() {
 function chessEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-//  gInfo=gData.info;
   gInfo=gameInfo[gameID];
-  debug(0,gameID);
-  debug(0,gameInfo);
-  debug(0,gInfo);
   
   if (gameID != gInfo.gid) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
@@ -185,9 +181,10 @@ function chessEvent(snapshot) {
       printBoard();
       animationInit(gData.movedPiece,gData.newPiece);
       break;
+/*      
     case "quit":
       swal({
-         title: gInfo.concede+" had quit the game",
+         title: gInfo.overMsg,
          text: "  ",
          buttons: false,
          icon: "../pics/swal-quit.jpg",
@@ -197,6 +194,7 @@ function chessEvent(snapshot) {
     newGID= 0;
     gameMsg="chess";
     $("#chessBoard").hide();
+*/    
   }
   debug(2,"mode="+mode);
 }

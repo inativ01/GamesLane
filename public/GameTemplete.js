@@ -62,9 +62,9 @@ $("#GAMEBoard .gameButtonEnd").click( function() {
     switch (value) {
     case "endAll":
       gInfo.status="quit";
-      gInfo.concede=auth.currentUser.displayName;
+      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
       db.ref("gameInfo/"+gameID).set(gInfo);
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+//      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -202,17 +202,6 @@ function GAMEEvent(snapshot) {
       }
 
       break;
-    case "quit":
-      swal({
-         title: gInfo.concede+" had quit the game",
-         text: "  ",
-         buttons: false,
-         icon: "../pics/swal-quit.jpg",
-     timer: 2000,
-      });
-      newGID= 0;
-      gameMsg="GAME";
-      $("#GAMEBoard").hide();
   }
   debug(2,"mode="+mode);
 }

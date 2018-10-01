@@ -102,9 +102,9 @@ $("#backgammonBoard .gameButtonEnd").click( function() {
     switch (value) {
     case "endAll":
       gInfo.status="quit";
-      gInfo.concede=auth.currentUser.displayName;
+      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
       db.ref("gameInfo/"+gameID).set(gInfo);
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+//      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
       break;
    
     default:
@@ -179,8 +179,11 @@ $('#backgammonStartButton').click(function() {
 function backgammonEvent(snapshot) {
   if (!snapshot.val()) return; // information not ready yet
   gData=jQuery.extend(true, {}, snapshot.val()); // copy of gameData from database
-//  gInfo=gData.info;
   gInfo=gameInfo[gameID];
+  if (!gInfo) {
+    debug(0,"Game does not exist "+gameID);
+    return;
+  }
   if (gameID != gInfo.gid) {
     debug(0,"Incorrect Game ID:"+gInfo.gid+"/"+gameID);
     return;
@@ -312,10 +315,10 @@ function backgammonEvent(snapshot) {
         }
       }
       break;
-
+/*
     case "quit":
       swal({
-        title: gInfo.concede+" had quit the game",
+        title: gInfo.overMsg,
         text: "  ",
         buttons: false,
         icon: "../pics/swal-quit.jpg",
@@ -324,7 +327,7 @@ function backgammonEvent(snapshot) {
       newGID= 0;
       gameMsg="backgammon";
       $("#backgammonBoard").hide();
-      
+*/      
   }
   debug(2,"mode="+mode);
 }

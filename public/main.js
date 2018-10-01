@@ -1,3 +1,5 @@
+// the next line is very important for using images in JS
+/* @pjs preload="../pics/game_over.png"; */
 'use strict';
 
 /**
@@ -423,11 +425,13 @@ function onAuthStateChanged(user) {
      if (gInfo.playerList[p].uid!=0) clean=false;   // is there an active player (with valid uid) ?
     }
     if (clean) {                  // if there are no more valid players (Everybody left) than remove the game.
-      debug(2,"clean");
+      debug(2,"clean "+gInfo.game+"/"+gInfo.gid);
       var up=new Object();
       up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
       up["/gameInfo/"+gInfo.gid]={};
 //    up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
+      gInfo={};
+      gData={};
       return db.ref().update(up);
     }
     else {
@@ -457,7 +461,7 @@ function onAuthStateChanged(user) {
 
 function addGameToList(gInfo) {
   debug(2,"addGameToList");
-  var active=false;
+  var active=false; // Does this user participate in the added game?
   gameInfo[gInfo.gid]=gInfo;
   var node=$("<button id='line-"+gInfo.game+"-"+gInfo.gid+"' value='"+gInfo.gid+"' style='width:300px; margin: auto' class='mdl-list__item '></button>");
   var justMe=true;
@@ -482,12 +486,28 @@ function addGameToList(gInfo) {
   if (gInfo.status=="quit")
   {
     if (active) {
+      swal({
+        title: gInfo.overMsg,
+        text: "  ",
+        buttons: false,
+        icon: "../pics/game_over.png",
+//        timer: 2000,
+      })
+      .then(function(value){
+        if (gameID==gInfo.gid) {
+          newGID= 0;
+          gameMsg=gInfo.game;
+//          $("#"+gameMsg).hide();
+          $(".gameBoard").hide();
+          $("#sjButtons").hide();
+        }          
+      });      
       var updates=new Object();
       for (var p in gInfo.playerList)
         if (gInfo.playerList[p].uid==currentUID)
           updates[p+'/uid']=0;
       db.ref("gameInfo/"+gInfo.gid+"/playerList/").update(updates);
-      addLine(gInfo,gInfo.concede+" had quit the "+gInfo.game+" game.");
+      addLine(gInfo,gInfo.game+":"+gInfo.overMsg);
     }
   }
   else if (gInfo.status=="pending") {
