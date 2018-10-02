@@ -534,7 +534,7 @@ void mouseReleased() {
       gData.moveCnt++;
       gData.pips[gInfo.currentPlayer]-=dPips.val;
       if (gData.pips[gInfo.currentPlayer]==0) {
-    endGame(true);
+        endGame(true);
       }
       else if (gData.moveCnt==4 || (gData.dice[0]!=gData.dice[1] && gData.moveCnt==2) || !checkAnyMove()) {              // used up all the dice or no legal move
         gInfo.currentPlayer=1-gInfo.currentPlayer;

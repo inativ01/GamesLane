@@ -258,6 +258,23 @@ window.addEventListener('load', function() {
 }, false);
 
 
+// Routine to close active window
+function closeActiveWindow() {
+  if (gameID >0) {
+    $(".gameBoard").hide();
+    $("#sjButtons").hide();
+    if (gInfo=={}) {
+      debug(0, "gInfo is empty");
+      return;
+    }
+    newGID= 0;
+    gameMsg=gInfo.game
+    debug(2,"Stopped playing "+gameMsg);  
+    gInfo={};
+    gData={};
+  }
+}
+
 // When the user clicks anywhere outside of the modal, close it
 
 window.onclick = function(event) {
@@ -265,14 +282,7 @@ window.onclick = function(event) {
       $("#forgotModal").hide();
       $("#signInModal").show();
   }
-  if (event.target.classList.contains('gameBoard')) {
-//      event.target.style="display:none";
-      $(".gameBoard").hide();
-      $("#sjButtons").hide();
-      newGID= 0;
-      gameMsg=event.target.title;
-      debug(2,"Stopped playing "+gameMsg);
-  }
+  if (event.target.classList.contains('gameBoard')) closeActiveWindow();
   if (event.target.classList.contains('allowClose')) {
     event.target.style="display:none";
   }
@@ -282,13 +292,7 @@ window.onclick = function(event) {
 //*************************************************************************************************
 //   User selected to exit the current game
 //*************************************************************************************************
-$(".gameButtonClose").click( function() {
-  $(".gameBoard").hide();
-  $("#sjButtons").hide();
-  newGID= 0;
-  gameMsg=this.parentElement.parentElement.parentElement.parentElement.title;
-  debug(2,"Stopped playing "+gameMsg);
-});
+$(".gameButtonClose").click(closeActiveWindow);
 
 //*************************************************************************************************
 //   User selected to join the game as a player
@@ -430,8 +434,6 @@ function onAuthStateChanged(user) {
       up["/gameData/"+gInfo.game+"/"+gInfo.gid]={};
       up["/gameInfo/"+gInfo.gid]={};
 //    up["/gameChat/"+gInfo.game+"/"+gInfo.gid]={};
-      gInfo={};
-      gData={};
       return db.ref().update(up);
     }
     else {
@@ -494,13 +496,7 @@ function addGameToList(gInfo) {
 //        timer: 2000,
       })
       .then(function(value){
-        if (gameID==gInfo.gid) {
-          newGID= 0;
-          gameMsg=gInfo.game;
-//          $("#"+gameMsg).hide();
-          $(".gameBoard").hide();
-          $("#sjButtons").hide();
-        }          
+        if (gameID==gInfo.gid) closeActiveWindow();
       });      
       var updates=new Object();
       for (var p in gInfo.playerList)

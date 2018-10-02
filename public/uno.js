@@ -31,60 +31,60 @@ var uno_colors=[#000000, // no color
                 #0000FF];// blue
 
 var uno_cards=[
-           {c_type:0, c_color:1, c_number:0, c_image:-1},//red
-           {c_type:0, c_color:1, c_number:1, c_image:-1},
-           {c_type:0, c_color:1, c_number:2, c_image:-1},
-           {c_type:0, c_color:1, c_number:3, c_image:-1},
-           {c_type:0, c_color:1, c_number:4, c_image:-1},
-           {c_type:0, c_color:1, c_number:5, c_image:-1},
-           {c_type:0, c_color:1, c_number:6, c_image:-1},
-           {c_type:0, c_color:1, c_number:7, c_image:-1},
-           {c_type:0, c_color:1, c_number:8, c_image:-1},
-           {c_type:0, c_color:1, c_number:9, c_image:-1},
-           {c_type:1, c_color:1, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:1, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:1, c_number:-1,c_image:-1},// +2
-           {c_type:0, c_color:2, c_number:0, c_image:-1},//yellow
-           {c_type:0, c_color:2, c_number:1, c_image:-1},
-           {c_type:0, c_color:2, c_number:2, c_image:-1},
-           {c_type:0, c_color:2, c_number:3, c_image:-1},
-           {c_type:0, c_color:2, c_number:4, c_image:-1},
-           {c_type:0, c_color:2, c_number:5, c_image:-1},
-           {c_type:0, c_color:2, c_number:6, c_image:-1},
-           {c_type:0, c_color:2, c_number:7, c_image:-1},
-           {c_type:0, c_color:2, c_number:8, c_image:-1},
-           {c_type:0, c_color:2, c_number:9, c_image:-1},
-           {c_type:1, c_color:2, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:2, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:2, c_number:-1,c_image:-1},// +2
-           {c_type:0, c_color:3, c_number:0, c_image:-1},//green
-           {c_type:0, c_color:3, c_number:1, c_image:-1},
-           {c_type:0, c_color:3, c_number:2, c_image:-1},
-           {c_type:0, c_color:3, c_number:3, c_image:-1},
-           {c_type:0, c_color:3, c_number:4, c_image:-1},
-           {c_type:0, c_color:3, c_number:5, c_image:-1},
-           {c_type:0, c_color:3, c_number:6, c_image:-1},
-           {c_type:0, c_color:3, c_number:7, c_image:-1},
-           {c_type:0, c_color:3, c_number:8, c_image:-1},
-           {c_type:0, c_color:3, c_number:9, c_image:-1},
-           {c_type:1, c_color:3, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:3, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:3, c_number:-1,c_image:-1},// +2
-           {c_type:0, c_color:4, c_number:0, c_image:-1},//blue
-           {c_type:0, c_color:4, c_number:1, c_image:-1},
-           {c_type:0, c_color:4, c_number:2, c_image:-1},
-           {c_type:0, c_color:4, c_number:3, c_image:-1},
-           {c_type:0, c_color:4, c_number:4, c_image:-1},
-           {c_type:0, c_color:4, c_number:5, c_image:-1},
-           {c_type:0, c_color:4, c_number:6, c_image:-1},
-           {c_type:0, c_color:4, c_number:7, c_image:-1},
-           {c_type:0, c_color:4, c_number:8, c_image:-1},
-           {c_type:0, c_color:4, c_number:9, c_image:-1},
-           {c_type:1, c_color:4, c_number:-1,c_image:-1},// skip
-           {c_type:2, c_color:4, c_number:-1,c_image:-1},// change direction
-           {c_type:3, c_color:4, c_number:-1,c_image:-1},// +2
-           {c_type:4, c_color:0, c_number:-1,c_image:-1},// choose color
-           {c_type:5, c_color:0, c_number:-1,c_image:-1} // choose color +4
+           {c_type:0, c_color:1, c_value:0, c_image:-1},//red
+           {c_type:0, c_color:1, c_value:1, c_image:-1},
+           {c_type:0, c_color:1, c_value:2, c_image:-1},
+           {c_type:0, c_color:1, c_value:3, c_image:-1},
+           {c_type:0, c_color:1, c_value:4, c_image:-1},
+           {c_type:0, c_color:1, c_value:5, c_image:-1},
+           {c_type:0, c_color:1, c_value:6, c_image:-1},
+           {c_type:0, c_color:1, c_value:7, c_image:-1},
+           {c_type:0, c_color:1, c_value:8, c_image:-1},
+           {c_type:0, c_color:1, c_value:9, c_image:-1},
+           {c_type:1, c_color:1, c_value:10,c_image:-1},// skip
+           {c_type:2, c_color:1, c_value:11,c_image:-1},// change direction
+           {c_type:3, c_color:1, c_value:12,c_image:-1},// +2
+           {c_type:0, c_color:2, c_value:0, c_image:-1},//yellow
+           {c_type:0, c_color:2, c_value:1, c_image:-1},
+           {c_type:0, c_color:2, c_value:2, c_image:-1},
+           {c_type:0, c_color:2, c_value:3, c_image:-1},
+           {c_type:0, c_color:2, c_value:4, c_image:-1},
+           {c_type:0, c_color:2, c_value:5, c_image:-1},
+           {c_type:0, c_color:2, c_value:6, c_image:-1},
+           {c_type:0, c_color:2, c_value:7, c_image:-1},
+           {c_type:0, c_color:2, c_value:8, c_image:-1},
+           {c_type:0, c_color:2, c_value:9, c_image:-1},
+           {c_type:1, c_color:2, c_value:10,c_image:-1},// skip
+           {c_type:2, c_color:2, c_value:11,c_image:-1},// change direction
+           {c_type:3, c_color:2, c_value:12,c_image:-1},// +2
+           {c_type:0, c_color:3, c_value:0, c_image:-1},//green
+           {c_type:0, c_color:3, c_value:1, c_image:-1},
+           {c_type:0, c_color:3, c_value:2, c_image:-1},
+           {c_type:0, c_color:3, c_value:3, c_image:-1},
+           {c_type:0, c_color:3, c_value:4, c_image:-1},
+           {c_type:0, c_color:3, c_value:5, c_image:-1},
+           {c_type:0, c_color:3, c_value:6, c_image:-1},
+           {c_type:0, c_color:3, c_value:7, c_image:-1},
+           {c_type:0, c_color:3, c_value:8, c_image:-1},
+           {c_type:0, c_color:3, c_value:9, c_image:-1},
+           {c_type:1, c_color:3, c_value:10,c_image:-1},// skip
+           {c_type:2, c_color:3, c_value:11,c_image:-1},// change direction
+           {c_type:3, c_color:3, c_value:12,c_image:-1},// +2
+           {c_type:0, c_color:4, c_value:0, c_image:-1},//blue
+           {c_type:0, c_color:4, c_value:1, c_image:-1},
+           {c_type:0, c_color:4, c_value:2, c_image:-1},
+           {c_type:0, c_color:4, c_value:3, c_image:-1},
+           {c_type:0, c_color:4, c_value:4, c_image:-1},
+           {c_type:0, c_color:4, c_value:5, c_image:-1},
+           {c_type:0, c_color:4, c_value:6, c_image:-1},
+           {c_type:0, c_color:4, c_value:7, c_image:-1},
+           {c_type:0, c_color:4, c_value:8, c_image:-1},
+           {c_type:0, c_color:4, c_value:9, c_image:-1},
+           {c_type:1, c_color:4, c_value:10,c_image:-1},// skip
+           {c_type:2, c_color:4, c_value:11,c_image:-1},// change direction
+           {c_type:3, c_color:4, c_value:12,c_image:-1},// +2
+           {c_type:4, c_color:0, c_value:13,c_image:-1},// choose color
+           {c_type:5, c_color:0, c_value:14,c_image:-1} // choose color +4
 ];
 
 var uno_count=[1,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -198,6 +198,9 @@ $('#unoStartButton').click(function() {
     openDeck:[],
     closedDeck:[],
     playerDeck:[[]],
+    direction: 1,
+    take2: 0,
+    take4: 0,
     toggle:0,
   };
 
@@ -213,6 +216,9 @@ $('#unoStartButton').click(function() {
     if (firstCard>52) gData.closedDeck.splice(Math.floor(Math.random()*gData.closedDeck.length),0,firstCard); // can't be change color
   } while (firstCard>52);
   gData.openDeck.push(firstCard);
+  if (uno_cards[firstCard].c_value==10) gInfo.currentPlayer=1; // skip first player
+  if (uno_cards[firstCard].c_value==11) gData.direction=-1;    // start in reverse direction
+  if (uno_cards[firstCard].c_value==12) gData.take2=1;         // first player needs to take2
   
   gData.playerDeck.push([]);
   for (var i=0; i<7; i++) {
@@ -370,36 +376,50 @@ void draw() {
 void mouseClicked () {
   var ok=false;
   var x=mouseX/pixelSize, y=mouseY/pixelSize;
-  var ncards=gData.playerDeck[gInfo.currentPlayer].length;
-  var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
-  var leftcard=(SZ-(cardsize*(ncards+1)))/2;
-  // if clicking on a card, discart it to open pile
-  if (x>leftcard && x<(SZ-leftcard) && y>(SZ*0.7) && y<(SZ*0.7+cardsize*3)) {
-    var i=min(Math.floor((x-leftcard)/cardsize),ncards-1);
-    gData.openDeck.push(gData.playerDeck[gInfo.currentPlayer][i]);
-    gData.playerDeck[gInfo.currentPlayer].splice(i,1);
-    ok=true;
-  }
-  
-  // if clicking on closed pile, take card from closed pile
-  if (x>(SZ*0.5) && x<(SZ*0.64) && y>(SZ*0.3) && y<(SZ*0.51)) {
-    gData.playerDeck[gInfo.currentPlayer].push(gData.closedDeck.pop());  
-    ok=true;
-  }
-  
-/*   
-  gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
-*/  
-  if (ok) {
-    if (gData.playerDeck[gInfo.currentPlayer].length>0) {
-      gInfo.currentPlayer++;
-      if (gInfo.currentPlayer >= gData.nPlayers) gInfo.currentPlayer=0;
-      db.ref("gameInfo/"+gameID).set(gInfo);
-      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-    } else {
-      gInfo.status="quit";
-      gInfo.overMsg=auth.currentUser.displayName+" had won the game";
-      db.ref("gameInfo/"+gameID).set(gInfo);
+  if (checkPlayer()) {
+    var ncards=gData.playerDeck[gInfo.currentPlayer].length;
+    var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
+    var leftcard=(SZ-(cardsize*(ncards+1)))/2;
+    // if clicking on a card, discart it to open pile
+    if (x>leftcard && x<(SZ-leftcard) && y>(SZ*0.7) && y<(SZ*0.7+cardsize*3)) {     
+      var i=min(Math.floor((x-leftcard)/cardsize),ncards-1);
+      // check if I selected a legal card to play
+      topCard=gData.openDeck[gData.openDeck.length-1];
+      myCard=gData.playerDeck[gInfo.currentPlayer][i];
+      if (gData.take2 && uno_cards[myCard].c_value!=12)
+        return; // after pervious player played take2, you can only play another take2
+      if (uno_cards[myCard].c_value<13 && uno_cards[topCard].c_value!=uno_cards[myCard].c_value && uno_cards[topCard].c_color!=uno_cards[myCard].c_color)
+        return; // not changing color, and mismatch in value AND color - can't select this card
+      gData.openDeck.push(myCard);
+      gData.playerDeck[gInfo.currentPlayer].splice(i,1);
+      if (uno_cards[myCard].c_value==10) gInfo.currentPlayer+=gData.direction; // skip next player card
+      if (uno_cards[myCard].c_value==11) gData.direction= -gData.direction; // change direction card
+      if (uno_cards[myCard].c_value==12) gData.take2++; // next player take two cards
+      ok=true;
+    }
+    
+    // if clicking on closed pile, take card from closed pile
+    if (x>(SZ*0.5) && x<(SZ*0.64) && y>(SZ*0.3) && y<(SZ*0.51)) {
+      takeCards=max(1,gData.take2*2+gData.take4*4);
+      for (var i=0; i<takeCards; i++)
+        gData.playerDeck[gInfo.currentPlayer].push(gData.closedDeck.pop());  
+      gData.take2=gData.take4=0;
+      ok=true;
+    }
+    
+  /*   
+    gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
+  */  
+    if (ok) {
+      if (gData.playerDeck[gInfo.currentPlayer].length>0) {
+        gInfo.currentPlayer=(gInfo.currentPlayer+gData.direction+gData.nPlayers)% gData.nPlayers;
+        db.ref("gameInfo/"+gameID).set(gInfo);
+        db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+      } else {
+        gInfo.status="quit";
+        gInfo.overMsg=auth.currentUser.displayName+" had won the game";
+        db.ref("gameInfo/"+gameID).set(gInfo);
+      }
     }
   }
 }
@@ -424,14 +444,22 @@ function checkPlayer() {
 function printBoard() {
   size(pixelSize*SZ,pixelSize*SZ);
   scale(pixelSize,pixelSize); 
-  $("#unoBoard").show();
-  $("#unoCanvas").show();
+  if (checkPlayer()) fill(#99ff66); else fill (#999966)
+  rect(0,0,1000,1000);
   if (gInfo.status=="active") {
-    var ncards=gData.playerDeck[gInfo.currentPlayer].length;
-    var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
-    var leftcard=(SZ-(cardsize*(ncards+1)))/2;
-    for (var i=0;i<ncards;i++) {
-      image(uno_cards[gData.playerDeck[gInfo.currentPlayer][i]].c_image, leftcard+i*cardsize, SZ*0.7, cardsize*2, cardsize*3);
+    var myIndex=gInfo.currentPlayer; // find which player's card to display
+    var i;
+    for (i=0;i<gData.nPlayers;i++) {
+      if (gInfo.playerList[myIndex].uid==currentUID) break; // this is my player
+      myIndex=(myIndex+1)%gData.nPlayers;
+    }
+    if (i<gData.nPlayers) {  // I'm not just a spectator 
+      var ncards=gData.playerDeck[myIndex].length;
+      var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
+      var leftcard=(SZ-(cardsize*(ncards+1)))/2;
+      for (var i=0;i<ncards;i++) {
+        image(uno_cards[gData.playerDeck[myIndex][i]].c_image, leftcard+i*cardsize, SZ*0.7, cardsize*2, cardsize*3);
+      }
     }
     image(uno_cards[gData.openDeck[gData.openDeck.length-1]].c_image, SZ*0.3, SZ*0.3, SZ*0.14, SZ*0.21);
     image(uno_back, SZ*0.5, SZ*0.3, SZ*0.14, SZ*0.21);
@@ -439,7 +467,8 @@ function printBoard() {
     text(gData.openDeck.length,SZ*0.35,SZ*0.28);
     text(gData.closedDeck.length,SZ*0.55,SZ*0.28);
   }
-
+  $("#unoBoard").show();
+  $("#unoCanvas").show();
 }
 
 
