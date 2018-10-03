@@ -375,11 +375,16 @@ void draw() {
 void mouseClicked () {
   var ok=false;
   var myCard=-1;
+  var skipNext=false;
   var x=mouseX/pixelSize, y=mouseY/pixelSize;
   if (checkPlayer()) {
     if (changeColor > -1) { // already selected ChangeColor card. Need to select requested color
-    // the following line is a stub. replace with color selection
-        gData.requestedColor=1; 
+        if (x<SZ*0.25 || x>SZ*0.75 || y<SZ*0.25 || y>SZ*0.75) {   // if didn't click on any color
+          changeColor=-1;
+          printBoard();
+          return;
+        }
+        gData.requestedColor=Math.floor(x/(SZ*0.25))+Math.floor(y/(SZ*0.25))*2-2;
         myCard=gData.playerDeck[gInfo.currentPlayer][changeColor];
         gData.playerDeck[gInfo.currentPlayer].splice(changeColor,1);  // remove card from current player
         gData.openDeck.push(myCard);                        // ... and instert it into the open deck
@@ -396,26 +401,30 @@ void mouseClicked () {
         // check if I selected a legal card to play
         topCard=gData.openDeck[gData.openDeck.length-1];
         myCard=gData.playerDeck[gInfo.currentPlayer][i];
-        if (uno_cards[myCard].c_value>=13) {
-          // print color selection bar
-          changeColor=i;
-          return;
-        }
         if (gData.take4)
           return; // after pervious player played take4, you have to take 4 cards        
         if (gData.take2 && uno_cards[myCard].c_value!=12)
           return; // after pervious player played take2, you can only play another take2
+        if (uno_cards[myCard].c_value>=13) {
+          fill(uno_colors[1]); rect(SZ*0.25, SZ*0.25, SZ*0.25, SZ*0.25);
+          fill(uno_colors[2]); rect(SZ*0.5, SZ*0.25, SZ*0.25, SZ*0.25);
+          fill(uno_colors[3]); rect(SZ*0.25, SZ*0.5, SZ*0.25, SZ*0.25);
+          fill(uno_colors[4]); rect(SZ*0.5, SZ*0.5, SZ*0.25, SZ*0.25);
+          // print color selection bar
+          changeColor=i;
+          return;
+        }
         if (gData.requestedColor>0) {
-          if (uno_cards[myCard].c_value<13 && gData.requestedColor!=uno_cards[myCard].c_color)
+          if (gData.requestedColor!=uno_cards[myCard].c_color)
             return; // not changing color, and mismatch requested color - can't select this card
         } else {
-          if (uno_cards[myCard].c_value<13 && uno_cards[topCard].c_value!=uno_cards[myCard].c_value && uno_cards[topCard].c_color!=uno_cards[myCard].c_color)
+          if (uno_cards[topCard].c_value!=uno_cards[myCard].c_value && uno_cards[topCard].c_color!=uno_cards[myCard].c_color)
             return; // not changing color, and mismatch in value AND color - can't select this card
         }
         gData.requestedColor=0;
         gData.playerDeck[gInfo.currentPlayer].splice(i,1);  // remove card from current player
         gData.openDeck.push(myCard);                        // ... and instert it into the open deck
-        if (uno_cards[myCard].c_value==10) gInfo.currentPlayer+=gData.direction; // skip next player card
+        if (uno_cards[myCard].c_value==10) skipNext=true; // skip next player card
         if (uno_cards[myCard].c_value==11) gData.direction= -gData.direction; // change direction card
         if (uno_cards[myCard].c_value==12) gData.take2++; // next player take two cards
         ok=true;
@@ -436,6 +445,7 @@ void mouseClicked () {
   */  
     if (ok) {
       if (gData.playerDeck[gInfo.currentPlayer].length>0) {
+        if (skipNext) gInfo.currentPlayer+=gData.direction;
         gInfo.currentPlayer=(gInfo.currentPlayer+gData.direction+gData.nPlayers)% gData.nPlayers;
         db.ref("gameInfo/"+gameID).set(gInfo);
         db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
