@@ -6,9 +6,7 @@
 /* @pjs preload="../pics/UNO_cards_deck.svg.png,../pics/UNO-back.png" */
 // -----------------------
 
-var cnst={
-};
-
+var changeColor=-1;
 var SZ=500;
 var uno_back=-1; // image back of UNO card
 var myunoIndex=0;                                              // 0 - no active player
@@ -201,6 +199,7 @@ $('#unoStartButton').click(function() {
     direction: 1,
     take2: 0,
     take4: 0,
+    requestedColor: 0,
     toggle:0,
   };
 
@@ -375,36 +374,61 @@ void draw() {
 
 void mouseClicked () {
   var ok=false;
+  var myCard=-1;
   var x=mouseX/pixelSize, y=mouseY/pixelSize;
   if (checkPlayer()) {
-    var ncards=gData.playerDeck[gInfo.currentPlayer].length;
-    var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
-    var leftcard=(SZ-(cardsize*(ncards+1)))/2;
-    // if clicking on a card, discart it to open pile
-    if (x>leftcard && x<(SZ-leftcard) && y>(SZ*0.7) && y<(SZ*0.7+cardsize*3)) {     
-      var i=min(Math.floor((x-leftcard)/cardsize),ncards-1);
-      // check if I selected a legal card to play
-      topCard=gData.openDeck[gData.openDeck.length-1];
-      myCard=gData.playerDeck[gInfo.currentPlayer][i];
-      if (gData.take2 && uno_cards[myCard].c_value!=12)
-        return; // after pervious player played take2, you can only play another take2
-      if (uno_cards[myCard].c_value<13 && uno_cards[topCard].c_value!=uno_cards[myCard].c_value && uno_cards[topCard].c_color!=uno_cards[myCard].c_color)
-        return; // not changing color, and mismatch in value AND color - can't select this card
-      gData.openDeck.push(myCard);
-      gData.playerDeck[gInfo.currentPlayer].splice(i,1);
-      if (uno_cards[myCard].c_value==10) gInfo.currentPlayer+=gData.direction; // skip next player card
-      if (uno_cards[myCard].c_value==11) gData.direction= -gData.direction; // change direction card
-      if (uno_cards[myCard].c_value==12) gData.take2++; // next player take two cards
-      ok=true;
-    }
-    
-    // if clicking on closed pile, take card from closed pile
-    if (x>(SZ*0.5) && x<(SZ*0.64) && y>(SZ*0.3) && y<(SZ*0.51)) {
-      takeCards=max(1,gData.take2*2+gData.take4*4);
-      for (var i=0; i<takeCards; i++)
-        gData.playerDeck[gInfo.currentPlayer].push(gData.closedDeck.pop());  
-      gData.take2=gData.take4=0;
-      ok=true;
+    if (changeColor > -1) { // already selected ChangeColor card. Need to select requested color
+    // the following line is a stub. replace with color selection
+        gData.requestedColor=1; 
+        myCard=gData.playerDeck[gInfo.currentPlayer][changeColor];
+        gData.playerDeck[gInfo.currentPlayer].splice(changeColor,1);  // remove card from current player
+        gData.openDeck.push(myCard);                        // ... and instert it into the open deck
+        if (uno_cards[myCard].c_value==14) gData.take4++;   // next player take 4 cards
+        changeColor=-1;
+        ok=true;
+    } else {     
+      var ncards=gData.playerDeck[gInfo.currentPlayer].length;
+      var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
+      var leftcard=(SZ-(cardsize*(ncards+1)))/2;
+      // if clicking on a card, discart it to open pile
+      if (x>leftcard && x<(SZ-leftcard) && y>(SZ*0.7) && y<(SZ*0.7+cardsize*3)) {     
+        var i=min(Math.floor((x-leftcard)/cardsize),ncards-1);
+        // check if I selected a legal card to play
+        topCard=gData.openDeck[gData.openDeck.length-1];
+        myCard=gData.playerDeck[gInfo.currentPlayer][i];
+        if (uno_cards[myCard].c_value>=13) {
+          // print color selection bar
+          changeColor=i;
+          return;
+        }
+        if (gData.take4)
+          return; // after pervious player played take4, you have to take 4 cards        
+        if (gData.take2 && uno_cards[myCard].c_value!=12)
+          return; // after pervious player played take2, you can only play another take2
+        if (gData.requestedColor>0) {
+          if (uno_cards[myCard].c_value<13 && gData.requestedColor!=uno_cards[myCard].c_color)
+            return; // not changing color, and mismatch requested color - can't select this card
+        } else {
+          if (uno_cards[myCard].c_value<13 && uno_cards[topCard].c_value!=uno_cards[myCard].c_value && uno_cards[topCard].c_color!=uno_cards[myCard].c_color)
+            return; // not changing color, and mismatch in value AND color - can't select this card
+        }
+        gData.requestedColor=0;
+        gData.playerDeck[gInfo.currentPlayer].splice(i,1);  // remove card from current player
+        gData.openDeck.push(myCard);                        // ... and instert it into the open deck
+        if (uno_cards[myCard].c_value==10) gInfo.currentPlayer+=gData.direction; // skip next player card
+        if (uno_cards[myCard].c_value==11) gData.direction= -gData.direction; // change direction card
+        if (uno_cards[myCard].c_value==12) gData.take2++; // next player take two cards
+        ok=true;
+      }
+      
+      // if clicking on closed pile, take card from closed pile
+      if (x>(SZ*0.5) && x<(SZ*0.64) && y>(SZ*0.3) && y<(SZ*0.51)) {
+        takeCards=max(1,gData.take2*2+gData.take4*4);
+        for (var i=0; i<takeCards; i++)
+          gData.playerDeck[gInfo.currentPlayer].push(gData.closedDeck.pop());  
+        gData.take2=gData.take4=0;
+        ok=true;
+      }
     }
     
   /*   
@@ -466,6 +490,17 @@ function printBoard() {
     fill(0);
     text(gData.openDeck.length,SZ*0.35,SZ*0.28);
     text(gData.closedDeck.length,SZ*0.55,SZ*0.28);
+    if (gData.requestedColor>0) {
+      fill(uno_colors[gData.requestedColor]);     	
+      ellipse(SZ*0.37, SZ*0.45, SZ*0.06, SZ*0.06)
+//      rect(SZ*0.34, SZ*0.4, SZ*0.06, SZ*0.06)
+    }
+    if (gData.take2+gData.take4 > 0) {
+      fill(#FFFFFF);     	// white
+      ellipse(SZ*0.57, SZ*0.45, SZ*0.06, SZ*0.06)
+      fill(0);            // black font
+      text(gData.take2*2+gData.take4*4,SZ*0.56, SZ*0.44, SZ*0.06, SZ*0.06)
+    }
   }
   $("#unoBoard").show();
   $("#unoCanvas").show();
