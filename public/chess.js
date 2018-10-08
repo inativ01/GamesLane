@@ -147,8 +147,8 @@ function chessEvent(snapshot) {
   mychessIndex=0;
   var i=1;
   for (var p in gInfo.playerList) {
-  if (gInfo.playerList[p].uid==currentUID) mychessIndex|=i;
-  i=i*2;
+    if (gInfo.playerList[p].uid==currentUID) mychessIndex|=i;
+    i=i*2;
   }
   debug(2,"mychessIndex="+mychessIndex);
   if (mychessIndex && gInfo.status!="quit")
@@ -209,6 +209,7 @@ function chessEvent(snapshot) {
 // Initialization
 //*************************************************************************************************
 void setup() {
+  debug(2,"Chess started");
   pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
   $("#chessBoard .gameContent").css("width",pixelSize*1000);
   for (var i=0; i<12; i++) {

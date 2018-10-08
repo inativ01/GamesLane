@@ -180,6 +180,7 @@ function mouseSquare()
 // Initialization
 //*************************************************************************************************
 void setup() {
+  debug(2,"ChessEdit started");
   pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/1000;
   $("#chessOptionsContent").css("width",pixelSize*1000);
   for (var i=0; i<12; i++) {

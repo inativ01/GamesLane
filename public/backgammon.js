@@ -124,6 +124,7 @@ $("#backgammonBoard .gameButtonEnd").click( function() {
 //   go to the game Options screen
 //*************************************************************************************************
 $("#backgammonNewButton").click( function() {
+  console.log(0,"unoNewButton");
   if (!auth.currentUser.isAnonymous) {
     mode="passive";
     $("#backgammonOptionsBoard").show();
@@ -342,6 +343,7 @@ function backgammonEvent(snapshot) {
 // Initialization
 //*************************************************************************************************
 void setup() {
+  debug(2,"Backgammon started");
   textSize(7);
   pixelSize=Math.min(window.innerWidth/4,(window.innerHeight-60)/3)/100;
   $("#backgammonBoard .gameContent").css("width",pixelSize*400);

@@ -21,7 +21,6 @@ var hints=false;
 var direction=$('body').attr('dir');
 var lang=$('html').attr('lang');
 var roleColors={
-  0:'#ffffff',
   'White':'#ffffff',
   'Brown':'#9b4e0f',
   'Black':'#000000'
@@ -30,6 +29,7 @@ var roleColors={
 function debug(level, msg) {
   switch (level) {
     case 0: console.error(msg);
+      console.trace();
       break;
     case 1: console.warn(msg);
       break;
@@ -321,6 +321,7 @@ $("#gameButtonJoin").click(function() {
         break;
       case "uno":
         gData.playerDeck.push([]);
+        gData.unoProtected.push(false);
         for (var i=0; i<7; i++) {
           gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());
         }

@@ -1,15 +1,17 @@
+// the next line is very important for using images in JS
+/* @pjs preload="../pics/UNOcards.png,../pics/UNOback.png,../pics/UNObutton.png" */
+
 /************************************************************************************************
 *
 *   Define global variables
 *
 ************************************************************************************************/
-/* @pjs preload="../pics/UNO_cards_deck.svg.png,../pics/UNO-back.png" */
-// -----------------------
 
 var changeColor=-1;
 var SZ=500;
-var uno_back=-1; // image back of UNO card
-var myunoIndex=0;                                              // 0 - no active player
+var uno_back;    // image back of UNO card
+var uno_button; // image of UNO button
+var myunoIndex;                                              // 0 - no active player
                                                                       // 1 - White
                                                                       // 2 - Brown
                                                                       // 3 - Both (single player)
@@ -200,6 +202,7 @@ $('#unoStartButton').click(function() {
     take2: 0,
     take4: 0,
     requestedColor: 0,
+    unoProtected: [false],
     toggle:0,
   };
 
@@ -253,23 +256,26 @@ function unoEvent(snapshot) {
   debug(2,gInfo);
   $("#unoBoard .playerPics").empty();         // pictures of Players
   for (var p in gInfo.playerList) {
-    var element= $("<div><img src='"+gInfo.playerList[p].photoURL+"'></div>");
-    element.css('background','white');
+    var element= $("<div></div>");
+    var e1= $("<img src='"+gInfo.playerList[p].photoURL+"'>");
+    var e2=$("<span>"+gData.playerDeck[p].length+" </span>");
+    if (gData.unoProtected[p]) e2.css('backgroundColor','yellow');
+    element.append(e1);
+    element.append(e2);
     element.css('border',"medium "+((gInfo.currentPlayer==p)?"solid":"none")+" red");
     element.prop('title', gInfo.playerList[p].displayName+"("+gData.playerDeck[p].length+")");
     $("#unoBoard .playerPics").append(element);
   }
-  myunoIndex=0;
+  myunoIndex=[];
   var i=1;
   for (var p in gInfo.playerList) {
-  if (gInfo.playerList[p].uid==currentUID) myunoIndex|=i;
-  i=i*2;
+    if (gInfo.playerList[p].uid==currentUID) myunoIndex.push(parseInt(p));
   }
   debug(2,"myunoIndex="+myunoIndex);
   $("#sjButtons").hide();
   $("#gameButtonJoin").hide();
   $("#gameButtonStart").hide();
-  if (myunoIndex && gInfo.status!="quit")
+  if (myunoIndex.length && gInfo.status!="quit")
     $("#unoBoard .gameButtonEnd").attr("disabled",false);
   else
     $("#unoBoard .gameButtonEnd").attr("disabled",true);
@@ -286,10 +292,20 @@ function unoEvent(snapshot) {
       break;
     case "active":
       printBoard();
+      if (gData.unoCall) {
+        swal({
+          title: "Uno was called", 
+          text: gData.unoCall, 
+          icon: "../pics/UNO-icon.jpg",
+          buttons: false,
+          timer: 2000
+        });
+        gData.unoCall="";
+      }
       if (mode !="animation") mode="active";
       if (gData.special) {                                             // now need to check special messages or end conditions
         if (gData.special.endGame) {
-          if (myunoIndex) {                                     // Mark player ready to end
+          if (myunoIndex.length) {                                     // Mark player ready to end
             var updates= new Object();                                 // remove my Players from gameInfo
             for (var player in gInfo.playerList)
               if (gInfo.playerList[player].uid==currentUID)
@@ -314,18 +330,20 @@ function unoEvent(snapshot) {
 // Initialization
 //*************************************************************************************************
 void setup() {
+  debug(2,"Uno started");
   pixelSize=Math.min(window.innerWidth,(window.innerHeight-60))/SZ;
   $("#unoBoard .gameContent").css("width",pixelSize*SZ);
-  uno_all_cards=loadImage("../pics/UNO_cards_deck.svg.png");
-  uno_back=loadImage("../pics/UNO-back.png");
+  uno_all_cards=loadImage("../pics/UNOcards.png");
+  uno_back=loadImage("../pics/UNOback.png");
+  uno_button=loadImage("../pics/UNObutton.png");
   var h=360, w=240;
   for (var i=0; i<54; i++)
-    uno_cards[i].c_image=createImage(w,h,RGB);
+    uno_cards[i].c_image=createImage(w+2,h+2,RGB);
   for (var j=0; j<4; j++)
     for (var i=0; i<13; i++)
-      uno_cards[i+j*13].c_image.copy (uno_all_cards, i*w,j*h,w,h,0,0,w,h); 
-  uno_cards[52].c_image.copy (uno_all_cards, 13*w,h,w,h,0,0,w,h); // change color
-  uno_cards[53].c_image.copy (uno_all_cards, 13*w,4*h,w,h,0,0,w,h); // change color +4
+      uno_cards[i+j*13].c_image.copy (uno_all_cards, i*w,j*h,w+2,h+2,0,0,w+2,h+2); 
+  uno_cards[52].c_image.copy (uno_all_cards, 13*w,h,w+2,h+2,0,0,w+2,h+2); // change color
+  uno_cards[53].c_image.copy (uno_all_cards, 13*w,4*h,w+2,h+2,0,0,w+2,h+2); // change color +4
 }
 
 //*************************************************************************************************
@@ -377,7 +395,32 @@ void mouseClicked () {
   var myCard=-1;
   var skipNext=false;
   var x=mouseX/pixelSize, y=mouseY/pixelSize;
-  if (checkPlayer()) {
+  if (myunoIndex.length && x>SZ*0.75 && x<SZ*0.85 && y>SZ*0.35 && y<SZ*0.45) { // pressed the UNO button (just like yelling "UNO")   
+    var anyUno=false;
+    for (var i=0; i< gData.nPlayers; i++) {
+      if (gData.playerDeck[i].length==1) {
+        if (gInfo.playerList[i].uid != currentUID) {  // last card for someone else
+          if (!gData.unoProtected[i]) {
+            debug (0,"Successful UNO called");
+            gData.unoCall=gInfo.playerList[i].displayName+" took 2 penalty cards (unprotected)";
+            for (var j=0; j<2; j++)
+              gData.playerDeck[i].push(gData.closedDeck.pop());  // 2 cards penalty 
+          }              
+        } else {                                      // I have last card. Protect me.
+          gData.unoProtected[i]=true;
+          gData.unoCall=gInfo.playerList[i].displayName+" is now protected";
+        }
+        anyUno=true;
+      }
+    }
+    if (!anyUno) {
+      debug(0,"unjustified UNO called");
+      gData.unoCall=gInfo.playerList[myunoIndex[0]].displayName+" took 2 penalty cards (unjustigied call)";
+      for (var i=0; i<2; i++) // current player needs to take two cards and continue playing
+        gData.playerDeck[myunoIndex[0]].push(gData.closedDeck.pop());  
+    }
+    db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
+  } else if (checkPlayer()) { // other than UNO button, only current player can press anything
     if (changeColor > -1) { // already selected ChangeColor card. Need to select requested color
         if (x<SZ*0.25 || x>SZ*0.75 || y<SZ*0.25 || y>SZ*0.75) {   // if didn't click on any color
           changeColor=-1;
@@ -391,7 +434,7 @@ void mouseClicked () {
         if (uno_cards[myCard].c_value==14) gData.take4++;   // next player take 4 cards
         changeColor=-1;
         ok=true;
-    } else {     
+    } else {      // not selecting color. may select card or closed pile
       var ncards=gData.playerDeck[gInfo.currentPlayer].length;
       var cardsize=Math.min(SZ*0.07,SZ/(ncards+1));
       var leftcard=(SZ-(cardsize*(ncards+1)))/2;
@@ -432,6 +475,7 @@ void mouseClicked () {
       
       // if clicking on closed pile, take card from closed pile
       if (x>(SZ*0.5) && x<(SZ*0.64) && y>(SZ*0.3) && y<(SZ*0.51)) {
+        gData.unoProtected[gInfo.currentPlayer]=false; // no longer protected from UNO call
         takeCards=max(1,gData.take2*2+gData.take4*4);
         for (var i=0; i<takeCards; i++)
           gData.playerDeck[gInfo.currentPlayer].push(gData.closedDeck.pop());  
@@ -495,8 +539,9 @@ function printBoard() {
         image(uno_cards[gData.playerDeck[myIndex][i]].c_image, leftcard+i*cardsize, SZ*0.7, cardsize*2, cardsize*3);
       }
     }
-    image(uno_cards[gData.openDeck[gData.openDeck.length-1]].c_image, SZ*0.3, SZ*0.3, SZ*0.14, SZ*0.21);
-    image(uno_back, SZ*0.5, SZ*0.3, SZ*0.14, SZ*0.21);
+    image(uno_cards[gData.openDeck[gData.openDeck.length-1]].c_image, SZ*0.3, SZ*0.3, SZ*0.14, SZ*0.21); //top card on open pile
+    image(uno_back, SZ*0.5, SZ*0.3, SZ*0.14, SZ*0.21);              // back of card - closed pile
+    if (myunoIndex.length) image(uno_button, SZ*0.75, SZ*0.35, SZ*0.1, SZ*0.1);            // UNO button
     fill(0);
     text(gData.openDeck.length,SZ*0.35,SZ*0.28);
     text(gData.closedDeck.length,SZ*0.55,SZ*0.28);
