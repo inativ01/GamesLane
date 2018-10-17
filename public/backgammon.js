@@ -76,51 +76,6 @@ $("#backgammonBoard .gameButtonUndo").click( function() {
 });
 
 //*************************************************************************************************
-//   User selected to quit (resign) the game
-//*************************************************************************************************
-$("#backgammonBoard .gameButtonEnd").click( function() {
-  swal({
-    title: "Are you sure?",
-    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
-    icon: "warning",
-    dangerMode: true,
-    buttons: {
-    cancel: {
-      visible: true,
-      text: "No, keep playing",
-      value: false,
-      closeModal: true,
-    },
-    confirm: {
-      text: "Yes, I quit!",
-      value: "endAll",
-      closeModal: true,
-    },
-  }
-  })
-  .then(function(value){
-    switch (value) {
-    case "endAll":
-      gInfo.status="quit";
-      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
-      db.ref("gameInfo/"+gameID).set(gInfo);
-//      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-      break;
-   
-    default:
-      swal({
-        title: "Cancelled", 
-        text: "Keep Playing", 
-        icon: "error",
-        buttons: false,
-        timer: 1000
-      });
-    }
-  })
-      
-});
-
-//*************************************************************************************************
 //   go to the game Options screen
 //*************************************************************************************************
 $("#backgammonNewButton").click( function() {
@@ -718,13 +673,12 @@ function gdataInit(first) {
   var pips=0;
   if (!first) {
     points=gData.points;
-    playTo:gData.playTo;
+    playTo=gData.playTo;
   }
   for (var i=0;i<24; i++) 
     if (cnst.boardStart[i]>0) pips += (24-i)*cnst.boardStart[i];
   
   gData={
-//    info:gInfo,
     board: cnst.boardStart,
     moveCnt:0,
     diceMoves:[0,0,0,0],

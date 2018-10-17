@@ -109,51 +109,6 @@ window.addEventListener('resize', function() {
 });
 
 //*************************************************************************************************
-//   User selected to quit (resign) the game
-//*************************************************************************************************
-$("#unoBoard .gameButtonEnd").click( function() {
-  swal({
-    title: "Are you sure?",
-    text: "You will forfeit the game!",
-//    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
-    icon: "warning",
-  dangerMode: true,
-  buttons: {
-    cancel: {
-      visible: true,
-      text: "No, keep playing",
-      value: false,
-      closeModal: true,
-    },
-    confirm: {
-      text: "Yes, I quit!",
-      value: "endAll",
-      closeModal: true,
-    },
-  }
-  })
-  .then(function(value){
-    switch (value) {
-    case "endAll":
-      gInfo.status="quit";
-      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
-      db.ref("gameInfo/"+gameID).set(gInfo);
-//      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-      break;
-   
-    default:
-      swal({
-        title: "Cancelled", 
-        text: "Keep Playing", 
-        icon: "error",
-        buttons: false,
-        timer: 1000
-      });
-    }
-  })
-});
-
-//*************************************************************************************************
 //   go to the game Options screen
 //*************************************************************************************************
 $("#unoNewButton").click( function() {
@@ -171,6 +126,20 @@ $("#unoNewButton").click( function() {
 $("#unoCancelOptions").click(function() {
     $("#unoOptionsBoard").hide();
 });
+
+//*************************************************************************************************
+//   Pop card from closed pile
+//*************************************************************************************************
+int unoClosedPop() {
+  var ret=gData.closedDeck.pop();
+  if (gData.closedDeck.length==0) {
+    for (i=0;i<gData.openDeck.length-1;i++) 
+      gData.closedDeck.push(gData.openDeck[i]); // copy all cards from open pile to closed
+    gData.openDeck.splice(0,gData.openDeck.length-1); // delete all but the top open card
+    shuffleCards(gData.closedDeck, gData.closedDeck.length);   
+  }
+  return ret;
+}
 
 //*************************************************************************************************
 //   done with Options, start the game
@@ -192,7 +161,6 @@ $('#unoStartButton').click(function() {
     displayName:auth.currentUser.displayName,
     photoURL:auth.currentUser.photoURL,
   });
-  
   gData={
     nPlayers:1,
     openDeck:[],
@@ -203,7 +171,10 @@ $('#unoStartButton').click(function() {
     take4: 0,
     requestedColor: 0,
     unoProtected: [false],
+    pyramid: ($("#unoGameType").val()=="Pyramid"),  // true iff requested pyramid game
+    roundCards: [7], // start with 7 cards
     toggle:0,
+    playTo:1,
   };
 
   for(var c=0;c<54;c++) // fill the closed pile with all the cards (by order)
@@ -214,9 +185,9 @@ $('#unoStartButton').click(function() {
   
   var firstCard;
   do {
-    firstCard=gData.closedDeck.pop(); // take the top card off the closed pile
-    if (firstCard>52) gData.closedDeck.splice(Math.floor(Math.random()*gData.closedDeck.length),0,firstCard); // can't be change color
-  } while (firstCard>52);
+    firstCard=unoClosedPop(); // take the top card off the closed pile
+    if (firstCard>51) gData.closedDeck.splice(Math.floor(Math.random()*gData.closedDeck.length),0,firstCard); // can't be change color
+  } while (firstCard>51);
   gData.openDeck.push(firstCard);
   if (uno_cards[firstCard].c_value==10) gInfo.currentPlayer=1; // skip first player
   if (uno_cards[firstCard].c_value==11) gData.direction=-1;    // start in reverse direction
@@ -224,7 +195,7 @@ $('#unoStartButton').click(function() {
   
   gData.playerDeck.push([]);
   for (var i=0; i<7; i++) {
-    gData.playerDeck[0].push(gData.closedDeck.pop());  
+    gData.playerDeck[0].push(unoClosedPop());  
   }
  
   db.ref("gameInfo/"+newGID).set(gInfo);
@@ -404,7 +375,7 @@ void mouseClicked () {
             debug (0,"Successful UNO called");
             gData.unoCall=gInfo.playerList[i].displayName+" took 2 penalty cards (unprotected)";
             for (var j=0; j<2; j++)
-              gData.playerDeck[i].push(gData.closedDeck.pop());  // 2 cards penalty 
+              gData.playerDeck[i].push(unoClosedPop());  // 2 cards penalty 
           }              
         } else {                                      // I have last card. Protect me.
           gData.unoProtected[i]=true;
@@ -417,7 +388,7 @@ void mouseClicked () {
       debug(0,"unjustified UNO called");
       gData.unoCall=gInfo.playerList[myunoIndex[0]].displayName+" took 2 penalty cards (unjustigied call)";
       for (var i=0; i<2; i++) // current player needs to take two cards and continue playing
-        gData.playerDeck[myunoIndex[0]].push(gData.closedDeck.pop());  
+        gData.playerDeck[myunoIndex[0]].push(unoClosedPop());  
     }
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   } else if (checkPlayer()) { // other than UNO button, only current player can press anything
@@ -478,7 +449,7 @@ void mouseClicked () {
         gData.unoProtected[gInfo.currentPlayer]=false; // no longer protected from UNO call
         takeCards=max(1,gData.take2*2+gData.take4*4);
         for (var i=0; i<takeCards; i++)
-          gData.playerDeck[gInfo.currentPlayer].push(gData.closedDeck.pop());  
+          gData.playerDeck[gInfo.currentPlayer].push(unoClosedPop());  
         gData.take2=gData.take4=0;
         ok=true;
       }
@@ -488,6 +459,12 @@ void mouseClicked () {
     gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
   */  
     if (ok) {
+      if (gData.playerDeck[gInfo.currentPlayer].length==0 && gData.pyramid && gData.roundCards[gInfo.currentPlayer]>1) {  // finished cards AND playing pyramid AND this is not the last round
+        gData.roundCards[gInfo.currentPlayer]--;
+        for (var i=0; i<gData.roundCards[gInfo.currentPlayer]; i++)
+          gData.playerDeck[gInfo.currentPlayer].push(unoClosedPop());  
+      }
+
       if (gData.playerDeck[gInfo.currentPlayer].length>0) {
         if (skipNext) gInfo.currentPlayer+=gData.direction;
         gInfo.currentPlayer=(gInfo.currentPlayer+gData.direction+gData.nPlayers)% gData.nPlayers;

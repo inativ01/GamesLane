@@ -108,6 +108,7 @@ $('#chessStartButton').click(function() {
     movedPiece:-1,
     newPiece:-1,
     toggle:0,
+    playTo:1,
   };
   gInfo.playerList.push({
     role:$("#chessRole").val(),

@@ -34,50 +34,6 @@ window.addEventListener('resize', function() {
   if($("#GAMEBoard").is(":visible")) printBoard();
 });
 
-//*************************************************************************************************
-//   User selected to quit (resign) the game
-//*************************************************************************************************
-$("#GAMEBoard .gameButtonEnd").click( function() {
-  swal({
-    title: "Are you sure?",
-    text: "You will forfeit the game!",
-//    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
-    icon: "warning",
-  dangerMode: true,
-  buttons: {
-    cancel: {
-      visible: true,
-      text: "No, keep playing",
-      value: false,
-      closeModal: true,
-    },
-    confirm: {
-      text: "Yes, I quit!",
-      value: "endAll",
-      closeModal: true,
-    },
-  }
-  })
-  .then(function(value){
-    switch (value) {
-    case "endAll":
-      gInfo.status="quit";
-      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
-      db.ref("gameInfo/"+gameID).set(gInfo);
-//      db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
-      break;
-   
-    default:
-      swal({
-        title: "Cancelled", 
-        text: "Keep Playing", 
-        icon: "error",
-        buttons: false,
-        timer: 1000
-      });
-    }
-  })
-});
 
 //*************************************************************************************************
 //   go to the game Options screen
@@ -115,6 +71,7 @@ $('#GAMEStartButton').click(function() {
   gData={
     // ### specific fields for this game
     toggle:0,
+    playTo:1,
   };
   gInfo.playerList.push({
   role:$("#GAMERole").val(), // ### assuming that a role was defined in the game options

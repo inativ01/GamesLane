@@ -261,19 +261,17 @@
             <div><b><u>Uno Options</u></b></div>
             <br>
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
-              <input id="unoMaxPlayers" class="mdl-textfield__input" type="text" value=5 readonly tabIndex="-1">
-              <label for="unoMaxPlayers" class="mdl-textfield__label">Max Players</label>
-              <ul for="unoMaxPlayers" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">2</li>
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">3</li>
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">4</li>
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">5</li>
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">6</li>
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">7</li>
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">8</li>
-                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">9</li>
-                <li class="mdl-menu__item">10</li>
+              <input id="unoGameType" class="mdl-textfield__input" type="text" value="Normal" readonly tabIndex="-1">
+              <label for="unoGameType" class="mdl-textfield__label">Type of game</label>
+              <ul for="unoGameType" class="mdl-menu mdl-menu--bottom-left mdl-js-menu">
+                <li class="mdl-menu__item mdl-menu__item--full-bleed-divider">Normal</li>
+                <li class="mdl-menu__item">Pyramid</li>
               </ul>
+            </div>
+            <br>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select getmdl-select__fullwidth">
+              <input id="unoMaxPlayers" class="mdl-textfield__input" type="number" min="2" max="10" value="4" tabIndex="-1">
+              <label for="unoMaxPlayers" class="mdl-textfield__label">Max Players</label>
             </div>
             <br>
             <div style="text-align: center;padding: 0px;">

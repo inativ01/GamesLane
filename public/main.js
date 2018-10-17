@@ -295,6 +295,51 @@ window.onclick = function(event) {
 $(".gameButtonClose").click(closeActiveWindow);
 
 //*************************************************************************************************
+//   User selected to quit (resign) the game
+//*************************************************************************************************
+$(".gameButtonEnd").click( function() {
+  swal({
+    title: "Are you sure?",
+    text: "You will forfeit the "+((gData.playTo==1)?"game":"entire match"),
+    icon: "warning",
+    dangerMode: true,
+    buttons: {
+      cancel: {
+        visible: true,
+        text: "No, keep playing",
+        value: false,
+        closeModal: true,
+      },
+      confirm: {
+        text: "Yes, I quit!",
+        value: "endAll",
+        closeModal: true,
+      },
+    }
+  })
+  .then(function(value){
+    switch (value) {
+    case "endAll":
+      gInfo.status="quit";
+      gInfo.overMsg=auth.currentUser.displayName+" had quit the game";
+      db.ref("gameInfo/"+gameID).set(gInfo);
+      break;
+   
+    default:
+      swal({
+        title: "Cancelled", 
+        text: "Keep Playing", 
+        icon: "error",
+        buttons: false,
+        timer: 1000
+      });
+    }
+  })
+});
+
+
+
+//*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
 $("#gameButtonJoin").click(function() {
@@ -322,6 +367,7 @@ $("#gameButtonJoin").click(function() {
       case "uno":
         gData.playerDeck.push([]);
         gData.unoProtected.push(false);
+        gData.roundCards.push(7); // start with 7 cards
         for (var i=0; i<7; i++) {
           gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());
         }
