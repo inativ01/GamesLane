@@ -258,7 +258,9 @@ window.addEventListener('load', function() {
 }, false);
 
 
-// Routine to close active window
+//*************************************************************************************************
+//   User selected to exit the current game
+//*************************************************************************************************
 function closeActiveWindow() {
   if (gameID >0) {
     $(".gameBoard").hide();
@@ -288,10 +290,8 @@ window.onclick = function(event) {
   }
 }
 
+// when user clicks the X button inside a game
 
-//*************************************************************************************************
-//   User selected to exit the current game
-//*************************************************************************************************
 $(".gameButtonClose").click(closeActiveWindow);
 
 //*************************************************************************************************
@@ -342,7 +342,7 @@ $(".gameButtonEnd").click( function() {
 //*************************************************************************************************
 //   User selected to join the game as a player
 //*************************************************************************************************
-$("#gameButtonJoin").click(function() {
+function gameButtonJoin() {
   if (gInfo.status=="pending") {
     if (currentGame == "chess" && this.value == "White") {
       gInfo.playerList.splice(0,0,{  // if new player is White, push as first player
@@ -380,7 +380,10 @@ $("#gameButtonJoin").click(function() {
     db.ref("gameData/"+gInfo.game+"/"+gameID).set(gData);
   }
   else debug(0,"Game not Pending. Can't start");
-});
+}
+
+// When user clicks the JOIN button
+$("#gameButtonJoin").click(gameButtonJoin);
 
 //*************************************************************************************************
 //   User selected to start the game without the maximum players
