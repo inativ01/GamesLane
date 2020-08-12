@@ -365,11 +365,11 @@ function gameButtonJoin() {
         gData.toggle=gData.toggle^1; // just touch gData to force update to everyone.
         break;
       case "uno":
-        gData.playerDeck.push([]);
+		gData.playerDeck.push({cards:[]});
         gData.unoProtected.push(false);
         gData.roundCards.push(7); // start with 7 cards
         for (var i=0; i<7; i++) {
-          gData.playerDeck[gData.nPlayers].push(gData.closedDeck.pop());
+          gData.playerDeck[gData.nPlayers].cards.push(gData.closedDeck.pop());
         }
         gData.nPlayers++;
         if (gData.nPlayers==$("#unoMaxPlayers").val())
