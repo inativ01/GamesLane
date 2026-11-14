@@ -2045,6 +2045,23 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
     const chat = startChat(sessionId, view);
     menuButton.before(chat.button);
 
+    // On a phone turned sideways, the top bar and the session bar are hidden to leave room for the game (see .masthead in
+    // styles.css); a small tab under the top of the page shows them, and hides them again.
+    const masthead = document.querySelector(".masthead");
+    const mastheadToggle = el("button", "masthead-toggle");
+    mastheadToggle.type = "button";
+    const showMasthead = (shown) => {
+        masthead.classList.toggle("expanded", shown);
+        mastheadToggle.textContent = shown ? "▴" : "▾";
+        mastheadToggle.title = shown ? t("Hide the top bars") : t("Show the top bars");
+        mastheadToggle.setAttribute("aria-label", mastheadToggle.title);
+        mastheadToggle.setAttribute("aria-expanded", String(shown));
+        fitSessionInfo();
+    };
+    mastheadToggle.addEventListener("click", () => showMasthead(!masthead.classList.contains("expanded")));
+    masthead.append(mastheadToggle);
+    showMasthead(false);
+
     // The session bar's role ("You: ⚪ White", or "👁 Watching") and, in its menu, how many players are seated and how
     // many connections watch.
     function updateSessionInfo(state) {
@@ -2052,9 +2069,23 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             ? t("You: {seats}", { seats: view.mySeats.map((seat) => seatRole(seat, state)).join(", ") })
             : `👁 ${t("Watching")}`;
         $("session-info").replaceChildren(el("span", "session-fact", role));
+        fitSessionInfo();
         seatedCount.textContent = t("{taken} players · {observers} watching",
             { taken: state.seats.filter(Boolean).length, observers: state.observerCount });
     }
+
+    // The role is shown only when the whole session bar fits on one line: otherwise (e.g. on a phone) it is left out.
+    function fitSessionInfo() {
+        const info = $("session-info");
+        const bar = info.closest(".session-bar");
+        const art = bar.querySelector(".session-art");
+        info.style.display = "";
+        const lineEnd = art.offsetTop + art.offsetHeight;
+        const wraps = [...bar.children].some((item) => item.offsetParent !== null
+            && getComputedStyle(item).position !== "absolute" && item.offsetTop >= lineEnd);
+        info.style.display = wraps ? "none" : "";
+    }
+    addEventListener("resize", fitSessionInfo);
 
     // A seat tile: a big icon, the name, and a note such as "Seat 2 · You". The user's own seat is a button to leave
     // it; the empty seat is a button to sit there (the server gives the next available seat, which is this one). A user

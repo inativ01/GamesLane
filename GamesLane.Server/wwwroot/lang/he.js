@@ -63,6 +63,8 @@ TRANSLATIONS.he = {
     "You: {seats}": "אני: {seats}",
     "Watching": "צפייה",
     "Game menu": "תפריט המשחק",
+    "Show the top bars": "הצגת הפסים העליונים",
+    "Hide the top bars": "הסתרת הפסים העליונים",
     "Invite link": "קישור הזמנה",
     "Share": "שיתוף",
     "Players:": "שחקנים:",

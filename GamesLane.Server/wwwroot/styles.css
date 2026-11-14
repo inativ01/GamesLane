@@ -1200,8 +1200,40 @@ label.check {
     box-shadow: none;
 }
 
+/* On a phone turned sideways (a landscape screen at most 500 pixels high), the top bar and the session bar are hidden
+   to leave room for the game, and a small tab hanging under the top of the page, at the end (on the right, or on the
+   left in Hebrew), shows them (▾) and hides them again (▴). Elsewhere they are always shown, without the tab. */
+.masthead-toggle {
+    display: none;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .masthead:not(.expanded) > .top,
+    .masthead:not(.expanded) > .session-bar {
+        display: none;
+    }
+
+    button.masthead-toggle {
+        display: block;
+        position: absolute;
+        top: 100%;
+        inset-inline-end: 0.75rem;
+        width: 2.75rem;
+        height: 1.4rem;
+        min-height: 0;
+        padding: 0;
+        border-radius: 0 0 8px 8px;
+        background: var(--black);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        color: #fff;
+        font-size: 0.85rem;
+        line-height: 1;
+    }
+}
+
 /* As tall as the header above it (the GamesLane name's height and padding). When everything does not fit on one line,
-   it takes two: the game's picture and name on the first, the rest on the second. The picture and name keep to the start
+   the user's role is left out (see fitSessionInfo in common.js), and if the rest still does not fit, it takes two lines:
+   the game's picture and name on the first, the rest on the second. The picture and name keep to the start
    (left, or right in Hebrew) and the name grows to fill its line, so the other items keep to the end on every line. */
 .session-bar {
     position: relative;

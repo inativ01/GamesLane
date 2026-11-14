@@ -63,6 +63,8 @@ TRANSLATIONS.fr = {
     "You: {seats}": "Toi : {seats}",
     "Watching": "Spectateur",
     "Game menu": "Menu de la partie",
+    "Show the top bars": "Afficher les barres du haut",
+    "Hide the top bars": "Masquer les barres du haut",
     "Invite link": "Lien d'invitation",
     "Share": "Partager",
     "Players:": "Joueurs :",
