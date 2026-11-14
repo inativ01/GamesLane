@@ -10,14 +10,15 @@ namespace GamesLane.Server.Hubs;
 public interface IGameHub
 {
     /// <summary>
-    /// Opens a session page: subscribes to updates and, for a logged-in user, reconnects them to their seats. A public
-    /// game can be opened only by its seated players.
+    /// Opens a session page: subscribes to updates and, for a logged-in user, reconnects them to their seats. A logged-in
+    /// user opening a private game for the first time while it is in the lobby takes the next empty seat, if there is
+    /// one. A public game can be opened only by its seated players.
     /// </summary>
     Task<SessionEntry> EnterSession(string sessionId);
 
     /// <summary>
     /// Logged-in users only. Creates a session and returns its code. The session starts with the creator's saved options
-    /// for the game, if they have any. The creator of a private game is not seated; the creator of a public game is.
+    /// for the game, if they have any. The creator is seated.
     /// </summary>
     Task<string> CreateSession(GameType gameType, bool isPublic);
 
@@ -314,6 +315,11 @@ public interface IGameHub
     /// Yaniv: <paramref name="seat"/>, which the caller must hold, calls Yaniv on its turn with a hand score of 7 or less.
     /// </summary>
     Task CallYaniv(string sessionId, int seat);
+
+    /// <summary>
+    /// Yaniv: <paramref name="seat"/>, which the caller must hold, passes its last turn after a Yaniv call, keeping its hand.
+    /// </summary>
+    Task PassLastTurn(string sessionId, int seat);
 
     /// <summary>
     /// Trick-taking games: <paramref name="seat"/>, which the caller must hold, plays <paramref name="card"/> (short text

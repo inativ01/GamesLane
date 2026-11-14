@@ -270,6 +270,58 @@ $("join-form").addEventListener("submit", async (event) => {
     }
 });
 
+// The offer to install GamesLane as an app (see manifest.webmanifest), under the main menu. Browsers that can install
+// it themselves (Chrome and Edge, on Android and on computers) tell the page so, and Install app opens their install
+// dialog. On iPhone and iPad, only Safari's Share menu can install it, so Install app shows how. Not offered in the
+// installed app, once it is installed, or after Not now (remembered in this browser).
+const INSTALL_DISMISSED_KEY = "installDismissed";
+const isInstalledApp = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isAppleMobile = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+let installPrompt = null;
+
+function offerInstall(offered) {
+    $("install-app").hidden = !offered || isInstalledApp || localStorage.getItem(INSTALL_DISMISSED_KEY) !== null;
+}
+
+function showAppleInstallSteps() {
+    const dialog = createDialog(`
+        <h2>${t("Install GamesLane")}</h2>
+        <ol class="install-steps">
+            <li>${t("Tap the Share button (the square with an arrow).")}</li>
+            <li>${t("Scroll down and tap Add to Home Screen.")}</li>
+            <li>${t("Tap Add.")}</li>
+        </ol>
+        <div class="actions"><button type="button" data-close>${t("Got it")}</button></div>`);
+    dialog.addEventListener("close", () => dialog.remove());
+    dialog.showModal();
+}
+
+addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installPrompt = event;
+    offerInstall(true);
+});
+addEventListener("appinstalled", () => {
+    installPrompt = null;
+    offerInstall(false);
+});
+$("install-app-button").addEventListener("click", async () => {
+    if (!installPrompt) {
+        showAppleInstallSteps();
+        return;
+    }
+    // The browser's dialog can be opened only once per offer; the browser offers again later if it was declined.
+    const prompt = installPrompt;
+    installPrompt = null;
+    offerInstall(false);
+    await prompt.prompt();
+});
+$("install-app-later").addEventListener("click", () => {
+    localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+    offerInstall(false);
+});
+offerInstall(isAppleMobile);
+
 // The privacy policy in the chosen language: privacy.html in English, privacy.<code>.html in the others.
 $("privacy-link").href = language === LANGUAGES[0] ? "/privacy.html" : `/privacy.${language.code}.html`;
 
