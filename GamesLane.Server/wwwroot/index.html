@@ -6,6 +6,8 @@
     <title>GamesLane</title>
     <link rel="icon" href="images/logo-32.png">
     <link rel="apple-touch-icon" href="images/logo-180.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="apple-mobile-web-app-title" content="GamesLane">
     <meta name="theme-color" content="#19285d">
     <link rel="stylesheet" href="styles.css">
     <script>
@@ -73,6 +75,13 @@
                 </div>
                 <button type="button" class="big" data-pick="public-create" data-i18n>Create a game</button>
                 <button type="button" class="big menu-join" data-pick="public-join" data-i18n>Join a game</button>
+            </div>
+        </div>
+        <div id="install-app" class="install-app" hidden>
+            <span data-i18n>Get GamesLane on your home screen.</span>
+            <div class="install-actions">
+                <button type="button" id="install-app-button" class="small" data-i18n>Install app</button>
+                <button type="button" id="install-app-later" class="secondary small" data-i18n>Not now</button>
             </div>
         </div>
 
