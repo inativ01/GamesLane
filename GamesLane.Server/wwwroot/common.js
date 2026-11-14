@@ -2047,9 +2047,23 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             ? t("You: {seats}", { seats: view.mySeats.map((seat) => seatRole(seat, state)).join(", ") })
             : `👁 ${t("Watching")}`;
         $("session-info").replaceChildren(el("span", "session-fact", role));
+        fitSessionInfo();
         seatedCount.textContent = t("{taken} players · {observers} watching",
             { taken: state.seats.filter(Boolean).length, observers: state.observerCount });
     }
+
+    // The role is shown only when the whole session bar fits on one line: otherwise (e.g. on a phone) it is left out.
+    function fitSessionInfo() {
+        const info = $("session-info");
+        const bar = info.closest(".session-bar");
+        const art = bar.querySelector(".session-art");
+        info.style.display = "";
+        const lineEnd = art.offsetTop + art.offsetHeight;
+        const wraps = [...bar.children].some((item) => item.offsetParent !== null
+            && getComputedStyle(item).position !== "absolute" && item.offsetTop >= lineEnd);
+        info.style.display = wraps ? "none" : "";
+    }
+    addEventListener("resize", fitSessionInfo);
 
     // A seat tile: a big icon, the name, and a note such as "Seat 2 · You". The user's own seat is a button to leave
     // it; the empty seat is a button to sit there (the server gives the next available seat, which is this one). A user

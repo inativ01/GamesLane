@@ -1148,7 +1148,8 @@ label.check {
 }
 
 /* As tall as the header above it (the GamesLane name's height and padding). When everything does not fit on one line,
-   it takes two: the game's picture and name on the first, the rest on the second. The picture and name keep to the start
+   the user's role is left out (see fitSessionInfo in common.js), and if the rest still does not fit, it takes two lines:
+   the game's picture and name on the first, the rest on the second. The picture and name keep to the start
    (left, or right in Hebrew) and the name grows to fill its line, so the other items keep to the end on every line. */
 .session-bar {
     position: relative;
