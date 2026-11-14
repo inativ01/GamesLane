@@ -971,6 +971,37 @@ main.home {
     font-weight: 700;
 }
 
+/* The offer to install GamesLane as an app, under the main menu (not while a list of games is shown). */
+.install-app {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+    box-shadow: var(--shadow);
+}
+
+.install-app span {
+    flex: 1;
+    min-width: 12rem;
+}
+
+.install-app[hidden], #menu[hidden] + .install-app {
+    display: none;
+}
+
+.install-steps {
+    text-align: start;
+    padding-inline-start: 1.4rem;
+}
+
+.install-steps li {
+    margin: 0.4rem 0;
+}
+
 .join-row {
     display: flex;
     gap: 0.5rem;
