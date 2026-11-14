@@ -2040,6 +2040,23 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
     const chat = startChat(sessionId, view);
     menuButton.before(chat.button);
 
+    // On a phone turned sideways, the top bar and the session bar are hidden to leave room for the game (see .masthead in
+    // styles.css); a small tab under the top of the page shows them, and hides them again.
+    const masthead = document.querySelector(".masthead");
+    const mastheadToggle = el("button", "masthead-toggle");
+    mastheadToggle.type = "button";
+    const showMasthead = (shown) => {
+        masthead.classList.toggle("expanded", shown);
+        mastheadToggle.textContent = shown ? "▴" : "▾";
+        mastheadToggle.title = shown ? t("Hide the top bars") : t("Show the top bars");
+        mastheadToggle.setAttribute("aria-label", mastheadToggle.title);
+        mastheadToggle.setAttribute("aria-expanded", String(shown));
+        fitSessionInfo();
+    };
+    mastheadToggle.addEventListener("click", () => showMasthead(!masthead.classList.contains("expanded")));
+    masthead.append(mastheadToggle);
+    showMasthead(false);
+
     // The session bar's role ("You: ⚪ White", or "👁 Watching") and, in its menu, how many players are seated and how
     // many connections watch.
     function updateSessionInfo(state) {

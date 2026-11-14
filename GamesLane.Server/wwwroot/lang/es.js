@@ -63,6 +63,8 @@ TRANSLATIONS.es = {
     "You: {seats}": "Tú: {seats}",
     "Watching": "Viendo",
     "Game menu": "Menú de la partida",
+    "Show the top bars": "Mostrar las barras de arriba",
+    "Hide the top bars": "Ocultar las barras de arriba",
     "Invite link": "Enlace de invitación",
     "Share": "Compartir",
     "Players:": "Jugadores:",

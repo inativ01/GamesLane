@@ -63,6 +63,8 @@ TRANSLATIONS["zh-TW"] = {
     "You: {seats}": "您：{seats}",
     "Watching": "觀戰中",
     "Game menu": "遊戲選單",
+    "Show the top bars": "顯示頂部列",
+    "Hide the top bars": "隱藏頂部列",
     "Invite link": "邀請連結",
     "Share": "分享",
     "Players:": "玩家：",
