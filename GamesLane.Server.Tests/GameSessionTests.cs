@@ -1751,7 +1751,7 @@ public class GameSessionTests
     {
         var session = StartedSpades();
         var state = Spades(session);
-        Assert.Equal((SpadesPhase.Bidding, 3, 0), (state.Phase, state.Dealer, state.Bidder));
+        Assert.Equal((SpadesPhase.Bidding, 3, 0, 1), (state.Phase, state.Dealer, state.Bidder, state.Shuffles));
         Assert.Equal([[0, 2], [1, 3]], state.Teams.Select(t => t.Seats));
         Assert.False(session.TryBid(Players[1], 1, 3, false, out var error));
         Assert.Equal("It is not your turn to bid.", error);

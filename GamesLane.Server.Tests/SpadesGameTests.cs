@@ -81,7 +81,7 @@ public class SpadesGameTests
         Assert.Equal((SpadesPhase.HandOver, null), (game.Phase, game.Winner));
 
         Assert.True(game.TryNextHand(1, out var error), error);
-        Assert.Equal((0, 1, SpadesPhase.Bidding), (game.Dealer, game.Bidder, game.Phase));
+        Assert.Equal((0, 1, SpadesPhase.Bidding, 2), (game.Dealer, game.Bidder, game.Phase, game.Shuffles));
     }
 
     [Fact]

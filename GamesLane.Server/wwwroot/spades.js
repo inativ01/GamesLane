@@ -128,6 +128,15 @@ function facts(game, seat) {
     return items;
 }
 
+// For everyone with the page open, as soon as the card is played: the breaking glass when spades are broken. Only
+// changes seen while the page is open count.
+let heard = null;
+function playSounds(game, state) {
+    const now = { hand: `${state.gameNumber}:${game.handNumber}`, broken: game.spadesBroken };
+    if (heard?.hand === now.hand && now.broken && !heard.broken) playGlassBreak();
+    heard = now;
+}
+
 // Confetti for the user's success: their team winning the game.
 function noticeSuccess(game, state, view) {
     if (game.phase === "GameOver" && myTeam(game, view) === game.winner) {
@@ -139,9 +148,12 @@ const spades = startSessionPage("Spades", (game, state, view) => {
     currentGame = game;
     $("status").textContent = statusText(game, state, view);
     noticeSuccess(game, state, view);
+    noticeShuffles(view, state, game.shuffles);
+    playSounds(game, state);
     $("spades-table").replaceChildren(trickTable(game, state, view, {
         turn: game.phase === "Playing" ? game.turn : game.phase === "Bidding" ? game.bidder : null,
         facts: (seat) => facts(game, seat),
+        arrived: trickArrival(game, view),
     }));
     const message = game.claim ? claimText(game, state, view) : game.phase === "Playing" ? lastTrickText(game, state, view) : "";
     $("spades-message").textContent = message;

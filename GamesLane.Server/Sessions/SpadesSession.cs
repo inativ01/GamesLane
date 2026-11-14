@@ -34,7 +34,8 @@ public record SpadesResultState(IReadOnlyList<SpadesTeamResultState> Teams, IRea
 /// Public Spades state. <see cref="Turn"/>, <see cref="Dealer"/>, <see cref="Bidder"/> and the seats in the tricks,
 /// claim, players and teams are seats; <see cref="Players"/> are in seat order, <see cref="Teams"/> by team, and
 /// <see cref="Winner"/> is a team. <see cref="Claim"/> is the claim of this hand's remaining tricks, or null.
-/// <see cref="Actions"/> counts the actions, so a page can tell a new one.
+/// <see cref="Actions"/> counts the actions, so a page can tell a new one, and <see cref="Shuffles"/> the shuffles of
+/// the deck, so a page can show each one.
 /// </summary>
 public record SpadesState(
     bool Nil,
@@ -53,7 +54,8 @@ public record SpadesState(
     IReadOnlyList<SpadesTeamState> Teams,
     int Actions,
     SpadesResultState? LastResult,
-    int? Winner);
+    int? Winner,
+    int Shuffles);
 
 /// <summary>
 /// A seat's private Spades information: its cards (by suit, from 2 to A; none while it has not looked at them), those it
@@ -115,7 +117,8 @@ public class SpadesSession(string id, Action<Card[]>? shuffle = null) : TrickTak
                     [.. result.Teams.Select(t => new SpadesTeamResultState(t.Team, t.Bid, t.Tricks, t.Made, t.Points, t.NewBags, t.BagPenalty, t.Score, t.Bags))],
                     [.. result.Nils.Select(n => new SpadesNilResultState(SeatOf(n.Player), n.Blind, n.Made))])
                 : null,
-            game.Winner);
+            game.Winner,
+            game.Shuffles);
     }
 
     /// <inheritdoc />
