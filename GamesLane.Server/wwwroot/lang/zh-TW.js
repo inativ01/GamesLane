@@ -197,7 +197,7 @@ TRANSLATIONS["zh-TW"] = {
     "CODE": "代碼",
     "Join": "加入",
     "Privacy policy": "隱私權政策",
-    "Play GamesLane like an app, from your home screen.": "像使用 App 一樣，從主畫面直接玩 GamesLane。",
+    "Get GamesLane on your home screen.": "把 GamesLane 加入主畫面。",
     "Install app": "安裝 App",
     "Not now": "以後再說",
     "Install GamesLane": "安裝 GamesLane",

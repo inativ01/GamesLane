@@ -197,7 +197,7 @@ TRANSLATIONS.he = {
     "CODE": "קוד",
     "Join": "הצטרפות",
     "Privacy policy": "מדיניות פרטיות",
-    "Play GamesLane like an app, from your home screen.": "שחקו ב־GamesLane כמו באפליקציה, ממסך הבית.",
+    "Get GamesLane on your home screen.": "הוסיפו את GamesLane למסך הבית.",
     "Install app": "התקנת האפליקציה",
     "Not now": "לא עכשיו",
     "Install GamesLane": "התקנת GamesLane",

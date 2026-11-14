@@ -197,7 +197,7 @@ TRANSLATIONS.pt = {
     "CODE": "CÓDIGO",
     "Join": "Entrar",
     "Privacy policy": "Política de privacidade",
-    "Play GamesLane like an app, from your home screen.": "Jogue o GamesLane como um app, direto da sua tela de início.",
+    "Get GamesLane on your home screen.": "Coloque o GamesLane na sua tela de início.",
     "Install app": "Instalar o app",
     "Not now": "Agora não",
     "Install GamesLane": "Instalar o GamesLane",

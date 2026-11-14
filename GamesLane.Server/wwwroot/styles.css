@@ -971,12 +971,13 @@ main.home {
     font-weight: 700;
 }
 
-/* The offer to install GamesLane as an app, under the main menu (not while a list of games is shown). */
+/* The offer to install GamesLane as an app, under the main menu (not while a list of games is shown): the message, and
+   the two buttons kept together, beside it when there is room, otherwise under it. */
 .install-app {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.5rem 0.75rem;
     margin: 0.75rem 0;
     padding: 0.6rem 0.9rem;
     border-radius: var(--radius);
@@ -985,8 +986,18 @@ main.home {
 }
 
 .install-app span {
-    flex: 1;
-    min-width: 12rem;
+    flex: 1 1 14rem;
+    font-size: 0.95rem;
+}
+
+.install-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+}
+
+.install-actions button {
+    white-space: nowrap;
 }
 
 .install-app[hidden], #menu[hidden] + .install-app {
