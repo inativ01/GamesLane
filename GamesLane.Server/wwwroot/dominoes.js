@@ -98,6 +98,42 @@ function messageText(game, state, view) {
     }
 }
 
+// What the last action did, for everyone, once (not when the page opens): a tile played slides from its player to its
+// place on the board, and a tile drawn flies face down from the board to its player, each with the sound of a tile set
+// down.
+const TILE_MOVE_MS = 450;
+let placed = { seat: null, target: null, at: -Infinity };
+let drawnBy = null;
+
+function noticeAction(game, state, view) {
+    const action = game.lastAction;
+    if (!view.changed("action", [state.gameNumber, game.roundNumber, game.actions]) || !action) return;
+    if (action.kind === "Played") {
+        playGameSound("checker");
+        placed = { seat: action.seat, target: action.target, at: performance.now() };
+    } else if (action.kind === "Drew") {
+        playGameSound("checker");
+        drawnBy = action.seat;
+    }
+}
+
+// The tile just played slides in from its player while its move lasts (the board is redrawn on every update).
+function slidePlaced(view, line, trains) {
+    const age = animationAge(placed.at, TILE_MOVE_MS);
+    if (age === null) return;
+    const tile = line ? (placed.target === 0 ? line.firstElementChild : line.lastElementChild)
+        : trains.find(({ target }) => target === placed.target)?.tiles.lastElementChild;
+    flyFrom(tile, seatSpot(view, placed.seat, "dominoes-hands", "dominoes-players"), age, TILE_MOVE_MS);
+}
+
+// The tile drawn flies, face down, from the board to its player.
+function flyDrawn(view) {
+    if (drawnBy === null) return;
+    const back = el("span", "domino face-down", el("span", "domino-half"), el("span", "domino-half"));
+    flyCard($("dominoes-board"), seatSpot(view, drawnBy, "dominoes-hands", "dominoes-players"), back);
+    drawnBy = null;
+}
+
 // The line (line styles), with the ends to choose for the chosen tile; or the engine and every train (Mexican Train),
 // each with Play here for the chosen tile.
 function renderBoard(game, state, view) {
@@ -109,18 +145,21 @@ function renderBoard(game, state, view) {
             ...(targets.includes(0) ? [targetButton(hand, 0, `◀ ${t("Left end")}`)] : [el("span")]),
             ...(targets.includes(1) ? [targetButton(hand, 1, `${t("Right end")} ▶`)] : []));
         $("dominoes-board").replaceChildren(line, endButtons);
+        slidePlaced(view, line, null);
         return;
     }
     const engine = el("div", "domino-engine", t("Engine"), dominoTile(`${game.engine}-${game.engine}`));
-    $("dominoes-board").replaceChildren(engine, ...game.trains.map((train) => {
+    const trains = game.trains.map((train) => {
         const target = train.seat ?? MEXICAN;
         const owner = train.seat === null ? el("strong", null, t("Mexican train")) : seatLabel(state, train.seat, view);
-        const row = el("div", "domino-train", owner, ...(train.marker ? [el("span", "rp-tag", `🚂 ${t("Open")}`)] : []),
-            el("span", "domino-train-tiles", ...train.tiles.slice(-8).map(dominoTile)));
+        const tiles = el("span", "domino-train-tiles", ...train.tiles.slice(-8).map(dominoTile));
+        const row = el("div", "domino-train", owner, ...(train.marker ? [el("span", "rp-tag", `🚂 ${t("Open")}`)] : []), tiles);
         row.classList.toggle("marker", train.marker);
         if (targets.includes(target)) row.append(targetButton(hand, target, t("Play here")));
-        return row;
-    }));
+        return { target, row, tiles };
+    });
+    $("dominoes-board").replaceChildren(engine, ...trains.map(({ row }) => row));
+    slidePlaced(view, null, trains);
 }
 
 // The players: name, tiles in hand, and whose turn it is.
@@ -128,6 +167,7 @@ function renderPlayers(game, state, view) {
     $("dominoes-players").replaceChildren(...game.players.map((p) => {
         const item = el("div", "trick-player", seatLabel(state, p.seat, view), el("span", "rp-tag", `🁢 ${p.tileCount}`));
         item.classList.toggle("turn", game.phase === "Playing" && game.turn === p.seat);
+        item.dataset.seat = String(p.seat);
         return item;
     }));
 }
@@ -217,6 +257,7 @@ const dominoes = startSessionPage("Dominoes", (game, state, view) => {
     if (!hand || chosenTargets(hand).length === 0) chosen = { seat: null, tile: null };
     $("status").textContent = statusText(game, state, view);
     noticeSuccess(game, state, view);
+    noticeAction(game, state, view);
     renderPlayers(game, state, view);
     renderBoard(game, state, view);
     const message = messageText(game, state, view);
@@ -224,6 +265,7 @@ const dominoes = startSessionPage("Dominoes", (game, state, view) => {
     $("dominoes-message").hidden = !message;
     renderResult(game, state, view);
     $("dominoes-hands").replaceChildren(...myHands(game, view).map((h) => handPanel(game, state, view, h)));
+    flyDrawn(view);
     renderTable(game, state, view);
     $("next-round").hidden = !(view.isPlayer && game.phase === "RoundOver");
 });

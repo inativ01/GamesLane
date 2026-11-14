@@ -6,6 +6,8 @@
     <title>Dominoes - GamesLane</title>
     <link rel="icon" href="images/logo-32.png">
     <link rel="apple-touch-icon" href="images/logo-180.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="apple-mobile-web-app-title" content="GamesLane">
     <meta name="theme-color" content="#19285d">
     <link rel="stylesheet" href="styles.css">
     <!-- SignalR sets a global "t" while it loads, so it comes before i18n.js, which defines t(). -->
@@ -32,11 +34,6 @@
     </div>
     <div id="status-bar" class="status-bar" hidden>
         <p id="status" class="status"></p>
-        <span class="status-actions">
-            <button id="next-round" type="button" class="small" hidden data-i18n>Next round</button>
-            <button id="play-again" type="button" class="small" hidden data-i18n>Play again</button>
-            <button id="to-lobby" type="button" class="secondary small" hidden data-i18n>Back to the lobby</button>
-        </span>
     </div>
 </div>
 <main class="tricks dominoes">
@@ -73,6 +70,13 @@
                 <p id="dominoes-message" class="trick-message" hidden></p>
                 <div id="dominoes-result" class="trick-result" hidden></div>
             </section>
+
+            <!-- The buttons between rounds and after the game, under the table. -->
+            <div class="game-actions">
+                <button id="next-round" type="button" hidden data-i18n>Next round</button>
+                <button id="play-again" type="button" hidden data-i18n>Play again</button>
+                <button id="to-lobby" type="button" class="secondary" hidden data-i18n>Back to the lobby</button>
+            </div>
 
             <!-- This user's own tiles, one panel per seat they hold. -->
             <div id="dominoes-hands"></div>

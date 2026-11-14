@@ -5201,6 +5201,22 @@ button.yaniv-call {
     opacity: 0.6;
 }
 
+/* A tile drawn, face down, flying from the board to its player (flyCard in common.js). */
+.domino.face-down {
+    background: #6b4f35;
+}
+
+.domino.face-down .domino-half + .domino-half {
+    border-left-color: #4a3524;
+}
+
+.domino.flying-card {
+    position: fixed;
+    z-index: 30;
+    margin: 0;
+    pointer-events: none;
+}
+
 .domino-row,
 .domino-line {
     display: flex;
