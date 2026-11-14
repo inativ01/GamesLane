@@ -972,7 +972,7 @@ main.home {
 }
 
 /* The offer to install GamesLane as an app, under the main menu (not while a list of games is shown): the message, and
-   the two buttons kept together, beside it when there is room, otherwise under it. */
+   under it Install app in the middle and Not now at the end (on the right; on the left in Hebrew). */
 .install-app {
     display: flex;
     flex-wrap: wrap;
@@ -991,13 +991,24 @@ main.home {
 }
 
 .install-actions {
-    display: flex;
+    flex-basis: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     gap: 0.5rem;
-    flex-wrap: nowrap;
 }
 
 .install-actions button {
     white-space: nowrap;
+}
+
+#install-app-button {
+    grid-column: 2;
+}
+
+#install-app-later {
+    grid-column: 3;
+    justify-self: end;
 }
 
 .install-app[hidden], #menu[hidden] + .install-app {
