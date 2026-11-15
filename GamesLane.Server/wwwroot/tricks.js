@@ -65,6 +65,41 @@ function trickArrival(game, view) {
     return trickArrived;
 }
 
+// A breaking glass when the trump or penalty suit is broken (Hearts' hearts, Spades' spades): a sharp crack of noise,
+// then shards ringing high.
+function playGlassBreak() {
+    playSound((audio, start) => {
+        const length = 0.3;
+        const buffer = audio.createBuffer(1, Math.floor(audio.sampleRate * length), audio.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / data.length) ** 4;
+        }
+        const crack = audio.createBufferSource();
+        crack.buffer = buffer;
+        const filter = audio.createBiquadFilter();
+        filter.type = "highpass";
+        filter.frequency.value = 2200;
+        const volume = audio.createGain();
+        volume.gain.value = 0.6;
+        crack.connect(filter).connect(volume).connect(audio.destination);
+        crack.start(start);
+        for (let i = 0; i < 10; i++) {
+            const at = start + 0.02 + Math.random() * 0.5;
+            const ring = 0.08 + Math.random() * 0.2;
+            const shard = audio.createOscillator();
+            const gain = audio.createGain();
+            shard.frequency.value = 2500 + Math.random() * 5000;
+            gain.gain.setValueAtTime(0.0001, at);
+            gain.gain.exponentialRampToValueAtTime(0.1, at + 0.004);
+            gain.gain.exponentialRampToValueAtTime(0.0001, at + ring);
+            shard.connect(gain).connect(audio.destination);
+            shard.start(at);
+            shard.stop(at + ring + 0.02);
+        }
+    });
+}
+
 // The table, on felt: each player at their place (bottom, left, top, right) with their name, what `facts(seat)` gives
 // (e.g. tricks won) and the card they played to the trick shown; the player whose turn it is (`turn`, or null) is
 // outlined. The card of `arrived` (see trickArrival) slides in from its player's side.
