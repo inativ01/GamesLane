@@ -106,12 +106,17 @@ GamesLane.Server/              ASP.NET Core backend
     hearts.html/.js            Hearts page (the table and hands of tricks.js; choosing the cards to pass)
     spades.html/.js            Spades page (the table and hands of tricks.js; the bid under the hand)
     dominoes.html/.js          Dominoes page (tiles drawn with pips, the line or the trains, choosing where a tile goes; the players' table of tricks.js)
-    manifest.webmanifest       Makes the site installable as an app (name, colors, start page, icons); linked from every page. The main screen (home.js) offers Install app: the browser's own dialog where it sends beforeinstallprompt (Chrome, Edge), otherwise on iPhone and iPad a dialog with the Share steps; not in the installed app (display-mode standalone) or after Not now (installDismissed in localStorage)
+    manifest.webmanifest       Makes the site installable as an app (name, colors, start page, icons); linked from every page. The main screen (home.js) offers Install app: the browser's own dialog where it sends beforeinstallprompt (Chrome, Edge), otherwise on iPhone and iPad a dialog with the Share steps; not in the installed app (display-mode standalone), in the iPhone app (window.Capacitor.isNativePlatform()) or after Not now (installDismissed in localStorage)
     sw.js                      Service worker, registered by common.js: caches nothing (games are live); only when a page cannot be reached does it show a short offline page in the device's language, with Try again
     images/                    Logo (logo-32/180/256, and the app icons logo-192, logo-512 and logo-maskable-512, the logo inside the safe zone on the page background), the GamesLane name for the header, the splash screens and the card back (web-sized copies of the originals in docs/), game pictures (SVG)
     images/the-gang/           A picture (SVG) for each challenge and specialist card, named by the card's key, e.g. quick-access.svg
     images/flags/              Flags for the language picker
 GamesLane.Server.Tests/        Unit tests
+GamesLane.iOS/                 iPhone app (Capacitor, see iPhone app below)
+  capacitor.config.ts          App ID, name, the server it shows (GAMESLANE_SERVER), sites that stay in the app
+  www/index.html               Shown when the server cannot be reached
+  assets/logo.png              Source of the app icon and launch screen (npm run assets)
+  ios/                         Xcode project (ios/App/App.xcodeproj); Swift Package Manager, no CocoaPods
 docs/                          This guide and the user manual; original logo, name and splash pictures (kept out of git); docs/the-gang/: The Gang's card texts
 ```
 
@@ -407,6 +412,31 @@ dotnet test
 
 The scripts in `wwwroot` have no build step; `node --check <file>.js` checks a script for syntax errors.
 
+## iPhone app
+
+`GamesLane.iOS/` is a [Capacitor](https://capacitorjs.com) 8 app: a native iPhone shell whose web view shows the live site, so every deploy reaches the app without a new release. It adds no iPhone-specific features yet. Requires macOS, Xcode 26+ and Node.js 22+.
+
+```
+cd GamesLane.iOS
+npm install
+npm run ios          # writes the settings into the Xcode project and opens it in Xcode; press Run
+npm run simulator    # or: builds and runs it on a Simulator chosen in the terminal
+```
+
+The server is chosen when the app is built, by the `GAMESLANE_SERVER` environment variable (see `capacitor.config.ts`):
+
+| `GAMESLANE_SERVER` | Server |
+| --- | --- |
+| not set | Production, https://gameslane.onrender.com |
+| a pull request's number, e.g. `42` | Its preview, https://gameslane-pr-42.onrender.com |
+| a full address, e.g. `http://localhost:5171` | A server running locally |
+
+For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run ios`) again to switch back to production. On the Simulator, `http://localhost:5171` reaches the server started with `dotnet run`; on a phone, run the server with `--urls http://0.0.0.0:5171` and use `http://<computer's IP address>:5171`. Plain `http` is allowed only for local addresses (`NSAllowsLocalNetworking` in `ios/App/App/Info.plist`).
+
+- **Sign-in:** Microsoft and Discord pages stay in the app (`server.allowNavigation`); every other site opens in Safari. Google does not allow sign-in inside an app's web view, so Google sign-in does not work in the app yet (see [Next steps](#next-steps)).
+- **Icon and launch screen:** made from `assets/logo.png` (the logo, 1024×1024) on the page background by `npm run assets`, into `ios/App/App/Assets.xcassets`.
+- **Signing:** the Simulator needs none. A phone needs a team in Xcode (App target → Signing & Capabilities): a free Apple ID (Personal Team) installs on your own phone for 7 days at a time; TestFlight and the App Store need the Apple Developer Program, whose Team ID is shown under Membership details at https://developer.apple.com/account.
+
 ## Project status and external services
 
 _Last updated: 2026-11-05. Keep this section current; it is the hand-off point between work sessions._
@@ -414,6 +444,7 @@ _Last updated: 2026-11-05. Keep this section current; it is the hand-off point b
 ### Local machine
 - Repo folder: being moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
 - Installed: Git (user Isaac Nativ), GitHub CLI (`gh`, signed in), .NET 10 SDK, Node.js (useful for `node --check` on the scripts in `wwwroot`). Not installed: Docker.
+- Mac (for the iPhone app): Xcode, and Node.js LTS through nvm (`~/.nvm`, loaded by `~/.bash_profile`). No Homebrew or CocoaPods (not needed).
 - The original JavaScript/Firebase app is in the sibling folder `GamesLane` (github.com/inativ01/GamesLane). It is separate; do not modify it.
 
 ### GitHub
@@ -459,6 +490,7 @@ _Last updated: 2026-11-05. Keep this section current; it is the hand-off point b
 13. Hearts: first play-test.
 13. Spades: first play-test.
 13. Dominoes: first play-test (all four styles; Mexican Train with many players on phones).
+14. iPhone app: Google sign-in (open it in the system browser and return to the app, e.g. with `@capacitor/browser` and a custom URL scheme); join links opening the app (universal links); a paid Apple Developer membership for TestFlight and the App Store; then iPhone-specific features.
 
 ## Working conventions
 - Ask before adding or upgrading packages.
@@ -473,3 +505,4 @@ _Last updated: 2026-11-05. Keep this section current; it is the hand-off point b
 - Forgotten passwords cannot be reset (no email is collected).
 - The login-token keys are stored unencrypted in the database (the server logs a warning about this at startup), so the connection string must be kept secret.
 - Seats move to the new user after logging in or out only in sessions that are in memory at the time; a seat in a session nobody has open stays with the previous user.
+- In the iPhone app, Google sign-in does not work, and join links open in Safari rather than the app.
