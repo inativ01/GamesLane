@@ -6,6 +6,20 @@
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
+// The iPhone app (GamesLane.iOS) and its own features (ios/App/App/GamesLanePlugin.swift): signing in with a provider
+// in Apple's sign-in window, and vibrating. appPlugin is null on the website and in app versions without the plugin.
+const isNativeApp = window.Capacitor?.isNativePlatform?.() === true;
+const appPlugin = isNativeApp ? window.Capacitor.Plugins?.GamesLane ?? null : null;
+
+// Vibrates the device when the user's turn comes: in the iPhone app, and in browsers that can (not Safari).
+function vibrateForTurn() {
+    if (appPlugin) {
+        appPlugin.vibrate().catch(() => {});
+    } else {
+        navigator.vibrate?.([180, 90, 180]);
+    }
+}
+
 translatePage();
 $("account").before(languagePicker() ?? "");
 
@@ -336,17 +350,29 @@ async function call(method, ...args) {
 }
 
 // After signing in with an external provider (e.g. Google), the page returns with ?signin=external
-// and exchanges the short-lived sign-in cookie for this tab's login token.
+// and exchanges the short-lived sign-in cookie for this tab's login token. In the iPhone app, the page reloads with
+// ?signin=app instead, and exchanges the code the app's sign-in window returned with, and the verifier of the
+// challenge the sign-in started with (see signInInApp).
+const APP_SIGNIN_CODE_KEY = "appSignInCode";
+const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
+
 async function completeExternalSignIn() {
-    if (params.get("signin") !== "external") {
+    const signIn = params.get("signin");
+    if (signIn !== "external" && signIn !== "app") {
         return;
     }
     const url = new URL(location.href);
     url.searchParams.delete("signin");
     history.replaceState(null, "", url.pathname + url.search);
+    const code = sessionStorage.getItem(APP_SIGNIN_CODE_KEY);
+    const verifier = sessionStorage.getItem(APP_SIGNIN_VERIFIER_KEY);
+    sessionStorage.removeItem(APP_SIGNIN_CODE_KEY);
+    sessionStorage.removeItem(APP_SIGNIN_VERIFIER_KEY);
 
     showBusy(t("Signing you in…"), 0);
-    const response = await fetch("/auth/external", { method: "POST" }).catch(() => null);
+    const response = await (signIn === "app"
+        ? postJson("/auth/app-signin", { code, verifier })
+        : fetch("/auth/external", { method: "POST" })).catch(() => null);
     hideBusy();
     if (response?.ok) {
         const result = await response.json();
@@ -361,6 +387,39 @@ function externalSignInUrl(provider) {
     const url = new URL(location.href);
     url.searchParams.set("signin", "external");
     return `/auth/signin/${provider.toLowerCase()}?returnUrl=${encodeURIComponent(url.pathname + url.search)}`;
+}
+
+function base64Url(bytes) {
+    return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+// In the iPhone app, signs in with a provider in Apple's sign-in window, which returns to the app with a code (or an
+// error); the page then reloads with ?signin=app to exchange it (see completeExternalSignIn). The sign-in starts with
+// the challenge (SHA-256 hash) of a random verifier that only this page knows, so the code is of no use to another app
+// that receives it. Returns false if the sign-in did not complete; the user closing the window is not an error.
+async function signInInApp(provider) {
+    let result;
+    let verifier;
+    try {
+        verifier = base64Url(crypto.getRandomValues(new Uint8Array(32)));
+        const challenge = base64Url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
+        const url = `${location.origin}/auth/signin/${provider.toLowerCase()}?app=true&challenge=${challenge}`;
+        result = new URL((await appPlugin.signIn({ url })).url);
+    } catch (err) {
+        if (err?.code !== "CANCELLED") showError(t("Sign-in did not complete. Please try again."));
+        return false;
+    }
+    const code = result.searchParams.get("code");
+    if (!code) {
+        showError(t("Sign-in did not complete. Please try again."));
+        return false;
+    }
+    sessionStorage.setItem(APP_SIGNIN_CODE_KEY, code);
+    sessionStorage.setItem(APP_SIGNIN_VERIFIER_KEY, verifier);
+    const url = new URL(location.href);
+    url.searchParams.set("signin", "app");
+    location.replace(url.pathname + url.search);
+    return true;
 }
 
 function smallButton(text, onClick) {
@@ -544,6 +603,7 @@ function openProfileDialog() {
         <div class="profile-footer">
             ${account.isAdmin ? '<span class="profile-admin"><a class="button secondary small" href="/admin.html">Admin page</a><a class="button secondary small" href="/cards.html">All cards</a></span>' : ""}
             <button type="button" class="secondary small" data-logout>${t("Log out")}</button>
+            <button type="button" class="small danger" data-delete-account>${t("Delete account")}</button>
         </div>`}`);
     dialog.classList.add("profile-dialog");
     const form = dialog.querySelector("[data-profile]");
@@ -620,6 +680,14 @@ function openProfileDialog() {
             sessionStorage.setItem(PREVIOUS_TOKEN_KEY, token);
             saveToken("");
             location.reload();
+        });
+        // The server gives the user's seats to the new guest it logs in, so the page only reloads.
+        const deleteAccount = dialog.querySelector("[data-delete-account]");
+        deleteAccount.addEventListener("click", () => {
+            if (!confirm(t("Delete your account? Your profile, uploaded picture and saved game options are deleted for good. You keep playing as a new guest."))) {
+                return;
+            }
+            withBusyButton(deleteAccount, t("Deleting account…"), () => submitAccount("/auth/delete", {}, error));
         });
     }
     dialog.addEventListener("close", () => dialog.remove());
@@ -701,12 +769,12 @@ const PROVIDER_LOGOS = {
 };
 
 // The profile dialog's login part, for guests: Log in and Create account tabs, and a button per external provider.
-// The iPhone app (GamesLane.iOS) leaves out Google, which does not allow sign-in inside an app's web view.
+// The iPhone app signs in with providers in Apple's sign-in window (see signInInApp); an app version without it leaves
+// out Google, which does not allow sign-in inside an app's web view.
 // `profile` gives the display name and icon for a new account.
 function setUpLogin(dialog, profile) {
     const providers = dialog.querySelector(".login-providers");
-    const isNativeApp = window.Capacitor?.isNativePlatform?.() === true;
-    const offered = account.providers.filter((provider) => !(isNativeApp && provider === "Google"));
+    const offered = account.providers.filter((provider) => !(isNativeApp && !appPlugin && provider === "Google"));
     providers.hidden = offered.length === 0;
     for (const provider of offered) {
         const link = document.createElement("a");
@@ -716,8 +784,13 @@ function setUpLogin(dialog, profile) {
         logo.innerHTML = PROVIDER_LOGOS[provider] ?? "";
         const label = el("span", "provider-label", t("Sign in with {provider}", { provider }));
         link.append(logo, label);
+        const notBusy = () => {
+            link.classList.remove("is-busy");
+            link.removeAttribute("aria-disabled");
+            label.textContent = t("Sign in with {provider}", { provider });
+        };
         // The dialog stays open while the browser goes to the provider; the link shows a spinner meanwhile.
-        link.addEventListener("click", (event) => {
+        link.addEventListener("click", async (event) => {
             if (link.classList.contains("is-busy")) {
                 event.preventDefault();
                 return;
@@ -726,13 +799,16 @@ function setUpLogin(dialog, profile) {
             link.classList.add("is-busy");
             link.setAttribute("aria-disabled", "true");
             label.textContent = t("Connecting to {provider}…", { provider });
+            if (appPlugin) {
+                event.preventDefault();
+                if (!(await signInInApp(provider))) {
+                    sessionStorage.removeItem(PREVIOUS_TOKEN_KEY);
+                    notBusy();
+                }
+            }
         });
         // Coming back with the browser's Back button can restore the page with the spinner still showing.
-        window.addEventListener("pageshow", () => {
-            link.classList.remove("is-busy");
-            link.removeAttribute("aria-disabled");
-            label.textContent = t("Sign in with {provider}", { provider });
-        });
+        window.addEventListener("pageshow", notBusy);
         providers.appendChild(link);
     }
 
@@ -2353,7 +2429,10 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             || [...$("game-screen").querySelectorAll(".game-actions button")].some((b) => !b.hidden && !b.classList.contains("secondary"));
         status.textContent = status.textContent.replace(/[👉⏳]\uFE0F?\s*/gu, "").trim();
         $("status-bar").classList.toggle("act", mustAct);
-        if (myTurn && wasActing === false && view.turnSound) playGameSound("turn");
+        if (myTurn && wasActing === false && view.turnSound) {
+            vibrateForTurn();
+            playGameSound("turn");
+        }
         wasActing = myTurn;
     }
 

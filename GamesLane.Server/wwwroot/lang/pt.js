@@ -22,6 +22,10 @@ TRANSLATIONS.pt = {
     "Sign-in did not complete. Please try again.": "O login não foi concluído. Tente de novo.",
     "Your profile": "Seu perfil",
     "Log out": "Sair",
+    "Delete account": "Excluir conta",
+    "Delete your account? Your profile, uploaded picture and saved game options are deleted for good. You keep playing as a new guest.":
+        "Excluir sua conta? Seu perfil, a imagem enviada e as opções de partida salvas são excluídos para sempre. Você continua jogando como um novo convidado.",
+    "Deleting account…": "Excluindo a conta…",
     "Log in": "Entrar",
     "Too many attempts. Wait a minute and try again.": "Muitas tentativas. Espere um minuto e tente de novo.",
     "Create account": "Criar conta",

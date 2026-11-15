@@ -22,6 +22,10 @@ TRANSLATIONS.fr = {
     "Sign-in did not complete. Please try again.": "La connexion n'a pas abouti. Réessaie.",
     "Your profile": "Ton profil",
     "Log out": "Se déconnecter",
+    "Delete account": "Supprimer le compte",
+    "Delete your account? Your profile, uploaded picture and saved game options are deleted for good. You keep playing as a new guest.":
+        "Supprimer ton compte ? Ton profil, l'image importée et les options de partie enregistrées sont supprimés définitivement. Tu continues à jouer en tant que nouvel invité.",
+    "Deleting account…": "Suppression du compte…",
     "Log in": "Se connecter",
     "Too many attempts. Wait a minute and try again.": "Trop de tentatives. Attends une minute et réessaie.",
     "Create account": "Créer un compte",

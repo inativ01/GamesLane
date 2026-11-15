@@ -433,7 +433,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 function notifyTurn() {
-    navigator.vibrate?.([180, 90, 180]);
+    vibrateForTurn();
     if (!audio || !userSettings().sound) return;
     (audio.state === "running" ? Promise.resolve() : audio.resume()).then(playTurnChime).catch(() => {});
 }

@@ -113,10 +113,11 @@ GamesLane.Server/              ASP.NET Core backend
     images/flags/              Flags for the language picker
 GamesLane.Server.Tests/        Unit tests
 GamesLane.iOS/                 iPhone app (Capacitor, see iPhone app below)
-  capacitor.config.ts          App ID, name, the server it shows (GAMESLANE_SERVER), sites that stay in the app
+  capacitor.config.ts          App ID, name, the server it shows (GAMESLANE_SERVER)
   www/index.html               Shown when the server cannot be reached
   assets/logo.png              Source of the app icon and launch screen (npm run assets)
   ios/                         Xcode project (ios/App/App.xcodeproj); Swift Package Manager, no CocoaPods
+  ios/App/App/GamesLanePlugin.swift  The app's own features for the site (sign-in window, vibration) and its screen (GamesLaneViewController)
 docs/                          This guide and the user manual; original logo, name and splash pictures (kept out of git); docs/the-gang/: The Gang's card texts
 ```
 
@@ -300,11 +301,15 @@ Saved users' tokens last 30 days. Every page load calls `GET /auth/me`, which re
 
 **Seat transfer:** before logging in, creating an account, signing in with a provider or logging out, the page keeps the current token in `sessionStorage` (`previousToken`). After the reload, once it has the new token, it calls `POST /auth/transfer` with the previous token, before connecting to the hub. The server checks that the previous token is valid and has not expired (which proves it is the same person), then in every session in memory gives the previous user's seats, player ID, connection status (Reconnecting or Away) and any Rich man, poor man request to join to the new user, with the new name and icon (`GameSession.TransferSeats`), and broadcasts the new state. Sessions not in memory are not changed.
 
+**Deleting an account:** **Delete account** in a saved user's profile (after a confirmation) calls `POST /auth/delete`, which deletes the user (with their external logins, icons and saved game options, as the 30-day cleanup does), logs in a new guest, gives them the deleted user's seats in every session in memory, as after logging out, and returns the guest's token; the page saves it and reloads. Nothing else is linked to the user: `GamePlays` and `ActivityCounts` hold counts only, and saved sessions (with the players' names and icons) are deleted 6 hours after their last activity.
+
 Tokens are encrypted and signed with keys stored in the `DataProtectionKeys` table, so they stay valid across restarts and deploys.
 
 User IDs are a GUID for saved users and `guest:<random>` for guests.
 
 External sign-in: the page sends the browser to `/auth/signin/{provider}` with a `returnUrl` containing `signin=external`. After sign-in, the provider's result is kept in a short-lived cookie; the returning page calls `POST /auth/external`, which finds or creates the user, exchanges the cookie for a login token and clears it. On the first sign-in, the profile dialog opens so the user can confirm their name and icon.
+
+In the iPhone app, the page instead calls the app's `signIn` (see [iPhone app](#iphone-app)) with `/auth/signin/{provider}?app=true&challenge=...`, which Apple's sign-in window opens. As in PKCE, the challenge is the SHA-256 hash (base64url) of a random verifier that only the page knows (`AuthSetup.AppSignInChallenge`); the server keeps it with the sign-in. The window's cookies are not the web view's, so after sign-in `GET /auth/app-signin` reads the cookie there and redirects to `gameslane://signin?code=...` (or `?error=failed`, also when the provider reports a failure), which ends the window. The code holds the external account and the challenge, encrypted and valid for 5 minutes (`AuthSetup.CreateAppSignInCode`). The page keeps the code and the verifier in `sessionStorage` (`appSignInCode`, `appSignInVerifier`) and reloads with `signin=app`, then calls `POST /auth/app-signin` with both, which finds or creates the user like `/auth/external`. The server accepts a code only with the verifier of its challenge, and only once (`UsedAppSignInCodes` remembers used codes until they expire), so a code that another app receives through the `gameslane://` scheme is of no use. `crypto.subtle` needs a secure page, so app sign-in works with `https` servers and `http://localhost`.
 
 ## Database
 
@@ -338,13 +343,16 @@ Each option has a key, a label and a list of choices with a default; `Games/Game
 | `GET /auth/me` | `{ signedIn, kind, name, icon, uploadedIcon, gameOrder, settings, accessToken, providers, icons, feedback, isAdmin }`. `gameOrder` is a saved user's order of the games (game names), or `null`; `settings` is a saved user's `{ chat, sound, cards }`, or `null` for guests (whose settings stay in their browser); `accessToken` is a renewed login token; `providers` lists the external sign-in options that are configured; `icons` lists the built-in icons; `feedback` tells whether comments can be sent (see [Feedback setup](#feedback-setup)); `isAdmin` tells an admin (see **Admins** above) |
 | `POST /auth/guest` | Logs in as a new guest named `Guest-` and a random 3-digit number (e.g. `Guest-042`), with a random built-in icon. The token does not expire |
 | `POST /auth/transfer` | Body `{ previousToken }`, logged-in users only. Gives the seats of the user in `previousToken` to the current user in every session in memory (204), or `{ error }` (400) if the token is not valid or has expired |
+| `POST /auth/delete` | Saved users only (others: 401). Deletes the user (see **Deleting an account** above) and logs in a new guest with their seats |
 | `POST /auth/register` | Body `{ username, password, name, icon }`. Creates a registered user and logs in. Rate-limited |
 | `POST /auth/login` | Body `{ username, password }`. Logs in a registered user. Rate-limited (10 attempts per minute per address) |
 | `POST /auth/profile` | Body `{ name, icon }`, logged-in users only. Changes the display name and icon (a built-in icon, or the user's uploaded picture) |
 | `POST /auth/icon` | Body: a PNG, JPEG or WebP picture (up to 200 KB). Saved users only. Uploads it and makes it the icon |
 | `GET /api/icons/{id}` | An uploaded picture |
-| `GET /auth/signin/{provider}?returnUrl=/...` | Starts sign-in with `google`, `microsoft` or `discord` |
+| `GET /auth/signin/{provider}?returnUrl=/...` | Starts sign-in with `google`, `microsoft` or `discord`; with `app=true&challenge=...` instead of `returnUrl`, ends at `GET /auth/app-signin` (the iPhone app; 400 without a valid challenge) |
 | `POST /auth/external` | Exchanges the result of an external sign-in for `{ accessToken, isNew }` |
+| `GET /auth/app-signin` | The end of an external sign-in started by the iPhone app: redirects to `gameslane://signin?code=...`, or `?error=failed` |
+| `POST /auth/app-signin` | Body `{ code, verifier }`. Exchanges the iPhone app's sign-in code for `{ accessToken, isNew }`, or 401 if it is not valid, has expired, was already used, or the verifier does not match its challenge. Rate-limited like logging in |
 | `GET /api/options/{gameType}` | Saved users only. `{ saved, options }`: the user's saved options for the game, or its defaults (`saved: false`) |
 | `PUT /api/options/{gameType}` | Saved users only. Body: the options, e.g. `{ "mode": "Advanced" }`. Saves them as the user's preferences (204), or `{ error }` (400) |
 | `GET /api/games/popular` | Everyone. The game names, most played in the last 30 days first (ties in the usual order); no counts |
@@ -356,7 +364,7 @@ Each option has a key, a label and a list of choices with a default; `Games/Game
 | `POST /api/feedback` | Body `{ type, text, includeName, page, language }`, logged-in users only (guests too). `type` is `"Problem"`, `"Idea"` or `"Other"`; `text` has 1 to 2000 characters. Posts the comment as a GitHub issue and returns `{ url }`, its address. `{ error }` (400) for an invalid comment, 404 when feedback is not configured, 429 after 5 comments in an hour from the same user, `{ error }` (502) if GitHub refused or could not be reached |
 | `GET /health` | Health check |
 
-All the `POST /auth/...` endpoints except `/auth/external` and `/auth/transfer` return `{ accessToken }` on success, or `{ error }` (status 400) with a message to show.
+All the `POST /auth/...` endpoints except `/auth/external`, `/auth/app-signin` and `/auth/transfer` return `{ accessToken }` on success, or `{ error }` (status 400) with a message to show.
 
 Static files are served with `Cache-Control: no-cache`, so browsers check for a newer version and a deploy takes effect immediately.
 
@@ -414,7 +422,7 @@ The scripts in `wwwroot` have no build step; `node --check <file>.js` checks a s
 
 ## iPhone app
 
-`GamesLane.iOS/` is a [Capacitor](https://capacitorjs.com) 8 app: a native iPhone shell whose web view shows the live site, so every deploy reaches the app without a new release. It adds no iPhone-specific features yet. Requires macOS, Xcode 26+ and Node.js 22.18+ (the Capacitor CLI reads `capacitor.config.ts` with Node's built-in TypeScript support, since TypeScript 7 no longer offers the compiler API it used).
+`GamesLane.iOS/` is a [Capacitor](https://capacitorjs.com) 8 app: a native iPhone shell whose web view shows the live site, so every deploy reaches the app without a new release. Its own features are in `GamesLanePlugin` (see below). Requires macOS, Xcode 26+ and Node.js 22.18+ (the Capacitor CLI reads `capacitor.config.ts` with Node's built-in TypeScript support, since TypeScript 7 no longer offers the compiler API it used).
 
 ```
 cd GamesLane.iOS
@@ -431,9 +439,12 @@ The server is chosen when the app is built, by the `GAMESLANE_SERVER` environmen
 | a pull request's number, e.g. `42` | Its preview, https://gameslane-pr-42.onrender.com |
 | a full address, e.g. `http://localhost:5171` | A server running locally |
 
-For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run ios`) again to switch back to production. On the Simulator, `http://localhost:5171` reaches the server started with `dotnet run`; on a phone, run the server with `--urls http://0.0.0.0:5171` and use `http://<computer's IP address>:5171`. Plain `http` is allowed only for local addresses (`NSAllowsLocalNetworking` in `ios/App/App/Info.plist`).
+For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run ios`) again to switch back to production. On the Simulator, `http://localhost:5171` reaches the server started with `dotnet run`; on a phone, run the server with `--urls http://0.0.0.0:5171` and use `http://<computer's IP address>:5171`. Plain `http` is allowed only for local addresses (`NSAllowsLocalNetworking` in `ios/App/App/Info.plist`). Sign-in with a provider does not work on a phone with `http://<computer's IP address>:5171`: the page makes the sign-in's challenge with `crypto.subtle`, which browsers offer only on `https` and `localhost` pages, so it shows "Sign-in did not complete" (the Simulator with `localhost`, and pull request previews, are not affected).
 
-- **Sign-in:** Microsoft and Discord pages stay in the app (`server.allowNavigation`); every other site opens in Safari. Google does not allow sign-in inside an app's web view, so the app does not offer Google sign-in yet (`setUpLogin` in `common.js` leaves it out when `window.Capacitor.isNativePlatform()`; see [Next steps](#next-steps)).
+- **The GamesLane plugin:** `ios/App/App/GamesLanePlugin.swift`, a Capacitor plugin registered by the app's screen (`GamesLaneViewController`, set in `SceneDelegate.swift`). Capacitor gives the site's pages `window.Capacitor.Plugins.GamesLane` (`appPlugin` in `common.js`, null on the website and in app versions without the plugin):
+  - `signIn({ url })` opens `url` in Apple's sign-in window (`ASWebAuthenticationSession`) and resolves with `{ url }`, the `gameslane://` address the server ends the sign-in with; it rejects with the code `CANCELLED` when the user closes the window. Google does not allow sign-in inside an app's web view, so every provider signs in this way (see [Login](#login)); an app version without the plugin leaves Google out.
+  - `vibrate()` vibrates the phone once. `vibrateForTurn()` in `common.js` calls it when the user's turn comes (with the turn chime; Rich man, poor man calls it with its own chime); browsers that can vibrate (not Safari) get `navigator.vibrate` instead.
+- **Other sites** open in Safari.
 - **Icon and launch screen:** made from `assets/logo.png` (the logo, 1024×1024) on the page background by `npm run assets`, into `ios/App/App/Assets.xcassets`.
 - **Signing:** the Simulator needs none. A phone needs a team in Xcode (App target → Signing & Capabilities): a free Apple ID (Personal Team) installs on your own phone for 7 days at a time; TestFlight and the App Store need the Apple Developer Program, whose Team ID is shown under Membership details at https://developer.apple.com/account.
 
@@ -482,8 +493,8 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 5. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
 6. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
 7. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
-8. iPhone app: Google sign-in (open it in the system browser and return to the app, e.g. with `@capacitor/browser` and a custom URL scheme; until then the app hides it); join links opening the app (universal links); a paid Apple Developer membership for TestFlight and the App Store.
-9. iPhone app, native features (Apple's App Store guideline 4.2 rejects apps that only show a website): push notifications when it is your turn or a game you wait for starts, also while the app is closed (`@capacitor/push-notifications`, Apple Push Notification service, a server endpoint storing device tokens per user); haptic feedback on your turn and on game events (`@capacitor/haptics`); the native share sheet for a private game's code and join link (`@capacitor/share`); keeping the screen awake during a game on a shared screen (e.g. `@capacitor-community/keep-awake`); an offline screen with Try again instead of `www/index.html`'s static text.
+8. iPhone app: a paid Apple Developer membership for TestFlight and the App Store; then Sign in with Apple (App Store guideline 4.8, since the app offers Google, Microsoft and Discord); join links opening the app (universal links). Before App Store submission, end in-app sign-in at an `https` address on the site (a universal link, `ASWebAuthenticationSession.Callback.https(host:path:)`, iOS 17.4+; Associated Domains and the site's `apple-app-site-association`) instead of `gameslane://`: any app can claim the `gameslane://` scheme, so another app could start a sign-in with its own challenge and receive the code (the challenge and one-time codes do not prevent that).
+9. iPhone app, native features (Apple's App Store guideline 4.2 rejects apps that only show a website): push notifications when it is your turn and the game is not on screen (the phone asleep, another app in front, the app closed, or another page), for every user, guests too (the server would keep only a guest's ID and the device token, deleted after 30 days without use; the privacy policy to say so); the app to tell the server when it goes to the background, so a notification does not wait for the connection to time out; needs an APNs key from the Apple Developer membership. Possibly: the native share sheet for a private game's code and join link; keeping the screen awake during a game on a shared screen; an offline screen with Try again instead of `www/index.html`'s static text.
 
 ## Working conventions
 - Ask before adding or upgrading packages.
@@ -498,4 +509,5 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 - Forgotten passwords cannot be reset (no email is collected).
 - The login-token keys are stored unencrypted in the database (the server logs a warning about this at startup), so the connection string must be kept secret.
 - Seats move to the new user after logging in or out only in sessions that are in memory at the time; a seat in a session nobody has open stays with the previous user.
-- The iPhone app does not offer Google sign-in, and join links open in Safari rather than the app.
+- In the iPhone app, join links open in Safari rather than the app.
+- In-app sign-in returns to the app at `gameslane://`, a scheme other apps can also claim (see [Next steps](#next-steps), item 8).

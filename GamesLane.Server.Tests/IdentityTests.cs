@@ -7,6 +7,7 @@ using GamesLane.Server.Users;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -181,12 +182,93 @@ public class IdentityTests
         Assert.Equal(new PlayerProfile("Guest-042", "🐼"), AuthSetup.GetProfile(guest));
     }
 
+    // An example verifier and its challenge from RFC 7636 (PKCE), appendix B.
+    private const string Verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk";
+    private const string Challenge = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM";
+
+    [Fact]
+    public void The_iPhone_apps_challenge_is_the_SHA_256_hash_of_its_verifier()
+    {
+        Assert.Equal(Challenge, AuthSetup.AppSignInChallenge(Verifier));
+        Assert.True(AuthSetup.IsAppSignInChallenge(Challenge));
+        Assert.False(AuthSetup.IsAppSignInChallenge(Challenge[..^1]));
+        Assert.False(AuthSetup.IsAppSignInChallenge(Challenge[..^1] + "+"));
+        Assert.False(AuthSetup.IsAppSignInChallenge(null));
+    }
+
+    [Fact]
+    public void The_iPhone_apps_sign_in_code_brings_back_the_external_account_once_with_its_verifier()
+    {
+        var account = new ExternalAccount(AuthSetup.Google, "1234567890", "Ada Lovelace", "https://example.com/ada.png");
+
+        var context = TokenContext(new TestTime { Now = DateTimeOffset.UtcNow });
+        var code = AuthSetup.CreateAppSignInCode(context, account, Challenge);
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, code, "another-verifier-that-only-another-app-knows"));
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, code, null));
+        Assert.Equal(account, AuthSetup.ReadAppSignInCode(context, code, Verifier));
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, code, Verifier));
+
+        var other = TokenContext(new TestTime { Now = DateTimeOffset.UtcNow });
+        var otherCode = AuthSetup.CreateAppSignInCode(other, account, Challenge);
+        Assert.Null(AuthSetup.ReadAppSignInCode(other, otherCode[..^2] + "xx", Verifier));
+        Assert.Null(AuthSetup.ReadAppSignInCode(other, "not-a-code", Verifier));
+        Assert.Null(AuthSetup.ReadAppSignInCode(other, "", Verifier));
+        Assert.Null(AuthSetup.ReadAppSignInCode(other, null, Verifier));
+    }
+
+    [Fact]
+    public void The_iPhone_apps_sign_in_code_expires_after_a_few_minutes()
+    {
+        var time = new TestTime { Now = DateTimeOffset.UtcNow - AuthSetup.AppSignInCodeLifetime - TimeSpan.FromSeconds(1) };
+        var context = TokenContext(time);
+
+        var code = AuthSetup.CreateAppSignInCode(context, new ExternalAccount(AuthSetup.Google, "1234567890", null, null), Challenge);
+
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, code, Verifier));
+    }
+
+    [Fact]
+    public void Used_sign_in_codes_are_forgotten_once_they_expire()
+    {
+        var time = new TestTime { Now = new DateTimeOffset(2026, 11, 15, 12, 0, 0, TimeSpan.Zero) };
+        var used = new UsedAppSignInCodes(time);
+
+        Assert.True(used.TryUse("code", time.Now.AddMinutes(5)));
+        Assert.False(used.TryUse("code", time.Now.AddMinutes(5)));
+
+        time.Now = time.Now.AddMinutes(6);
+        Assert.True(used.TryUse("code", time.Now.AddMinutes(5)));
+    }
+
+    // Deleting a user (Delete account, and the 30-day cleanup) deletes their external accounts, icons and game options.
+    [Fact]
+    public void Everything_linked_to_a_user_is_deleted_with_them()
+    {
+        var options = new DbContextOptionsBuilder<GamesLaneDbContext>().UseNpgsql("Host=localhost").Options;
+        using var db = new GamesLaneDbContext(options);
+
+        var linked = db.Model.FindEntityType(typeof(User))!.GetReferencingForeignKeys().ToList();
+
+        Assert.Equal(
+            new[] { typeof(ExternalLogin), typeof(UserGameOptions), typeof(UserIcon) }.Select(t => t.Name),
+            linked.Select(key => key.DeclaringEntityType.ClrType.Name).Order());
+        Assert.All(linked, key => Assert.Equal(DeleteBehavior.Cascade, key.DeleteBehavior));
+    }
+
+    [Fact]
+    public void An_external_sign_in_returns_to_the_iPhone_app_with_its_code_or_an_error()
+    {
+        Assert.Equal("gameslane://signin?code=a%2Bb%2Fc", AuthSetup.AppReturnUrl("a+b/c", null));
+        Assert.Equal("gameslane://signin?error=failed", AuthSetup.AppReturnUrl(null, "failed"));
+    }
+
     private static HttpContext TokenContext(TimeProvider time)
     {
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddDataProtection().UseEphemeralDataProtectionProvider();
         services.AddSingleton(time);
+        services.AddSingleton(new UsedAppSignInCodes(time));
         services.AddAuthentication().AddBearerToken(BearerTokenDefaults.AuthenticationScheme, o => o.BearerTokenExpiration = TimeSpan.FromDays(30));
         return new DefaultHttpContext { RequestServices = services.BuildServiceProvider() };
     }
