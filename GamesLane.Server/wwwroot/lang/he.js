@@ -253,10 +253,10 @@ TRANSLATIONS.he = {
     "{loser} dropped the double: {winner} wins {points}.": "{loser}: ויתור על ההכפלה. {winner} זוכה ב־{points}.",
     "You win the game: {points}.": "ניצחת במשחק: {points}.",
     "{name} wins the game: {points}.": "{name} זוכה במשחק: {points}.",
-    "You win a gammon: {points}.": "ניצחת בגמון: {points}.",
-    "{name} wins a gammon: {points}.": "{name} זוכה בגמון: {points}.",
-    "You win a backgammon: {points}.": "ניצחת בבקגמון: {points}.",
-    "{name} wins a backgammon: {points}.": "{name} זוכה בבקגמון: {points}.",
+    "You win a gammon: {points}.": "ניצחת במארס: {points}.",
+    "{name} wins a gammon: {points}.": "{name} זוכה במארס: {points}.",
+    "You win a backgammon: {points}.": "ניצחת במארס טורקי: {points}.",
+    "{name} wins a backgammon: {points}.": "{name} זוכה במארס טורקי: {points}.",
     "Opening roll: White {white}, Black {black}. You start.": "הטלת פתיחה: לבן {white}, שחור {black}. התור הראשון שלך.",
     "Opening roll: White {white}, Black {black}. {name} starts.": "הטלת פתיחה: לבן {white}, שחור {black}. התור הראשון של {name}.",
 
@@ -267,7 +267,7 @@ TRANSLATIONS.he = {
     "Before rolling, a player may offer to double the game's value; the other player takes it or gives up the game. Crawford rule included.":
         "לפני ההטלה, שחקן יכול להציע להכפיל את ערך המשחק; השחקן השני מקבל את ההכפלה או מוותר על המשחק. כולל חוק קרופורד.",
     "Without the cube": "בלי הקובייה",
-    "Every game is worth 1, 2 (gammon) or 3 (backgammon) points.": "כל משחק שווה 1, 2 (גמון) או 3 (בקגמון) נקודות.",
+    "Every game is worth 1, 2 (gammon) or 3 (backgammon) points.": "כל משחק שווה 1, 2 (מארס) או 3 (מארס טורקי) נקודות.",
 
     // Rich man, poor man
     "Rich man, poor man": "עשיר ועני",

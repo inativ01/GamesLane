@@ -701,11 +701,14 @@ const PROVIDER_LOGOS = {
 };
 
 // The profile dialog's login part, for guests: Log in and Create account tabs, and a button per external provider.
+// The iPhone app (GamesLane.iOS) leaves out Google, which does not allow sign-in inside an app's web view.
 // `profile` gives the display name and icon for a new account.
 function setUpLogin(dialog, profile) {
     const providers = dialog.querySelector(".login-providers");
-    providers.hidden = account.providers.length === 0;
-    for (const provider of account.providers) {
+    const isNativeApp = window.Capacitor?.isNativePlatform?.() === true;
+    const offered = account.providers.filter((provider) => !(isNativeApp && provider === "Google"));
+    providers.hidden = offered.length === 0;
+    for (const provider of offered) {
         const link = document.createElement("a");
         link.className = `button provider-button provider-${provider.toLowerCase()}`;
         link.href = externalSignInUrl(provider);
