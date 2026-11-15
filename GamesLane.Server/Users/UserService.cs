@@ -265,6 +265,10 @@ public class UserService(
         return db.Users.Where(u => u.LastActiveAt < cutoff && !keptIds.Contains(u.Id)).ExecuteDeleteAsync();
     }
 
+    /// <inheritdoc />
+    public async Task<bool> DeleteUserAsync(Guid userId) =>
+        await db.Users.Where(u => u.Id == userId).ExecuteDeleteAsync() > 0;
+
     /// <summary>
     /// A new icon record with a new ID.
     /// </summary>

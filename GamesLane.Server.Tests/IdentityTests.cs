@@ -181,6 +181,39 @@ public class IdentityTests
         Assert.Equal(new PlayerProfile("Guest-042", "🐼"), AuthSetup.GetProfile(guest));
     }
 
+    [Fact]
+    public void The_iPhone_apps_sign_in_code_brings_back_the_external_account()
+    {
+        var context = TokenContext(new TestTime { Now = DateTimeOffset.UtcNow });
+        var account = new ExternalAccount(AuthSetup.Google, "1234567890", "Ada Lovelace", "https://example.com/ada.png");
+
+        var code = AuthSetup.CreateAppSignInCode(context, account);
+
+        Assert.Equal(account, AuthSetup.ReadAppSignInCode(context, code));
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, code[..^2] + "xx"));
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, "not-a-code"));
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, ""));
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, null));
+    }
+
+    [Fact]
+    public void The_iPhone_apps_sign_in_code_expires_after_a_few_minutes()
+    {
+        var time = new TestTime { Now = DateTimeOffset.UtcNow - AuthSetup.AppSignInCodeLifetime - TimeSpan.FromSeconds(1) };
+        var context = TokenContext(time);
+
+        var code = AuthSetup.CreateAppSignInCode(context, new ExternalAccount(AuthSetup.Google, "1234567890", null, null));
+
+        Assert.Null(AuthSetup.ReadAppSignInCode(context, code));
+    }
+
+    [Fact]
+    public void An_external_sign_in_returns_to_the_iPhone_app_with_its_code_or_an_error()
+    {
+        Assert.Equal("gameslane://signin?code=a%2Bb%2Fc", AuthSetup.AppReturnUrl("a+b/c", null));
+        Assert.Equal("gameslane://signin?error=failed", AuthSetup.AppReturnUrl(null, "failed"));
+    }
+
     private static HttpContext TokenContext(TimeProvider time)
     {
         var services = new ServiceCollection();

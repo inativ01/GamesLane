@@ -1,10 +1,13 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 using GamesLane.Server.Sessions;
 using GamesLane.Server.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 
 namespace GamesLane.Server.Auth;
@@ -13,6 +16,16 @@ namespace GamesLane.Server.Auth;
 /// The external sign-in providers that are configured (have a client ID and secret).
 /// </summary>
 public record AuthProviders(IReadOnlyList<string> Names);
+
+/// <summary>
+/// An external account just signed in with: the provider (e.g. Google), the account's ID there, and its name and picture.
+/// </summary>
+public record ExternalAccount(string Provider, string Key, string? Name, string? PictureUrl);
+
+/// <summary>
+/// The body of <c>POST /auth/app-signin</c>: the code the iPhone app's sign-in window returned with.
+/// </summary>
+public record AppSignInRequest(string? Code);
 
 /// <summary>
 /// Every visitor is logged in: as a guest (created automatically, with a random name and icon), as a registered user
@@ -56,6 +69,21 @@ public static class AuthSetup
     /// The rate-limiting policy for logging in and registering.
     /// </summary>
     public const string LoginRateLimit = "login";
+
+    /// <summary>
+    /// The iPhone app's URL scheme, which ends an external sign-in in the app's sign-in window.
+    /// </summary>
+    public const string AppScheme = "gameslane";
+
+    /// <summary>
+    /// Where an external sign-in started by the iPhone app returns to (see <see cref="MapExternalSignInEndpoints"/>).
+    /// </summary>
+    public const string AppSignInPath = "/auth/app-signin";
+
+    /// <summary>
+    /// How long the code that brings an external sign-in back to the iPhone app is valid.
+    /// </summary>
+    public static readonly TimeSpan AppSignInCodeLifetime = TimeSpan.FromMinutes(5);
 
     private const string KindClaim = "kind";
     private const string IconClaim = "icon";
@@ -153,35 +181,74 @@ public static class AuthSetup
     /// <summary>
     /// Maps external sign-in: <c>GET /auth/signin/{provider}</c> starts it, and <c>POST /auth/external</c> exchanges
     /// its result for a login token, creating the user on first sign-in.
+    /// The iPhone app signs in with <c>?app=true</c> in Apple's sign-in window, whose cookies the app's web view does not
+    /// share: <c>GET /auth/app-signin</c> then returns to the app with a short-lived code (see <see cref="AppReturnUrl"/>),
+    /// which the page exchanges for a login token with <c>POST /auth/app-signin</c>.
     /// </summary>
     public static void MapExternalSignInEndpoints(this WebApplication app)
     {
-        app.MapGet("/auth/signin/{provider}", (string provider, string? returnUrl, AuthProviders providers) =>
+        app.MapGet("/auth/signin/{provider}", (string provider, string? returnUrl, bool? app, AuthProviders providers) =>
         {
             var scheme = providers.Names.FirstOrDefault(n => n.Equals(provider, StringComparison.OrdinalIgnoreCase));
+            var redirectUri = app == true ? AppSignInPath : SafeReturnUrl(returnUrl);
             return scheme is null
                 ? Results.NotFound()
-                : Results.Challenge(new AuthenticationProperties { RedirectUri = SafeReturnUrl(returnUrl) }, [scheme]);
+                : Results.Challenge(new AuthenticationProperties { RedirectUri = redirectUri }, [scheme]);
         });
 
         app.MapPost("/auth/external", async (HttpContext context, IUserService users) =>
-        {
-            var result = await context.AuthenticateAsync(ExternalScheme);
-            await context.SignOutAsync(ExternalScheme);
-            var account = result.Principal?.FindFirst(ClaimTypes.NameIdentifier);
-            if (!result.Succeeded || account is null)
-            {
-                return Results.Unauthorized();
-            }
+            await ReadExternalAccountAsync(context) is { } account
+                ? await SignInExternalAsync(context, users, account)
+                : Results.Unauthorized());
 
-            var signIn = await users.SignInExternalAsync(
-                account.Issuer,
-                account.Value,
-                result.Principal!.FindFirstValue(ClaimTypes.Name),
-                result.Principal.FindFirstValue(PictureClaim));
-            var user = CreateUser(signIn.User.Id.ToString(), signIn.User.DisplayName, signIn.User.Icon, account.Issuer);
-            return Results.Ok(new { accessToken = IssueToken(context, user), isNew = signIn.IsNew });
-        });
+        app.MapGet(AppSignInPath, async (HttpContext context) =>
+            Results.Redirect(await ReadExternalAccountAsync(context) is { } account
+                ? AppReturnUrl(CreateAppSignInCode(context, account), null)
+                : AppReturnUrl(null, "failed")));
+
+        app.MapPost(AppSignInPath, async (AppSignInRequest request, HttpContext context, IUserService users) =>
+            ReadAppSignInCode(context, request.Code) is { } account
+                ? await SignInExternalAsync(context, users, account)
+                : Results.Unauthorized())
+            .RequireRateLimiting(LoginRateLimit);
+    }
+
+    /// <summary>
+    /// The address that ends an external sign-in in the iPhone app's sign-in window: the app's own scheme
+    /// (<see cref="AppScheme"/>), with the sign-in <paramref name="code"/> or an <paramref name="error"/>.
+    /// </summary>
+    public static string AppReturnUrl(string? code, string? error) =>
+        code is not null
+            ? $"{AppScheme}://signin?code={Uri.EscapeDataString(code)}"
+            : $"{AppScheme}://signin?error={Uri.EscapeDataString(error ?? "failed")}";
+
+    /// <summary>
+    /// A code holding an external account the iPhone app has just signed in with, valid for <see cref="AppSignInCodeLifetime"/>.
+    /// </summary>
+    public static string CreateAppSignInCode(HttpContext context, ExternalAccount account)
+    {
+        var now = context.RequestServices.GetRequiredService<TimeProvider>().GetUtcNow();
+        return AppSignInProtector(context).Protect(JsonSerializer.Serialize(account), now + AppSignInCodeLifetime);
+    }
+
+    /// <summary>
+    /// The external account in a code from <see cref="CreateAppSignInCode"/>, or null if the code is not valid or has expired.
+    /// </summary>
+    public static ExternalAccount? ReadAppSignInCode(HttpContext context, string? code)
+    {
+        if (string.IsNullOrEmpty(code))
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<ExternalAccount>(AppSignInProtector(context).Unprotect(code));
+        }
+        catch (Exception ex) when (ex is CryptographicException or FormatException or JsonException)
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -281,12 +348,40 @@ public static class AuthSetup
     }
 
     /// <summary>
-    /// When an external sign-in fails or is cancelled, returns to the main screen with an error.
+    /// When an external sign-in fails or is cancelled, returns to the main screen with an error (or to the iPhone app).
     /// </summary>
     private static Task HandleRemoteFailure(RemoteFailureContext context)
     {
-        context.Response.Redirect("/?signin=failed");
+        context.Response.Redirect(context.Properties?.RedirectUri == AppSignInPath ? AppReturnUrl(null, "failed") : "/?signin=failed");
         context.HandleResponse();
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// The external account brought back by the short-lived sign-in cookie, which is then removed; null if there is none.
+    /// </summary>
+    private static async Task<ExternalAccount?> ReadExternalAccountAsync(HttpContext context)
+    {
+        var result = await context.AuthenticateAsync(ExternalScheme);
+        await context.SignOutAsync(ExternalScheme);
+        var account = result.Principal?.FindFirst(ClaimTypes.NameIdentifier);
+        return result.Succeeded && account is not null
+            ? new ExternalAccount(account.Issuer, account.Value, result.Principal!.FindFirstValue(ClaimTypes.Name),
+                result.Principal.FindFirstValue(PictureClaim))
+            : null;
+    }
+
+    /// <summary>
+    /// Signs in with an external account (creating the user on first sign-in): <c>{ accessToken, isNew }</c>.
+    /// </summary>
+    private static async Task<IResult> SignInExternalAsync(HttpContext context, IUserService users, ExternalAccount account)
+    {
+        var signIn = await users.SignInExternalAsync(account.Provider, account.Key, account.Name, account.PictureUrl);
+        var user = CreateUser(signIn.User.Id.ToString(), signIn.User.DisplayName, signIn.User.Icon, account.Provider);
+        return Results.Ok(new { accessToken = IssueToken(context, user), isNew = signIn.IsNew });
+    }
+
+    private static ITimeLimitedDataProtector AppSignInProtector(HttpContext context) =>
+        context.RequestServices.GetRequiredService<IDataProtectionProvider>().CreateProtector("GamesLane.AppSignIn")
+            .ToTimeLimitedDataProtector();
 }

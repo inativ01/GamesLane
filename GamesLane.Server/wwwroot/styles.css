@@ -675,7 +675,8 @@ label.card-style-choice input {
     justify-content: flex-end;
 }
 
-/* Log out, at the bottom of the profile dialog, apart from Save and Cancel; admins also get their pages on the left. */
+/* Log out and Delete account, at the bottom of the profile dialog, apart from Save and Cancel; admins also get their
+   pages on the left. */
 .profile-footer {
     display: flex;
     flex-wrap: wrap;

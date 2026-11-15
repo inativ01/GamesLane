@@ -31,15 +31,15 @@ public record LoginRequest(string? Username, string? Password);
 
 /// <summary>
 /// The account endpoints: who is logged in, becoming a guest, logging in as a registered user, registering, moving seats
-/// to the new user after logging in or out, the profile (display name and icon), and saved game options. Every
-/// successful login or profile call returns a fresh login token, which the page keeps for this tab.
+/// to the new user after logging in or out, deleting one's account, the profile (display name and icon), and saved game
+/// options. Every successful login or profile call returns a fresh login token, which the page keeps for this tab.
 /// </summary>
 public static class AccountEndpoints
 {
     /// <summary>
     /// Maps <c>/auth/me</c>, <c>/auth/guest</c>, <c>/auth/register</c>, <c>/auth/login</c>, <c>/auth/transfer</c>,
-    /// <c>/auth/profile</c>, <c>/auth/icon</c>, <c>/api/icons/{id}</c>, <c>/api/game-order</c>, <c>/api/settings</c> and
-    /// <c>/api/options/{gameType}</c>.
+    /// <c>/auth/delete</c>, <c>/auth/profile</c>, <c>/auth/icon</c>, <c>/api/icons/{id}</c>, <c>/api/game-order</c>,
+    /// <c>/api/settings</c> and <c>/api/options/{gameType}</c>.
     /// </summary>
     public static void MapAccountEndpoints(this WebApplication app)
     {
@@ -67,16 +67,14 @@ public static class AccountEndpoints
         });
 
         // A new guest, with a random name and icon.
-        app.MapPost("/auth/guest", (HttpContext context) =>
-            Token(context, AuthSetup.CreateUser(
-                $"guest:{Guid.NewGuid():N}", UserRules.RandomGuestName(), UserRules.RandomIcon(), AuthSetup.GuestKind)));
+        app.MapPost("/auth/guest", (HttpContext context) => Token(context, NewGuest()));
 
         // After logging in or out, gives the seats of the previous user (proven by their login token) to the current one,
         // in every session in memory.
         app.MapPost("/auth/transfer", async (TransferRequest request, HttpContext context, IGameSessionStore store,
             IHubContext<GameHub> hub, TimeProvider timeProvider) =>
         {
-            if (AuthSetup.GetProfile(context.User) is not { } profile)
+            if (AuthSetup.GetProfile(context.User) is null)
             {
                 return Results.Unauthorized();
             }
@@ -86,18 +84,24 @@ public static class AccountEndpoints
                 return Error("Your previous login has expired.");
             }
 
-            var from = GameHub.GetUserKey(previous, "");
-            var to = GameHub.GetUserKey(context.User, "");
-            var now = timeProvider.GetUtcNow();
-            foreach (var session in store.All.ToList())
+            await TransferSeatsAsync(store, hub, previous, context.User, timeProvider.GetUtcNow());
+            return Results.NoContent();
+        });
+
+        // Deletes the logged-in saved user (with their external accounts, icons and game options) and logs in a new
+        // guest, who gets their seats in every session in memory, as after logging out.
+        app.MapPost("/auth/delete", async (HttpContext context, IUserService users, IGameSessionStore store,
+            IHubContext<GameHub> hub, TimeProvider timeProvider) =>
+        {
+            if (AuthSetup.GetSavedUserId(context.User) is not { } id)
             {
-                if (session.TransferSeats(from, to, profile, now))
-                {
-                    await GameHub.BroadcastState(hub.Clients, store, session);
-                }
+                return Results.Unauthorized();
             }
 
-            return Results.NoContent();
+            await users.DeleteUserAsync(id);
+            var guest = NewGuest();
+            await TransferSeatsAsync(store, hub, context.User, guest, timeProvider.GetUtcNow());
+            return Token(context, guest);
         });
 
         app.MapPost("/auth/register", async (RegisterRequest request, HttpContext context, IUserService users) =>
@@ -247,6 +251,31 @@ public static class AccountEndpoints
         }
 
         return await users.GetActiveUserAsync(id) is { } user ? Saved(user, kind) : null;
+    }
+
+    /// <summary>
+    /// A new guest, with a random name and icon.
+    /// </summary>
+    private static ClaimsPrincipal NewGuest() =>
+        AuthSetup.CreateUser($"guest:{Guid.NewGuid():N}", UserRules.RandomGuestName(), UserRules.RandomIcon(), AuthSetup.GuestKind);
+
+    /// <summary>
+    /// Gives the seats of <paramref name="from"/> to <paramref name="to"/>, shown with the new name and icon, in every
+    /// session in memory, and sends the new state of each session that changed.
+    /// </summary>
+    private static async Task TransferSeatsAsync(IGameSessionStore store, IHubContext<GameHub> hub, ClaimsPrincipal from,
+        ClaimsPrincipal to, DateTimeOffset now)
+    {
+        var fromKey = GameHub.GetUserKey(from, "");
+        var toKey = GameHub.GetUserKey(to, "");
+        var profile = AuthSetup.GetProfile(to)!;
+        foreach (var session in store.All.ToList())
+        {
+            if (session.TransferSeats(fromKey, toKey, profile, now))
+            {
+                await GameHub.BroadcastState(hub.Clients, store, session);
+            }
+        }
     }
 
     /// <summary>

@@ -23,8 +23,7 @@ const config: CapacitorConfig = {
         url: serverUrl(process.env.GAMESLANE_SERVER),
         // Shown when the server cannot be reached.
         errorPath: "index.html",
-        // Microsoft and Discord sign-in stay in the app; other sites (including Google sign-in) open in Safari.
-        allowNavigation: ["login.microsoftonline.com", "login.live.com", "account.live.com", "discord.com"],
+        // Other sites open in Safari. Sign-in with a provider opens in Apple's sign-in window (ios/App/App/GamesLanePlugin.swift).
     },
     ios: {
         // The site does not draw under the status bar or the home indicator.

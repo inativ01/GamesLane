@@ -22,6 +22,10 @@ TRANSLATIONS.es = {
     "Sign-in did not complete. Please try again.": "No se completó el inicio de sesión. Inténtalo de nuevo.",
     "Your profile": "Tu perfil",
     "Log out": "Cerrar sesión",
+    "Delete account": "Eliminar cuenta",
+    "Delete your account? Your profile, uploaded picture and saved game options are deleted for good. You keep playing as a new guest.":
+        "¿Eliminar tu cuenta? Tu perfil, la imagen que subiste y las opciones de partida guardadas se eliminan para siempre. Sigues jugando como un nuevo invitado.",
+    "Deleting account…": "Eliminando la cuenta…",
     "Log in": "Iniciar sesión",
     "Too many attempts. Wait a minute and try again.": "Demasiados intentos. Espera un minuto e inténtalo de nuevo.",
     "Create account": "Crear cuenta",

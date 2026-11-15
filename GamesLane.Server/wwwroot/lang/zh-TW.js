@@ -22,6 +22,10 @@ TRANSLATIONS["zh-TW"] = {
     "Sign-in did not complete. Please try again.": "登入未完成。請再試一次。",
     "Your profile": "個人檔案",
     "Log out": "登出",
+    "Delete account": "刪除帳號",
+    "Delete your account? Your profile, uploaded picture and saved game options are deleted for good. You keep playing as a new guest.":
+        "要刪除您的帳號嗎？您的個人檔案、上傳的圖片和儲存的遊戲選項將永久刪除。您將以新訪客身分繼續遊戲。",
+    "Deleting account…": "正在刪除帳號…",
     "Log in": "登入",
     "Too many attempts. Wait a minute and try again.": "嘗試次數過多。請稍候一分鐘再試一次。",
     "Create account": "建立帳號",

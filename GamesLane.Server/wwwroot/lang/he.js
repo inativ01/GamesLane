@@ -22,6 +22,10 @@ TRANSLATIONS.he = {
     "Sign-in did not complete. Please try again.": "ההתחברות לא הושלמה. נסו שוב.",
     "Your profile": "הפרופיל שלי",
     "Log out": "התנתקות",
+    "Delete account": "מחיקת חשבון",
+    "Delete your account? Your profile, uploaded picture and saved game options are deleted for good. You keep playing as a new guest.":
+        "למחוק את החשבון? הפרופיל, התמונה שהעליתם ואפשרויות המשחק השמורות יימחקו לצמיתות. תמשיכו לשחק כאורחים חדשים.",
+    "Deleting account…": "מוחקים את החשבון…",
     "Log in": "התחברות",
     "Too many attempts. Wait a minute and try again.": "יותר מדי ניסיונות. חכו דקה ונסו שוב.",
     "Create account": "יצירת חשבון",
