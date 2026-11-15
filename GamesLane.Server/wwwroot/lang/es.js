@@ -967,8 +967,8 @@ TRANSLATIONS.es = {
     "Without jokers": "Sin comodines",
     "The standard 52-card deck.": "La baraja normal de 52 cartas.",
     "With 2 jokers": "Con 2 comodines",
-    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards side by side; each hand uses one of them.":
-        "Un comodín en tu mano se cambia: elige una de dos cartas nuevas. Un comodín en la mesa se vuelve dos cartas lado a lado; cada mano usa una de ellas.",
+    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards stacked in one column; each hand uses one of them.":
+        "Un comodín en tu mano se cambia: elige una de dos cartas nuevas. Un comodín en la mesa se vuelve dos cartas apiladas en una columna; cada mano usa una de ellas.",
     "My hand's ranking": "La jugada de mi mano",
     "Hidden": "Oculta",
     "As in the original game: players work out their hands themselves.": "Como en el juego original: cada jugador descubre su jugada por su cuenta.",

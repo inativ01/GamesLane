@@ -967,8 +967,8 @@ TRANSLATIONS.he = {
     "Without jokers": "בלי ג'וקרים",
     "The standard 52-card deck.": "חפיסה רגילה של 52 קלפים.",
     "With 2 jokers": "עם 2 ג'וקרים",
-    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards side by side; each hand uses one of them.":
-        "ג'וקר ביד שלכם מוחלף: בחרו אחד משני קלפים חדשים. ג'וקר על השולחן הופך לשני קלפים זה לצד זה; כל יד משתמשת באחד מהם.",
+    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards stacked in one column; each hand uses one of them.":
+        "ג'וקר ביד שלכם מוחלף: בחרו אחד משני קלפים חדשים. ג'וקר על השולחן הופך לשני קלפים זה מעל זה בעמודה אחת; כל יד משתמשת באחד מהם.",
     "My hand's ranking": "הדרגה של היד שלי",
     "Hidden": "מוסתרת",
     "As in the original game: players work out their hands themselves.": "כמו במשחק המקורי: השחקנים מבינים בעצמם מה היד שלהם.",

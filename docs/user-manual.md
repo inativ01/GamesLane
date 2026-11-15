@@ -233,7 +233,6 @@ A game can offer **options**, i.e. rule variants (so far The Gang's, backgammon'
 - **Spectator screen** (e.g. a TV): the whole table fits on the screen without scrolling. The table is sized to the largest that fits, so it grows on large screens and shrinks on small ones; on landscape screens the heist's cards are in a column on the right, and on very wide screens (or without heist cards) the chips and the revealed hands sit side by side.
 - **A player's screen** splits the table in two. The top (the shared cards) is always shown, above the player's hand, in large size: as large as five of them fit in one row (up to a maximum size). The rest of the table (the heist number, vaults and alarms, the chips in the middle, the heist's challenge and specialist cards in large size, the chip table, the revealed hands and the game options) is below the hand; on wide screens, the top and the hand are on the left and the rest of the table on the right.
 - Players can **Hide table** (and **Show table** again) to hide the rest of the table, e.g. when a shared screen shows it; the heist number, vaults and alarms stay shown. The browser remembers the choice. Until they choose, it is hidden on phones and tablets and shown on computers.
-- Not yet included: in-game chat.
 
 ### Rich man, poor man
 

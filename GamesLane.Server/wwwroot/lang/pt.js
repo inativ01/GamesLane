@@ -968,8 +968,8 @@ TRANSLATIONS.pt = {
     "Without jokers": "Sem coringas",
     "The standard 52-card deck.": "O baralho normal de 52 cartas.",
     "With 2 jokers": "Com 2 coringas",
-    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards side by side; each hand uses one of them.":
-        "Um coringa na sua mão é trocado: escolha uma de duas cartas novas. Um coringa na mesa vira duas cartas lado a lado; cada mão usa uma delas.",
+    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards stacked in one column; each hand uses one of them.":
+        "Um coringa na sua mão é trocado: escolha uma de duas cartas novas. Um coringa na mesa vira duas cartas empilhadas em uma coluna; cada mão usa uma delas.",
     "My hand's ranking": "A combinação da minha mão",
     "Hidden": "Oculta",
     "As in the original game: players work out their hands themselves.": "Como no jogo original: cada jogador descobre sozinho a própria mão.",

@@ -42,7 +42,8 @@ public record WazooState(
     IReadOnlyList<int> Winners);
 
 /// <summary>
-/// A Wazoo game for 1 to 8 seats, who play in seat order. A game that waits for an absent player is paused.
+/// A Wazoo game for 1 to 8 seats, who play in seat order. A game that waits for an absent player waits until they come
+/// back, a newcomer takes their seat, or a player ends the game.
 /// </summary>
 public class WazooSession(string id, Func<int>? rollDie = null) : GameSession(id), IWazooSession
 {
