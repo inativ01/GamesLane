@@ -106,12 +106,17 @@ GamesLane.Server/              ASP.NET Core backend
     hearts.html/.js            Hearts page (the table and hands of tricks.js; choosing the cards to pass)
     spades.html/.js            Spades page (the table and hands of tricks.js; the bid under the hand)
     dominoes.html/.js          Dominoes page (tiles drawn with pips, the line or the trains, choosing where a tile goes; the players' table of tricks.js)
-    manifest.webmanifest       Makes the site installable as an app (name, colors, start page, icons); linked from every page. The main screen (home.js) offers Install app: the browser's own dialog where it sends beforeinstallprompt (Chrome, Edge), otherwise on iPhone and iPad a dialog with the Share steps; not in the installed app (display-mode standalone) or after Not now (installDismissed in localStorage)
+    manifest.webmanifest       Makes the site installable as an app (name, colors, start page, icons); linked from every page. The main screen (home.js) offers Install app: the browser's own dialog where it sends beforeinstallprompt (Chrome, Edge), otherwise on iPhone and iPad a dialog with the Share steps; not in the installed app (display-mode standalone), in the iPhone app (window.Capacitor.isNativePlatform()) or after Not now (installDismissed in localStorage)
     sw.js                      Service worker, registered by common.js: caches nothing (games are live); only when a page cannot be reached does it show a short offline page in the device's language, with Try again
     images/                    Logo (logo-32/180/256, and the app icons logo-192, logo-512 and logo-maskable-512, the logo inside the safe zone on the page background), the GamesLane name for the header, the splash screens and the card back (web-sized copies of the originals in docs/), game pictures (SVG)
     images/the-gang/           A picture (SVG) for each challenge and specialist card, named by the card's key, e.g. quick-access.svg
     images/flags/              Flags for the language picker
 GamesLane.Server.Tests/        Unit tests
+GamesLane.iOS/                 iPhone app (Capacitor, see iPhone app below)
+  capacitor.config.ts          App ID, name, the server it shows (GAMESLANE_SERVER), sites that stay in the app
+  www/index.html               Shown when the server cannot be reached
+  assets/logo.png              Source of the app icon and launch screen (npm run assets)
+  ios/                         Xcode project (ios/App/App.xcodeproj); Swift Package Manager, no CocoaPods
 docs/                          This guide and the user manual; original logo, name and splash pictures (kept out of git); docs/the-gang/: The Gang's card texts
 ```
 
@@ -159,7 +164,7 @@ The texts in the pages and scripts are in English, and they are also the keys of
 - Spoken texts (Rich man, poor man's **Read throws aloud**): a single card is read as a whole text per value (`SPOKEN_SINGLES` in `rich-man-poor-man.js`: `"A single nine"`, `"A single queen"`, …), so translations can match the value's gender (`"חמש יחיד"`, `"מלכה יחידה"`). 2 to 12 cards are read as their group (`SPOKEN_GROUPS`: `"Pair of {card}"`, `"Triplet of {card}"`, …), with `{card}` the card's value in the singular (`SPOKEN_VALUES`: `"nine"`, `"jack"`, `"ace"`, …), e.g. `"Triplet of {card}": "שלישיית {card}"` and `"jack": "נסיך"`. All are translated in every language. Without a voice for the language on the device, the English text is spoken.
 - Spanish, French and Portuguese style: the informal "you" (tú, tu, você). Colors stand alone or in brackets (e.g. "Ficha 3 (Rojo)"), since one color text serves Backgammon, The Gang and Final Card, and the nouns they go with differ in gender.
 - Chinese style: the polite 您, and instructions start with 请 (Simplified) or 請 (Traditional). Traditional Chinese uses Taiwan's words, not a character conversion of the Simplified text (e.g. 登入 / 登录 for log in, 帳號 / 账户 for account, 設定 / 设置 for settings, 抽牌 / 摸牌 for draw). Quotation marks are “…” in Simplified and 「…」 in Traditional. Spoken throws use Chinese numbers and the letters J, Q, K and A (e.g. "一对K", "三张九").
-- Terms still to be confirmed by the user: צעדים (pips), משחק קרופורד (Crawford game), גמון / בקגמון (gammon / backgammon), "(אני)" for the viewer's own seat; game names שש־בש, הכנופיה, איקס־עיגול; in Rich man, poor man: בחר / פס (Select / Pass), מסירה (Give), עשיר / עני (rich man / poor man), נסיך (jack) and the spoken numbers (e.g. "שלוש תשיעיות"); in Wazoo: the name וואזו, the boxes (שלשות … שישיות, שלישייה, רביעייה, פול האוס, רצף קטן / גדול, צ'אנס), משבצת (box), כרטיס הניקוד (scorecard) and נשמרה (a kept die); in The Gang: שוד (heist), צ'יפ (chip), קלפי כיס (pocket cards), כספת / אזעקה (vault / alarm), אתגר / מומחה (challenge / specialist), the card names (e.g. גישה מהירה, גלאי תנועה, האפלה, מודיע, נהג מילוט, המוח, נסיך, שרירן) and the hand rankings (קלף גבוה, זוג, שני זוגות, סטרייט, פלאש, סטרייט פלאש, רויאל פלאש); in Final Card: the name קלף אחרון, יד (hand), ג'וקר / ג'וקר +4 (Wild / Wild Draw Four), קח 2, דילוג, היפוך כיוון, שליפה (drawing), שרשור קלפי שליפה (stacking), and פירמידה; in Yaniv: הערימה הסגורה / הפתוחה (closed / open pile), זריקה (discarding), ניקוד היד (hand score), בחוץ (out); לקיחה (trick); in Hearts: the name לבבות, מלכת העלה (queen of spades), העברת קלפים (passing), "לקח את כל הנקודות" (shooting the moon); and the privacy policy and help pages (`privacy.he.html`, `help.he.html`). Confirmed: the names יניב and אסף (Assaf), סדרת משחקים (match), עשיר ועני (the game's name), אחדים / שתיימים (ones / twos, in Wazoo and in Rich man, poor man's spoken throws).
+- Hebrew terms: reviewed by the user, including the privacy policy and help pages; gammon / backgammon are מארס / מארס טורקי.
 - Spanish, French and Portuguese terms still to be confirmed by native speakers (Spanish / French / Portuguese):
   - Game names: Gato / Morpion / Jogo da Velha (Tic-tac-toe), Backgammon / Backgammon / Gamão, Rico o pobretón / Riche ou fauché / Do luxo ao lixo (Rich man, poor man); The Gang, Wazoo and Yaniv keep their names; Final Card is Última carta / Dernière carte / Última carta.
   - Shared: partida / partie / partida (a game), lugar / place / lugar (seat), sala / salon / sala (lobby), nombre visible / pseudo / nome de exibição (display name).
@@ -174,8 +179,8 @@ The texts in the pages and scripts are in English, and they are also the keys of
   - Hearts: the names Corazones / Dame de pique / Copas, pasar / passer / passar (pass cards), Se llevó todo / Grand chelem / Levou tudo (shooting the moon).
   - Spades: the names Picas / Pique / Espadas, apostar / annoncer / apostar (bid), Nil a ciegas / Nil aveugle / Nil às cegas (Blind Nil), bazas de más / plis en trop / vazas a mais (bags).
   - Dominoes: Dominó / Dominos / Dominó, ficha / domino / pedra (tile), pozo / pioche / monte (boneyard), Bloqueo / Bloqué / Bloqueio, Robo / Pioche / Compra, Todos cincos / Tous cinq / Todos os cincos, Tren mexicano / Train mexicain / Trem mexicano, locomotora / locomotive / locomotiva (engine), mula / double / bucha (a double).
-- Spades terms still to be confirmed: in Hebrew the name ספיידס, הכרזה (bid), אפס / אפס עיוור (Nil / Blind Nil), עודפים (bags); in Chinese the name 黑桃王, 叫墩 (bid), 零墩 / 盲零墩 (Nil / Blind Nil), 超墩 (bags).
-- Dominoes terms still to be confirmed: in Hebrew the name דומינו, אבן (tile), קופה (boneyard), חסימה / משיכה / חמישיות / רכבת מקסיקנית (the styles), קטר (engine); in Chinese the names 多米诺骨牌 / 骨牌, 牌堆 (boneyard), 牌龙 / 牌龍 (line), 封锁 / 封鎖, 摸牌 / 抽牌, 五的倍数 / 五的倍數, 墨西哥火车 / 墨西哥火車, 火车头 / 火車頭 (engine).
+- Spades terms still to be confirmed: in Chinese the name 黑桃王, 叫墩 (bid), 零墩 / 盲零墩 (Nil / Blind Nil), 超墩 (bags).
+- Dominoes terms still to be confirmed: in Chinese the names 多米诺骨牌 / 骨牌, 牌堆 (boneyard), 牌龙 / 牌龍 (line), 封锁 / 封鎖, 摸牌 / 抽牌, 五的倍数 / 五的倍數, 墨西哥火车 / 墨西哥火車, 火车头 / 火車頭 (engine).
 - Chinese terms still to be confirmed by native speakers (Simplified / Traditional): the game names 双陆棋 / 雙陸棋, 井字棋 / 井字遊戲, 富翁与穷人 / 富翁與窮人 and 最后一张 / 最後一張; 王牌 / 鬼牌 (joker); in Backgammon: 克劳福德局 / 克勞福德局 (Crawford game), 全胜 / 全勝 and 完胜 / 完勝 (gammon / backgammon), 加倍骰 (doubling cube); in Wazoo: the boxes (一点 … 六点 / 一點 … 六點, 三条 / 三條, 四条 / 四條, 葫芦 / 葫蘆, 小顺 / 小順, 大顺 / 大順, 机会 / 機會); in The Gang: 劫案 / 搶案 (heist), 底牌 (pocket cards), 人头牌 / 人頭牌 (face cards) and the card names (e.g. 停电 / 停電, 线人 / 線人, 打手); in Final Card: 停止, 转向 / 迴轉, 变色 / 變色, 加号 / 加號, 王冠, +3 破解; in Yaniv: 暗牌堆 / 明牌堆 (closed / open pile); 墩 (trick); in Hearts: the names 红心大战 / 傷心小棧, 传牌 / 傳牌 (pass cards), 全收 (shooting the moon); and the privacy policy and help pages (`privacy.zh-CN.html`, `privacy.zh-TW.html`, `help.zh-CN.html`, `help.zh-TW.html`).
 
 ## Game Hub API
@@ -407,6 +412,31 @@ dotnet test
 
 The scripts in `wwwroot` have no build step; `node --check <file>.js` checks a script for syntax errors.
 
+## iPhone app
+
+`GamesLane.iOS/` is a [Capacitor](https://capacitorjs.com) 8 app: a native iPhone shell whose web view shows the live site, so every deploy reaches the app without a new release. It adds no iPhone-specific features yet. Requires macOS, Xcode 26+ and Node.js 22.18+ (the Capacitor CLI reads `capacitor.config.ts` with Node's built-in TypeScript support, since TypeScript 7 no longer offers the compiler API it used).
+
+```
+cd GamesLane.iOS
+npm install
+npm run ios          # writes the settings into the Xcode project and opens it in Xcode; press Run
+npm run simulator    # or: builds and runs it on a Simulator chosen in the terminal
+```
+
+The server is chosen when the app is built, by the `GAMESLANE_SERVER` environment variable (see `capacitor.config.ts`):
+
+| `GAMESLANE_SERVER` | Server |
+| --- | --- |
+| not set | Production, https://gameslane.onrender.com |
+| a pull request's number, e.g. `42` | Its preview, https://gameslane-pr-42.onrender.com |
+| a full address, e.g. `http://localhost:5171` | A server running locally |
+
+For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run ios`) again to switch back to production. On the Simulator, `http://localhost:5171` reaches the server started with `dotnet run`; on a phone, run the server with `--urls http://0.0.0.0:5171` and use `http://<computer's IP address>:5171`. Plain `http` is allowed only for local addresses (`NSAllowsLocalNetworking` in `ios/App/App/Info.plist`).
+
+- **Sign-in:** Microsoft and Discord pages stay in the app (`server.allowNavigation`); every other site opens in Safari. Google does not allow sign-in inside an app's web view, so the app does not offer Google sign-in yet (`setUpLogin` in `common.js` leaves it out when `window.Capacitor.isNativePlatform()`; see [Next steps](#next-steps)).
+- **Icon and launch screen:** made from `assets/logo.png` (the logo, 1024×1024) on the page background by `npm run assets`, into `ios/App/App/Assets.xcassets`.
+- **Signing:** the Simulator needs none. A phone needs a team in Xcode (App target → Signing & Capabilities): a free Apple ID (Personal Team) installs on your own phone for 7 days at a time; TestFlight and the App Store need the Apple Developer Program, whose Team ID is shown under Membership details at https://developer.apple.com/account.
+
 ## Project status and external services
 
 _Last updated: 2026-11-15. Keep this section current; it is the hand-off point between work sessions._
@@ -414,6 +444,7 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 ### Local machine
 - Repo folder: `C:\Users\inati\source\GamesLane2.0`, moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
 - Installed: Git (user Isaac Nativ), GitHub CLI (`gh`, signed in), .NET 10 SDK, Node.js (useful for `node --check` on the scripts in `wwwroot`). Not installed: Docker.
+- Mac (for the iPhone app): Xcode, and Node.js LTS through nvm (`~/.nvm`, loaded by `~/.bash_profile`). No Homebrew or CocoaPods (not needed).
 - The original JavaScript/Firebase app is at github.com/inativ01/GamesLane. It is separate; do not modify it.
 
 ### GitHub
@@ -447,18 +478,12 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 1. Linking a Google account to a registered user (deferred).
 2. Microsoft and Discord sign-in: app registration (Entra admin center, Discord Developer Portal) and the environment variables on Render.
 3. Game history (deferred). Visitor countries need a location lookup (e.g. MaxMind GeoLite2) or Cloudflare in front of Render; until then the browser language stands in.
-4. Backgammon: first play-test on phones and a TV; possible extras later (a move list, variants such as Nackgammon or Acey-deucey).
-5. Rich man, poor man: first play-test with real players on phones and a TV.
-6. Hebrew: every page is translated; first check on Render, and the user to review the terms listed under [Translations](#translations).
-7. Wazoo: first play-test.
-8. Final Card: first play-test.
-9. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
-10. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
-11. Yaniv: first play-test.
-12. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
-13. Hearts: first play-test.
-14. Spades: first play-test.
-15. Dominoes: first play-test (all four styles; Mexican Train with many players on phones).
+4. Backgammon: possible extras (a move list, variants such as Nackgammon or Acey-deucey).
+5. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
+6. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
+7. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
+8. iPhone app: Google sign-in (open it in the system browser and return to the app, e.g. with `@capacitor/browser` and a custom URL scheme; until then the app hides it); join links opening the app (universal links); a paid Apple Developer membership for TestFlight and the App Store.
+9. iPhone app, native features (Apple's App Store guideline 4.2 rejects apps that only show a website): push notifications when it is your turn or a game you wait for starts, also while the app is closed (`@capacitor/push-notifications`, Apple Push Notification service, a server endpoint storing device tokens per user); haptic feedback on your turn and on game events (`@capacitor/haptics`); the native share sheet for a private game's code and join link (`@capacitor/share`); keeping the screen awake during a game on a shared screen (e.g. `@capacitor-community/keep-awake`); an offline screen with Try again instead of `www/index.html`'s static text.
 
 ## Working conventions
 - Ask before adding or upgrading packages.
@@ -473,3 +498,4 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 - Forgotten passwords cannot be reset (no email is collected).
 - The login-token keys are stored unencrypted in the database (the server logs a warning about this at startup), so the connection string must be kept secret.
 - Seats move to the new user after logging in or out only in sessions that are in memory at the time; a seat in a session nobody has open stays with the previous user.
+- The iPhone app does not offer Google sign-in, and join links open in Safari rather than the app.

@@ -27,6 +27,7 @@ It is a complete reimplementation of the original [GamesLane](https://github.com
 - Plain HTML, CSS and JavaScript (no build step)
 - xUnit tests
 - Hosted on Render (Docker)
+- iPhone app: Capacitor, showing the site (see the [developer guide](docs/developer-guide.md#iphone-app))
 
 ## Getting started
 
@@ -52,6 +53,7 @@ dotnet test
 ```
 GamesLane.Server/        ASP.NET Core backend: game rules, sessions, SignalR hub, auth, database, and the web pages (wwwroot/)
 GamesLane.Server.Tests/  Unit tests
+GamesLane.iOS/           iPhone app (Capacitor)
 docs/                    User manual, developer guide, and The Gang's card texts
 Dockerfile               Build for Render
 ```
