@@ -1,5 +1,8 @@
+using System.Buffers.Text;
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading.RateLimiting;
 using GamesLane.Server.Sessions;
@@ -23,9 +26,40 @@ public record AuthProviders(IReadOnlyList<string> Names);
 public record ExternalAccount(string Provider, string Key, string? Name, string? PictureUrl);
 
 /// <summary>
-/// The body of <c>POST /auth/app-signin</c>: the code the iPhone app's sign-in window returned with.
+/// The body of <c>POST /auth/app-signin</c>: the code the iPhone app's sign-in window returned with, and the verifier
+/// whose challenge started the sign-in.
 /// </summary>
-public record AppSignInRequest(string? Code);
+public record AppSignInRequest(string? Code, string? Verifier);
+
+/// <summary>
+/// What an iPhone app sign-in code holds: the external account and the challenge the sign-in started with.
+/// </summary>
+public record AppSignInCodeContent(ExternalAccount Account, string Challenge);
+
+/// <summary>
+/// The iPhone app sign-in codes already exchanged, kept until they expire, so each code works only once.
+/// </summary>
+public class UsedAppSignInCodes(TimeProvider timeProvider)
+{
+    private readonly ConcurrentDictionary<string, DateTimeOffset> used = new();
+
+    /// <summary>
+    /// Marks <paramref name="code"/>, valid until <paramref name="expiration"/>, as used. Returns false if it already was.
+    /// </summary>
+    public bool TryUse(string code, DateTimeOffset expiration)
+    {
+        var now = timeProvider.GetUtcNow();
+        foreach (var (key, until) in used)
+        {
+            if (until <= now)
+            {
+                used.TryRemove(key, out _);
+            }
+        }
+
+        return used.TryAdd(Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(code))), expiration);
+    }
+}
 
 /// <summary>
 /// Every visitor is logged in: as a guest (created automatically, with a random name and icon), as a registered user
@@ -88,6 +122,7 @@ public static class AuthSetup
     private const string KindClaim = "kind";
     private const string IconClaim = "icon";
     private const string PictureClaim = "picture";
+    private const string ChallengeItem = "appChallenge";
     private const string TokenScheme = BearerTokenDefaults.AuthenticationScheme;
     private const string ExternalScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
@@ -167,6 +202,7 @@ public static class AuthSetup
         }
 
         builder.Services.AddSingleton(new AuthProviders(enabled));
+        builder.Services.AddSingleton<UsedAppSignInCodes>();
 
         // At most 10 login or registration attempts per minute from one address, so passwords cannot be guessed quickly.
         builder.Services.AddRateLimiter(options =>
@@ -181,37 +217,65 @@ public static class AuthSetup
     /// <summary>
     /// Maps external sign-in: <c>GET /auth/signin/{provider}</c> starts it, and <c>POST /auth/external</c> exchanges
     /// its result for a login token, creating the user on first sign-in.
-    /// The iPhone app signs in with <c>?app=true</c> in Apple's sign-in window, whose cookies the app's web view does not
-    /// share: <c>GET /auth/app-signin</c> then returns to the app with a short-lived code (see <see cref="AppReturnUrl"/>),
-    /// which the page exchanges for a login token with <c>POST /auth/app-signin</c>.
+    /// The iPhone app signs in with <c>?app=true&amp;challenge=...</c> in Apple's sign-in window, whose cookies the app's
+    /// web view does not share: <c>GET /auth/app-signin</c> then returns to the app with a short-lived code (see
+    /// <see cref="AppReturnUrl"/>), which the page exchanges for a login token with <c>POST /auth/app-signin</c>, with the
+    /// verifier of the challenge (see <see cref="AppSignInChallenge"/>), so a code taken by another app is of no use.
     /// </summary>
     public static void MapExternalSignInEndpoints(this WebApplication app)
     {
-        app.MapGet("/auth/signin/{provider}", (string provider, string? returnUrl, bool? app, AuthProviders providers) =>
+        app.MapGet("/auth/signin/{provider}", (string provider, string? returnUrl, bool? app, string? challenge, AuthProviders providers) =>
         {
             var scheme = providers.Names.FirstOrDefault(n => n.Equals(provider, StringComparison.OrdinalIgnoreCase));
-            var redirectUri = app == true ? AppSignInPath : SafeReturnUrl(returnUrl);
-            return scheme is null
-                ? Results.NotFound()
-                : Results.Challenge(new AuthenticationProperties { RedirectUri = redirectUri }, [scheme]);
+            if (scheme is null)
+            {
+                return Results.NotFound();
+            }
+
+            if (app != true)
+            {
+                return Results.Challenge(new AuthenticationProperties { RedirectUri = SafeReturnUrl(returnUrl) }, [scheme]);
+            }
+
+            if (!IsAppSignInChallenge(challenge))
+            {
+                return Results.BadRequest();
+            }
+
+            var properties = new AuthenticationProperties { RedirectUri = AppSignInPath };
+            properties.Items[ChallengeItem] = challenge;
+            return Results.Challenge(properties, [scheme]);
         });
 
         app.MapPost("/auth/external", async (HttpContext context, IUserService users) =>
-            await ReadExternalAccountAsync(context) is { } account
+            await ReadExternalAccountAsync(context) is ({ } account, _)
                 ? await SignInExternalAsync(context, users, account)
                 : Results.Unauthorized());
 
         app.MapGet(AppSignInPath, async (HttpContext context) =>
-            Results.Redirect(await ReadExternalAccountAsync(context) is { } account
-                ? AppReturnUrl(CreateAppSignInCode(context, account), null)
-                : AppReturnUrl(null, "failed")));
+            Results.Redirect(await ReadExternalAccountAsync(context) is ({ } account, var properties)
+                && properties?.Items.TryGetValue(ChallengeItem, out var challenge) == true && IsAppSignInChallenge(challenge)
+                    ? AppReturnUrl(CreateAppSignInCode(context, account, challenge!), null)
+                    : AppReturnUrl(null, "failed")));
 
         app.MapPost(AppSignInPath, async (AppSignInRequest request, HttpContext context, IUserService users) =>
-            ReadAppSignInCode(context, request.Code) is { } account
+            ReadAppSignInCode(context, request.Code, request.Verifier) is { } account
                 ? await SignInExternalAsync(context, users, account)
                 : Results.Unauthorized())
             .RequireRateLimiting(LoginRateLimit);
     }
+
+    /// <summary>
+    /// The challenge for an iPhone app sign-in's <paramref name="verifier"/>: its SHA-256 hash in base64url (as in PKCE).
+    /// </summary>
+    public static string AppSignInChallenge(string verifier) =>
+        Base64Url.EncodeToString(SHA256.HashData(Encoding.UTF8.GetBytes(verifier)));
+
+    /// <summary>
+    /// Whether <paramref name="challenge"/> looks like one from <see cref="AppSignInChallenge"/>: 43 base64url characters.
+    /// </summary>
+    public static bool IsAppSignInChallenge(string? challenge) =>
+        challenge is { Length: 43 } && Base64Url.IsValid(challenge);
 
     /// <summary>
     /// The address that ends an external sign-in in the iPhone app's sign-in window: the app's own scheme
@@ -223,32 +287,43 @@ public static class AuthSetup
             : $"{AppScheme}://signin?error={Uri.EscapeDataString(error ?? "failed")}";
 
     /// <summary>
-    /// A code holding an external account the iPhone app has just signed in with, valid for <see cref="AppSignInCodeLifetime"/>.
+    /// A code holding an external account the iPhone app has just signed in with and the sign-in's
+    /// <paramref name="challenge"/>, valid for <see cref="AppSignInCodeLifetime"/>.
     /// </summary>
-    public static string CreateAppSignInCode(HttpContext context, ExternalAccount account)
+    public static string CreateAppSignInCode(HttpContext context, ExternalAccount account, string challenge)
     {
         var now = context.RequestServices.GetRequiredService<TimeProvider>().GetUtcNow();
-        return AppSignInProtector(context).Protect(JsonSerializer.Serialize(account), now + AppSignInCodeLifetime);
+        var content = JsonSerializer.Serialize(new AppSignInCodeContent(account, challenge));
+        return AppSignInProtector(context).Protect(content, now + AppSignInCodeLifetime);
     }
 
     /// <summary>
-    /// The external account in a code from <see cref="CreateAppSignInCode"/>, or null if the code is not valid or has expired.
+    /// The external account in a code from <see cref="CreateAppSignInCode"/>, or null if the code is not valid, has
+    /// expired, was already used, or <paramref name="verifier"/> is not the one of its challenge.
     /// </summary>
-    public static ExternalAccount? ReadAppSignInCode(HttpContext context, string? code)
+    public static ExternalAccount? ReadAppSignInCode(HttpContext context, string? code, string? verifier)
     {
-        if (string.IsNullOrEmpty(code))
+        if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(verifier))
         {
             return null;
         }
 
+        AppSignInCodeContent? content;
+        DateTimeOffset expiration;
         try
         {
-            return JsonSerializer.Deserialize<ExternalAccount>(AppSignInProtector(context).Unprotect(code));
+            content = JsonSerializer.Deserialize<AppSignInCodeContent>(AppSignInProtector(context).Unprotect(code, out expiration));
         }
         catch (Exception ex) when (ex is CryptographicException or FormatException or JsonException)
         {
             return null;
         }
+
+        var matches = content is not null && CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(content.Challenge), Encoding.UTF8.GetBytes(AppSignInChallenge(verifier)));
+        return matches && context.RequestServices.GetRequiredService<UsedAppSignInCodes>().TryUse(code, expiration)
+            ? content!.Account
+            : null;
     }
 
     /// <summary>
@@ -358,17 +433,18 @@ public static class AuthSetup
     }
 
     /// <summary>
-    /// The external account brought back by the short-lived sign-in cookie, which is then removed; null if there is none.
+    /// The external account brought back by the short-lived sign-in cookie, which is then removed, and the sign-in's
+    /// properties; the account is null if there is none.
     /// </summary>
-    private static async Task<ExternalAccount?> ReadExternalAccountAsync(HttpContext context)
+    private static async Task<(ExternalAccount? Account, AuthenticationProperties? Properties)> ReadExternalAccountAsync(HttpContext context)
     {
         var result = await context.AuthenticateAsync(ExternalScheme);
         await context.SignOutAsync(ExternalScheme);
         var account = result.Principal?.FindFirst(ClaimTypes.NameIdentifier);
         return result.Succeeded && account is not null
-            ? new ExternalAccount(account.Issuer, account.Value, result.Principal!.FindFirstValue(ClaimTypes.Name),
-                result.Principal.FindFirstValue(PictureClaim))
-            : null;
+            ? (new ExternalAccount(account.Issuer, account.Value, result.Principal!.FindFirstValue(ClaimTypes.Name),
+                result.Principal.FindFirstValue(PictureClaim)), result.Properties)
+            : (null, null);
     }
 
     /// <summary>

@@ -351,8 +351,10 @@ async function call(method, ...args) {
 
 // After signing in with an external provider (e.g. Google), the page returns with ?signin=external
 // and exchanges the short-lived sign-in cookie for this tab's login token. In the iPhone app, the page reloads with
-// ?signin=app instead, and exchanges the code the app's sign-in window returned with (see signInInApp).
+// ?signin=app instead, and exchanges the code the app's sign-in window returned with, and the verifier of the
+// challenge the sign-in started with (see signInInApp).
 const APP_SIGNIN_CODE_KEY = "appSignInCode";
+const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
 
 async function completeExternalSignIn() {
     const signIn = params.get("signin");
@@ -363,11 +365,13 @@ async function completeExternalSignIn() {
     url.searchParams.delete("signin");
     history.replaceState(null, "", url.pathname + url.search);
     const code = sessionStorage.getItem(APP_SIGNIN_CODE_KEY);
+    const verifier = sessionStorage.getItem(APP_SIGNIN_VERIFIER_KEY);
     sessionStorage.removeItem(APP_SIGNIN_CODE_KEY);
+    sessionStorage.removeItem(APP_SIGNIN_VERIFIER_KEY);
 
     showBusy(t("Signing you in…"), 0);
     const response = await (signIn === "app"
-        ? postJson("/auth/app-signin", { code })
+        ? postJson("/auth/app-signin", { code, verifier })
         : fetch("/auth/external", { method: "POST" })).catch(() => null);
     hideBusy();
     if (response?.ok) {
@@ -385,13 +389,22 @@ function externalSignInUrl(provider) {
     return `/auth/signin/${provider.toLowerCase()}?returnUrl=${encodeURIComponent(url.pathname + url.search)}`;
 }
 
+function base64Url(bytes) {
+    return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 // In the iPhone app, signs in with a provider in Apple's sign-in window, which returns to the app with a code (or an
-// error); the page then reloads with ?signin=app to exchange it (see completeExternalSignIn). Returns false if the
-// sign-in did not complete; the user closing the window is not an error.
+// error); the page then reloads with ?signin=app to exchange it (see completeExternalSignIn). The sign-in starts with
+// the challenge (SHA-256 hash) of a random verifier that only this page knows, so the code is of no use to another app
+// that receives it. Returns false if the sign-in did not complete; the user closing the window is not an error.
 async function signInInApp(provider) {
     let result;
+    let verifier;
     try {
-        result = new URL((await appPlugin.signIn({ url: `${location.origin}/auth/signin/${provider.toLowerCase()}?app=true` })).url);
+        verifier = base64Url(crypto.getRandomValues(new Uint8Array(32)));
+        const challenge = base64Url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
+        const url = `${location.origin}/auth/signin/${provider.toLowerCase()}?app=true&challenge=${challenge}`;
+        result = new URL((await appPlugin.signIn({ url })).url);
     } catch (err) {
         if (err?.code !== "CANCELLED") showError(t("Sign-in did not complete. Please try again."));
         return false;
@@ -402,6 +415,7 @@ async function signInInApp(provider) {
         return false;
     }
     sessionStorage.setItem(APP_SIGNIN_CODE_KEY, code);
+    sessionStorage.setItem(APP_SIGNIN_VERIFIER_KEY, verifier);
     const url = new URL(location.href);
     url.searchParams.set("signin", "app");
     location.replace(url.pathname + url.search);
