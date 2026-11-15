@@ -10,6 +10,7 @@ using GamesLane.Server.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 
@@ -90,6 +91,11 @@ public static class AuthSetup
     public const string Discord = "Discord";
 
     /// <summary>
+    /// The Sign in with Apple provider (see <see cref="AppleSettings"/>).
+    /// </summary>
+    public const string Apple = "Apple";
+
+    /// <summary>
     /// The kind of user who has not logged in with an account. Guests are not saved.
     /// </summary>
     public const string GuestKind = "Guest";
@@ -105,14 +111,15 @@ public static class AuthSetup
     public const string LoginRateLimit = "login";
 
     /// <summary>
-    /// The iPhone app's URL scheme, which ends an external sign-in in the app's sign-in window.
-    /// </summary>
-    public const string AppScheme = "gameslane";
-
-    /// <summary>
     /// Where an external sign-in started by the iPhone app returns to (see <see cref="MapExternalSignInEndpoints"/>).
     /// </summary>
     public const string AppSignInPath = "/auth/app-signin";
+
+    /// <summary>
+    /// The address on the site that ends the iPhone app's sign-in window, which only the app can receive (see
+    /// <see cref="AppleSettings.SiteAssociation"/>). Opened anywhere else, it goes to the main screen.
+    /// </summary>
+    public const string AppReturnPath = "/auth/app-return";
 
     /// <summary>
     /// How long the code that brings an external sign-in back to the iPhone app is valid.
@@ -201,8 +208,26 @@ public static class AuthSetup
             });
         }
 
+        var apple = AppleSettings.From(builder.Configuration);
+        if (apple.CanSignInOnWebsite)
+        {
+            enabled.Add(Apple);
+            auth.AddApple(Apple, options =>
+            {
+                options.ClientId = apple.ServicesId;
+                options.TeamId = apple.TeamId;
+                options.KeyId = apple.KeyId!;
+                options.GenerateClientSecret = true;
+                options.PrivateKey = (_, _) => Task.FromResult(apple.PrivateKey!.AsMemory());
+                options.Events.OnCreatingTicket = AddAppleName;
+                options.Events.OnRemoteFailure = HandleRemoteFailure;
+            });
+        }
+
         builder.Services.AddSingleton(new AuthProviders(enabled));
+        builder.Services.AddSingleton(apple);
         builder.Services.AddSingleton<UsedAppSignInCodes>();
+        builder.Services.AddSingleton<AppleIdentityTokens>();
 
         // At most 10 login or registration attempts per minute from one address, so passwords cannot be guessed quickly.
         builder.Services.AddRateLimiter(options =>
@@ -220,7 +245,9 @@ public static class AuthSetup
     /// The iPhone app signs in with <c>?app=true&amp;challenge=...</c> in Apple's sign-in window, whose cookies the app's
     /// web view does not share: <c>GET /auth/app-signin</c> then returns to the app with a short-lived code (see
     /// <see cref="AppReturnUrl"/>), which the page exchanges for a login token with <c>POST /auth/app-signin</c>, with the
-    /// verifier of the challenge (see <see cref="AppSignInChallenge"/>), so a code taken by another app is of no use.
+    /// verifier of the challenge (see <see cref="AppSignInChallenge"/>). Sign in with Apple in the app uses Apple's own
+    /// sheet instead, whose identity token the page exchanges with <c>POST /auth/apple-app</c>.
+    /// Also maps <c>/.well-known/apple-app-site-association</c>.
     /// </summary>
     public static void MapExternalSignInEndpoints(this WebApplication app)
     {
@@ -263,6 +290,17 @@ public static class AuthSetup
                 ? await SignInExternalAsync(context, users, account)
                 : Results.Unauthorized())
             .RequireRateLimiting(LoginRateLimit);
+
+        app.MapGet(AppReturnPath, () => Results.Redirect("/?signin=failed"));
+
+        app.MapPost("/auth/apple-app", async (AppleAppSignInRequest request, HttpContext context, IUserService users,
+            AppleIdentityTokens tokens) =>
+            await tokens.ValidateAsync(request.IdentityToken, request.Nonce) is { } subject
+                ? await SignInExternalAsync(context, users, new ExternalAccount(Apple, subject, NullIfEmpty(request.Name), null))
+                : Results.Unauthorized())
+            .RequireRateLimiting(LoginRateLimit);
+
+        app.MapGet("/.well-known/apple-app-site-association", (AppleSettings apple) => Results.Json(apple.SiteAssociation()));
     }
 
     /// <summary>
@@ -278,13 +316,36 @@ public static class AuthSetup
         challenge is { Length: 43 } && Base64Url.IsValid(challenge);
 
     /// <summary>
-    /// The address that ends an external sign-in in the iPhone app's sign-in window: the app's own scheme
-    /// (<see cref="AppScheme"/>), with the sign-in <paramref name="code"/> or an <paramref name="error"/>.
+    /// The address that ends an external sign-in in the iPhone app's sign-in window (<see cref="AppReturnPath"/>), with
+    /// the sign-in <paramref name="code"/> or an <paramref name="error"/>.
     /// </summary>
     public static string AppReturnUrl(string? code, string? error) =>
         code is not null
-            ? $"{AppScheme}://signin?code={Uri.EscapeDataString(code)}"
-            : $"{AppScheme}://signin?error={Uri.EscapeDataString(error ?? "failed")}";
+            ? $"{AppReturnPath}?code={Uri.EscapeDataString(code)}"
+            : $"{AppReturnPath}?error={Uri.EscapeDataString(error ?? "failed")}";
+
+    /// <summary>
+    /// The name in the <c>user</c> field Apple posts on a user's first Sign in with Apple on the website, e.g.
+    /// <c>{"name":{"firstName":"Ada","lastName":"Lovelace"}}</c>, or null.
+    /// </summary>
+    public static string? AppleUserName(string? user)
+    {
+        try
+        {
+            using var json = JsonDocument.Parse(user ?? "");
+            if (!json.RootElement.TryGetProperty("name", out var name) || name.ValueKind != JsonValueKind.Object)
+            {
+                return null;
+            }
+
+            string? Part(string key) => name.TryGetProperty(key, out var part) && part.ValueKind == JsonValueKind.String ? part.GetString() : null;
+            return NullIfEmpty(string.Join(" ", new[] { Part("firstName"), Part("lastName") }.Where(p => !string.IsNullOrWhiteSpace(p))));
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>
     /// A code holding an external account the iPhone app has just signed in with and the sign-in's
@@ -431,6 +492,21 @@ public static class AuthSetup
         context.HandleResponse();
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Adds the name Apple posts on a user's first Sign in with Apple on the website (it is not in Apple's token).
+    /// </summary>
+    private static Task AddAppleName(OAuthCreatingTicketContext context)
+    {
+        if (context.Request.HasFormContentType && AppleUserName(context.Request.Form["user"]) is { } name)
+        {
+            context.Identity?.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, context.Options.ClaimsIssuer));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static string? NullIfEmpty(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     /// <summary>
     /// The external account brought back by the short-lived sign-in cookie, which is then removed, and the sign-in's

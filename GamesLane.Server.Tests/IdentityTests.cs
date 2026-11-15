@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using GamesLane.Server.Auth;
 using GamesLane.Server.Data;
 using GamesLane.Server.Hubs;
@@ -10,6 +11,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 
 namespace GamesLane.Server.Tests;
@@ -258,8 +263,94 @@ public class IdentityTests
     [Fact]
     public void An_external_sign_in_returns_to_the_iPhone_app_with_its_code_or_an_error()
     {
-        Assert.Equal("gameslane://signin?code=a%2Bb%2Fc", AuthSetup.AppReturnUrl("a+b/c", null));
-        Assert.Equal("gameslane://signin?error=failed", AuthSetup.AppReturnUrl(null, "failed"));
+        Assert.Equal("/auth/app-return?code=a%2Bb%2Fc", AuthSetup.AppReturnUrl("a+b/c", null));
+        Assert.Equal("/auth/app-return?error=failed", AuthSetup.AppReturnUrl(null, "failed"));
+    }
+
+    [Theory]
+    [InlineData("""{"name":{"firstName":"Ada","lastName":"Lovelace"},"email":"ada@example.com"}""", "Ada Lovelace")]
+    [InlineData("""{"name":{"firstName":"Ada"}}""", "Ada")]
+    [InlineData("""{"name":{"firstName":" ","lastName":""}}""", null)]
+    [InlineData("""{"email":"ada@example.com"}""", null)]
+    [InlineData("not json", null)]
+    [InlineData(null, null)]
+    public void Sign_in_with_Apple_on_the_website_takes_the_name_Apple_posts_the_first_time(string? user, string? expected)
+    {
+        Assert.Equal(expected, AuthSetup.AppleUserName(user));
+    }
+
+    [Fact]
+    public void The_site_association_lets_join_links_and_the_sign_in_window_open_the_iPhone_app()
+    {
+        var apple = new AppleSettings("7Z69JFQYCV", "com.gameslane.app", "com.gameslane.web", null, null);
+
+        var json = System.Text.Json.JsonSerializer.Serialize(apple.SiteAssociation());
+
+        Assert.Equal(
+            """{"applinks":{"details":[{"appIDs":["7Z69JFQYCV.com.gameslane.app"],"components":[{"/":"/join/*"}]}]},"webcredentials":{"apps":["7Z69JFQYCV.com.gameslane.app"]}}""",
+            json);
+        Assert.False(apple.CanSignInOnWebsite);
+        Assert.True((apple with { KeyId = "ABC123DEFG", PrivateKey = "-----BEGIN PRIVATE KEY-----" }).CanSignInOnWebsite);
+    }
+
+    // Sign in with Apple in the iPhone app: an identity token signs in only if Apple signed it for the app, it has not
+    // expired, it carries the hash of the page's nonce, and it was not used before.
+    private const string AppleSubject = "001234.abcdef0123456789.1234";
+    private static readonly AppleSettings Apple = new("7Z69JFQYCV", "com.gameslane.app", "com.gameslane.web", null, null);
+    private readonly ECDsaSecurityKey _appleKey = new(ECDsa.Create(ECCurve.NamedCurves.nistP256)) { KeyId = "apple-key" };
+
+    [Fact]
+    public async Task An_identity_token_Apple_signed_for_the_app_and_the_nonce_signs_in_once()
+    {
+        var tokens = AppleTokens();
+        var token = AppleToken();
+
+        Assert.Equal(AppleSubject, await tokens.ValidateAsync(token, Verifier));
+        Assert.Null(await tokens.ValidateAsync(token, Verifier));
+    }
+
+    [Fact]
+    public async Task An_identity_token_for_another_nonce_app_or_issuer_or_expired_is_refused()
+    {
+        Assert.Null(await AppleTokens().ValidateAsync(AppleToken(), "another-nonce"));
+        Assert.Null(await AppleTokens().ValidateAsync(AppleToken(), null));
+        Assert.Null(await AppleTokens().ValidateAsync(AppleToken(audience: "com.example.other"), Verifier));
+        Assert.Null(await AppleTokens().ValidateAsync(AppleToken(issuer: "https://evil.example"), Verifier));
+        Assert.Null(await AppleTokens().ValidateAsync(AppleToken(expires: DateTime.UtcNow.AddMinutes(-10)), Verifier));
+    }
+
+    [Fact]
+    public async Task An_identity_token_not_signed_by_Apple_is_refused()
+    {
+        var otherKey = new ECDsaSecurityKey(ECDsa.Create(ECCurve.NamedCurves.nistP256)) { KeyId = "apple-key" };
+
+        Assert.Null(await AppleTokens().ValidateAsync(AppleToken(key: otherKey), Verifier));
+        Assert.Null(await AppleTokens().ValidateAsync("not-a-token", Verifier));
+        Assert.Null(await AppleTokens().ValidateAsync(null, Verifier));
+    }
+
+    private AppleIdentityTokens AppleTokens()
+    {
+        var configuration = new OpenIdConnectConfiguration { Issuer = AppleIdentityTokens.Issuer };
+        configuration.SigningKeys.Add(_appleKey);
+        return new AppleIdentityTokens(Apple, new UsedAppSignInCodes(TimeProvider.System),
+            new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration));
+    }
+
+    private string AppleToken(string? audience = null, string? issuer = null, DateTime? expires = null, SecurityKey? key = null)
+    {
+        var until = expires ?? DateTime.UtcNow.AddMinutes(10);
+        return new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+        {
+            Issuer = issuer ?? AppleIdentityTokens.Issuer,
+            Audience = audience ?? Apple.BundleId,
+            Subject = new ClaimsIdentity([new Claim("sub", AppleSubject)]),
+            Claims = new Dictionary<string, object> { ["nonce"] = Challenge },
+            NotBefore = until.AddMinutes(-20),
+            IssuedAt = until.AddMinutes(-20),
+            Expires = until,
+            SigningCredentials = new SigningCredentials(key ?? _appleKey, SecurityAlgorithms.EcdsaSha256),
+        });
     }
 
     private static HttpContext TokenContext(TimeProvider time)

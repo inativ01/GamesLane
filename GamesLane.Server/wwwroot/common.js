@@ -352,13 +352,15 @@ async function call(method, ...args) {
 // After signing in with an external provider (e.g. Google), the page returns with ?signin=external
 // and exchanges the short-lived sign-in cookie for this tab's login token. In the iPhone app, the page reloads with
 // ?signin=app instead, and exchanges the code the app's sign-in window returned with, and the verifier of the
-// challenge the sign-in started with (see signInInApp).
+// challenge the sign-in started with (see signInInApp); or with ?signin=apple, and exchanges the identity token of
+// Sign in with Apple, with its nonce and the user's name (see signInWithAppleInApp).
 const APP_SIGNIN_CODE_KEY = "appSignInCode";
 const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
+const APP_SIGNIN_NAME_KEY = "appSignInName";
 
 async function completeExternalSignIn() {
     const signIn = params.get("signin");
-    if (signIn !== "external" && signIn !== "app") {
+    if (signIn !== "external" && signIn !== "app" && signIn !== "apple") {
         return;
     }
     const url = new URL(location.href);
@@ -366,12 +368,12 @@ async function completeExternalSignIn() {
     history.replaceState(null, "", url.pathname + url.search);
     const code = sessionStorage.getItem(APP_SIGNIN_CODE_KEY);
     const verifier = sessionStorage.getItem(APP_SIGNIN_VERIFIER_KEY);
-    sessionStorage.removeItem(APP_SIGNIN_CODE_KEY);
-    sessionStorage.removeItem(APP_SIGNIN_VERIFIER_KEY);
+    const name = sessionStorage.getItem(APP_SIGNIN_NAME_KEY);
+    [APP_SIGNIN_CODE_KEY, APP_SIGNIN_VERIFIER_KEY, APP_SIGNIN_NAME_KEY].forEach((key) => sessionStorage.removeItem(key));
 
     showBusy(t("Signing you in…"), 0);
-    const response = await (signIn === "app"
-        ? postJson("/auth/app-signin", { code, verifier })
+    const response = await (signIn === "app" ? postJson("/auth/app-signin", { code, verifier })
+        : signIn === "apple" ? postJson("/auth/apple-app", { identityToken: code, nonce: verifier, name })
         : fetch("/auth/external", { method: "POST" })).catch(() => null);
     hideBusy();
     if (response?.ok) {
@@ -393,18 +395,35 @@ function base64Url(bytes) {
     return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-// In the iPhone app, signs in with a provider in Apple's sign-in window, which returns to the app with a code (or an
-// error); the page then reloads with ?signin=app to exchange it (see completeExternalSignIn). The sign-in starts with
-// the challenge (SHA-256 hash) of a random verifier that only this page knows, so the code is of no use to another app
-// that receives it. Returns false if the sign-in did not complete; the user closing the window is not an error.
+// A random secret and its SHA-256 hash, both base64url (a PKCE verifier and challenge, or a nonce and its hash).
+async function secretAndHash() {
+    const secret = base64Url(crypto.getRandomValues(new Uint8Array(32)));
+    const hash = base64Url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret))));
+    return { secret, hash };
+}
+
+// After signing in in the iPhone app, reloads the page with ?signin=<kind> to finish (see completeExternalSignIn).
+function finishSignInInApp(kind, code, verifier, name = "") {
+    sessionStorage.setItem(APP_SIGNIN_CODE_KEY, code);
+    sessionStorage.setItem(APP_SIGNIN_VERIFIER_KEY, verifier);
+    sessionStorage.setItem(APP_SIGNIN_NAME_KEY, name);
+    const url = new URL(location.href);
+    url.searchParams.set("signin", kind);
+    location.replace(url.pathname + url.search);
+}
+
+// In the iPhone app, signs in with a provider in Apple's sign-in window, which ends at /auth/app-return on this site
+// (an address only the app can receive) with a code (or an error); the page then reloads with ?signin=app to exchange
+// it. The sign-in starts with the challenge (SHA-256 hash) of a random verifier that only this page knows. Returns
+// false if the sign-in did not complete; the user closing the window is not an error.
 async function signInInApp(provider) {
     let result;
     let verifier;
     try {
-        verifier = base64Url(crypto.getRandomValues(new Uint8Array(32)));
-        const challenge = base64Url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
-        const url = `${location.origin}/auth/signin/${provider.toLowerCase()}?app=true&challenge=${challenge}`;
-        result = new URL((await appPlugin.signIn({ url })).url);
+        const { secret, hash } = await secretAndHash();
+        verifier = secret;
+        const url = `${location.origin}/auth/signin/${provider.toLowerCase()}?app=true&challenge=${hash}`;
+        result = new URL((await appPlugin.signIn({ url, callback: `${location.origin}/auth/app-return` })).url);
     } catch (err) {
         if (err?.code !== "CANCELLED") showError(t("Sign-in did not complete. Please try again."));
         return false;
@@ -414,12 +433,22 @@ async function signInInApp(provider) {
         showError(t("Sign-in did not complete. Please try again."));
         return false;
     }
-    sessionStorage.setItem(APP_SIGNIN_CODE_KEY, code);
-    sessionStorage.setItem(APP_SIGNIN_VERIFIER_KEY, verifier);
-    const url = new URL(location.href);
-    url.searchParams.set("signin", "app");
-    location.replace(url.pathname + url.search);
+    finishSignInInApp("app", code, verifier);
     return true;
+}
+
+// In the iPhone app, Sign in with Apple in Apple's own sheet. Apple puts the hash of a random nonce in its identity
+// token; the server checks it against the nonce. Returns false as signInInApp does.
+async function signInWithAppleInApp() {
+    try {
+        const { secret, hash } = await secretAndHash();
+        const result = await appPlugin.signInWithApple({ nonce: hash });
+        finishSignInInApp("apple", result.identityToken, secret, result.name ?? "");
+        return true;
+    } catch (err) {
+        if (err?.code !== "CANCELLED") showError(t("Sign-in did not complete. Please try again."));
+        return false;
+    }
 }
 
 function smallButton(text, onClick) {
@@ -763,18 +792,23 @@ function setUpFeedbackLink() {
 
 // Each external provider's logo, for its sign-in button.
 const PROVIDER_LOGOS = {
+    Apple: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.37 12.73c-.02-2.17 1.77-3.21 1.85-3.26-1.01-1.47-2.58-1.67-3.13-1.7-1.33-.13-2.6.79-3.28.79-.68 0-1.72-.77-2.83-.75-1.45.02-2.8.85-3.55 2.15-1.52 2.63-.39 6.52 1.09 8.66.72 1.04 1.58 2.21 2.7 2.17 1.09-.04 1.5-.7 2.81-.7 1.31 0 1.68.7 2.83.68 1.17-.02 1.91-1.06 2.62-2.11.83-1.21 1.17-2.38 1.19-2.44-.03-.01-2.28-.87-2.3-3.49zM14.22 6.36c.6-.73 1.01-1.74.9-2.75-.87.04-1.92.58-2.54 1.31-.56.64-1.05 1.67-.92 2.66.97.08 1.96-.49 2.56-1.22z"/></svg>`,
     Google: `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`,
     Microsoft: `<svg viewBox="0 0 21 21" aria-hidden="true"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>`,
     Discord: `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.009c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.095 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>`,
 };
 
-// The profile dialog's login part, for guests: Log in and Create account tabs, and a button per external provider.
-// The iPhone app signs in with providers in Apple's sign-in window (see signInInApp); an app version without it leaves
-// out Google, which does not allow sign-in inside an app's web view.
+// The profile dialog's login part, for guests: Log in and Create account tabs, and a button per external provider
+// (Apple first). The iPhone app signs in with providers in Apple's sign-in window (see signInInApp), and with Apple in
+// Apple's own sheet (see signInWithAppleInApp), which the app offers even when the website does not; an app version
+// without the plugin leaves out Google, which does not allow sign-in inside an app's web view.
 // `profile` gives the display name and icon for a new account.
 function setUpLogin(dialog, profile) {
     const providers = dialog.querySelector(".login-providers");
-    const offered = account.providers.filter((provider) => !(isNativeApp && !appPlugin && provider === "Google"));
+    const appleInApp = typeof appPlugin?.signInWithApple === "function";
+    const offered = [...new Set([...(appleInApp ? ["Apple"] : []), ...account.providers])]
+        .filter((provider) => !(isNativeApp && !appPlugin && provider === "Google"))
+        .sort((a, b) => (b === "Apple") - (a === "Apple"));
     providers.hidden = offered.length === 0;
     for (const provider of offered) {
         const link = document.createElement("a");
@@ -801,7 +835,7 @@ function setUpLogin(dialog, profile) {
             label.textContent = t("Connecting to {provider}…", { provider });
             if (appPlugin) {
                 event.preventDefault();
-                if (!(await signInInApp(provider))) {
+                if (!(await (provider === "Apple" && appleInApp ? signInWithAppleInApp() : signInInApp(provider)))) {
                     sessionStorage.removeItem(PREVIOUS_TOKEN_KEY);
                     notBusy();
                 }
