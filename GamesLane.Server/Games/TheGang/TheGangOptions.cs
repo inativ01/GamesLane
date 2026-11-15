@@ -81,7 +81,7 @@ public static class TheGangOptions
             [
                 new GameOptionChoice(No, "Without jokers", "The standard 52-card deck."),
                 new GameOptionChoice(Yes, "With 2 jokers",
-                    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards side by side; each hand uses one of them."),
+                    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards stacked in one column; each hand uses one of them."),
             ],
             No),
         new GameOption(

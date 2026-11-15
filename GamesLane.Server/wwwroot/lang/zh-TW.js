@@ -968,8 +968,8 @@ TRANSLATIONS["zh-TW"] = {
     "Without jokers": "不使用鬼牌",
     "The standard 52-card deck.": "標準的 52 張牌。",
     "With 2 jokers": "使用 2 張鬼牌",
-    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards side by side; each hand uses one of them.":
-        "您手中的鬼牌會被替換：請從兩張新牌中選一張。牌桌上的鬼牌會變成並排的兩張牌；每手牌使用其中一張。",
+    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards stacked in one column; each hand uses one of them.":
+        "您手中的鬼牌會被替換：請從兩張新牌中選一張。牌桌上的鬼牌會變成疊成一列的兩張牌；每手牌使用其中一張。",
     "My hand's ranking": "我的手牌牌型",
     "Hidden": "隱藏",
     "As in the original game: players work out their hands themselves.": "與原版遊戲相同：玩家自行判斷自己的手牌。",

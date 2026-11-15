@@ -967,8 +967,8 @@ TRANSLATIONS.fr = {
     "Without jokers": "Sans jokers",
     "The standard 52-card deck.": "Le jeu classique de 52 cartes.",
     "With 2 jokers": "Avec 2 jokers",
-    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards side by side; each hand uses one of them.":
-        "Un joker dans ta main est échangé : choisis l'une de deux nouvelles cartes. Un joker sur la table devient deux cartes côte à côte ; chaque main utilise l'une d'elles.",
+    "A joker in your hand is swapped: choose one of two new cards. A joker on the table becomes two cards stacked in one column; each hand uses one of them.":
+        "Un joker dans ta main est échangé : choisis l'une de deux nouvelles cartes. Un joker sur la table devient deux cartes empilées en colonne ; chaque main utilise l'une d'elles.",
     "My hand's ranking": "La combinaison de ma main",
     "Hidden": "Masquée",
     "As in the original game: players work out their hands themselves.": "Comme dans le jeu original : chacun évalue sa main lui-même.",

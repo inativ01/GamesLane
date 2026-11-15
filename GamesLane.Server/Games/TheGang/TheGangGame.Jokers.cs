@@ -1,13 +1,13 @@
 namespace GamesLane.Server.Games.TheGang;
 
 /// <summary>
-/// Playing with jokers (the deck has two). A joker dealt to the table is replaced by two cards side by side (three if one
-/// of them is the other joker); each hand uses one of them. A joker in a player's hand is swapped: the player is offered
-/// two cards from the deck and keeps one, discarding the other. If one of them is a joker, the player either keeps the
-/// other card or swaps that joker for two more cards. With two jokers in hand, they are swapped one after the other. This
-/// happens before the betting (the betting waits for everyone), and also for cards drawn later (Motion Detector, Laser
-/// Tripwires, Hacker), when the stage cannot end until the player has chosen. Everyone sees that a player swapped a joker,
-/// but not which cards.
+/// Playing with jokers (the deck has two). A joker dealt to the table is replaced by two cards stacked in one column
+/// (three if one of them is the other joker); each hand uses one of them. A joker in a player's hand is swapped: the
+/// player is offered two cards from the deck and keeps one, discarding the other. If one of them is a joker, the player
+/// either keeps the other card or swaps that joker for two more cards. With two jokers in hand, they are swapped one
+/// after the other. This happens before the betting (the betting waits for everyone), and also for cards drawn later
+/// (Motion Detector, Laser Tripwires, Hacker), when the stage cannot end until the player has chosen. Everyone sees that
+/// a player swapped a joker, but not which cards.
 /// </summary>
 public partial class TheGangGame
 {
