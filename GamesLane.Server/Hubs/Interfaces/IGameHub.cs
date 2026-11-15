@@ -342,6 +342,19 @@ public interface IGameHub
 
     /// <summary>
 
+    /// Spades, while bidding with Blind Nil: <paramref name="seat"/>, which the caller must hold, looks at its cards, so it
+    /// can no longer bid Blind Nil.
+    /// </summary>
+    Task LookAtCards(string sessionId, int seat);
+
+    /// <summary>
+    /// Spades: <paramref name="seat"/>, which the caller must hold and whose turn it is to bid, bids
+    /// <paramref name="tricks"/> (1 to 13, or 0 for Nil with the option), <paramref name="blind"/> for Blind Nil.
+    /// </summary>
+    Task Bid(string sessionId, int seat, int tricks, bool blind);
+
+    /// <summary>
+
     /// Dominoes: <paramref name="seat"/>, which the caller must hold, plays <paramref name="tile"/> (short text such as
     /// "3-5") on its turn: in the line styles at the left end (<paramref name="target"/> 0) or the right end (1); in
     /// Mexican Train on the train of seat <paramref name="target"/>, or on the Mexican train (-1).
