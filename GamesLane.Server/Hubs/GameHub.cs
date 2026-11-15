@@ -428,6 +428,19 @@ public class GameHub(
         Act(sessionId, (ISpadesSession s, out string? error) => s.TryBid(UserKey, seat, tricks, blind, out error));
 
     /// <inheritdoc />
+
+    public Task PlayTile(string sessionId, int seat, string? tile, int target) =>
+        Act(sessionId, (IDominoesSession s, out string? error) => s.TryPlayTile(UserKey, seat, tile, target, out error));
+
+    /// <inheritdoc />
+    public Task DrawTile(string sessionId, int seat) =>
+        Act(sessionId, (IDominoesSession s, out string? error) => s.TryDraw(UserKey, seat, out error));
+
+    /// <inheritdoc />
+    public Task PassTurn(string sessionId, int seat) =>
+        Act(sessionId, (IDominoesSession s, out string? error) => s.TryPass(UserKey, seat, out error));
+
+    /// <inheritdoc />
     public Task RevealNext(string sessionId, int revealed) =>
         Act(sessionId, (ITheGangSession s, out string? error) => s.TryRevealNext(UserKey, revealed, out error));
 

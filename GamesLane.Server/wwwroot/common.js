@@ -14,6 +14,7 @@ const GAME_PAGES = {
     RichManPoorMan: "/rich-man-poor-man.html", Wazoo: "/wazoo.html", FinalCard: "/final-card.html", Yaniv: "/yaniv.html",
     Hearts: "/hearts.html",
     Spades: "/spades.html",
+    Dominoes: "/dominoes.html",
 };
 
 const help = startHelp();

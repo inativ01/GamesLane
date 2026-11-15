@@ -234,6 +234,7 @@ public class GameSessionStore(
         GameType.Yaniv => new YanivSession(id),
         GameType.Hearts => new HeartsSession(id),
         GameType.Spades => new SpadesSession(id),
+        GameType.Dominoes => new DominoesSession(id),
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown game type."),
     };
 
@@ -251,6 +252,7 @@ public class GameSessionStore(
         GameType.Yaniv => "/yaniv.html",
         GameType.Hearts => "/hearts.html",
         GameType.Spades => "/spades.html",
+        GameType.Dominoes => "/dominoes.html",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown game type."),
     };
 }

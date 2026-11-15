@@ -17,6 +17,7 @@ public enum GameType
     Yaniv,
     Hearts,
     Spades,
+    Dominoes,
 }
 
 /// <summary>
