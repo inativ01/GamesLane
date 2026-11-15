@@ -72,7 +72,8 @@ public record FinalCardPrivateState(IReadOnlyList<FinalCardHand> Hands);
 
 /// <summary>
 /// A Final Card game for 2 to 10 seats, with the options' style, end (one game, a score target or a pyramid), stacking and drawing. The
-/// players are the game's seats in seat order. A game that waits for an absent player is paused.
+/// players are the game's seats in seat order. A game that waits for an absent player waits until they come back, a
+/// newcomer takes their seat, or a player ends the game.
 /// </summary>
 public class FinalCardSession(string id, Action<FinalCardCard[]>? shuffle = null) : GameSession(id), IFinalCardSession
 {
