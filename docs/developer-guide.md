@@ -316,7 +316,7 @@ PostgreSQL on Neon, accessed with EF Core. Tables (created and updated automatic
 | `ActivityCounts` | Anonymous activity: `Day` (UTC) + `Event` + `GameType` (or `""`) + `Detail` (or `""`) (key), `Count`. See **Activity** above |
 | `DataProtectionKeys` | The keys that encrypt and sign login tokens |
 
-Deleting a user also deletes their external logins, icons and saved game options. To change the tables, edit the classes in `Data/` and run `dotnet ef migrations add <Name> --project GamesLane.Server --output-dir Data/Migrations` (first `dotnet tool restore`, and `export ASPNETCORE_ENVIRONMENT=Development` so the connection string is read from user secrets). The earlier migrations were merged into one, `InitialCreate`, which creates every table; it keeps the first migration's ID, so databases created before the merge treat it as already applied. New migrations go on top of it.
+Deleting a user also deletes their external logins, icons and saved game options. To change the tables, edit the classes in `Data/` and run `dotnet ef migrations add <Name> --project GamesLane.Server --output-dir Data/Migrations` (first `dotnet tool restore`, and set `$env:ASPNETCORE_ENVIRONMENT = "Development"` so the connection string is read from user secrets). The earlier migrations were merged into one, `InitialCreate`, which creates every table; it keeps the first migration's ID, so databases created before the merge treat it as already applied. New migrations go on top of it.
 
 To browse the database, use the Neon console's SQL Editor, pgAdmin, DBeaver, or the PostgreSQL extension for VS Code (not SSMS, which is for SQL Server only). Table and column names are case-sensitive, e.g. `select * from "Users"`.
 
@@ -412,9 +412,9 @@ The scripts in `wwwroot` have no build step; `node --check <file>.js` checks a s
 _Last updated: 2026-11-15. Keep this section current; it is the hand-off point between work sessions._
 
 ### Local machine
-- macOS (Apple silicon). Repo folder: `/Users/isaacnativ/GIT/GamesLane2.0`. Before every push, check the full file list of the commit (`git show --stat HEAD`).
-- Installed: Git (commits as `inativ01`, set in the repo's own Git config), .NET 10 SDK (in `~/.dotnet`, from Microsoft's `dotnet-install.sh`), GitHub CLI (`gh`, in `~/.local/bin`); both folders are on the `PATH` in `~/.zprofile` and `~/.bash_profile`. Not installed: Homebrew, Node.js (useful for `node --check` on the scripts in `wwwroot`), Docker.
-- The original JavaScript/Firebase app is at github.com/inativ01/GamesLane (not cloned on this machine). It is separate; do not modify it.
+- Repo folder: `C:\Users\inati\source\GamesLane2.0`, moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
+- Installed: Git (user Isaac Nativ), GitHub CLI (`gh`, signed in), .NET 10 SDK, Node.js (useful for `node --check` on the scripts in `wwwroot`). Not installed: Docker.
+- The original JavaScript/Firebase app is at github.com/inativ01/GamesLane. It is separate; do not modify it.
 
 ### GitHub
 - Repo: https://github.com/inativ01/GamesLane2.0 (public), branch `main`.
