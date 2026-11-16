@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using GamesLane.Server.Auth;
 using GamesLane.Server.Data;
 using GamesLane.Server.Hubs;
@@ -554,5 +555,38 @@ public class IdentityTests
         Assert.False(admins.IsAdmin(AuthSetup.CreateUser($"guest:{SavedId:N}", "Guest", "🐼", AuthSetup.GuestKind)));
         Assert.False(admins.IsAdmin(null));
         Assert.Empty(AdminUsers.From(new ConfigurationBuilder().Build()).Ids);
+    }
+
+    // accountReady runs completeExternalSignIn as common.js loads; until its first await, it may read only constants
+    // declared before accountReady (others are not initialized yet, and reading them throws).
+    [Fact]
+    public void Finishing_a_sign_in_reads_only_constants_declared_before_the_page_loads_the_account()
+    {
+        var script = File.ReadAllText(Path.Combine(FindWwwroot(), "common.js"));
+        var accountReady = script.IndexOf("const accountReady = ", StringComparison.Ordinal);
+        var start = script.IndexOf("async function completeExternalSignIn()", StringComparison.Ordinal);
+        var beforeAwait = script[start..script.IndexOf("await ", start, StringComparison.Ordinal)];
+        var constants = Regex.Matches(beforeAwait, @"\b[A-Z][A-Z0-9_]+_KEY\b").Select(match => match.Value).Distinct().ToList();
+
+        Assert.True(accountReady > 0 && start > 0);
+        Assert.NotEmpty(constants);
+        Assert.All(constants, name =>
+        {
+            var declared = script.IndexOf($"const {name} = ", StringComparison.Ordinal);
+            Assert.True(declared >= 0 && declared < accountReady, $"{name} is declared after accountReady.");
+        });
+    }
+
+    private static string FindWwwroot()
+    {
+        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
+        {
+            var wwwroot = Path.Combine(dir.FullName, "GamesLane.Server", "wwwroot");
+            if (Directory.Exists(wwwroot))
+            {
+                return wwwroot;
+            }
+        }
+        throw new DirectoryNotFoundException("GamesLane.Server/wwwroot was not found.");
     }
 }

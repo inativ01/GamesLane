@@ -43,6 +43,12 @@ if ("serviceWorker" in navigator) {
 const TOKEN_KEY = "loginToken";
 // The login token this tab had before logging in or out. The next page load gives that user's seats to the new user.
 const PREVIOUS_TOKEN_KEY = "previousToken";
+// What the iPhone app's sign-in brings back to the reloaded page (see completeExternalSignIn). Declared before
+// accountReady, which reads them as soon as the page loads.
+const APP_SIGNIN_CODE_KEY = "appSignInCode";
+const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
+const APP_SIGNIN_NAME_KEY = "appSignInName";
+const APP_SIGNIN_AUTHORIZATION_KEY = "appSignInAuthorization";
 
 function loadToken() {
     let value = sessionStorage.getItem(TOKEN_KEY);
@@ -354,11 +360,6 @@ async function call(method, ...args) {
 // ?signin=app instead, and exchanges the code the app's sign-in window returned with, and the verifier of the
 // challenge the sign-in started with (see signInInApp); or with ?signin=apple, and exchanges the identity token of
 // Sign in with Apple, with its nonce, the user's name and Apple's authorization code (see signInWithAppleInApp).
-const APP_SIGNIN_CODE_KEY = "appSignInCode";
-const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
-const APP_SIGNIN_NAME_KEY = "appSignInName";
-const APP_SIGNIN_AUTHORIZATION_KEY = "appSignInAuthorization";
-
 async function completeExternalSignIn() {
     const signIn = params.get("signin");
     if (signIn !== "external" && signIn !== "app" && signIn !== "apple") {
