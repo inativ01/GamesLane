@@ -477,7 +477,7 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 
 ### Render (hosting)
 - Live site: https://gameslane.onrender.com
-- Free web service, built from the `Dockerfile` at the repo root; auto-deploys from `main`.
+- Free web service, built from the `Dockerfile` at the repo root; auto-deploys from `main`. The image adds the Kerberos library (`libgssapi-krb5-2`), which the .NET image leaves out; without it, .NET logs "Cannot load library libgssapi_krb5.so.2" at startup.
 - Server reads the `PORT` setting; health check at `/health`.
 - Free tier: sleeps after 15 min idle (~1 min to wake). Sessions are saved in the database, so games survive restarts and deploys (unless a deploy changes a game's saved fields, see [Sessions and seats](#sessions-and-seats)); logins survive too.
 - Environment variables (values only in Render, never in the repo):
