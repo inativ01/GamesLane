@@ -460,6 +460,7 @@ For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run i
 - **Other sites** open in Safari.
 - **Icon and launch screen:** made from `assets/logo.png` (the logo, 1024×1024) on the page background by `npm run assets`, into `ios/App/App/Assets.xcassets`.
 - **Signing:** the Simulator needs none. A phone needs a team in Xcode (App target → Signing & Capabilities): a free Apple ID (Personal Team) installs on your own phone for 7 days at a time; TestFlight and the App Store need the Apple Developer Program, whose Team ID is shown under Membership details at https://developer.apple.com/account.
+- **Xcode Cloud (TestFlight):** the Default workflow builds `main` and uploads it to TestFlight. A cloned repository has no `ios/App/App/public` or `capacitor.config.json` (they are in `ios/.gitignore`), so `ios/App/ci_scripts/ci_post_clone.sh` installs Node.js, runs `npm ci` and `npx cap sync ios` before the build, with `GAMESLANE_SERVER` not set (production). The script must stay executable in Git (`git update-index --chmod=+x`). Without it the build fails with "The file 'public' couldn't be opened" and "Command Ld failed".
 
 ## Project status and external services
 
