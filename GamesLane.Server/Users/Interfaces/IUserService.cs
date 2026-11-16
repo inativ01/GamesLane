@@ -24,6 +24,12 @@ public record UserResult(User? User, string? Error)
 public record ExternalSignInResult(User User, bool IsNew);
 
 /// <summary>
+/// A provider's refresh token for an external account, already encrypted, and the client it was issued to (see
+/// <see cref="ExternalLogin.RefreshToken"/>).
+/// </summary>
+public record ExternalLoginToken(string ClientId, string RefreshToken);
+
+/// <summary>
 /// Saved users: registration, logging in, external accounts, profiles, icons and the order of their games.
 /// </summary>
 public interface IUserService
@@ -40,8 +46,15 @@ public interface IUserService
 
     /// <summary>
     /// The user linked to an external account, created on first sign-in with the account's name and picture as defaults.
+    /// A <paramref name="token"/>, if given, replaces the one kept with the account.
     /// </summary>
-    Task<ExternalSignInResult> SignInExternalAsync(string provider, string providerKey, string? name, string? pictureUrl);
+    Task<ExternalSignInResult> SignInExternalAsync(string provider, string providerKey, string? name, string? pictureUrl,
+        ExternalLoginToken? token = null);
+
+    /// <summary>
+    /// The user's external accounts.
+    /// </summary>
+    Task<IReadOnlyList<ExternalLogin>> GetExternalLoginsAsync(Guid userId);
 
     /// <summary>
     /// The user with this ID, or null if they no longer exist. Records the user as active.

@@ -102,13 +102,19 @@ public class UserService(
     }
 
     /// <inheritdoc />
-    public async Task<ExternalSignInResult> SignInExternalAsync(string provider, string providerKey, string? name, string? pictureUrl)
+    public async Task<ExternalSignInResult> SignInExternalAsync(string provider, string providerKey, string? name, string? pictureUrl,
+        ExternalLoginToken? token = null)
     {
         var now = timeProvider.GetUtcNow();
         var login = await db.ExternalLogins.SingleOrDefaultAsync(l => l.Provider == provider && l.ProviderKey == providerKey);
         if (login is not null && await db.Users.FindAsync(login.UserId) is { } existing)
         {
             existing.LastActiveAt = now;
+            if (token is not null)
+            {
+                (login.TokenClientId, login.RefreshToken) = (token.ClientId, token.RefreshToken);
+            }
+
             await db.SaveChangesAsync();
             return new ExternalSignInResult(existing, false);
         }
@@ -121,7 +127,13 @@ public class UserService(
             CreatedAt = now,
             LastActiveAt = now,
         };
-        user.ExternalLogins.Add(new ExternalLogin { Provider = provider, ProviderKey = providerKey });
+        user.ExternalLogins.Add(new ExternalLogin
+        {
+            Provider = provider,
+            ProviderKey = providerKey,
+            TokenClientId = token?.ClientId,
+            RefreshToken = token?.RefreshToken,
+        });
         db.Users.Add(user);
 
         if (await DownloadPictureAsync(pictureUrl) is { } picture)
@@ -134,6 +146,10 @@ public class UserService(
         await db.SaveChangesAsync();
         return new ExternalSignInResult(user, true);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<ExternalLogin>> GetExternalLoginsAsync(Guid userId) =>
+        await db.ExternalLogins.AsNoTracking().Where(l => l.UserId == userId).ToListAsync();
 
     /// <inheritdoc />
     public async Task<User?> GetActiveUserAsync(Guid userId)

@@ -89,13 +89,19 @@ public static class AccountEndpoints
         });
 
         // Deletes the logged-in saved user (with their external accounts, icons and game options) and logs in a new
-        // guest, who gets their seats in every session in memory, as after logging out.
+        // guest, who gets their seats in every session in memory, as after logging out. Sign in with Apple's tokens are
+        // revoked first, as Apple requires.
         app.MapPost("/auth/delete", async (HttpContext context, IUserService users, IGameSessionStore store,
-            IHubContext<GameHub> hub, TimeProvider timeProvider) =>
+            IHubContext<GameHub> hub, TimeProvider timeProvider, AppleAccountTokens appleTokens) =>
         {
             if (AuthSetup.GetSavedUserId(context.User) is not { } id)
             {
                 return Results.Unauthorized();
+            }
+
+            foreach (var login in await users.GetExternalLoginsAsync(id))
+            {
+                await appleTokens.RevokeAsync(login);
             }
 
             await users.DeleteUserAsync(id);

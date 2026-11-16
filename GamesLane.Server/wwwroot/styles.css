@@ -720,6 +720,16 @@ a.provider-discord:hover {
     background: #4752c4;
 }
 
+a.provider-apple {
+    background: #000;
+    color: #fff;
+    box-shadow: none;
+}
+
+a.provider-apple:hover {
+    background: #333;
+}
+
 .provider-logo {
     display: inline-flex;
     width: 1.15rem;
@@ -735,7 +745,7 @@ a.provider-button.is-busy .provider-logo {
     display: none;
 }
 
-a.provider-button:not(.provider-discord).is-busy::before {
+a.provider-button:not(.provider-discord, .provider-apple).is-busy::before {
     border-color: rgba(0, 0, 0, 0.15);
     border-top-color: var(--primary);
 }

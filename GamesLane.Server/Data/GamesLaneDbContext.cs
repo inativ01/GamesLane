@@ -72,6 +72,8 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
             login.HasKey(l => new { l.Provider, l.ProviderKey });
             login.Property(l => l.Provider).HasMaxLength(50);
             login.Property(l => l.ProviderKey).HasMaxLength(200);
+            login.Property(l => l.TokenClientId).HasMaxLength(100);
+            login.Property(l => l.RefreshToken).HasMaxLength(2000);
         });
 
         modelBuilder.Entity<UserIcon>(icon =>
