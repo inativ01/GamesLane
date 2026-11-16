@@ -598,7 +598,6 @@ TRANSLATIONS.fr = {
     "Assaf!": "Assaf !",
     "Piles": "Tas",
     "Last turn: choose cards to discard, then take a card from a pile, or call Assaf.": "Dernier tour : choisis des cartes à défausser, puis prends une carte sur un tas, ou annonce Assaf.",
-    "Assaf": "Assaf",
     "You called Assaf.": "Tu as annoncé Assaf.",
     "{name} called Assaf.": "{name} a annoncé Assaf.",
     "Choose cards to discard, then take a card from a pile, or call Yaniv.": "Choisis des cartes à défausser, puis prends une carte sur un tas, ou annonce Yaniv.",

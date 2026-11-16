@@ -599,7 +599,6 @@ TRANSLATIONS["zh-TW"] = {
     "Assaf!": "Assaf！",
     "Piles": "牌堆",
     "Last turn: choose cards to discard, then take a card from a pile, or call Assaf.": "最後一回合：請選擇要棄掉的牌，然後從牌堆拿一張牌，或者喊 Assaf。",
-    "Assaf": "Assaf",
     "You called Assaf.": "你喊了 Assaf。",
     "{name} called Assaf.": "{name} 喊了 Assaf。",
     "Choose cards to discard, then take a card from a pile, or call Yaniv.": "請選擇要棄掉的牌，然後從牌堆拿一張牌，或喊 Yaniv。",

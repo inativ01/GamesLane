@@ -4972,7 +4972,8 @@ button.yaniv-pile:disabled {
 .rp-tag.yaniv { background: var(--gold); font-weight: 800; }
 .rp-tag.assaf { background: #d7262e; color: #fff; font-weight: 800; }
 
-/* Under the cards: the hand score in the middle, and on the user's turn with 7 or less, Yaniv! next to it. */
+/* Under the cards: the hand score in the middle, and on the user's turn with 7 or less, Yaniv! next to it (or, in
+   the last turn after a Yaniv call, Assaf!). */
 .yaniv-hand-foot {
     display: flex;
     flex-wrap: wrap;
@@ -4994,6 +4995,18 @@ button.yaniv-call {
     background: #d7262e;
     font-size: 1.15rem;
     font-weight: 900;
+}
+
+button.yaniv-pass {
+    padding: 0.45rem 1.4rem;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+button.yaniv-pass:not(:disabled):hover {
+    background: #d4952a;
 }
 
 .yaniv-player-score {

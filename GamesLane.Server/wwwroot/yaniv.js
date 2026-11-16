@@ -236,7 +236,7 @@ function handPanel(game, state, view, hand) {
     }
     // After a Yaniv call, a player may call Assaf: pass their last turn and keep their hand.
     if (myTurn && game.caller !== null) {
-        const pass = el("button", "secondary yaniv-pass", t("Assaf"));
+        const pass = el("button", "yaniv-pass", t("Assaf!"));
         pass.type = "button";
         pass.addEventListener("click", () => send("PassLastTurn", hand.seat));
         foot.append(pass);
