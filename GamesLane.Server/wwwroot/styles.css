@@ -5193,12 +5193,12 @@ button.yaniv-call {
     font-weight: 800;
 }
 
-.pip {
+.domino-pip {
     margin: 0.07em;
     border-radius: 50%;
 }
 
-.pip.on {
+.domino-pip.on {
     background: #1d1a17;
 }
 

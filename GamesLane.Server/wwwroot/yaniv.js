@@ -88,7 +88,7 @@ function statusText(game, state, view) {
     if (!hand) {
         return `⏳ ${t("Waiting for {name}", { name: playerName(state, game.turn) })}`;
     }
-    const action = game.caller !== null ? t("Last turn: choose cards to discard, then take a card from a pile, or pass.")
+    const action = game.caller !== null ? t("Last turn: choose cards to discard, then take a card from a pile, or call Assaf.")
         : hand.canCallYaniv ? t("Choose cards to discard, then take a card from a pile, or call Yaniv.")
             : t("Choose cards to discard, then take a card from a pile.");
     return `👉 ${view.mySeats.length > 1 ? `${playerName(state, hand.seat)}: ` : ""}${action}`;
@@ -111,7 +111,7 @@ function messageText(game, state, view) {
     if (turn?.skipped) {
         parts.push(say(turn.seat, "Your turn was skipped.", "{name}'s turn was skipped."));
     } else if (turn?.passed) {
-        parts.push(say(turn.seat, "You passed your last turn.", "{name} passed their last turn."));
+        parts.push(say(turn.seat, "You called Assaf.", "{name} called Assaf."));
     } else if (turn?.tookOpen) {
         parts.push(say(turn.seat, "You discarded {cards} and took {card}.", "{name} discarded {cards} and took {card}.",
             { cards: cardsText(turn.cards), card: cardText(turn.taken) }));
@@ -234,9 +234,9 @@ function handPanel(game, state, view, hand) {
         call.addEventListener("click", () => send("CallYaniv", hand.seat));
         foot.append(call);
     }
-    // After a Yaniv call, a player may pass their last turn and keep their hand.
+    // After a Yaniv call, a player may call Assaf: pass their last turn and keep their hand.
     if (myTurn && game.caller !== null) {
-        const pass = el("button", "secondary yaniv-pass", t("Pass"));
+        const pass = el("button", "secondary yaniv-pass", t("Assaf"));
         pass.type = "button";
         pass.addEventListener("click", () => send("PassLastTurn", hand.seat));
         foot.append(pass);

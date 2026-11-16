@@ -33,7 +33,7 @@ function dominoTile(text) {
         if (!PIP_SPOTS[value]) {
             return el("span", "domino-half number", String(value));
         }
-        return el("span", "domino-half", ...Array.from({ length: 9 }, (_, i) => el("span", PIP_SPOTS[value].includes(i) ? "pip on" : "pip")));
+        return el("span", "domino-half", ...Array.from({ length: 9 }, (_, i) => el("span", PIP_SPOTS[value].includes(i) ? "domino-pip on" : "domino-pip")));
     }));
     tile.classList.toggle("double", ends(text)[0] === ends(text)[1]);
     tile.setAttribute("role", "img");
