@@ -30,7 +30,7 @@ public static class DatabaseSetup
         {
             var npgsql = new NpgsqlConnectionStringBuilder(ToNpgsqlConnectionString(connectionString));
 
-            // Neon uses SSL, not Kerberos (GSS) encryption, and the server image does not include the Kerberos library.
+            // Neon uses SSL, not Kerberos (GSS) encryption.
             if (!npgsql.ContainsKey("GSS Encryption Mode"))
             {
                 npgsql.GssEncryptionMode = GssEncryptionMode.Disable;
