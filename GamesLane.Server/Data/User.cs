@@ -110,6 +110,18 @@ public class ExternalLogin
     /// The user the account belongs to.
     /// </summary>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The client the provider issued <see cref="RefreshToken"/> to (for Apple, the app's bundle ID or the website's
+    /// Services ID), or null.
+    /// </summary>
+    public string? TokenClientId { get; set; }
+
+    /// <summary>
+    /// The provider's refresh token, encrypted, kept only so it can be revoked when the user deletes their account
+    /// (Sign in with Apple requires it), or null.
+    /// </summary>
+    public string? RefreshToken { get; set; }
 }
 
 /// <summary>

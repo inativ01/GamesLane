@@ -77,8 +77,9 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
     }
 
     /// Signs in with Apple in Apple's own sheet, asking for the user's name only. `nonce` is put in the identity token
-    /// (the page sends it hashed, and the server checks it). Resolves with `{ identityToken, name }`; Apple gives the
-    /// name only on the first sign-in. Rejects with the code CANCELLED when the user closes the sheet.
+    /// (the page sends it hashed, and the server checks it). Resolves with `{ identityToken, name, authorizationCode }`;
+    /// Apple gives the name only on the first sign-in, and the server redeems the code for a refresh token to revoke
+    /// when the account is deleted. Rejects with the code CANCELLED when the user closes the sheet.
     @objc func signInWithApple(_ call: CAPPluginCall) {
         guard let nonce = call.getString("nonce"), !nonce.isEmpty else {
             call.reject("A nonce is required.")
@@ -106,7 +107,8 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
             return
         }
         let name = credential.fullName.map { PersonNameComponentsFormatter().string(from: $0) } ?? ""
-        call.resolve(["identityToken": token, "name": name])
+        let code = credential.authorizationCode.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+        call.resolve(["identityToken": token, "name": name, "authorizationCode": code])
     }
 
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {

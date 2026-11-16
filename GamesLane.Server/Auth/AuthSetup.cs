@@ -22,9 +22,10 @@ namespace GamesLane.Server.Auth;
 public record AuthProviders(IReadOnlyList<string> Names);
 
 /// <summary>
-/// An external account just signed in with: the provider (e.g. Google), the account's ID there, and its name and picture.
+/// An external account just signed in with: the provider (e.g. Google), the account's ID there, its name and picture,
+/// and the provider's refresh token to keep with it, if any (see <see cref="AppleAccountTokens"/>).
 /// </summary>
-public record ExternalAccount(string Provider, string Key, string? Name, string? PictureUrl);
+public record ExternalAccount(string Provider, string Key, string? Name, string? PictureUrl, ExternalLoginToken? Token = null);
 
 /// <summary>
 /// The body of <c>POST /auth/app-signin</c>: the code the iPhone app's sign-in window returned with, and the verifier
@@ -129,6 +130,7 @@ public static class AuthSetup
     private const string KindClaim = "kind";
     private const string IconClaim = "icon";
     private const string PictureClaim = "picture";
+    private const string RefreshTokenClaim = "refresh_token";
     private const string ChallengeItem = "appChallenge";
     private const string TokenScheme = BearerTokenDefaults.AuthenticationScheme;
     private const string ExternalScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -219,7 +221,7 @@ public static class AuthSetup
                 options.KeyId = apple.KeyId!;
                 options.GenerateClientSecret = true;
                 options.PrivateKey = (_, _) => Task.FromResult(apple.PrivateKey!.AsMemory());
-                options.Events.OnCreatingTicket = AddAppleName;
+                options.Events.OnCreatingTicket = AddAppleNameAndToken;
                 options.Events.OnRemoteFailure = HandleRemoteFailure;
             });
         }
@@ -228,6 +230,7 @@ public static class AuthSetup
         builder.Services.AddSingleton(apple);
         builder.Services.AddSingleton<UsedAppSignInCodes>();
         builder.Services.AddSingleton<AppleIdentityTokens>();
+        builder.Services.AddSingleton<AppleAccountTokens>();
 
         // At most 10 login or registration attempts per minute from one address, so passwords cannot be guessed quickly.
         builder.Services.AddRateLimiter(options =>
@@ -294,11 +297,16 @@ public static class AuthSetup
         app.MapGet(AppReturnPath, () => Results.Redirect("/?signin=failed"));
 
         app.MapPost("/auth/apple-app", async (AppleAppSignInRequest request, HttpContext context, IUserService users,
-            AppleIdentityTokens tokens) =>
-            await tokens.ValidateAsync(request.IdentityToken, request.Nonce) is { } subject
-                ? await SignInExternalAsync(context, users, new ExternalAccount(Apple, subject, NullIfEmpty(request.Name), null))
-                : Results.Unauthorized())
-            .RequireRateLimiting(LoginRateLimit);
+            AppleIdentityTokens tokens, AppleAccountTokens accountTokens) =>
+        {
+            if (await tokens.ValidateAsync(request.IdentityToken, request.Nonce) is not { } subject)
+            {
+                return Results.Unauthorized();
+            }
+
+            var token = await accountTokens.RedeemAppCodeAsync(request.AuthorizationCode);
+            return await SignInExternalAsync(context, users, new ExternalAccount(Apple, subject, NullIfEmpty(request.Name), null, token));
+        }).RequireRateLimiting(LoginRateLimit);
 
         app.MapGet("/.well-known/apple-app-site-association", (AppleSettings apple) => Results.Json(apple.SiteAssociation()));
     }
@@ -494,13 +502,19 @@ public static class AuthSetup
     }
 
     /// <summary>
-    /// Adds the name Apple posts on a user's first Sign in with Apple on the website (it is not in Apple's token).
+    /// Adds the name Apple posts on a user's first Sign in with Apple on the website (it is not in Apple's token), and
+    /// Apple's refresh token, to keep and revoke when the account is deleted.
     /// </summary>
-    private static Task AddAppleName(OAuthCreatingTicketContext context)
+    private static Task AddAppleNameAndToken(OAuthCreatingTicketContext context)
     {
         if (context.Request.HasFormContentType && AppleUserName(context.Request.Form["user"]) is { } name)
         {
             context.Identity?.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, context.Options.ClaimsIssuer));
+        }
+
+        if (!string.IsNullOrEmpty(context.RefreshToken))
+        {
+            context.Identity?.AddClaim(new Claim(RefreshTokenClaim, context.RefreshToken));
         }
 
         return Task.CompletedTask;
@@ -510,17 +524,24 @@ public static class AuthSetup
 
     /// <summary>
     /// The external account brought back by the short-lived sign-in cookie, which is then removed, and the sign-in's
-    /// properties; the account is null if there is none.
+    /// properties; the account is null if there is none. Apple's refresh token, if any, comes encrypted for the database.
     /// </summary>
     private static async Task<(ExternalAccount? Account, AuthenticationProperties? Properties)> ReadExternalAccountAsync(HttpContext context)
     {
         var result = await context.AuthenticateAsync(ExternalScheme);
         await context.SignOutAsync(ExternalScheme);
         var account = result.Principal?.FindFirst(ClaimTypes.NameIdentifier);
-        return result.Succeeded && account is not null
-            ? (new ExternalAccount(account.Issuer, account.Value, result.Principal!.FindFirstValue(ClaimTypes.Name),
-                result.Principal.FindFirstValue(PictureClaim)), result.Properties)
-            : (null, null);
+        if (!result.Succeeded || account is null)
+        {
+            return (null, null);
+        }
+
+        var token = account.Issuer == Apple && result.Principal!.FindFirstValue(RefreshTokenClaim) is { Length: > 0 } refreshToken
+            ? context.RequestServices.GetRequiredService<AppleAccountTokens>()
+                .Protect(context.RequestServices.GetRequiredService<AppleSettings>().ServicesId, refreshToken)
+            : null;
+        return (new ExternalAccount(account.Issuer, account.Value, result.Principal!.FindFirstValue(ClaimTypes.Name),
+            result.Principal.FindFirstValue(PictureClaim), token), result.Properties);
     }
 
     /// <summary>
@@ -528,7 +549,7 @@ public static class AuthSetup
     /// </summary>
     private static async Task<IResult> SignInExternalAsync(HttpContext context, IUserService users, ExternalAccount account)
     {
-        var signIn = await users.SignInExternalAsync(account.Provider, account.Key, account.Name, account.PictureUrl);
+        var signIn = await users.SignInExternalAsync(account.Provider, account.Key, account.Name, account.PictureUrl, account.Token);
         var user = CreateUser(signIn.User.Id.ToString(), signIn.User.DisplayName, signIn.User.Icon, account.Provider);
         return Results.Ok(new { accessToken = IssueToken(context, user), isNew = signIn.IsNew });
     }

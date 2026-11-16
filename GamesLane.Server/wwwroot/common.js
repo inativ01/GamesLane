@@ -353,10 +353,11 @@ async function call(method, ...args) {
 // and exchanges the short-lived sign-in cookie for this tab's login token. In the iPhone app, the page reloads with
 // ?signin=app instead, and exchanges the code the app's sign-in window returned with, and the verifier of the
 // challenge the sign-in started with (see signInInApp); or with ?signin=apple, and exchanges the identity token of
-// Sign in with Apple, with its nonce and the user's name (see signInWithAppleInApp).
+// Sign in with Apple, with its nonce, the user's name and Apple's authorization code (see signInWithAppleInApp).
 const APP_SIGNIN_CODE_KEY = "appSignInCode";
 const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
 const APP_SIGNIN_NAME_KEY = "appSignInName";
+const APP_SIGNIN_AUTHORIZATION_KEY = "appSignInAuthorization";
 
 async function completeExternalSignIn() {
     const signIn = params.get("signin");
@@ -369,11 +370,13 @@ async function completeExternalSignIn() {
     const code = sessionStorage.getItem(APP_SIGNIN_CODE_KEY);
     const verifier = sessionStorage.getItem(APP_SIGNIN_VERIFIER_KEY);
     const name = sessionStorage.getItem(APP_SIGNIN_NAME_KEY);
-    [APP_SIGNIN_CODE_KEY, APP_SIGNIN_VERIFIER_KEY, APP_SIGNIN_NAME_KEY].forEach((key) => sessionStorage.removeItem(key));
+    const authorizationCode = sessionStorage.getItem(APP_SIGNIN_AUTHORIZATION_KEY);
+    [APP_SIGNIN_CODE_KEY, APP_SIGNIN_VERIFIER_KEY, APP_SIGNIN_NAME_KEY, APP_SIGNIN_AUTHORIZATION_KEY]
+        .forEach((key) => sessionStorage.removeItem(key));
 
     showBusy(t("Signing you in…"), 0);
     const response = await (signIn === "app" ? postJson("/auth/app-signin", { code, verifier })
-        : signIn === "apple" ? postJson("/auth/apple-app", { identityToken: code, nonce: verifier, name })
+        : signIn === "apple" ? postJson("/auth/apple-app", { identityToken: code, nonce: verifier, name, authorizationCode })
         : fetch("/auth/external", { method: "POST" })).catch(() => null);
     hideBusy();
     if (response?.ok) {
@@ -403,10 +406,11 @@ async function secretAndHash() {
 }
 
 // After signing in in the iPhone app, reloads the page with ?signin=<kind> to finish (see completeExternalSignIn).
-function finishSignInInApp(kind, code, verifier, name = "") {
+function finishSignInInApp(kind, code, verifier, name = "", authorizationCode = "") {
     sessionStorage.setItem(APP_SIGNIN_CODE_KEY, code);
     sessionStorage.setItem(APP_SIGNIN_VERIFIER_KEY, verifier);
     sessionStorage.setItem(APP_SIGNIN_NAME_KEY, name);
+    sessionStorage.setItem(APP_SIGNIN_AUTHORIZATION_KEY, authorizationCode);
     const url = new URL(location.href);
     url.searchParams.set("signin", kind);
     location.replace(url.pathname + url.search);
@@ -443,7 +447,7 @@ async function signInWithAppleInApp() {
     try {
         const { secret, hash } = await secretAndHash();
         const result = await appPlugin.signInWithApple({ nonce: hash });
-        finishSignInInApp("apple", result.identityToken, secret, result.name ?? "");
+        finishSignInInApp("apple", result.identityToken, secret, result.name ?? "", result.authorizationCode ?? "");
         return true;
     } catch (err) {
         if (err?.code !== "CANCELLED") showError(t("Sign-in did not complete. Please try again."));

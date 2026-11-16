@@ -329,6 +329,85 @@ public class IdentityTests
         Assert.Null(await AppleTokens().ValidateAsync(null, Verifier));
     }
 
+    [Fact]
+    public async Task Apples_keys_are_fetched_again_once_when_a_token_has_a_new_key()
+    {
+        var oldKey = new ECDsaSecurityKey(ECDsa.Create(ECCurve.NamedCurves.nistP256)) { KeyId = "old-key" };
+        var keys = new AppleKeys(oldKey, _appleKey);
+        var tokens = new AppleIdentityTokens(Apple, new UsedAppSignInCodes(TimeProvider.System), keys);
+
+        Assert.Equal(AppleSubject, await tokens.ValidateAsync(AppleToken(), Verifier));
+        Assert.Equal(1, keys.Refreshes);
+    }
+
+    [Fact]
+    public async Task An_identity_token_is_refused_when_Apples_keys_cannot_be_fetched()
+    {
+        var tokens = new AppleIdentityTokens(Apple, new UsedAppSignInCodes(TimeProvider.System), new AppleKeys(null));
+
+        Assert.Null(await tokens.ValidateAsync(AppleToken(), Verifier));
+    }
+
+    [Fact]
+    public void The_client_secret_for_Apple_is_signed_with_the_teams_key_for_the_client()
+    {
+        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var apple = Apple with { KeyId = "ABC123DEFG", PrivateKey = ecdsa.ExportPkcs8PrivateKeyPem() };
+        var tokens = new AppleAccountTokens(apple, null!, new EphemeralDataProtectionProvider(), TimeProvider.System,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<AppleAccountTokens>.Instance);
+
+        var secret = new JsonWebToken(tokens.ClientSecret("com.gameslane.app"));
+
+        Assert.Equal(("ABC123DEFG", "ES256"), (secret.Kid, secret.Alg));
+        Assert.Equal(("7Z69JFQYCV", "com.gameslane.app"), (secret.Issuer, secret.Subject));
+        Assert.Equal([AppleIdentityTokens.Issuer], secret.Audiences);
+        Assert.True(secret.ValidTo > DateTime.UtcNow && secret.ValidTo <= DateTime.UtcNow.AddMinutes(6));
+        Assert.True(new JsonWebTokenHandler().ValidateTokenAsync(secret.EncodedToken, new TokenValidationParameters
+        {
+            ValidIssuer = "7Z69JFQYCV",
+            ValidAudience = AppleIdentityTokens.Issuer,
+            IssuerSigningKey = new ECDsaSecurityKey(ecdsa),
+        }).Result.IsValid);
+    }
+
+    [Fact]
+    public async Task Deleting_an_account_revokes_only_kept_Apple_tokens_and_without_a_key_reports_it()
+    {
+        var tokens = new AppleAccountTokens(Apple, null!, new EphemeralDataProtectionProvider(), TimeProvider.System,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<AppleAccountTokens>.Instance);
+        var kept = tokens.Protect(Apple.BundleId, "refresh-token");
+
+        Assert.NotEqual("refresh-token", kept.RefreshToken);
+        Assert.True(await tokens.RevokeAsync(new ExternalLogin { Provider = AuthSetup.Google, ProviderKey = "1" }));
+        Assert.True(await tokens.RevokeAsync(new ExternalLogin { Provider = AuthSetup.Apple, ProviderKey = "1" }));
+        Assert.False(await tokens.RevokeAsync(new ExternalLogin
+        {
+            Provider = AuthSetup.Apple, ProviderKey = "1", TokenClientId = kept.ClientId, RefreshToken = kept.RefreshToken,
+        }));
+        Assert.Null(await tokens.RedeemAppCodeAsync("code"));
+    }
+
+    // Apple's keys: the old ones until refreshed, then the new ones; or failing to be fetched (null).
+    private sealed class AppleKeys(SecurityKey? before, SecurityKey? after = null) : IConfigurationManager<OpenIdConnectConfiguration>
+    {
+        public int Refreshes { get; private set; }
+
+        public Task<OpenIdConnectConfiguration> GetConfigurationAsync(CancellationToken cancel)
+        {
+            var key = Refreshes == 0 ? before : after;
+            if (key is null)
+            {
+                throw new InvalidOperationException("Apple could not be reached.");
+            }
+
+            var configuration = new OpenIdConnectConfiguration { Issuer = AppleIdentityTokens.Issuer };
+            configuration.SigningKeys.Add(key);
+            return Task.FromResult(configuration);
+        }
+
+        public void RequestRefresh() => Refreshes++;
+    }
+
     private AppleIdentityTokens AppleTokens()
     {
         var configuration = new OpenIdConnectConfiguration { Issuer = AppleIdentityTokens.Issuer };
