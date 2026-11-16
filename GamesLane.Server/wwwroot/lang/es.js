@@ -598,7 +598,6 @@ TRANSLATIONS.es = {
     "Assaf!": "¡Assaf!",
     "Piles": "Montones",
     "Last turn: choose cards to discard, then take a card from a pile, or call Assaf.": "Último turno: elige cartas para descartar y luego toma una carta de un montón, o di Assaf.",
-    "Assaf": "Assaf",
     "You called Assaf.": "Dijiste Assaf.",
     "{name} called Assaf.": "{name} dijo Assaf.",
     "Choose cards to discard, then take a card from a pile, or call Yaniv.": "Elige cartas para descartar y luego toma una carta de un montón, o canta Yaniv.",

@@ -598,7 +598,6 @@ TRANSLATIONS.he = {
     "Assaf!": "אסף!",
     "Piles": "ערימות",
     "Last turn: choose cards to discard, then take a card from a pile, or call Assaf.": "תור אחרון: בחרו קלפים לזריקה, ואז קחו קלף מאחת הערימות, או קראו אסף.",
-    "Assaf": "אסף",
     "You called Assaf.": "קראת אסף.",
     "{name} called Assaf.": "קריאת אסף מ־{name}.",
     "Choose cards to discard, then take a card from a pile, or call Yaniv.": "בחרו קלפים לזריקה ואז קחו קלף מאחת הערימות, או קראו יניב.",
