@@ -1,259 +1,237 @@
 # GamesLane user manual
 
-How to use GamesLane and the rules of each game. For how it is built, see the [developer guide](developer-guide.md).
+How to play on GamesLane. The rules of each game are in the [appendix](#appendix-game-rules).
 
 - [Getting started](#getting-started)
-- [Installing the app](#installing-the-app)
-- [Users and logging in](#users-and-logging-in)
-- [Main screen](#main-screen)
-- [Languages](#languages)
-- [Help](#help)
-- [Sessions](#sessions)
-- [Session lobby](#session-lobby)
+- [Your profile](#your-profile)
+- [Playing with family and friends](#playing-with-family-and-friends)
 - [Public games](#public-games)
-- [Game screen](#game-screen)
-- [Disconnections and seats](#disconnections-and-seats)
+- [During a game](#during-a-game)
 - [Game options](#game-options)
-- [Games](#games): [Tic-tac-toe](#tic-tac-toe), [Backgammon](#backgammon), [The Gang](#the-gang), [Rich man, poor man](#rich-man-poor-man), [Wazoo](#wazoo), [Final Card](#final-card), [Yaniv](#yaniv), [Hearts](#hearts), [Spades](#spades), [Dominoes](#dominoes)
+- [Playing each game](#playing-each-game): [Tic-tac-toe](#tic-tac-toe), [Backgammon](#backgammon), [The Gang](#the-gang), [Rich man, poor man](#rich-man-poor-man), [Wazoo](#wazoo), [Final Card](#final-card), [Yaniv](#yaniv), [Hearts](#hearts), [Spades](#spades), [Dominoes](#dominoes)
+- [Installing the app](#installing-the-app)
+- [Languages](#languages)
+- [Help and feedback](#help-and-feedback)
+- [Appendix: game rules](#appendix-game-rules)
 
 ## Getting started
 
-1. Open the site (e.g. https://gameslane.onrender.com). You are logged in automatically as a guest; to use an account, open your profile (your icon and name in the top bar) and log in.
-2. To play with family and friends, choose **Create a game** under **Private games**, then a game. A new **session** opens, with its game code and a join link.
-3. Send the link (or the code) to the others. A logged-in user who opens it for the first time while the session is in its lobby is seated at once if a seat is free; anyone else watches, and can tap **Sit here** to take a seat.
-4. Once enough seats are taken, any seated player presses **Start**.
+1. Open https://gameslane.onrender.com. You can play straight away as a guest.
+2. Under **Private games**, tap **Create a game** and choose a game.
+3. Send the others the invite link, or tell them the game code.
+4. Once enough players are seated, any player taps **Start**.
 
-To play with other people on GamesLane, use **Public games** instead (see [Public games](#public-games)).
+To play with people you don't know, use [Public games](#public-games) instead.
 
-A typical setup is a shared screen (such as a TV or laptop) connected as a spectator to show the board, while each player uses their own phone to view their hand and play. To try several players on one computer, use a separate browser tab for each user.
+The top bar of every page has the GamesLane name (back to the main screen), **?** for help, the language flag, and your icon and name, which open your profile.
 
-## Installing the app
+**Tip:** open the game on a shared screen (a TV or laptop) to show the table, and let each player play on their own phone.
 
-GamesLane can be added to a phone's or computer's home screen, and then opens like an app: with its own icon, full screen, without the browser's address bar. It is the same site, so it is always up to date, and nothing is downloaded from an app store.
+## Your profile
 
-Under the main menu, the main screen offers it: "Get GamesLane on your home screen." and under it **Install app** in the middle and **Not now** on the right (on the left in Hebrew). In Chrome and Edge (Android and computers), **Install app** opens the browser's install dialog; on iPhone and iPad, where only the Share menu can install it, it shows the three steps below. The offer is not shown in the installed app, once the app is installed, in browsers that cannot install it, or after **Not now** (remembered in that browser). The browser's menu always works too:
+Tap your icon and name in the top bar.
 
-- **Android (Chrome):** open the site, tap the ⋮ menu, then **Install app** (or **Add to Home screen**). Chrome may also offer it in a banner at the bottom.
-- **iPhone and iPad (Safari):** open the site in Safari, tap the Share button (the square with an arrow), scroll down and tap **Add to Home Screen**, then **Add**. Since iOS 16.4 this also works from Chrome and other browsers, from their Share menu.
-- **Computer (Chrome or Edge):** click the install icon at the right end of the address bar, or the browser's menu, then **Install GamesLane**.
+- **Guest or account:** you start as a guest, with a random name and icon kept in this browser only. To keep your profile, game order and game options on any device, tap **Log in or create account**: create a GamesLane account, or sign in with Apple, Google, Microsoft or Discord. GamesLane collects no email, so a forgotten password cannot be reset.
+- **Name and icon:** ✎ changes your name; tap your icon to choose another. With an account, you can also upload a picture.
+- **Preferences:**
+  - **Chat in games:** turn it off to hide the chat.
+  - **Sounds:** turn it off to silence GamesLane. Browsers play sounds only once you have tapped the page.
+  - <a id="card-style"></a>**Card style:** **GamesLane** (each suit in its own color) or **Classic cards**.
+- Tap **Save** to keep your changes, or **Cancel**.
+- **Log out** and **Delete account** are at the bottom. Logging in or out during a game keeps your seats.
+- You stay logged in for 30 days after your last visit. An account not used for 30 days is deleted.
 
-To remove it, remove it like any other app (on Android, long-press the icon and choose **Uninstall**; on iPhone, long-press it and choose **Remove App**). Without a connection, the app shows a short message with **Try again** instead of the browser's error page.
+## Playing with family and friends
 
-On iPhone and iPad, the installed app keeps its own data, apart from Safari's: it starts as a new guest, so log in to your account there, or choose your name and icon again.
+- **Create:** under **Private games**, tap **Create a game** and choose a game. You are seated at once. To change the order of the list, drag a game by its ⋮⋮ handle.
+- **Invite:** the lobby shows the invite link with **Copy link** and **Share…**. The game code is in the bar under the top bar (🔑; tap it to copy it). On an iPhone with the GamesLane app, the link opens in the app.
+- **Join:** open the link, or enter the code on the main screen and tap **Join**. You are seated at once if a seat is free; otherwise you watch.
+- **Seats:** tap **Sit here** to take a seat, and tap your seat to leave it and watch. You can take more than one seat, to play for several players on one device.
+- **Start:** once enough players are seated, any player taps **Start**.
 
-## Users and logging in
+  | Game | Players |
+  | --- | --- |
+  | Tic-tac-toe, Backgammon | 2 |
+  | The Gang | 3–8 |
+  | Rich man, poor man | 4–12 |
+  | Wazoo | 1–8 |
+  | Final Card | 2–10 |
+  | Yaniv | 2–4 |
+  | Hearts, Spades | 4 |
+  | Dominoes | 2–4 (2–8 in Mexican Train) |
 
-- A **user** is a person using the site. There is always exactly one user per browser tab; different tabs may have different users.
-- A user has a **user ID**, a **display name** and an **icon** (a built-in emoji, or an uploaded picture).
-- There are three kinds of user:
-  - **Guest:** anyone who has not logged in with an account. A new visitor automatically becomes a guest named `Guest-` and a random 3-digit number (e.g. `Guest-042`), with a random built-in icon. A guest's information is stored only in their browser's local storage, never on the server.
-  - **Registered user** (stored in the server's database, like Google users): a unique username (3–20 letters, digits or `_`, any case) and a password (at least 8 characters), plus a display name and icon. Passwords cannot be reset, since no email is collected.
-  - **Google** (or Apple, Microsoft or Discord): the account is saved by provider and account ID. The display name and icon default to the account's name and picture (for Discord, the name shown on Discord; Apple gives only the name, and only the first time, so the icon starts as the default one); changing them affects only GamesLane. GamesLane never asks Apple for the email address.
-- The profile (the user's icon and name in the top bar) shows the user's icon, display name and how they logged in (Guest, GamesLane account, or e.g. Google account). The ✎ next to the name changes the name; tapping the icon opens the icons to choose from. Under **Preferences**, two switches turn settings on or off (both on at first), and the card style is chosen by tapping a sample of each style. Changes take effect only with **Save** (enabled once something changed); **Cancel** or Escape discards them.
-  - **Chat in games:** with it off, the chat button (💬) is hidden in every session, and the user gets no chat count, pop-ups or chime (see [Chat](#chat)).
-  - **Sounds (chat, games and reading aloud):** with it off, the site plays no sound at all: no chat chime, no game sounds (e.g. the button ticks, the shuffles and dice, the cards, checkers and chips, the turn chime, the Yaniv and Final Card calls, The Gang's chip alert, Hearts' breaking glass and regal doom, Spades' breaking glass, the confetti fanfare), and Rich man, poor man's **Read throws aloud** is greyed out ("Sound is off in your profile.").
-  - <a id="card-style"></a>**Card style:** how playing cards look in every card game (The Gang, Rich man, poor man, Yaniv, Hearts, Spades), for this user only. **GamesLane** (the default): each suit has its own color (red hearts, green clubs, yellow diamonds, blue spades); the rank and suit are in block letters in the top left and (upside down) bottom right corners; the middle shows a very large, faint silhouette of the suit with the rank on it as a flowing script letter drawn as a road, like the L in the GamesLane logo (black asphalt with a dashed yellow line, rimmed in the suit's color). The joker shows the GamesLane logo in the middle, on a faint octagon in the four suit colors, and JOKER written downwards in the top left and bottom right corners, each letter in one of the four suit colors. **Classic cards:** red hearts and diamonds, black clubs and spades, suit symbols laid out as on ordinary playing cards, framed figures on the jack, queen and king, and a 🃏 joker. Saving the profile redraws the cards. Face-down cards (e.g. Yaniv's closed pile, The Gang's shared cards not yet dealt, and Final Card's draw pile) show the GamesLane card back in both styles.
-  - Registered and Google users' settings are saved with their account, so they follow them to any device; a guest's are remembered in their browser. The chat's own **Chat** and **Sound** boxes change the same settings.
-- At the top of a guest's profile, a note says that an account keeps their profile, game order and game options on any device, and **Log in or create account** opens **Log in**, **Create account** (which keeps the display name and icon chosen below it in the profile), and a button per sign-in provider (Apple first, then Google, Microsoft, Discord; only those set up on the server are shown, except that the iPhone app always offers Apple). In the iPhone app, **Sign in with Apple** opens Apple's own sign-in sheet (with Face ID or the device passcode), and the other providers' sign-in opens in Apple's sign-in window over the app (iPhone first asks to allow GamesLane to use the site to sign in); once done, the sheet or window closes and the app is logged in, and closing it cancels. Registered and Google users can upload a picture as their icon (under the icons, the page shrinks it to 128×128 before uploading) and **Log out**, at the bottom of the profile, which makes them a new guest with a random name and icon. Next to it, **Delete account** (after a confirmation) deletes their account for good, with its uploaded picture and saved game options (for an Apple account, it also tells Apple to end GamesLane's access, so GamesLane leaves the list of apps using Sign in with Apple in the Apple account's settings), and also makes them a new guest with a random name and icon, who keeps their seats in the games they are in (as after logging out). Admins also get **Admin page** and **All cards** (every GamesLane card at several sizes) next to Log out.
-- Registered and Google users stay logged in for 30 days after their last visit. Their information is deleted from the database automatically after 30 days of inactivity.
-- Guests do not expire: a guest keeps the same name and icon for as long as the browser keeps its local storage. A guest exists only in the browser where they were created; clearing the browser's site data ends them, and the next visit creates a new guest.
-- Changing the display name or icon also updates it on any seat the user holds.
-- Logging in, creating an account or logging out mid-game keeps your seats: they move to the new user, with the new name and icon. Other tabs that still use the previous user become spectators. Only sessions that are open on the server at the time move; a seat in a session nobody has open stays with the previous user.
-
-## Main screen
-
-- A splash screen (the portrait or landscape picture, to suit the screen) is shown for 5 seconds when the app is first opened in a browser tab, and for 1 second whenever the GamesLane name in the top bar is used later (on every page, the main screen too); then the main screen appears. It is not shown again when the page reloads (e.g. after logging in).
-- The top bar of every page shows the GamesLane name picture and, on the right, the help button (**?**, on the main screen and the game pages; see [Help](#help)), the language flag, and the user's icon and name, which open their profile (see [Users and logging in](#users-and-logging-in)).
-- Two columns (one under the other on narrow screens such as phones):
-  - **Private games** (family and friends): **Create a game**, and a box to join a game by its code.
-  - **Public games:** **Create a game** and **Join a game** (see [Public games](#public-games)).
-- Each **Create a game** and **Join a game** button shows the list of games to choose from, with **Back to the main menu** (the browser's Back button also returns to the menu). Each game shows its picture, its name with its number of players at the end of the same line (on the right; on the left in Hebrew), and a short description under them.
-- Users can reorder the games by dragging a game by its ⋮⋮ handle (mouse or touch; Alt+↑/↓ with the keyboard). The order is the same in all three lists: changing it in one changes it in all. A saved user's order (registered or Google) is saved with their account; a guest's is remembered in the browser. Games not in a saved order (all of them for users who never reordered the games, and new ones) come after the others, the most played on GamesLane in the last 30 days first (games played as often keep their usual order).
-- **Admin page:** admins (the accounts listed in the server's settings) have an **Admin page** link in their profile, next to **Log out**. The page (in English) shows how many games were started each day over the last N days (30 by default, up to 365; type the number and press **Show**): a line per game in its own color, with a checkbox per game to show or hide its line (remembered on the device), and that day's counts when hovering over (or tapping) a day; under it, each game's total for those days, most played first, and the total of all games. A game counts when it starts (Start, each Play again, or when the last seat fills), on its day in UTC; nothing about who played is kept. Under it, **Activity** shows, for the same days, anonymous counts: the visits per day (a browser's first visit of the day to the main screen or a game's page), a table per game (pages opened, games created, players joining someone else's game, games started and finished, the share of started games finished, invite links opened, and players joining a private game they were invited to), and the visits by how long since the previous visit (new, back within 7 days, back after 7 days or more), by source (a campaign's `utm_source`, the site the visitor came from, an invite link, or direct) and by browser language. Anyone else opening the page is told it is only for admins. Admin accounts are never deleted for inactivity.
-- **Coming back to a game:** when the main screen opens, a user who holds a seat in a public game in progress that waits for them (their seat is Reconnecting or Away) is taken straight back to it (to the most recently active one, if there are several). For private games in progress that wait for them, the main screen shows "You have a game in progress: …" with **Return** and **Leave** (which gives up their seats).
-- A link to the privacy policy, in the chosen language (`/privacy.html` in English, e.g. `/privacy.fr.html` in French).
-- <a id="feedback"></a>**Send feedback** (next to the privacy policy, and in the game menu ☰): a form to report a problem, share an idea or send another comment, for every user (guests too). The user picks the kind (**Problem**, **Idea** or **Other**), writes the comment (up to 2000 characters), and can tick **Include my name** to add their display name. The form warns that comments are posted publicly on GitHub, so they should not include personal details. **Send comment** posts it as an issue in the project's GitHub repository, with the page and language it was sent from; the form then thanks the user, with a link to see the issue on GitHub. A user can send up to 5 comments an hour. The link appears only when the site is set up to post comments (see the developer guide's Feedback setup).
-
-## Languages
-
-- English, Hebrew, Spanish (Mexico), French (France), Portuguese (Brazil), Simplified Chinese (mainland China) and Traditional Chinese (Taiwan). Every page is translated (including the profile dialog, the session lobby, the game options and the server's messages); the top bar shows the current language's flag; tapping it opens a menu of the languages, and choosing one reloads the page in it.
-- Hebrew pages read from right to left (the backgammon board stays as it is).
-- The choice is remembered in the browser; until the user chooses, the first of the browser's preferred languages that GamesLane has (e.g. a browser set to French opens in French), otherwise English. A browser set to Chinese opens in Simplified Chinese, or in Traditional Chinese when it is set to the Traditional script or to Taiwan, Hong Kong or Macau.
-- Some games have a local name rather than a translation of the English one, e.g. Tic-tac-toe is Gato in Spanish, Morpion in French, Jogo da Velha in Portuguese and 井字棋 / 井字遊戲 in Chinese. The Gang, Wazoo and Yaniv keep their names; Final Card is translated (e.g. Última carta, Dernière carte, 最后一张).
-- In Chinese, Rich man, poor man reads the throws aloud with a Mandarin voice (mainland China for Simplified, Taiwan for Traditional, otherwise any Mandarin voice on the device).
-
-## Help
-
-- **?** in the top bar (on the main screen and every game page) opens the help, in the chosen language, on the side of the page (on the right, or on the left in Hebrew; on a phone, the whole screen). ✕ or Escape closes it.
-- The help has one section for the main screen, one for getting a game started (the session lobby), and one per game. Each section is a title that unfolds; the help opens with the sections about the current page unfolded: the main screen's on the main screen, and on a game page that game's (with the lobby's first while the lobby is shown). The other sections stay folded, so any game's rules can be read from anywhere.
-- Each section is short, with the rest folded under **More details**. For a game: **How to play** (the rules in brief), then **More details** with the full rules and the game's options, then **On this screen** (how to play it on GamesLane), followed by its own **More details** when there is more to say about the screen.
-- On a game page, the lobby's section starts with how seats work (users are usually seated at once; tap your seat or **Leave my seat (watch)** to watch, **Sit here** to play again) and has a **📖 How to play this game** link that unfolds the game's section and scrolls to it (not on the help page of its own).
-- The first time a user opens the main screen, or a game's page, in a browser, a tip under **?** says "New here? Tap ? for help." (on a game page, "New to this game? Tap ? for how to play.") for 10 seconds (on the main screen, after the splash screen); tapping it opens the help. It is not shown again on that page in that browser.
-- The help is also a page of its own: `/help.html` in English, e.g. `/help.fr.html` in French.
-
-## Sessions
-
-- A **session** is one instance of a specific game, identified by a unique code.
-- A session is **private** (family and friends) or **public**. A private session can be created from the main screen, joined by entering its code, or opened directly from its URL. A public session is created or joined only from the main screen (see [Public games](#public-games)).
-- A session's status is **Lobby** (the session lobby), **Playing** (the game screen) or **Over** (the game has ended by itself and shows its result). Each game also has its own phases inside Playing, e.g. the exchange in Rich man, poor man or the reveal in The Gang. See [Disconnections and seats](#disconnections-and-seats).
-- The top of a session's page stays in place while the page scrolls. Under the top bar, the **session bar** (as tall as the top bar) shows the game's picture and name, the user's role in words (e.g. "You: ⚪ White", "You: X", "You: Player 3", or "👁 Watching"), the game code (🔑; clicking it copies it to the clipboard), the chat button (💬, see [Chat](#chat)), and a menu button (☰), in the session lobby and during a game. The menu shows the invite link with **Copy** (and **Share** where the browser supports it), how many players are seated and how many are watching (e.g. "2 players · 3 watching", counting every open page of a user without a seat), and for players **Leave my seat (watch)** (**Leave game** in a public game) and, during a game, **End game for everyone** (after confirming). When it does not all fit on one line (e.g. on a phone), the user's role is not shown; if the rest still does not fit, the session bar takes two lines: the game's picture and name, then the rest. The picture and name are on the left (on the right in Hebrew), and the other items on the right (on the left in Hebrew), on either line. On a phone turned sideways, the top bar and the session bar are hidden to leave more of the screen for the game; a small tab at the top right (top left in Hebrew), under the status bar during a game, shows them (▾) and hides them again (▴). During a game, a **status bar** under it shows the game's status and messages to the user; it has no buttons. While the user waits for others, the status bar is grey; when they have something to do (e.g. their move, or a button waiting for them such as **Next round**, **Next game**, **Next heist**, **Next hand** or **Play again**), it turns gold, with a larger text, and flashes once, and when their turn comes a short two-note chime plays (Rich man, poor man plays its own) and the phone vibrates (in the iPhone app, and in browsers that can, such as Chrome on Android; Safari does not let pages vibrate). The vibration does not follow the profile's sound setting; the phone's own settings can turn it off. The color alone shows whose turn it is, so the text has no "waiting" or "your turn" icons. The buttons of the turn (Backgammon's 🎲 **Roll**, **Double**, **Take**, **Drop**, **Undo**, **Done** and **Last move**) and the buttons between rounds and games (**Next round**, **Next game**, **Next heist**, **Next hand**, **Play again**, **Back to the lobby**) are full-size buttons in a row on the game screen, next to the table: under the board in Backgammon and Tic-tac-toe, under the dice in Wazoo, between the table and the user's cards in Final Card, Yaniv, Hearts, Spades and Rich man, poor man (and the user's tiles in Dominoes), and under the user's hands (with **Reveal next hand**) in The Gang. In games that keep a score without a players' table (Tic-tac-toe, Backgammon, Wazoo; Final Card, Yaniv, Hearts, Spades and Dominoes show their scores in the players' table instead), a score row under the status, in the same color, shows the round or game number (and the draws, or the match length), and each player's score (and pip count in Backgammon), with the player to act outlined. The round or match line is on its own; the players share the line under it when both fit, otherwise each has a line. The game options are changed only in the session lobby; during a game they are listed at the bottom of the table that players can hide (The Gang, Rich man, poor man, Final Card, Yaniv, Spades, Dominoes), so **Hide table** hides them too, or at the bottom of the game screen in the other games.
-- **Confetti:** when a player succeeds, confetti falls over their screen with a short rising fanfare, once per success (reloading the page does not show it again; the confetti is not shown when the device asks for reduced motion, but the fanfare still plays; the fanfare is silent with sound off in the profile, and, as with every sound, until the user has tapped the page): winning a round of Tic-tac-toe, a game of Backgammon, a game of Wazoo (or finishing a game alone), a hand or the game of Final Card (or emptying their hand in a pyramid), a round or the game of Yaniv, winning a game of Hearts or shooting the moon, their team winning a game of Spades, playing their last tile or winning the game in Dominoes, and emptying their hand in Rich man, poor man. Only the user holding the successful seat sees it, except in The Gang, a cooperative game, where everyone (players and observers) gets confetti each time the gang opens a vault.
-- <a id="sounds-and-animations"></a>**Sounds and animations** (made by the browser, except the recorded dice throw, card shuffle and checker move; every sound follows the profile's sound setting, and plays only once the user has tapped the page; the animations are not shown when the device asks for reduced motion). On every page, every button taps very softly when tapped; tapping a card in your hand gives a soft "tock", and a card landing on the table (played, drawn or taken) answers it with a lower "tock-tuck". In the card games (The Gang, Rich man, poor man, Final Card, Yaniv, Hearts, Spades), each time the rules shuffle cards, everyone sees two halves of a deck riffled together in the middle of the screen, with the sound of a riffle: at every deal (each game, hand, round or heist), and also when Yaniv's open pile or Final Card's discard pile is shuffled into a new pile, and when The Gang's Con Artist gathers the pocket cards. In Backgammon and Wazoo, every roll rattles and the dice tumble; a single die thrown (Backgammon's opening roll, or a Wazoo roll with the other four dice kept) has its own sound. Cards played or thrown slide or fly to the table from their player (from the user's own hand, from the player's line in the players' table while it is shown, or from the top of the screen), cards drawn or taken fly from their pile to the player, a checker slides from its point to its new place with a click, a chip taken in The Gang clinks and pops into place, shared cards and revealed hands flip in, a box scored in Wazoo glows, and a Tic-tac-toe mark pops in with a knock, and in Dominoes a tile played slides from its player to its place and a tile drawn flies face down to its player, each with the checker's knock. All this is shown to everyone at the table, players and watchers, but not when the page first opens on a game already under way.
-- Sessions where a game has started are saved, so a game survives a server restart and players can come back after a break. A session is kept for 6 hours after everyone has left it; after that, its code no longer works.
-- <a id="chat"></a>**Chat:** everyone with the session open (players and watchers, in private and public sessions, guests too) can chat, in the lobby and during a game. 💬 in the session bar opens the chat, on the side of the page (on the right, or on the left in Hebrew; on a phone, the whole screen), and ✕ or Escape closes it. Each message shows its writer's icon, name and time; the user's own messages are on the other side. A message has 1 to 300 characters. The session keeps its latest 100 messages, so whoever opens it later (or comes back) sees them. While the chat is closed, each message from someone else adds to the unread count on 💬, which flashes, shows the message in a pop-up for 5 seconds (tapping it opens the chat), and plays a short chime. While the chat is open, new messages only appear in it (with the chime if the browser tab is hidden). In the chat, **Chat** and **Sound** change the user's profile settings (see [Users and logging in](#users-and-logging-in)): unticking **Chat** closes the chat and hides 💬 (e.g. to ignore the chat in a public game), until the user turns it on again in their profile; unticking **Sound** turns off all sounds, including the chime (e.g. on a shared TV). Browsers play the chime only once the user has tapped or pressed a key on the page.
-- A session whose game never started is deleted once nobody has had it open for 30 seconds, or for 10 minutes for a private session with players seated (so friends have time to open the link). A public session with nobody seated is deleted at once.
-
-## Session lobby
-
-- A screen shared by all games, showing the game's **seats**.
-- Any user can take a seat. Users do not choose a seat: the taken seats are always the first ones, followed by a single empty seat (**Sit here**), until all seats are taken. A user may take more than one seat (and then sees the private information of all of them); a user who already has a seat and taps **Sit here** is first asked to confirm ("You already have a seat. Take this seat too, to play for one more player on this device?"), and then keeps their seat and takes this one too.
-- A user can leave a seat by tapping it. The seats after it then move up one, so there are no gaps.
-- On every page except the main screen, the GamesLane name in the top bar goes back to the main screen (for players, this gives up their seats).
-- A user who loses their connection (closed tab, phone asleep, network lost) keeps their seats for 60 seconds, and gets them back if they return in time; their seat shows a spinner meanwhile. In the lobby, the seats are then freed, as if they had left. During a game, see [Disconnections and seats](#disconnections-and-seats).
-- Creating a private session seats the creator at once.
-- A logged-in user opening a private session for the first time while it is in its lobby is seated at once in the next empty seat, if there is one. A user who then leaves their seat (or opens the session again later) watches until they tap **Sit here**.
-- Each game has its own number of seats and minimum to start:
-
-  | Game | Seats | Needed to start |
-  | --- | --- | --- |
-  | Tic-tac-toe, Backgammon | 2 | 2 |
-  | The Gang | 8 | 3 |
-  | Rich man, poor man | 12 | 4 |
-  | Wazoo | 8 | 1 (it can be played alone) |
-  | Final Card | 10 | 2 |
-  | Yaniv | 4 | 2 |
-  | Hearts | 4 | 4 |
-  | Spades | 4 | 4 |
-  | Dominoes | 4 (8 in Mexican Train) | 2 |
-
-- When the minimum number of seats is taken, a **Start** button appears (**New game** after the first game). Any seated user can start the game.
-- While the session is in the lobby, an **Invite friends** panel shows the join link (`/join/{code}`), with **Copy link** and **Share…** buttons where the browser supports them. On an iPhone with the GamesLane app, opening a join link (e.g. from Messages) opens the game in the app; without the app, it opens in Safari.
-- In the lobby, everyone sees the chosen [game options](#game-options) on a big **Game options:** button; anyone in the session can change them.
-- Anyone not seated is a **spectator**.
-
-The lobby of a public game differs in some ways; see [Public games](#public-games).
+- **Coming back:** a game that has started is saved, and you can come back to it up to 6 hours after everyone has left. The main screen offers your games in progress, with **Return** and **Leave**.
 
 ## Public games
 
-Public games let users play with other people on GamesLane. Private games work as described above.
+Play with other people on GamesLane.
 
-- **Creating:** **Create a game** under **Public games**, then a game. The creator is seated at once.
-- **Joining:** **Join a game** under **Public games**, then a game. The user is seated at once in a random public game of that kind that is in its lobby with a free seat (it may be one they are already in, e.g. from another tab, as an additional seat). If there is none, they can **Create a new game** or go **Back to the main menu**.
-- **No code and no spectators:** a public game shows no game code, invite link or share buttons, and cannot be joined by code or link. Only its seated players can open it; there is no **Sit here**, and no seat offer during a game.
-- **The creator** (shown as "Creator" on their seat) alone changes the [game options](#game-options) (others can only see them) and presses **Start** in the lobby. If the creator's seat is freed, the next seated player becomes the creator.
-- **Starting:**
-  - Games with a fixed number of players (Tic-tac-toe, Backgammon, Hearts, Spades) start by themselves when a player joins and fills the seats.
-  - Games with a minimum and a maximum (The Gang, Rich man, poor man, Wazoo, Final Card, Yaniv, Dominoes): the creator can press **Start** once the minimum is seated; the game starts by itself when a player joins and fills the last seat.
-  - Returning to the lobby with all seats taken does not restart the game by itself.
-- **Leaving:** a player leaves with **Leave game** (on their seat in the lobby, or in the ☰ menu during a game) or by going back to the main screen; either way they give up their seats. During a game this ends the game at once for everyone (except Rich man, poor man and Yaniv, which go on): everyone goes back to the lobby, which says e.g. "Ada left the game.", and random players can join again.
-- **Disconnections:** as in private games, a disconnected player keeps their seats for 60 seconds, then is Away. In the lobby their seat is then freed. During a game the other players see the "Waiting for …" pop-up when the game needs the missing player (see [Disconnections and seats](#disconnections-and-seats)); nobody can take the seat. In Yaniv, the turn of a player who is Away or has left is skipped by itself. A player whose seat was freed cannot open the game again: they go to the main screen, which says "You are no longer in this game."
-- **Joining a game in progress** is not possible, including Rich man, poor man's **Ask to join**.
+- **Create a game** under **Public games**, then choose a game. As its creator, you choose the [game options](#game-options) and tap **Start**.
+- **Join a game** seats you in a game of your choice that is waiting for players. If there is none, you can create one.
+- A public game has no code or invite link, and nobody can watch it.
+- It starts by itself once all its seats are taken; the creator can also start it once enough players are seated.
+- **Leave game** (on your seat, or in the ☰ menu) gives up your seat. During a game, this ends the game for everyone and returns to the lobby, except in Rich man, poor man and Yaniv, which go on.
+- If your seat is freed while you are away, you cannot return to that game.
 
-## Game screen
+## During a game
 
-- Once the game starts, the session lobby is replaced by a game-specific screen.
-- Seated players may see a different version of the screen than spectators (for example, their own cards in hand). Spectators never see any player's private information.
-- Anyone can watch an active game. During a game, the only seats that can be taken are those of absent players, by a newcomer opening the game (see below).
-- A seated user can **leave their seat** (**Leave my seat (watch)** in the ☰ menu; they become a spectator) or **leave** (go back to the main screen, giving up their seats).
-- A player can **End game for everyone** (in the ☰ menu) at any time during a game (after confirming): everyone goes back to the session lobby, the seats move up, others can join, and **Start** begins a new game.
-- When a game ends (The Gang, a backgammon match, Wazoo, Final Card, Yaniv, Hearts, Spades and Dominoes), anyone seated can choose **Play again** while at least the minimum number of players are seated, or go **Back to the lobby** (for everyone). A new game is played by whoever is seated (any number between the minimum and the maximum). If fewer than the minimum remain, the session goes back to the session lobby automatically.
-- Tic-tac-toe never ends by itself; players leave their seats or the game when they are done.
+- **The game bar**, under the top bar, shows the game, your seat, the game code (🔑), the chat (💬) and the menu (☰). On a phone held sideways, the top bars are hidden to leave room for the game: tap the small ▾ tab to show them.
+- **The status bar** says what is happening. It turns gold when it is your turn or a button is waiting for you, with a chime, and the phone vibrates where it can.
+- **The ☰ menu:** the invite link, how many play and watch, **Leave my seat (watch)**, **End game for everyone**, and **Send feedback**.
+- <a id="chat"></a>**Chat:** 💬 opens the chat, for everyone in the game. New messages show on 💬 and in a short pop-up. In the chat, untick **Chat** to hide it, or **Sound** to turn off all sounds.
+- **Watching:** anyone without a seat watches. Watchers never see the players' hidden cards.
+- **The table:** in most card and tile games, **Hide table** hides the players' table (for example when a shared screen shows it), and **Show table** shows it again.
+- **After a game:** **Play again**, or **Back to the lobby**.
+- **Leaving:** the GamesLane name in the top bar takes you back to the main screen and gives up your seats.
 
-## Disconnections and seats
+### If you lose the connection
 
-- **Seat states:**
-
-  | State | Meaning | Starts | Ends |
-  | --- | --- | --- | --- |
-  | **Present** | The holder is connected | Taking the seat, or reconnecting | The holder disconnects or leaves |
-  | **Reconnecting** | The holder lost their connection less than 60 seconds ago; the seat shows a spinner | Disconnecting | Coming back (Present), or 60 seconds (Away) |
-  | **Away** | The holder has been disconnected for 60 seconds or more; the seat is still theirs and shows a spinner | 60 seconds after disconnecting | The holder comes back (at any time), a newcomer takes the seat, or the game ends |
-  | **Vacant** | Nobody holds the seat | **Leave my seat**, going back to the main screen, or an Away seat freed (below) | A newcomer takes it |
-
-  An **absent** seat is one that is Reconnecting, Away or Vacant: during a game, a disconnected player is absent at once.
-- **When a disconnection is noticed:** closing the tab or leaving the page disconnects at once. When the browser cannot tell the server (e.g. a phone app closed or asleep, or a lost network), the server notices within about 10 seconds. A phone that freezes the page after switching to another app may therefore show as Reconnecting after about 10 seconds; the page reconnects by itself when the player comes back.
-- **Only while a game is in progress** are Away seats kept. In the session lobby, and once a game is Over, an Away seat is freed.
-- **Coming back:** after a refresh or a dropped connection, the page reconnects by itself and the player keeps their seats: in the session lobby, as long as they return within 60 seconds; during a game, at any time, unless a newcomer has taken their seat.
-- **The game goes on without the absent player until it needs them:** in turn-based games (Tic-tac-toe, Backgammon, Wazoo, Final Card, Rich man, poor man, Yaniv, Hearts, Spades, Dominoes), when it is their turn (in Backgammon, also when they must take or drop a double); where everyone acts at once (The Gang's steps, chips and votes, Rich man, poor man's card exchange, Hearts' passing), once every present player has done their part. Then every present player sees a **Waiting for …** pop-up naming the absent players, with a spinner and one button:
-  - **Skip player** (Rich man, poor man, Yaniv and Dominoes, while playing): the absent player passes this turn (in Rich man, poor man, if they were to start the round, the next player in turn starts it; in Yaniv, their hand stays as it is; in Dominoes, they do not draw, and in Mexican Train their train gets a marker). The pop-up comes back on their next turn.
-  - **End game** (every other game, and Rich man, poor man's card exchange), after confirming: everyone goes back to the session lobby.
-
-  If the absent player comes back before anyone presses the button, the pop-up closes and their turn goes on as normal.
-- **Taking an absent seat:** players cannot take an absent seat. A logged-in user without a seat who opens a private game in progress, or whose page reconnects to it, while it has absent seats, is offered them: a **Join this game?** dialog lists the absent seats, each with **Take this seat**, and **Watch**. The list is always up to date: a seat taken by someone else, or whose player comes back, leaves it at once, and when none is left the dialog closes and the user watches. Several users can have the dialog open at once. **Watch** closes it until the user opens the game again or their page reconnects; a watcher whose page stays connected is not offered seats that become absent later. Whoever takes a seat continues that player's game (their cards, checkers or chips); its holder loses it: when they come back, they are offered the absent seats left, if any, like anyone without a seat.
-
-- **Ending:** any one present player can **End game for everyone** during a game (after confirming), which takes everyone back to the session lobby. The session also goes back to the lobby with **Back to the lobby** after a game is Over, and when there are too few players for the next game (**Play again** with fewer than the minimum seated, or Rich man, poor man's exchange with fewer than 4).
-- **Reopening a session later:** a session nobody has had open for a while counts everyone as disconnected since then. In the lobby, their seats are freed; during a game, their seats are Away and they get them back by opening the session again (within 6 hours after everyone has left it, see [Sessions](#sessions)).
+- The page reconnects by itself and you keep your seats: in the lobby, if you are back within a minute; during a game, at any time, unless someone else has taken your seat.
+- The game goes on without a missing player until it needs them. Then the others see **Waiting for …**, with **Skip player** (Rich man, poor man, Yaniv and Dominoes) or **End game**.
+- In a private game, someone who opens the game while a seat is missing its player is offered **Take this seat**, to continue that player's game.
 
 ## Game options
 
-A game can offer **options**, i.e. rule variants (so far The Gang's, backgammon's, Final Card's, Rich man, poor man's, Yaniv's, Spades' and Dominoes'). A **choice** option is one of its choices. A **set** option (e.g. The Gang's challenge cards) is a list of choices, all on by default (for cards, each with its picture: tap a card to turn it on or off; a card that is off is greyed out). Some options are shown only when another option has a certain value (or one of a few values) and is itself shown (e.g. the card options only in Advanced mode, or Final Card's score target only in US Style with **Score target**). In some games (Dominoes' **Style**) the options also set how many players can play; options that allow fewer players than are seated cannot be chosen ("With these options, at most 4 players can play."), and the lobby then offers only that many seats.
+- In the lobby, the **Game options:** button shows the chosen options. Tap it to change them: anyone in a private game, only the creator in a public game.
+- The options apply to the next game. During a game, they are listed at the bottom of the screen.
+- With an account, you can save the options as your preferences for that game, and load them back. Games you create start with them.
 
-- In the session lobby, the chosen options are shown on a big button: **Game options:** and a bulleted list, one option per line, aligned to the left (to the right in Hebrew). During a game, the same list is shown at the bottom of the game screen, in every game that has options. Anyone in the session can press it and change the options in the dialog it opens, spectators too. In a public game, only its creator can change them; other players can only see them. They apply to the next new game; a game in progress keeps the options it started with.
-- Saved users (registered or Google, not guests) can **save** the options as their preferences for that game, and **load** them back in the dialog. A session starts with its creator's saved preferences.
+## Playing each game
 
-## Games
+How to play each game on GamesLane. For the rules, see the [appendix](#appendix-game-rules).
 
 ### Tic-tac-toe
 
-2 players. After each board, the wins and draws are kept and players start the next round. The starting player alternates: X starts the odd rounds, O the even ones.
+- On your turn, tap an empty square.
+- After each round, the next one starts; the score shows the wins and draws. The game goes on until the players leave.
 
 ### Backgammon
 
-2 players, standard rules. The first seat plays white, the second black.
-
-- **A match** to 1, 3, 5, 7 or 9 points (option **Match length**, default 5). A single game scores 1 point, a gammon (the loser bore off no checker) 2, a backgammon (and still has a checker on the bar or in the winner's home board) 3, times the cube. When the match ends, **Play again** starts a new one; between games, **Next game**.
-- **Opening roll:** at the start of each game, each player rolls their own die (tap the board, or 🎲 **Roll** under the board); each die stays on its player's side. On a tie, both dice stay on view until a player rolls again, and both roll again. The player with the higher die starts: they roll both dice for their first turn (and may not double before it).
-- **A turn:** tap the board (or press 🎲, the **Roll** button) to roll, move the checkers, then press **Done**. 🎲 **Roll**, **Double**, **Take**, **Drop**, **Undo**, **Done** and **Next game** are buttons under the board, shown when they can be used. The dice tumble for one second when rolled, with the rattle of dice; between turns, the last roll stays on the board, faded. **Undo** takes back the last checker moved in the turn (a combined move counts as one checker moved per die). Tap a checker and then one of its highlighted destinations; a checker that can only go to one place moves at once.
-- **Combined moves:** a checker can also move by both dice at once (e.g. 13 to 5 with 5-3, or by two, three or four dice with doubles), as one of its destinations. This is offered only when the checker can get there, and only when every way of getting there gives the same result (e.g. not when going by the 3 first hits an opposing checker and going by the 5 first does not; then the dice are played one at a time). With doubles, the fewest dice are used.
-- **Last move:** a **Last move** button under the board draws the last turn's checker moves on the board as numbered arrows; pressing it again hides them. The rules are enforced: a checker on the bar must enter first, a point with two or more opposing checkers is blocked, a single opposing checker is hit, bearing off only once all checkers are home (with a higher number only when no checker is on a higher point), as many dice as possible must be used (all four with doubles), and if only one die can be used, it must be the larger one when possible.
-- **Automatic turns:** if no checker can move, the turn passes; if there is only one way to play the dice, the game plays it and the turn ends. **Last move** shows what was played.
-- **Doubling cube** (option, on by default; not in 1-point matches): before rolling, the player may **Double** (the button under the board, or tap the cube, which is outlined when they may); the other player **Take**s (the cube doubles and they own it) or **Drop**s (losing the game at the cube's value). Crawford rule: no doubling in the game after a player first comes within one point of winning the match.
-- **The board** looks like a wooden board: a dark walnut frame and bar, a light maple playing field with dark and ivory inlaid points, and a dark tray, with wood grain. It is seen from each player's own side of the table: the board is turned around (rotated, not mirrored) between the players. Black's home board is at the bottom right, bearing off into the tray on the right, with its two back checkers at the top right; white's home board is at the bottom left, bearing off into the tray on the left, with its two back checkers at the top left. Spectators see white's side, and a user holding both seats sees the side of the seat that must act. It shows the dice on the mover's side (used dice faded) and the cube; the match length, game number, scores and pip counts are in the status bar's score row. Moves are not highlighted on the board (the previous turn's are shown only with **Last move**); the checker just moved slides from where it was to its new place, lifted, and lands with a click. The board scales to fit the screen, in portrait or landscape, and on a TV: it shrinks so that the whole page (scores, board and buttons) is visible without scrolling.
+- Tap the board, or 🎲 **Roll**, to roll (for the opening roll too).
+- Tap a checker, then one of its highlighted points. A checker that can go to only one place moves at once. Where both dice can move one checker with the same result, that point is offered too.
+- **Undo** takes back the last checker moved; **Done** ends your turn.
+- When no checker can move, or there is only one way to play, the game plays your turn for you.
+- Before rolling, **Double** (or tap the cube) offers a double; the other player answers **Take** or **Drop**.
+- **Last move** shows the last turn's moves as numbered arrows.
+- You see the board from your side. The score shows the match, the scores and the pip counts.
 
 ### The Gang
 
-3–8 players. The cooperative poker game by John Cooper and Kory Heath. Each heist:
-
-- Every player gets 2 pocket cards, shown only on their own screen. Five shared cards are dealt: none at first, then 3, 4 and 5 as the stages go on.
-- Four betting stages (white, yellow, orange, red). In each, every player takes a numbered chip, from 1 (weakest hand) up to the number of players (strongest), from the middle or from another player. Tapping your own chip returns it to the middle. Under the player's hand, the stage's chips are in one line, sized to fit it, each with the icon of the player holding it (their name shows when pointing at the chip; 🔒 marks a locked chip). Players are numbered 1 to the number of players in seat order: each hand is titled "Player N", and the table's chip list shows the numbers. Next to the player's cards are the chips they took in this heist's earlier stages. Once every player holds a chip, a **Confirm** button appears in the top right corner of the player's hand, after their pocket cards and chips (on their first hand, for a user with several seats); the stage ends when everyone has pressed it. Once pressed it shows **Confirmed**, greyed (tap it again to undo), and the table marks confirmed players with 👍. Any chip change clears everyone's confirmation (and hides the button again while a chip is in the middle). A user with several seats confirms once, for all their hands.
-- **Chip taken:** when another player takes one of your chips, your device plays a short alert sound (after you have tapped the page once, as browsers require, and unless sound is off in your profile). Nothing plays when you take a chip between your own seats.
-- Players work out their hand's strength themselves; its value is only shown when the hands are revealed. With the option **My hand's ranking** (Hidden by default, or Shown), each player sees next to their own cards the ranking their pocket cards make with the shared cards so far (e.g. "Pair", then "Two pair" once more shared cards appear); nobody else sees it.
-- Hands are then revealed one at a time, from the lowest red chip to the highest, each with its ranking and its five cards, most important first, in bold (e.g. "Two pair: 9, 9, 5, 5, K"). A hand at least as strong as the one before it has a thick green frame; a weaker one has a thick red frame, with the first reason in red: the ranking if it is lower, otherwise the first lower card values (e.g. "Two pair: 9, 9, 5, 5, **7**" after "Two pair: 9, 9, 5, 5, K"). If any hand is weaker than the one before it, the alarm goes off; otherwise the vault opens. Equal hands may be in either order.
-- 3 vaults win the game; 3 alarms lose it.
-- **Jokers** (option, off by default, in both modes): the deck has two jokers.
-  - **In a hand:** before the betting, a player dealt a joker gets two cards and taps the one to keep; the other is discarded. If one of the two is a joker, they either keep the other card, or tap the joker to swap it for two more cards (each choice is between two cards). With two jokers in hand, they are swapped one after the other. The betting starts once every joker is swapped. Everyone sees that a player swapped a joker (🃏 next to their name in the chip table), but not which cards.
-  - **Cards drawn later** (Motion Detector, Laser Tripwires, Hacker): a joker is swapped the same way, and the stage cannot end until it is.
-  - **On the table:** a joker is replaced by two cards, stacked in one column in a frame, the later card covering the earlier one except its top, so its corner (rank and suit) still shows, and lying at a slight angle; if one of them is the other joker, it is replaced too, and all three cards show. Each hand uses at most one card of the frame; the game always counts the best hand it allows.
-- **Advanced mode** (option **Mode**; Basic is the default) adds challenge and specialist cards. The first heist gets 0–3 challenge cards (option, default 1); after a successful heist, one challenge card is added, and after a failed heist, one specialist card. Cards stay in play for the rest of the game. They are drawn at random from the enabled ones (all by default; players can turn cards off), each at most once per game. As in the original game, any combination can come up; with Quick Access (no white chips), Motion Detector and Laser Tripwires have no effect. The option **Cards that cancel each other** (Allow by default, or Avoid) keeps such pairs from being in play together. The cards in play lie on the table (for players, in the table below their hand, above the chip table; for observers, on the right of the table, or at the bottom on narrow screens), each showing a picture (drawn for this site from the card's name, not taken from the original game), its kind and its name, with the ones added for this heist marked **New**; tapping a card opens it on the table: it grows, with a bigger picture and what it does, and tapping it again closes it. Each user's open cards stay open as the game goes on. With both Investor and Math Whiz in play, both facts are shown. The full card texts are in [`the-gang/`](the-gang/).
-- All 10 challenge cards and all 10 specialist cards are included. Motion Detector and Laser Tripwires are checked when the first 3 shared cards appear; the player who gets new pocket cards is shown to everyone. That player gets a panel saying their cards were replaced, with a **Got it** button; the stage cannot end until they press it. Their white chip no longer counts: it is crossed out in red wherever it is shown (the chip table, next to their hand). Locked chips (Noise Sensors, Ventilation Shaft) stay with whoever takes them first: they cannot be taken, swapped or returned. With Blackout, earlier stages' chips are hidden: the chip table shows each as a chip of its stage's color with "?" instead of the number. The specialist cards that start "Once the pocket cards have been dealt" (Coordinator, Con Artist, Investor, Math Whiz) are not optional and happen by themselves in every heist, before the betting: first Coordinator (everyone picks a card to pass to the next player; it moves once all have picked), then Con Artist (everyone confirms they have seen their cards, then all pocket cards are shuffled and dealt again), then Investor and Math Whiz show every player's count or total to everyone, in the chip table.
-- **The "Decide which of you…" specialist cards are optional.** The group may use any of them, in any order, at any time during the betting, each at most once per heist; when everyone is ready in the red stage, the hands are revealed however many are left unused. Next to a player's hand, each unused one is a folded panel.
-- **Group decisions** (Informant, Getaway Driver, Mastermind, Hacker, Jack, Muscle, Retina Scan, Fingerprint Scan): any player proposes a player and/or a value; everyone sees it, and it takes effect once every voter has pressed the 👍 (any change clears the agreement). Each user votes once, for all their seats, and the count is per user (e.g. "👍 1 of 3" with 3 users); the same goes for Con Artist's "I've seen my cards". Informant's player then secretly shows one card to one other player; Hacker's player draws a card and Jack's player gets the suitless Jack card (never part of a flush), and each then discards one; the stage cannot end until they have. Getaway Driver and Mastermind show the answer to everyone. Muscle's hand beats every hand of the same ranking at the reveal; a green **💪 Muscle** badge marks that player's own hand (next to their pocket cards) and, at the reveal, their revealed hand. The scans are decided just before the strongest hand is revealed, by everyone except the user who holds that hand's seat, for all of their seats, since that hand is on their screen (if one user plays every seat, only the strongest hand's seat sits out); a wrong guess fails the heist. If the hands are already out of order (including the strongest hand, not yet revealed), the heist fails anyway, so the scans are skipped.
-- **What the cards did is shown in the chip table, not on the cards.** Under each player's name, one line per card, starting with the card's name: e.g. "Motion Detector: new pocket cards were dealt", "Investor: 2 face cards", "Math Whiz: 18 total", "Informant: showed a card to …", "Hacker: drew a card and discarded one", "Getaway Driver: High card", "Mastermind: one 9", and the scans' guesses about the strongest hand with a green **PASS** or red **FAIL** badge. A note under the chip table shows group decisions under way (e.g. "Mastermind: deciding, 1 of 3 agreed").
-- **Unused cards are faded** (grey and see-through): Motion Detector or Laser Tripwires once it is known that it did not go off (when the first 3 shared cards appear, or at once with Quick Access), optional specialist cards the group has not used yet in this heist, and scans that are not needed.
-- **Spectator screen** (e.g. a TV): the whole table fits on the screen without scrolling. The table is sized to the largest that fits, so it grows on large screens and shrinks on small ones; on landscape screens the heist's cards are in a column on the right, and on very wide screens (or without heist cards) the chips and the revealed hands sit side by side.
-- **A player's screen** splits the table in two. The top (the shared cards) is always shown, above the player's hand, in large size: as large as five of them fit in one row (up to a maximum size). The rest of the table (the heist number, vaults and alarms, the chips in the middle, the heist's challenge and specialist cards in large size, the chip table, the revealed hands and the game options) is below the hand; on wide screens, the top and the hand are on the left and the rest of the table on the right.
-- Players can **Hide table** (and **Show table** again) to hide the rest of the table, e.g. when a shared screen shows it; the heist number, vaults and alarms stay shown. The browser remembers the choice. Until they choose, it is hidden on phones and tablets and shown on computers.
+- Your pocket cards are on your screen only, under the shared cards.
+- To take a chip, tap it in the middle or at another player; tap your own chip to put it back. You hear an alert when someone takes your chip.
+- Once everyone holds a chip, tap **Confirm** (tap it again to undo). Any chip change clears everyone's confirmation.
+- With jokers, tap the card you keep.
+- In Advanced mode, tap a challenge or specialist card to read it. For a decision, any player proposes; it takes effect once everyone has tapped 👍. The chip table shows what each card did.
+- On a shared screen such as a TV, the whole table fits on the screen.
 
 ### Rich man, poor man
 
+- Tap cards of one number, then **Select** to throw them, or **Pass**. When you start a round, tapping a card picks all your cards of that number (tap a picked card to throw fewer); otherwise it picks as many as are needed.
+- When it is your turn, your hand glows and the status bar says what to do.
+- In the exchange, the poorer player confirms with **Give these cards**; the richer player taps the cards to give, then **Give**.
+- During the exchange, a watcher can **Ask to join**; any player can **Accept** (choosing the newcomer's place) or **Decline**.
+- **Read throws aloud**, on a screen without a seat such as a TV, says each throw out loud.
+
+### Wazoo
+
+- Tap 🎲 **Roll**, up to three times. Between rolls, tap dice to keep them; tap again to let them go.
+- Your open boxes show what the dice would score there: tap one to score. The game asks before scoring 0.
+
+### Final Card
+
+- On your turn, tap a card to play it; the cards you cannot play are greyed. A Change Color asks for the color.
+- To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw). If the card can be played, play it or tap **Keep the card**.
+- **Final Card!** is always under your cards: one tap protects you and catches the others, when either applies.
+- **Challenge!** appears when you can challenge a Change Color +4, and **Close TAKI** during your TAKI.
+- The status bar shows the color to play and the direction (↻ or ↺).
+
+### Yaniv
+
+- Tap the cards to discard (outlined in red if they cannot go together), then tap the pile to take a card from.
+- **Yaniv!** appears next to your hand score when it is 7 or less. After a Yaniv call, **Assaf!** keeps your hand as it is.
+- In a public game, the turn of a player who is away is skipped by itself.
+
+### Hearts
+
+- To pass, tap 3 cards and **Pass 3 cards**; the status bar says to whom.
+- On your turn, tap a card to play it; the cards you cannot play are greyed.
+- **Claim all** appears when you lead and your cards win every remaining trick. Everyone's cards are then shown, so all can check.
+
+### Spades
+
+- On your turn to bid, choose **Your bid** (a number, or **Nil**) and tap **Bid**. With Blind Nil, your cards start face down: tap **Blind Nil**, or **Show my cards**.
+- On your turn, tap a card to play it; the cards you cannot play are greyed. Your partner sits across from you, at the top.
+- **Claim all** works as in Hearts.
+
+### Dominoes
+
+- On your turn, tap a tile to play it; the tiles you cannot play are greyed. When it fits in more than one place, tap where: **Left end** or **Right end**, or **Play here** on a train.
+- When you cannot play, **Draw a tile** or **Pass**.
+
+## Installing the app
+
+GamesLane can be added to your home screen, and then opens like an app. The main screen offers **Install app**; the browser's menu works too:
+
+- **Android (Chrome):** the ⋮ menu, then **Install app** (or **Add to Home screen**).
+- **iPhone and iPad (Safari):** the Share button, then **Add to Home Screen**, then **Add**.
+- **Computer (Chrome or Edge):** the install icon at the end of the address bar, then **Install GamesLane**.
+
+On iPhone and iPad, the installed app starts as a new guest: log in to your account there.
+
+## Languages
+
+Tap the flag in the top bar to choose English, Hebrew, Spanish, French, Portuguese, Simplified Chinese or Traditional Chinese. Your choice is remembered; until you choose, GamesLane follows your browser's language.
+
+## Help and feedback
+
+- **?** in the top bar opens the help about the page you are on. Every game's rules are in it too.
+- <a id="feedback"></a>**Send feedback** (at the bottom of the main screen, and in the ☰ menu): report a problem or share an idea. Comments are posted publicly on GitHub, so do not include personal details.
+- The **Privacy policy** is linked at the bottom of the main screen.
+
+## Appendix: game rules
+
+The rules of each game, with its options, for reference.
+
+### Tic-tac-toe rules
+
+2 players, X and O, take turns marking a square; three in a row wins the round. X starts the odd rounds, O the even ones.
+
+### Backgammon rules
+
+2 players, standard rules: white (the first seat) and black.
+
+- **A match** to 1, 3, 5, 7 or 9 points (option **Match length**, default 5). A game scores 1 point, a gammon 2 (the loser bore off no checker), a backgammon 3 (and still has a checker on the bar or in the winner's home board), times the cube.
+- **Opening roll:** each player rolls one die (again on a tie); the higher die starts, and rolls both dice for their first turn.
+- **Moving:** a checker on the bar must enter first. A point with two or more opposing checkers is blocked; a single opposing checker is hit. Bearing off starts once all your checkers are home. Use as many dice as you can (all four with doubles); if only one die can be used, use the larger one when possible.
+- **Doubling cube** (option, on by default; not in 1-point matches): before rolling, a player may double; the other takes (and owns the cube) or drops (and loses the game at the cube's value). Crawford rule: no doubling in the game after a player first comes within one point of winning the match.
+
+### The Gang rules
+
+3–8 players. The cooperative poker game by John Cooper and Kory Heath. Each heist:
+
+- Every player gets 2 pocket cards, seen only by them. Five shared cards come out over the stages: none, then 3, 4 and 5.
+- **Four betting stages** (white, yellow, orange, red). In each, every player takes a numbered chip, from 1 (weakest hand) up to the number of players (strongest), from the middle or from another player. The stage ends when everyone has confirmed.
+- **The reveal:** hands are revealed from the lowest red chip to the highest. If any hand is weaker than the one before it, the alarm goes off; otherwise the vault opens. Equal hands may be in either order.
+- 3 vaults win the game; 3 alarms lose it.
+- **My hand's ranking** (option, Hidden by default): shows each player the ranking their own cards make so far.
+- **Jokers** (option, off by default): the deck has two jokers. A player dealt a joker swaps it for one of two new cards. A joker among the shared cards is replaced by two cards, and each hand may use one of them.
+- **Advanced mode** (option **Mode**; Basic by default) adds challenge and specialist cards. The first heist gets 0–3 challenge cards (option, default 1); after a successful heist, one challenge card is added, and after a failed one, a specialist card. They stay for the rest of the game. Players can turn cards off, and the option **Cards that cancel each other** can keep such pairs apart. The "Decide which of you…" specialist cards are optional, each at most once per heist; the others apply by themselves. The full card texts are in [`the-gang/`](the-gang/).
+
+### Rich man, poor man rules
+
 4–12 players. A shedding card game.
 
-- **Goal:** get rid of all your cards. A game does not have a single winner: it ends with a full ranking of the players, in the order they emptied their hands. A player may empty their hand in the middle of a round; their place in the ranking is kept and they take no further part in that game. The game ends as soon as only one player has cards left: that player takes the last place without playing the rest of their cards. It also ends when every active player has emptied their hand.
-- **The deck:** one set of 2 to A per player, so every player gets 13 cards and each number appears once per player: 4 players use 4 sets (an ordinary deck), 6 players use 6 sets, 9 players use 9 sets, 12 players use 12 sets. The sets are drawn as playing cards (in the user's [card style](#card-style)), taking the suits ♠, ♥, ♦, ♣ in turn (the fifth set is ♠ again). **Suits do not matter** at all; only the numbers count. With more than 4 players, the same number appears more than 4 times (with 9 players, there are nine 7s).
-- **Order of strength:** 2 is the lowest, then 3, 4, … 10, J, Q, K, and A is the highest.
-- **Dealing:** the whole deck is shuffled and dealt; every player gets 13 cards.
-- **Rounds:** a game is played in rounds.
+- **Goal:** get rid of all your cards. A game ends with a ranking of the players, in the order they emptied their hands; the last player left with cards takes the last place.
+- **The deck:** one set of 2 to A per player, so every player gets 13 cards. **Suits do not matter**; only the numbers count. 2 is the lowest and A the highest.
+- **Rounds:**
   - The player who starts the round throws any number **N** of cards of one number (e.g. one 5, or three 9s). N stays the same until the round ends.
   - In turn, each other player either throws N cards of a **strictly higher** number (not equal), or passes. A player may pass even if they could play. Passing is only for that turn: a player who passed may throw again when their turn comes round, if the round is still going.
   - The round ends when the play comes back to the last player who threw cards, everyone else having passed since that throw. That player wins the round and starts the next one, choosing a new N.
   - **Aces end the round at once:** nothing beats an A, so the player who throws Aces wins the round immediately.
   - If the round winner has no cards left, the next player in turn who still has cards starts the next round.
-  - Players who have emptied their hands are skipped.
-- **Who starts:**
-  - **The very first round of the first game:** the player with the most 2s (with **First game: Exchange by current standings**, the poorest player, after the exchange). On a tie, the one of them with the most 3s; then the most 4s; and so on (if two players have exactly the same cards, one of them at random).
-  - **The first round of every later game:** the poorest player (the last in the ranking).
-- **Direction of play, in every game (the first one too):** in descending player numbers, from the poor towards the rich, then from the richest player (#1) straight back to the poorest (the last).
-- **Between games:** a seated player presses **Next game** to start it; there is no long-term score: each game only decides the seats and the exchange of the next one.
+- **Who starts:** in the first game, the player with the most 2s (on a tie, the most 3s, and so on); in later games, the poorest player.
+- **Direction of play:** from the poor towards the rich, then from the richest player (#1) back to the poorest.
+- **Between games:** there is no long-term score; each game decides the seats and the exchange of the next one.
   1. **New seats:** the players are re-seated by the last game's ranking: the winner becomes player #1 (the rich man), the second becomes #2, and so on; the last is the poor man.
   2. **Card exchange:** the cards are dealt again, then player #1 exchanges cards with the last player, #2 with the second-to-last, and so on:
 
@@ -269,119 +247,85 @@ A game can offer **options**, i.e. rule variants (so far The Gang's, backgammon'
      | 11 | #1↔#11: 4, #2↔#10: 3, #3↔#9: 2, #4↔#8: 1, #5↔#7: 1; #6 does not exchange |
      | 12 | #1↔#12: 4, #2↔#11: 3, #3↔#10: 2, #4↔#9: 1, #5↔#8: 1; #6 and #7 do not exchange |
 
-  3. **How each pair exchanges:** the poorer player must give their N highest cards: the game picks them, and the player confirms with **Give these cards**. The richer player taps any N cards and presses **Give**. Once given, the cards leave the hand and are shown in a small row under it. Nobody gets any cards until every pair has given: then all the cards are exchanged at once, everyone gets their new cards together, and the poorest player starts. Nobody sees the cards they will receive before choosing the cards they give.
-- **An absent player during a game** (disconnected or Vacant, see [Disconnections and seats](#disconnections-and-seats)): they keep their cards, their place and their turn. When it is their turn, the others see **Waiting for …** with **Skip player**, which makes them pass this turn (or, if they were to start the round, lets the next player in turn start it). A player who comes back plays on; a newcomer offered their seat can take it and continue in their place.
-- **When a game ends with absent players:** once only one player has cards left, the game ends and they take the last place, if they are connected; if they are not, they are removed. Likewise, once the last connected player empties their hand, the game ends: the absent players who still have cards are removed (from the game, the summary and the exchange, and their seats are freed). A player who emptied their hand and then disconnected keeps their place and stays for the next game.
-- **The exchange with absent players:** when **Next game** is pressed, empty seats are removed and the exchange is for the remaining number of players (the others keep their order, by the ranking). A disconnected player keeps their seat, cards and place: the others can still give, and once all the connected players have given, they see **Waiting for …** with **End game**, until the player comes back, a newcomer takes their seat, or a player ends the game.
-- **Fewer than 4 players:** a game in progress continues with however many active players are left, but there can be no exchange with fewer than 4 players: **Next game** then takes everyone back to the session lobby (a new game can start there once 4 are seated). Likewise, if players leave during the exchange and fewer than 4 remain, everyone goes back to the lobby.
-- **Joining:** during a game, only a user offered a seat when they open or reconnect to the game can take a seat, and only an absent player's seat (see [Disconnections and seats](#disconnections-and-seats)); during the exchange, they then give in that player's place. Otherwise, during the exchange, an observer can **Ask to join**; any player sees the request and can **Accept** it, choosing the newcomer's place (#1 to the last; the players from that place down move down one), or **Decline** it. A player who leaves during the exchange is dropped at once. Each time a player is added or dropped, one set of 2 to A is added to or removed from the deck (so each number still appears once per player), all the cards are shuffled and dealt again, any cards already given are cancelled, and the exchange starts again for the new number of players.
-- **Options:**
-  - **First game:** **No exchange** (the default): the first game is played without an exchange, and the player with the most 2s starts. **Exchange by current standings:** the lobby's seat order gives the places (seat 1 is #1, the rich man; the last seat is the poor man), the pairs exchange cards before the first game as in later games, and the poorest player starts.
-- **Screens:**
-  - **A player's hand** shows their cards in large size, sorted from low to high, with equal numbers together, overlapping so each shows its corner (more closely when the hand is wide); on a phone, a hand of more than 8 cards takes two rows. They tap one or more cards of the same value, then **Select** to put them on the table, or **Pass**. **Pass** is at one end of the hand and **Select** at the other, so one is not tapped by mistake. When starting a round, tapping a card picks all the cards of that number in the hand (e.g. all three 9s); tapping a picked card puts it back, to throw fewer, and tapping a card of another number picks all of that number instead. Tapping a card when there is a throw to beat picks as many cards of that number as are needed. A user holding several seats sees one hand per seat.
-  - **What to do** is said in the status bar at the top, not under the cards: e.g. "Throw a single card higher than '7', or pass.", "You start this round: tap one or more cards of the same value to place on the table.", "Waiting for Dana", "Choose 2 cards to give to Dana.", "Give your 3 highest cards to Dana.", "Your cards are given. …", or "You emptied your hand: place 2 for the next game." (after the game, after "Game 1 is over."). A user holding several seats sees it for the hand that must act, after its name. Observers see whose turn it is, or the exchange's progress. Under the cards there are only the buttons, the cards given in the exchange and, at the start of the game, the cards received.
-  - **Your turn:** the hand's border glows and pulses, its title shows **👉 Your turn**, and when the turn comes to the player, the page plays a short rising chime (unless sound is off in their profile) and the phone vibrates where it can (the iPhone app, and Android phones; Safari does not let web pages vibrate). The chime plays when the turn passes to the player from someone else, not when they keep it (e.g. after winning a round). On iPhones it plays even with the silent switch on, once the player has tapped the page; no sound plays while the browser is in the background or the phone is locked.
-  - **Confetti:** a player who empties their hand sees confetti on their screen (not the last player, who keeps their cards).
-  - **A player finishing, for everyone:** when a player empties their hand, all players and observers see a small banner near the top ("🏁 Dana finished in place 2!"), hear a soft chime (the player themselves hears their fanfare instead), and that player's line in the players' table glows gold for a moment.
-  - **Layout, for everyone:** on top, the cards on the table (the throw to beat and who threw it, or the round's winner; after a game, the next game's places); then the player's own hand; then the players' table. Players show or hide the players' table with **Show table** / **Hide table** (remembered on the device); it is hidden at first on phones (screens up to 600 pixels wide) and shown on computers. Observers always see it.
-  - **The players' table** shows the players in place order (#1, the rich man, to the last, the poor man), one line each, with their number of cards, whose turn it is, their last call in this round in the middle of the line (**Pass**, or what they threw, e.g. "2×9"; once a round is won, its calls stay until the winner throws to start the next round), disconnected players (faded, with a spinner), the finishing places so far (shown instead of the number of cards once a player's hand is empty), and during the exchange, how many cards each player gives and to whom (e.g. "Gives 4 cards to #8", then "✓ Gave 4 cards to #8" once given).
-  - **Read throws aloud:** on a screen without a seat, this button says each throw out loud as its group and card value (e.g. "A single nine", "Pair of jack", "Triplet of ace", "Quadruplet of five", and so on up to 12 cards), in the page's language, using the browser's speech; the choice is remembered in the browser. With sound off in the user's profile, the button is greyed out and nothing is read. Each language needs a voice for it on the device (Hebrew voices are often missing): without one, the throws are read in English, and the button's tooltip says so (on Windows, add a voice in Settings > Time & language > Speech). A voice for the language's variant is preferred (e.g. Mexican Spanish), otherwise any voice of the language.
+  3. **How each pair exchanges:** the poorer player gives their N highest cards; the richer player gives any N cards. Nobody sees the cards they will receive before giving, and the poorest player then starts.
+- **Fewer than 4 players:** a game goes on with the players left, but there is no exchange with fewer than 4, so the next game waits in the lobby until 4 are seated.
+- **First game** (option): **No exchange** (the default), or **Exchange by current standings**: the seat order gives the places, and the pairs exchange before the first game.
 
-### Wazoo
+### Wazoo rules
 
-1–8 players. The classic dice game. Players take turns in seat order for 13 rounds.
+1–8 players. The classic dice game, in 13 rounds.
 
-- **A turn:** press 🎲, the **Roll** button after the dice (on their right, or on their left in Hebrew), to roll the five dice, up to three times; the status bar then says how many rolls are left. Between rolls, tap dice to keep them (a kept die is lifted, outlined in gold and marked **Kept**); tap again to let it go. Then tap an open box of your scorecard to score the dice there, which ends the turn. The dice tumble for a moment when rolled.
-- **The boxes:** Ones to Sixes score the dice of that number. Three of a kind and Four of a kind score the total of all the dice; a full house (three of one number and two of another) scores 25, a small straight (four in a row) 30, a large straight (five in a row) 40, a Wazoo (five of a kind) 50, and Chance the total of all the dice. A box whose pattern is not there scores 0 (the page asks before scoring 0).
+- **A turn:** roll five dice up to three times, keeping any dice between rolls, then score them in an open box of your scorecard.
+- **The boxes:** Ones to Sixes score the dice of that number. Three of a kind and Four of a kind score the total of all the dice; a full house (three of one number and two of another) scores 25, a small straight (four in a row) 30, a large straight (five in a row) 40, a Wazoo (five of a kind) 50, and Chance the total of all the dice. A box whose pattern is not there scores 0.
 - **Bonuses:** 35 when Ones to Sixes add up to 63 or more; 100 for each extra Wazoo rolled while the Wazoo box holds 50.
 - **Joker rule:** a Wazoo rolled once the Wazoo box is filled (with 50 or 0) must go in the upper box of its number if that box is open; otherwise in any open lower box, where a full house and the straights score in full; otherwise in any open upper box, for 0.
-- **The end:** once every box is filled, the highest total wins (several players on a tie); alone, the status bar shows the final score. **Play again** starts a new game with clean scorecards.
-- **Screens:** everyone sees the dice and the scorecard, with a column per player, the section totals and bonuses, and the player to play highlighted. Their open boxes show what the dice would score there (on their own screen, as buttons to tap). The status bar's score row shows the round and each player's total; a message under the dice says what the last player scored.
+- **The end:** once every box is filled, the highest total wins.
 
-### Final Card
+### Final Card rules
 
-2–10 players, in one of two styles (the **Style** option, first in the options): **US Style** (default), with the UNO rules and cards, or **Israeli Style**, with the Super TAKI rules and cards (see [Israeli Style](#israeli-style) below). In US Style the deck has 108 cards: in each color (red, yellow, green, blue) one 0, two of each number 1 to 9, two Stop, two Change Direction and two +2; and four Change Color and four Change Color +4. The cards are GamesLane playing cards, always in the GamesLane style (whatever the profile's [card style](#card-style)): each color is drawn as the suit of that color (red hearts, yellow diamonds, green clubs, blue spades), with the number or the symbol (⊘ Stop, ⇄ Change Direction, +2) in the corners and in the middle; Change Color and Change Color +4 look like the joker, with COLOR or +4 in the corners. Each player gets 7 cards, and the next card is turned up to start the discard pile (a card without a color goes back under the draw pile and the next one is turned up). Players take turns in seat order; hand 1 is started by the first seat, each later hand by the next one.
+2–10 players, in one of two styles (the **Style** option): **US Style** (default), with the UNO rules and cards, or **Israeli Style**, with the Super TAKI rules and cards (see [Israeli Style](#israeli-style) below). In US Style the deck has 108 cards: in each color (red, yellow, green, blue) one 0, two of each number 1 to 9, two Stop, two Change Direction and two +2; and four Change Color and four Change Color +4. Each player gets 7 cards, and the next card is turned up to start the discard pile. Each hand is started by the next seat.
 
-- **A turn:** play a card that matches the top of the discard pile by color, or by number or symbol, or a card without a color; or draw. Tap a card to play it; the cards you cannot play are greyed. A Change Color asks for the color to play next. When a Change Color +4 can be played depends on the **Change Color +4** option (below).
-- **Drawing:** tap the draw pile or **Draw a card**. If the card drawn can be played, play it or **Keep the card**; otherwise the turn passes. You may draw even when you could play. When the draw pile runs out, the discard pile (except its top card) is shuffled into a new one.
+- **A turn:** play a card that matches the top of the discard pile by color, or by number or symbol, or a card without a color; or draw. A Change Color chooses the color to play next.
+- **Drawing:** if the card drawn can be played, you may play it; otherwise the turn passes. You may draw even when you could play.
 - **Action cards:** Stop: the next player misses their turn. Change Direction: play goes the other way (with two players it works like a Stop). +2 / Change Color +4: the next player has 2 / 4 penalty cards to draw and misses their turn. Turned up at the start of a hand, a Stop skips the first player, a Change Direction makes the player before them start in the other direction, and a +2 gives the first player 2 penalty cards and makes them miss their turn.
-- **Penalty cards:** cards a player must draw from a +2 or Change Color +4 (without stacking), a challenge, a +3 or +3 Breaker (Israeli Style), or being caught without calling Final Card. They are not drawn automatically: the player presses **Draw a card** / **Draw N cards** (or taps the draw pile) to draw them all, at any time during the hand, and must do it before anything else. The current turn goes on, but the turn does not pass to the next player until every penalty card is drawn. Penalty cards not yet drawn when a hand ends are drawn then, and count for the winner.
-- **Final Card!:** the button is always under your cards during a hand, and one press does everything that applies:
-  - **Protect yourself:** press it on your final card (any time while you hold it), or on your turn before playing your second-to-last card. While you hold that one card you are protected (🛡 next to your name in the players' table). Drawing any card ends the protection.
-  - **Catch the others:** every other player who holds one card and is not protected has 2 penalty cards to draw (4 in Israeli Style). This works at any time while they hold it, not only right after they played (but not during a player's own TAKI).
-  - When it does neither, nothing happens ("Nobody to catch.").
-  - **For everyone:** a player protecting their last card brings up a green banner, "🛡 Final Card!" with "Dana is protected.", and a rising shimmer; a player caught brings up an orange banner that shakes, "🚨 Caught!" with who caught whom and how many cards they draw, and a two-tone alarm (after the green one when one press did both). A press that does neither shows no banner and plays no sound.
-- **Options:** in US Style (in Israeli Style, only **Game end** is shown, with **One game** or **Pyramid**):
-  - **Game end:** **One game** (the first to play all their cards wins); **Score target** (default; 100, 200, 300 or 500 points, 500 by default): the winner of each hand scores the cards left in the other hands (a number its value, an action card 20, a card without a color 50), **Next hand** deals the next one, and the first to reach the target wins; **Pyramid:** a player who plays all their cards is dealt one card fewer than last time (7, then 6, 5 … 1; in Israeli Style 8, then 7 … 1) and play goes on; the first to play their last single card wins, and play goes on until everyone is ranked (the last player left is last).
-  - **Stacking:** which draw cards can answer a draw card; the next player then draws all the cards (e.g. **Draw 4 cards**) unless they stack again. **No stacking** (default): the next player draws and misses their turn. **+2 on +2**. **+2 on +2 and +4 on +4**. **+2 on +2, +4 on +4 and +4 on +2** (a +2 never answers a Change Color +4). When you answer a stack, the Change Color +4 option does not apply. When a hand ends on a draw card, the next player still draws its cards, which count for the winner.
+- **Penalty cards** (from a +2, a Change Color +4, a challenge, a +3, or being caught): the player must draw them before anything else.
+- **Final Card!:** call it on your final card, or before playing your second-to-last card, to be protected while you hold that one card (drawing ends the protection). Calling it also catches every other player holding one card unprotected: they draw 2 penalty cards (4 in Israeli Style).
+- **Options:** in US Style (in Israeli Style, only **Game end**, with **One game** or **Pyramid**):
+  - **Game end:** **One game** (the first to play all their cards wins); **Score target** (default; 100, 200, 300 or 500 points, 500 by default): the winner of each hand scores the cards left in the other hands (a number its value, an action card 20, a card without a color 50), and the first to reach the target wins; **Pyramid:** a player who plays all their cards is dealt one card fewer than last time (7, then 6, 5 … 1; in Israeli Style 8, then 7 … 1); the first to play their last single card wins, and play goes on until everyone is ranked.
+  - **Stacking:** which draw cards can answer a draw card; the next player then draws all the cards unless they stack again. **No stacking** (default), **+2 on +2**, **+2 on +2 and +4 on +4**, or **+2 on +2, +4 on +4 and +4 on +2**.
   - **Drawing:** **Draw one card** (default), or **Draw until you can play**.
-  - **Change Color +4:** **Always allowed**; **Only without the color**: only when you hold no card of the color to play (the game checks it); **Can be challenged** (default): always allowed, but the player it is played on can press **Challenge!** instead of drawing. If the player of the Change Color +4 held a card of the color that was to play, they have the cards to draw as penalty cards instead, and the challenger plays their turn; if not, the challenger has 2 more (6 instead of 4) and misses their turn. Everyone sees the result, not the cards. A Change Color +4 played on a stack, or as a player's last card, cannot be challenged.
+  - **Change Color +4:** **Always allowed**; **Only without the color**: only when you hold no card of the color to play; **Can be challenged** (default): the player it is played on may challenge instead of drawing. If the player of the Change Color +4 held a card of the color to play, they draw the cards instead; if not, the challenger draws 2 more (6 instead of 4) and misses their turn.
 - <a id="israeli-style"></a>**Israeli Style** (the Super TAKI rules): 116 cards: in each color two of each number 1 and 3 to 9 (no 0, and the +2 cards instead of the 2s), and two each of Stop, Change Direction, +2, Plus (a big + on the card) and TAKI; and four Change Color, and two each of SuperTAKI (TAKI on the joker's octagon), Crown, +3 and +3 Breaker (a crossed-out +3). Each player gets 8 cards.
   - **Drawing:** one card, which cannot be played until your next turn: the turn passes.
   - **Change Direction** with two players changes the direction and nothing else: the other player plays next.
   - **+2:** a +2 can always answer a +2 (or a Crown cancels them); the player who cannot draws them all and misses their turn.
   - **Plus:** play another card. If you cannot, draw a card (the turn passes). A Plus as your last card does not win: you must draw.
-  - **TAKI:** after it, play as many cards of its color as you like, one by one, then press **Close TAKI** (Draw is not possible during a TAKI). The action cards inside a TAKI do nothing, except the last one, which acts when the TAKI is closed (e.g. a +2 last makes the next player draw 2). The TAKI closes by itself when you have no more card to play in it, or play your last card. A Change Color, a Crown or a +3 can also end a TAKI, with their own action. **SuperTAKI:** a TAKI in the color to play (after a Crown, you choose its color).
-  - **Crown:** can be played on any card, even on +2 cards to draw or a +3 (it cancels them); then play any card you like, or draw. It can be your last card.
-  - **+3:** every other player draws 3 cards. Until someone answers it, the next player can play a Crown, or press **Draw 3 cards**: they draw 3, every other player but the one of the +3 has 3 penalty cards to draw, and the next player then plays on the card under the +3. **+3 Breaker:** any player but the one of the +3 can play it on a +3, even when it is not their turn (their cards glow, with "You can answer the +3 with your +3 Breaker."): the player of the +3 draws the 3 cards instead, and the next player plays on. Played on any other card (not on +2 cards to draw), its player draws 3 cards. After a +3 or +3 Breaker, the next player follows the card under it.
-- **Screens:**
-  - **In the status bar:** the status, and on the right the color to play (**Any card** after a Crown) and the direction of play (↻ or ↺).
-  - **On top, for everyone:** centered, the closed pile (face down, with its count; tap it to draw) and the open pile (its top card; a card without a color, but a Crown, has a ring of the color to play); under them, a message about the last action.
-  - **Your cards:** in a box that glows on your turn (with 👉 Your turn), when you have penalty cards to draw, or when you can play a +3 Breaker, as in Rich man, poor man and Yaniv. Under them, **Draw a card** (or **Draw N cards** with stacked cards or penalty cards) on the left, always shown but enabled only when you can draw (your penalty cards at any time; otherwise on your turn before you draw, and not during a TAKI), with **Keep the card** next to it after a draw, **Close TAKI** during your TAKI, and **Challenge!** when you can challenge a Change Color +4; and **Final Card!** on the right.
-  - **At the bottom, the players' table:** each player with 🛡 while protected, ▲ the cards they were last dealt or 🏁 their place in a pyramid, their cards in hand and, with **Score target**, their points; the player to play is outlined. At its bottom, the game's options (see [Game options](#game-options)). Players show or hide it with **Show table** / **Hide table** (remembered on the device); it is hidden at first on phones and shown on computers. Observers always see it.
+  - **TAKI:** after it, play as many cards of its color as you like, then close it. Only the last action card in a TAKI acts. **SuperTAKI:** a TAKI in the color to play.
+  - **Crown:** can be played on any card, even on +2 cards to draw or a +3 (it cancels them); then play any card, or draw.
+  - **+3:** every other player draws 3 cards, unless the next player answers with a Crown. **+3 Breaker:** played on a +3, even out of turn, makes the player of the +3 draw the 3 cards instead; played on any other card, its player draws 3.
 
-### Yaniv
+### Yaniv rules
 
-2–4 players, in quick rounds, with a 52-card deck and 2 jokers. Each round, every player gets 5 cards, the next card is turned face up to start the **open pile**, and the rest is the **closed pile**. After every shuffle a card is face up on the open pile: at each deal, and when the closed pile runs out and the open pile (except its top card) is shuffled into a new closed pile. Players take turns in seat order; round 1 is started by the first seat, each later round by the winner of the round before.
+2–4 players, with a 52-card deck and 2 jokers. Each round, every player gets 5 cards, the next card starts the **open pile**, and the rest is the **closed pile**. Each round is started by the winner of the round before.
 
-- **Goal:** lower your **hand score**, the sum of your cards' values: an ace 1, a joker 0, 2 to 10 their number, J, Q and K 10 (e.g. A, 7, 10, K is 1 + 7 + 10 + 10 = 28).
-- **A turn:** tap the cards to discard, then tap the pile to take a card from: the closed pile, or the open pile's top card (only the top card can be taken). The cards chosen wait next to the open pile until you take a card; they then go on the open pile, a straight from lowest to highest, so its highest card is the next player's top card. In a series, jokers go under the other cards. You may discard:
+- **Goal:** lower your **hand score**, the sum of your cards' values: an ace 1, a joker 0, 2 to 10 their number, J, Q and K 10.
+- **A turn:** discard, then take one card: from the closed pile, or the top card of the open pile. You may discard:
   - one card;
   - a **series** of 2 to 4 cards of the same value (e.g. 7♥ 7♣, or Q♦ Q♣ Q♠);
   - a **straight** of 3 or more cards in a row of one suit (e.g. 5♣ 6♣ 7♣). The ace is low only: A-2-3 is a straight, Q-K-A is not.
-  - A joker can stand for any card in a series or a straight (e.g. 9♥ joker J♥ Q♥). A joker left over in a straight extends it downwards (e.g. 5♠ 6♠ joker is 4♠ 5♠ 6♠, so 6♠ is on top). Only when the straight already starts at the ace does a joker left over stand for the next card up, and then it is on top (e.g. A♦ 2♦ joker is A♦ 2♦ 3♦, with the joker on top). This is the only way a joker is left on top of the open pile.
-- **Yaniv:** with a hand score of 7 or less, press **Yaniv!** next to your hand score, under your cards, on your turn, instead of discarding. Everyone at the table at once sees a big "Yaniv!" banner with the caller's name, with a brass chord. Every other player then plays one last turn (they cannot call Yaniv): they discard and take a card as usual, or press **Assaf!** (gold, next to their hand score, only in this last turn) to keep their hand as it is; then all the hands are revealed. If no hand is lower than the caller's (a tie goes to the caller), the caller wins the round. Otherwise the caller is **Assaf** and gains 30 points on top of their hand score, and the lowest hand wins the round (on a tie, the first of them after the caller); everyone then sees a red "Assaf!" banner with who has the lowest hand, with a falling "wah-wah" sound. The round's winner gains no points; every other player gains their hand score.
+  - A joker can stand for any card in a series or a straight (e.g. 9♥ joker J♥ Q♥).
+- **Yaniv:** with a hand score of 7 or less, a player may call **Yaniv** on their turn instead of discarding. Every other player then plays one last turn, as usual or calling **Assaf** to keep their hand. If no hand is lower than the caller's (a tie goes to the caller), the caller wins the round. Otherwise the caller is **Assaf** and gains 30 points on top of their hand score, and the lowest hand wins. The round's winner gains no points; every other player gains their hand score.
 - **Options:**
-  - **Game end:** **One round** (its winner wins the game), or **Score target** (100, 150, 200 (the default) or 300 points): after each round, **Next round** deals the next one. A player whose points go above the target is out (exactly on the target is not out) and watches; the last player left wins.
-  - **Bonus** (with a score target; on by default): landing exactly on half the target or on the target takes 50 points off (e.g. with 200, 100 becomes 50 and 200 becomes 150). **No bonus:** points only go up.
-- **An absent player:** when it is their turn, the others can **Skip player**: their hand stays as it is (after a Yaniv call, that counts as their last turn). In a public game, the turn of a player who is Away or has left is skipped by itself, and the game goes on when a player leaves.
-- **Screens:** on top, for everyone, the closed pile (with its count), the open pile's top card, the cards chosen to discard (outlined in red when they cannot be discarded together), and a message about the last turn and any Yaniv call; after a round, every player's cards, hand score and points gained, with who called **Yaniv!** or was **Assaf!**, the winner, the bonus and the players who are out. Then each player's own cards, sorted from the jokers and the ace up, with their hand score centred under them (and **Yaniv!** next to it when they can call it); on their turn the hand glows, as in Rich man, poor man, and the status bar says what to do. At the bottom, the players' table: its head shows the round (and with **Score target**, the target), then each player with their cards in hand and points, and whose turn it is. Players show or hide it with **Show table** / **Hide table** (remembered on the device); it is hidden at first on phones and shown on computers. Observers always see it.
+  - **Game end:** **One round** (its winner wins the game), or **Score target** (100, 150, 200 (the default) or 300 points): a player whose points go above the target is out; the last player left wins.
+  - **Bonus** (with a score target; on by default): landing exactly on half the target or on the target takes 50 points off. **No bonus:** points only go up.
 
-### Hearts
+### Hearts rules
 
-4 players, with a 52-card deck, 13 cards each, hand after hand. Players play in seat order, clockwise (to the left).
+4 players, with a 52-card deck, 13 cards each, hand after hand, clockwise.
 
 - **Goal:** take as few points as possible. Each heart taken in a trick is 1 point, the queen of spades (Q♠) 13; the other cards are worth nothing (26 points in all).
-- **Passing:** before the play of each hand, every player chooses 3 cards and passes them: in the first hand to the left (the next player), in the second to the right, in the third across, and in the fourth nobody passes; then again from the left. The players choose at the same time, and nobody gets the cards passed to them until everyone has passed.
+- **Passing:** before each hand, every player passes 3 cards: to the left, then to the right, then across, then no passing, and again.
 - **Tricks:** the holder of the 2♣ leads it to the first trick. Each player in turn plays a card, following the suit led if they can; otherwise any card. The highest card of the suit led wins the trick (there are no trumps), and its winner leads the next one.
   - **First trick:** nobody may play a heart or the Q♠ on it, unless they hold nothing else.
   - **Breaking hearts:** hearts cannot be led until a heart has been played in the hand, unless the leader holds only hearts. The Q♠ can be led at any time.
-- **Claim all:** at the start of a trick, the player to lead may press **Claim all** (under their cards) when their cards win every remaining trick whatever anyone plays, judged only from what they can know (their own cards and the cards already played): each of their cards is higher than every card of its suit still out. It is optional; they can still play their cards one by one. Claiming ends the hand at once: they take every card still in a hand; "Ada claimed the remaining tricks." and every player's cards at the time of the claim are shown face up on the table, a line per player (the claimer's first, outlined), so everyone can check the claim; and the hand is scored (shooting the moon included). A claim does not break hearts.
-- **Sounds** (for everyone with the page open, unless sound is off in the profile): as soon as the card is played, a breaking glass when the first heart breaks hearts, and a regal doom when the Q♠ is played (or taken by a claim).
 - **Scoring:** after the 13 tricks, each player gains the points they took. A player who takes all 26 points **shoots the moon**: they gain nothing, and every other player gains 26.
-- **The end:** after a hand in which someone reaches 100 points or more, the game is over and the lowest score wins (on a tie, all the lowest win). Otherwise **Next hand** deals the next one.
-- **An absent player:** the game waits for them (to pass, or on their turn); the others can only wait or end the game.
-- **Screens:** on top, for everyone, the four players around the trick: the user at the bottom, then clockwise the player on their left, the one across (at the top) and the one on their right (watchers see the first seat at the bottom). Each player shows their name and, while passing, **Passed** once they have; the player to play is outlined, and the card each one played to the trick is in front of them. Between tricks, the last trick stays on the table with its winner's card outlined, and a message says who won it. After a hand, each player's points in it and their score, with who **Shot the moon!** and the winners. Then each player's own cards, sorted by suit (♣ ♦ ♠ ♥) and from 2 to A, in a box that glows when they have to act, as in Rich man, poor man. While passing, the status bar says where the cards go (e.g. "Pass 3 cards to the left, to Ada."): tap 3 cards (they rise) and **Pass 3 cards**; then "You passed …", and after the pass, until the first card is played, "You received …". On their turn, the cards that cannot be played are greyed, and tapping another card plays it. At the bottom, the players' table: its head shows the hand and the target (100 points), then each player in seat order with **Passed** while passing, ♥ the hearts they have taken in this hand, **Q♠** once they have taken the queen of spades, and their score; the player to play is outlined. Players show or hide it with **Show table** / **Hide table** (remembered on the device); it is hidden at first on phones and shown on computers. Observers always see it. The table around the trick is two cards tall (the players on the left and right beside the top and bottom ones), so the table, the hand and the head of the players' table fit on one screen.
+- **The end:** after a hand in which someone reaches 100 points or more, the lowest score wins.
 
-### Spades
+### Spades rules
 
-4 players in 2 teams: the players in seats 1 and 3 against those in seats 2 and 4, so partners sit across the table. A 52-card deck, 13 cards each, hand after hand; players bid and play in seat order, clockwise (to the left).
+4 players in 2 teams: seats 1 and 3 against seats 2 and 4, so partners sit across the table. A 52-card deck, 13 cards each, hand after hand, clockwise.
 
 - **The deal** moves one seat to the left each hand; the fourth seat deals first.
 - **Bidding:** starting on the dealer's left, each player in turn bids the number of tricks they expect to take, 1 to 13. A team's bid is the sum of its partners' bids (but Nil bids).
   - **Nil** (option, on by default): bid 0, to take no trick at all: 100 points if the player takes none, otherwise 100 off. The partner's bid stands alone, and a Nil bidder's tricks do not count for it (they count as bags). **No Nil:** every player bids at least 1.
-  - **Blind Nil** (option, with Nil; off by default): every player's cards are face down when the hand is dealt. Before looking at them, a player may bid **Blind Nil**: 200 points if they take no trick, otherwise 200 off. **Show my cards** turns them over (at any time while bidding); then only a normal bid or Nil is possible. Bidding also turns them over.
+  - **Blind Nil** (option, with Nil; off by default): before looking at their cards, a player may bid **Blind Nil**: 200 points if they take no trick, otherwise 200 off.
 - **Tricks:** the player on the dealer's left leads the first trick. Each player in turn plays a card, following the suit led if they can; otherwise any card. Spades are trumps: the highest spade played wins the trick, or else the highest card of the suit led; its winner leads the next one. Spades cannot be led until a spade has been played in the hand, unless the leader holds only spades.
 - **Scoring,** for each team after the 13 tricks: if it took at least its bid, 10 points per trick bid, and 1 point per trick over (a **bag**); otherwise it loses 10 points per trick bid. Each Nil scores on its own. Bags add up from hand to hand: once a team has 10, it loses 100 points and 10 bags.
-- **The end:** after a hand in which a team reaches 500 points (or falls to −200 or below), the team with the higher score wins; on a tie, play goes on. Otherwise **Next hand** deals the next one.
-- **Sounds** (for everyone with the page open, unless sound is off in the profile): as soon as the card is played, a breaking glass when the first spade of a hand breaks spades.
-- **An absent player:** the game waits for them (to bid, or on their turn); the others can only wait or end the game.
-- **Screens:** on top, for everyone, the four players around the trick: the user at the bottom, then clockwise the opponent on their left, their partner at the top and the opponent on their right (watchers see the first seat at the bottom). Each player shows their name, **Dealer** while bidding, their bid (… before they bid; **Nil** or **Blind Nil**) and, once the play starts, the tricks they have taken; the player to bid or to play is outlined. Between tricks, the last trick stays on the table with its winner's card outlined. After a hand, each team's bid and tricks with **Bid made** or **Bid missed**, its Nil bids, **10 bags: −100**, the points gained and the score. Then each player's own cards, sorted by suit (♣ ♦ ♠ ♥) and from 2 to A, in a box that glows on their turn. On their turn to bid, under the cards: **Your bid** (a number of tricks, or **Nil**) and **Bid**; with face-down cards, **Blind Nil** and **Show my cards** instead. On their turn to play, the cards that cannot be played are greyed. At the bottom, the teams' table: its head shows the hand and the target (500 points), then each team with its players, its bid (… until both have bid), the tricks it has taken in this hand, its bags and its score; the team to bid or play is outlined, and the game's options are listed under it. Players show or hide it with **Show table** / **Hide table** (remembered on the device); it is hidden at first on phones and shown on computers. Observers always see it.
-- **Claim all:** at the start of a trick, the player to lead may press **Claim all** (under their cards) when their cards win every remaining trick whatever anyone plays, judged only from their own cards and the cards already played: each of their cards is higher than every card of its suit still out, and no spade is out unless they hold only spades. It is optional. Claiming ends the hand at once: they take the remaining tricks, and every player's cards at the time of the claim are shown face up, a line per player (the claimer's first, outlined), so everyone can check it; the hand is then scored.
+- **The end:** after a hand in which a team reaches 500 points (or falls to −200 or below), the team with the higher score wins; on a tie, play goes on.
 
-### Dominoes
+### Dominoes rules
 
-Round after round, in seat order. The **Style** option chooses the game:
+Round after round. The **Style** option chooses the game:
 
 - **Draw** (default), **Block** and **All Fives**: 2–4 players with a double-six set (28 tiles). Each player gets 7 tiles (in Draw and All Fives, 5 each with 3 or 4 players); the rest is the **boneyard**.
   - **Starting:** in round 1, the holder of the highest double starts (the first seat if nobody holds one) and plays any tile; in later rounds, the player who played out the round before, or after a blocked round the player after the last starter.
@@ -396,5 +340,3 @@ Round after round, in seat order. The **Style** option chooses the game:
   - **Can't play?** Draw one tile. If you can play it (or any tile), play; otherwise pass, and your train gets a marker so the others may play on it. Playing on your own train removes the marker. Once the boneyard is empty, pass at once.
   - **Doubles:** after playing a double, play again. A double at the end of a train must be covered before any other play, by whoever is to play (draw, then pass, if you cannot).
   - **The end of a round:** a player plays all their tiles, or nobody can play any more (and nothing can be drawn): each player adds the pips left in their hand to their score. After the last round, the lowest score wins.
-- **An absent player:** when it is their turn, the others can **Skip player**: the absent player passes without drawing (in Mexican Train, their train gets a marker).
-- **Screens:** on top, for everyone, the players (with 🁢 their tiles in hand; the player to play outlined), then the line, read from left to right in every language (in Mexican Train, the engine and a row per train: each player's, then the Mexican train, with its last tiles, and **Open** for a train with a marker); under it, a message about the last play, draw or pass, with the points scored in All Fives. After a round, each side's tiles left with their pips, who played out (**Domino!**) or had the **Fewest pips** after a block, the points gained and the score. Then each player's own tiles, drawn with pips (numbers above 6), in a box that glows on their turn. On their turn, the tiles that cannot be played are greyed; tapping a playable tile plays it, or, when it fits in more than one place, raises it and shows where it can go: **Left end** and **Right end** under the line, or **Play here** on the trains. **Draw a tile** and **Pass** appear under the tiles when the player cannot play. At the bottom, the players' table: its head shows the round (of the rounds, in Mexican Train), the target and the tiles left in the boneyard, then each player (or team, with **Partners**) with their tiles in hand and score; the player to play is outlined, and the game's options are listed under it. Players show or hide it with **Show table** / **Hide table** (remembered on the device); it is hidden at first on phones and shown on computers. Observers always see it.
