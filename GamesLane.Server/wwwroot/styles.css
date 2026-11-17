@@ -886,7 +886,8 @@ input {
    create or join a game shows the list of games instead. Each column has three rows (title and hint, Create a game,
    then Join a game or the code box); side by side, the rows line up across the columns. Columns may shrink below their
    content's natural width, so they fit narrow screens. The page fills the screen's height: the menu is in the middle
-   of the space under the top bar, and the privacy policy and feedback links are at the bottom. */
+   of the space under the top bar, and the privacy policy and feedback links are at the bottom. One under the other,
+   the two panels share out the free height evenly: the same space above, between and below them. */
 
 body:has(> main.home) {
     display: flex;
@@ -914,9 +915,15 @@ main.home {
     justify-content: center;
 }
 
+main.home > footer {
+    margin-top: 0.75rem;
+}
+
 .menu-columns {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    justify-content: space-evenly;
     column-gap: 0.75rem;
 }
 
@@ -946,6 +953,8 @@ main.home {
 
 @media (min-width: 700px), (orientation: landscape) and (min-width: 560px) {
     .menu-columns {
+        display: grid;
+        flex: none;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-rows: repeat(3, auto);
     }
