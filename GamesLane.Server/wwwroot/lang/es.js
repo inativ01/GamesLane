@@ -454,7 +454,7 @@ TRANSLATIONS.es = {
     "TAKI": "TAKI",
     "Change Color": "Cambio de color",
     "Change Color +4": "Cambio de color +4",
-    "SuperTAKI": "SuperTAKI",
+    "Rainbow TAKI": "TAKI arcoíris",
     "Crown": "Corona",
     "+3 Breaker": "Rompe +3",
     "{color} {value}": "{value} {color}",
@@ -543,10 +543,10 @@ TRANSLATIONS.es = {
     // Final Card options (from the server)
     "Style": "Estilo",
     "US Style": "Estilo estadounidense",
-    "The UNO rules and cards, with the options below.": "Las reglas y cartas de UNO, con las opciones de abajo.",
+    "7 cards each, with Change Color +4 and the options below.": "7 cartas por jugador, con Cambio de color +4 y las opciones de abajo.",
     "Israeli Style": "Estilo israelí",
-    "The Super TAKI rules and cards: 8 cards each, with Plus, TAKI, SuperTAKI, Crown, +3 and +3 Breaker.":
-        "Las reglas y cartas de Super TAKI: 8 cartas por jugador, con Más, TAKI, SuperTAKI, Corona, +3 y Rompe +3.",
+    "8 cards each, with Plus, TAKI, Rainbow TAKI, Crown, +3 and +3 Breaker.":
+        "8 cartas por jugador, con Más, TAKI, TAKI arcoíris, Corona, +3 y Rompe +3.",
     "Game end": "Fin del juego",
     "One game": "Una partida",
     "The first player to play all their cards wins.": "Gana el primero en soltar todas sus cartas.",

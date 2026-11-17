@@ -5,11 +5,11 @@ namespace GamesLane.Server.Games.FinalCard;
 /// </summary>
 public enum FinalCardStyle
 {
-    /// <summary>The UNO rules and cards, with the options for stacking, Change Color +4 and drawing.</summary>
+    /// <summary>7 cards each, with the options for stacking, Change Color +4 and drawing.</summary>
     US,
 
     /// <summary>
-    /// The Super TAKI rules and cards (see <see cref="FinalCardCard.IsraeliDeck"/>): 8 cards each, +2 on +2, a card drawn
+    /// The Israeli cards (see <see cref="FinalCardCard.IsraeliDeck"/>): 8 cards each, +2 on +2, a card drawn
     /// cannot be played until the next turn, and 4 penalty cards for being caught without Final Card.
     /// </summary>
     Israeli,
@@ -211,7 +211,7 @@ public record FinalCardRules(
 
 /// <summary>
 /// The options of Final Card. The style comes first; in Israeli Style, only the game end (one game or a pyramid) is
-/// shown, and the other rules are those of Super TAKI.
+/// shown, and the other rules are fixed (see <see cref="FinalCardStyle.Israeli"/>).
 /// </summary>
 public static class FinalCardOptions
 {
@@ -247,9 +247,9 @@ public static class FinalCardOptions
             Style,
             "Style",
             [
-                new GameOptionChoice(nameof(FinalCardStyle.US), "US Style", "The UNO rules and cards, with the options below."),
+                new GameOptionChoice(nameof(FinalCardStyle.US), "US Style", "7 cards each, with Change Color +4 and the options below."),
                 new GameOptionChoice(nameof(FinalCardStyle.Israeli), "Israeli Style",
-                    "The Super TAKI rules and cards: 8 cards each, with Plus, TAKI, SuperTAKI, Crown, +3 and +3 Breaker."),
+                    "8 cards each, with Plus, TAKI, Rainbow TAKI, Crown, +3 and +3 Breaker."),
             ],
             nameof(FinalCardStyle.US)),
         new GameOption(

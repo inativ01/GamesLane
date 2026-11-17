@@ -454,7 +454,7 @@ TRANSLATIONS.he = {
     "TAKI": "טאקי",
     "Change Color": "שנה צבע",
     "Change Color +4": "שנה צבע +4",
-    "SuperTAKI": "סופר טאקי",
+    "Rainbow TAKI": "טאקי קשת",
     "Crown": "כתר",
     "+3 Breaker": "שובר +3",
     "{color} {value}": "{value} {color}",
@@ -543,10 +543,10 @@ TRANSLATIONS.he = {
     // Final Card options (from the server)
     "Style": "סגנון",
     "US Style": "סגנון אמריקאי",
-    "The UNO rules and cards, with the options below.": "החוקים והקלפים של UNO, עם האפשרויות שלמטה.",
+    "7 cards each, with Change Color +4 and the options below.": "7 קלפים לכל שחקן, עם שנה צבע +4 והאפשרויות שלמטה.",
     "Israeli Style": "סגנון ישראלי",
-    "The Super TAKI rules and cards: 8 cards each, with Plus, TAKI, SuperTAKI, Crown, +3 and +3 Breaker.":
-        "החוקים והקלפים של סופר טאקי: 8 קלפים לכל שחקן, עם פלוס, טאקי, סופר טאקי, כתר, +3 ושובר +3.",
+    "8 cards each, with Plus, TAKI, Rainbow TAKI, Crown, +3 and +3 Breaker.":
+        "8 קלפים לכל שחקן, עם פלוס, טאקי, טאקי קשת, כתר, +3 ושובר +3.",
     "Game end": "סיום המשחק",
     "One game": "משחק אחד",
     "The first player to play all their cards wins.": "מי שמניח ראשון את כל הקלפים זוכה.",

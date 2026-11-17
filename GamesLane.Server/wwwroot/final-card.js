@@ -1,15 +1,15 @@
 "use strict";
 
 // Final Card: players take turns playing a card that matches the pile's color, number or symbol, or a card without a
-// color; a player who cannot (or does not want to) play draws. In US Style the cards are those of UNO, in Israeli Style
-// those of Super TAKI. Each player's own cards come in view.private. The table (the piles, what just happened and the
+// color; a player who cannot (or does not want to) play draws. Israeli Style adds Plus, TAKI, Rainbow TAKI, Crown, +3 and
+// +3 Breaker. Each player's own cards come in view.private. The table (the piles, what just happened and the
 // players) is on top, and the user's own hands below it.
 
 const COLORS = ["Red", "Yellow", "Green", "Blue"];
 const COLOR_LETTERS = { R: "Red", Y: "Yellow", G: "Green", B: "Blue" };
 const VALUE_NAMES = { S: "Stop", R: "Change Direction", "+": "Plus", T: "TAKI" };
 // The cards without a color, by their value after the "W": names and GamesLane card faces.
-const COLORLESS_NAMES = { W: "Change Color", "+4": "Change Color +4", T: "SuperTAKI", C: "Crown", "+3": "+3", "+3X": "+3 Breaker" };
+const COLORLESS_NAMES = { W: "Change Color", "+4": "Change Color +4", T: "Rainbow TAKI", C: "Crown", "+3": "+3", "+3X": "+3 Breaker" };
 const COLORLESS_FACES = { W: "COLOR", "+4": "+4", T: "TAKI", C: "CROWN", "+3": "+3", "+3X": "+3X" };
 
 // Each color is drawn as the suit of that color on the GamesLane cards.
@@ -42,7 +42,7 @@ function cardName(text) {
     return t("{color} {value}", { color: t(color), value: VALUE_NAMES[value] ? t(VALUE_NAMES[value]) : value });
 }
 
-// Whether playing a card needs a color chosen: a Change Color, a Change Color +4, or a SuperTAKI after a Crown.
+// Whether playing a card needs a color chosen: a Change Color, a Change Color +4, or a Rainbow TAKI after a Crown.
 function choosesColor(game, text) {
     const { color, value } = parseCard(text);
     return color === "Wild" && (value === "W" || value === "+4" || (value === "T" && game.anyCard && !game.takiColor));

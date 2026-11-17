@@ -291,12 +291,12 @@ The rules of each game, with its options, for reference.
 
 <a id="israeli-style"></a>**Israeli Style**
 
-- **The cards:** 116. In each color, two of each number 1 and 3 to 9 (no 0 or 2), two Stop, two Change Direction, two +2, two Plus and two TAKI; and four Change Color, and two each of SuperTAKI, Crown, +3 and +3 Breaker. Each player gets 8 cards.
+- **The cards:** 116. In each color, two of each number 1 and 3 to 9 (no 0 or 2), two Stop, two Change Direction, two +2, two Plus and two TAKI; and four Change Color, and two each of Rainbow TAKI, Crown, +3 and +3 Breaker. Each player gets 8 cards.
 - **Drawing:** a card you draw cannot be played until your next turn.
 - **Change Direction** with two players only changes the direction: the other player plays next.
 - **+2:** can always be answered with another +2; the player who cannot answer draws them all.
 - **Plus:** play another card; if you cannot, draw. A Plus cannot be your last card.
-- **TAKI:** play as many cards of its color as you like, one by one, then close the TAKI. Only the last action card in it does its action. **SuperTAKI:** a TAKI in the color to play.
+- **TAKI:** play as many cards of its color as you like, one by one, then close the TAKI. Only the last action card in it does its action. **Rainbow TAKI:** a TAKI in the color to play.
 - **Crown:** can be played on any card, and cancels the +2 cards or the +3 waiting to be drawn; then play any card, or draw.
 - **+3:** every other player draws 3 cards, unless the next player cancels it with a Crown. **+3 Breaker:** any other player can answer a +3 with it, even out of turn; the player of the +3 then draws the 3 cards. Played on any other card, a +3 Breaker makes its own player draw 3.
 - **Options:** **Game end** only: **One game** (the default), or **Pyramid** (8 cards, then 7 … 1).

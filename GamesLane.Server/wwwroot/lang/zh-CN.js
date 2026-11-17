@@ -455,7 +455,7 @@ TRANSLATIONS["zh-CN"] = {
     "TAKI": "TAKI",
     "Change Color": "变色",
     "Change Color +4": "变色 +4",
-    "SuperTAKI": "SuperTAKI",
+    "Rainbow TAKI": "彩虹 TAKI",
     "Crown": "王冠",
     "+3 Breaker": "+3 破解",
     "{color} {value}": "{color} {value}",
@@ -544,10 +544,10 @@ TRANSLATIONS["zh-CN"] = {
     // Final Card options (from the server)
     "Style": "玩法",
     "US Style": "美式玩法",
-    "The UNO rules and cards, with the options below.": "使用 UNO 的规则和纸牌，并可设置以下选项。",
+    "7 cards each, with Change Color +4 and the options below.": "每人 7 张牌，包含变色 +4，并可设置以下选项。",
     "Israeli Style": "以色列玩法",
-    "The Super TAKI rules and cards: 8 cards each, with Plus, TAKI, SuperTAKI, Crown, +3 and +3 Breaker.":
-        "使用 Super TAKI 的规则和纸牌：每人 8 张牌，包含加号、TAKI、SuperTAKI、王冠、+3 和 +3 破解。",
+    "8 cards each, with Plus, TAKI, Rainbow TAKI, Crown, +3 and +3 Breaker.":
+        "每人 8 张牌，包含加号、TAKI、彩虹 TAKI、王冠、+3 和 +3 破解。",
     "Game end": "游戏结束方式",
     "One game": "一局定胜负",
     "The first player to play all their cards wins.": "率先出完所有手牌的玩家获胜。",

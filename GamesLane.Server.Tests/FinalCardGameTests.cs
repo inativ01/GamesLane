@@ -564,7 +564,7 @@ public class FinalCardGameTests
     private const string Greens = "G1 G3 G4 G5 G6 G7 G8 G9";
 
     [Fact]
-    public void The_israeli_deck_has_116_cards_without_0_or_2_and_with_the_super_taki_cards()
+    public void The_israeli_deck_has_116_cards_without_0_or_2_and_with_the_israeli_cards()
     {
         var deck = FinalCardCard.IsraeliDeck();
 
@@ -670,7 +670,7 @@ public class FinalCardGameTests
     }
 
     [Fact]
-    public void A_crown_cancels_a_stack_and_its_player_plays_any_card_a_super_taki_then_takes_the_color_chosen()
+    public void A_crown_cancels_a_stack_and_its_player_plays_any_card_a_rainbow_taki_then_takes_the_color_chosen()
     {
         var game = Deal(Israeli, "R5", "", "R+2 B1 B3 B4 B6 B7 B8 B9", "WC WT G1 G3 G4 G6 G7 G8");
         Assert.True(game.TryPlay(0, Card("R+2"), null, out var error), error);

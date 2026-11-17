@@ -14,7 +14,7 @@ public enum FinalCardColor
 
 /// <summary>
 /// What a card shows: a number (0 to 9), an action (Stop, Change Direction, +2) or a card without a color (Change Color,
-/// Change Color +4). Israeli Style adds Plus and TAKI in each color, and SuperTAKI (a TAKI without a color), Crown, +3 and
+/// Change Color +4). Israeli Style adds Plus and TAKI in each color, and Rainbow TAKI (a TAKI without a color), Crown, +3 and
 /// +3 Breaker.
 /// </summary>
 public enum FinalCardValue
@@ -44,7 +44,7 @@ public enum FinalCardValue
 /// <summary>
 /// A card of Final Card. Its short text is its color's letter (R, Y, G, B) and its value (0 to 9, S for Stop, R for Change
 /// Direction, +2, + for Plus, T for TAKI), e.g. "R7", "GS", "B+2", "Y+", "RT"; or for a card without a color "W" (Change
-/// Color), "W+4" (Change Color +4), "WT" (SuperTAKI), "WC" (Crown), "W+3" (+3) and "W+3X" (+3 Breaker).
+/// Color), "W+4" (Change Color +4), "WT" (Rainbow TAKI), "WC" (Crown), "W+3" (+3) and "W+3X" (+3 Breaker).
 /// </summary>
 public sealed record FinalCardCard(FinalCardColor Color, FinalCardValue Value)
 {
@@ -61,12 +61,12 @@ public sealed record FinalCardCard(FinalCardColor Color, FinalCardValue Value)
     ];
 
     /// <summary>
-    /// Whether this card has no color (Change Color, Change Color +4, SuperTAKI, Crown, +3 or +3 Breaker).
+    /// Whether this card has no color (Change Color, Change Color +4, Rainbow TAKI, Crown, +3 or +3 Breaker).
     /// </summary>
     public bool IsWild => Color == FinalCardColor.Wild;
 
     /// <summary>
-    /// Whether this card is a TAKI or a SuperTAKI.
+    /// Whether this card is a TAKI or a Rainbow TAKI.
     /// </summary>
     public bool IsTaki => Value == FinalCardValue.Taki;
 
@@ -106,9 +106,9 @@ public sealed record FinalCardCard(FinalCardColor Color, FinalCardValue Value)
     ];
 
     /// <summary>
-    /// The 116 cards of an Israeli Style (Super TAKI) deck: in each color two of each number 1 and 3 to 9 (no 0, and the
+    /// The 116 cards of an Israeli Style deck: in each color two of each number 1 and 3 to 9 (no 0, and the
     /// +2 cards instead of the 2s), and two each of Stop, Change Direction, +2, Plus and TAKI; then four Change Color, and
-    /// two each of SuperTAKI, Crown, +3 and +3 Breaker.
+    /// two each of Rainbow TAKI, Crown, +3 and +3 Breaker.
     /// </summary>
     public static IReadOnlyList<FinalCardCard> IsraeliDeck() =>
     [
