@@ -471,7 +471,7 @@ For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run i
 
 ## Project status and external services
 
-_Last updated: 2026-11-15. Keep this section current; it is the hand-off point between work sessions._
+_Last updated: 2026-11-17. Keep this section current; it is the hand-off point between work sessions._
 
 ### Local machine
 - Repo folder: `C:\Users\inati\source\GamesLane2.0`, moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
@@ -492,8 +492,8 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
   - `ConnectionStrings__GamesLane`: Neon `production` branch (set; required — the server does not start without it). Either the .NET (`Host=...;`) or the URL (`postgresql://...`) format works.
   - `Authentication__Google__ClientId` / `__ClientSecret`: set, working
   - `Apple__KeyId`, with the secret file `apple-key.p8` (Sign in with Apple on the website; later also notifications)
-  - `Authentication__Microsoft__ClientId` / `__ClientSecret`: not set yet
-  - `Authentication__Discord__ClientId` / `__ClientSecret`: not set yet
+  - `Authentication__Microsoft__ClientId` / `__ClientSecret`: set, working
+  - `Authentication__Discord__ClientId` / `__ClientSecret`: set, working
 
 ### Neon (PostgreSQL database)
 - Project `GamesLane` (ID `gentle-cherry-51286211`), region AWS US East 2 (Ohio).
@@ -509,14 +509,13 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 
 ### Next steps
 1. Linking a Google account to a registered user (deferred).
-2. Microsoft and Discord sign-in: app registration (Entra admin center, Discord Developer Portal) and the environment variables on Render.
-3. Game history (deferred). Visitor countries need a location lookup (e.g. MaxMind GeoLite2) or Cloudflare in front of Render; until then the browser language stands in.
-4. Backgammon: possible extras (a move list, variants such as Nackgammon or Acey-deucey).
-5. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
-6. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
-7. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
-8. iPhone app: check on a phone Sign in with Apple (app and website), Google sign-in returning at `/auth/app-return`, and join links opening the app; then TestFlight and the App Store.
-9. iPhone app, native features (Apple's App Store guideline 4.2 rejects apps that only show a website): push notifications when it is your turn and the game is not on screen (the phone asleep, another app in front, the app closed, or another page), for every user, guests too (the server would keep only a guest's ID and the device token, deleted after 30 days without use; the privacy policy to say so); the app to tell the server when it goes to the background, so a notification does not wait for the connection to time out; needs an APNs key from the Apple Developer membership. Possibly: the native share sheet for a private game's code and join link; keeping the screen awake during a game on a shared screen; an offline screen with Try again instead of `www/index.html`'s static text.
+2. Game history (deferred). Visitor countries need a location lookup (e.g. MaxMind GeoLite2) or Cloudflare in front of Render; until then the browser language stands in.
+3. Backgammon: possible extras (a move list, variants such as Nackgammon or Acey-deucey).
+4. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
+5. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
+6. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
+7. iPhone app: sign-in with Apple, Google, Microsoft and Discord checked on a phone, in the app and on the website. Still to check: join links opening the app; then TestFlight and the App Store.
+8. iPhone app, native features (Apple's App Store guideline 4.2 rejects apps that only show a website): push notifications when it is your turn and the game is not on screen (the phone asleep, another app in front, the app closed, or another page), for every user, guests too (the server would keep only a guest's ID and the device token, deleted after 30 days without use; the privacy policy to say so); the app to tell the server when it goes to the background, so a notification does not wait for the connection to time out; needs an APNs key from the Apple Developer membership. Possibly: the native share sheet for a private game's code and join link; keeping the screen awake during a game on a shared screen; an offline screen with Try again instead of `www/index.html`'s static text.
 
 ## Working conventions
 - Ask before adding or upgrading packages.
