@@ -7,7 +7,8 @@ const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
 // The iPhone app (GamesLane.iOS) and its own features (ios/App/App/GamesLanePlugin.swift): signing in with a provider
-// in Apple's sign-in window, and vibrating. appPlugin is null on the website and in app versions without the plugin.
+// in Apple's sign-in window, vibrating, and turn notifications. appPlugin is null on the website and in app versions
+// without the plugin.
 const isNativeApp = window.Capacitor?.isNativePlatform?.() === true;
 const appPlugin = isNativeApp ? window.Capacitor.Plugins?.GamesLane ?? null : null;
 
@@ -17,6 +18,22 @@ function vibrateForTurn() {
         appPlugin.vibrate().catch(() => {});
     } else {
         navigator.vibrate?.([180, 90, 180]);
+    }
+}
+
+// Turn notifications in the iPhone app (see TurnNotifier on the server): the app registers the device for the
+// logged-in user, in the page's language, on every page, and asks the user to allow notifications once they are seated
+// in a game (ask). Without the permission, or in app versions without registerForNotifications, nothing happens.
+let notificationsAsked = false;
+
+async function registerForNotifications(ask) {
+    if (typeof appPlugin?.registerForNotifications !== "function" || !token || (ask && notificationsAsked)) return;
+    notificationsAsked ||= ask;
+    try {
+        const device = await appPlugin.registerForNotifications({ ask });
+        await postJson("/api/notifications/device", { token: device.token, sandbox: device.sandbox, language: language.code });
+    } catch {
+        // Not allowed, or the server could not be reached: no notifications this time.
     }
 }
 
@@ -178,6 +195,7 @@ const accountReady = (async () => {
     if (account.signedIn && account.accessToken) {
         saveToken(account.accessToken);
         await transferSeats();
+        registerForNotifications(false);
     }
     renderAccount();
     dispatchEvent(new Event(SETTINGS_EVENT));
@@ -228,10 +246,20 @@ async function restartConnection() {
     if (ok) connectionRestored();
 }
 
+// Tells the server when the page goes out of view (e.g. the iPhone app in the background) or comes back, so the app's
+// user is notified as soon as their turn comes while it is out of view. A new connection counts as in view.
+function reportPageHidden() {
+    if (connection.state === signalR.HubConnectionState.Connected) {
+        connection.invoke("SetPageHidden", document.hidden).catch(() => {});
+    }
+}
+
 connection.onreconnecting(() => showConnectionError(t("Connection lost. Reconnecting…")));
 connection.onreconnected(connectionRestored);
+connection.onreconnected(() => document.hidden && reportPageHidden());
 connection.onclose(restartConnection);
 document.addEventListener("visibilitychange", restartConnection);
+document.addEventListener("visibilitychange", reportPageHidden);
 
 // When the page closes (or the browser leaves it), the connection is closed on purpose, so the server knows at once
 // instead of waiting for the keep-alive messages to stop. A page the browser brings back from its cache reloads, to
@@ -251,6 +279,7 @@ async function connect() {
         await new Promise((resolve) => setTimeout(resolve, delay));
         try {
             await connection.start();
+            if (document.hidden) reportPageHidden();
             return true;
         } catch (err) {
             console.warn("Could not connect to the server; retrying.", err);
@@ -2452,6 +2481,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             if (view.playerId && !leaving) location.replace("/?left=1");
             return;
         }
+        if (view.isPlayer) registerForNotifications(true);
         const inLobby = state.phase === "Lobby";
         const taken = state.seats.filter(Boolean).length;
 

@@ -192,6 +192,12 @@ public interface IGameSession
     IReadOnlyList<PrivateUpdate> GetPrivateUpdates();
 
     /// <summary>
+    /// The users the game in progress waits for (whose turn it is), each once, with their connections to the session;
+    /// none outside a game in progress.
+    /// </summary>
+    IReadOnlyList<AwaitedPlayer> GetAwaitedPlayers();
+
+    /// <summary>
     /// Adds a chat message from <paramref name="userKey"/>, shown with <paramref name="profile"/>. Anyone with the session
     /// open can chat, seated or watching. Only the latest <see cref="GameSession.ChatHistoryLength"/> messages are kept.
     /// </summary>

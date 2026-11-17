@@ -17,6 +17,12 @@ public interface IGameHub
     Task<SessionEntry> EnterSession(string sessionId);
 
     /// <summary>
+    /// Tells whether the caller's page is out of view (e.g. the iPhone app in the background), so the iPhone app's user
+    /// is notified when their turn comes (see <see cref="Notifications.ITurnNotifier"/>).
+    /// </summary>
+    Task SetPageHidden(bool hidden);
+
+    /// <summary>
     /// Logged-in users only. Creates a session and returns its code. The session starts with the creator's saved options
     /// for the game, if they have any. The creator is seated.
     /// </summary>

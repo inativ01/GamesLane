@@ -2,12 +2,13 @@ using System.Buffers.Binary;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using GamesLane.Server.Games.RichManPoorMan;
+using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
 
 namespace GamesLane.Server.Tests;
 
 // Checks the translation files in wwwroot/lang against each other, the languages in i18n.js, the pages, the
-// translated privacy policies and help, the app manifest, and the main screen's pictures.
+// translated privacy policies and help, the app manifest, the main screen's pictures, and the iPhone app's notifications.
 public partial class TranslationsTests
 {
     private static readonly string Wwwroot = FindWwwroot();
@@ -183,6 +184,27 @@ public partial class TranslationsTests
         Assert.Contains("images/splash-landscape.jpg", sources);
         Assert.Contains("images/splash-portrait.jpg", sources);
         Assert.All(sources, source => Assert.True(File.Exists(Path.Combine(Wwwroot, source)), $"{source} is missing."));
+    }
+
+    // The iPhone app's turn notifications take the game's name and "Your turn" from the site's translations.
+    [Fact]
+    public void Turn_notifications_have_every_game_name_and_your_turn_in_every_language()
+    {
+        var texts = NotificationTexts.Load(Wwwroot);
+        Assert.Equal(Enum.GetValues<GameType>().Order(), NotificationTexts.GameNames.Keys.Order());
+        foreach (var code in Translated)
+        {
+            var translations = Translations(code);
+            Assert.Equal(code, texts.Language(code));
+            foreach (var (game, name) in NotificationTexts.GameNames)
+            {
+                Assert.True(translations.ContainsKey(name), $"{code}: \"{name}\" is not translated.");
+                Assert.Equal((translations[name], translations[NotificationTexts.YourTurn]), texts.Turn(game, code));
+            }
+        }
+
+        Assert.Equal(NotificationTexts.English, texts.Language("xx"));
+        Assert.Equal(("Rich man, poor man", "Your turn"), texts.Turn(GameType.RichManPoorMan, NotificationTexts.English));
     }
 
     private static List<string> HelpSections(string html) => HelpSection().Matches(html).Select(match => match.Groups[1].Value).ToList();

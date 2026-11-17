@@ -123,6 +123,11 @@ public record ChatMessage(int Number, string PlayerId, string Name, string Icon,
 public record PrivateUpdate(string ConnectionId, object State);
 
 /// <summary>
+/// A user the game in progress waits for (they hold an awaited seat), with the connections they have the session open on.
+/// </summary>
+public record AwaitedPlayer(string UserKey, IReadOnlyList<string> ConnectionIds);
+
+/// <summary>
 /// One session of a game: its seats, and the game played by the seated users.
 /// Users are identified by a user key; a user may hold several seats. Each game type sets its number of seats.
 /// Users do not choose a seat: they take the next available one. In the lobby, the taken seats are always the first
@@ -1080,6 +1085,29 @@ public abstract class GameSession : IGameSession
         lock (Sync)
         {
             return PrivateStateFor(userKey);
+        }
+    }
+
+    /// <summary>
+    /// The users the game in progress waits for (whose turn it is), each once, with their connections to the session;
+    /// none outside a game in progress.
+    /// </summary>
+    public IReadOnlyList<AwaitedPlayer> GetAwaitedPlayers()
+    {
+        lock (Sync)
+        {
+            if (!HasUnfinishedGame)
+            {
+                return [];
+            }
+
+            return AwaitedSeats
+                .Select(seat => _seats[seat]?.UserKey)
+                .OfType<string>()
+                .Distinct()
+                .Select(userKey => new AwaitedPlayer(userKey,
+                    [.. _connections.Where(c => c.Value == userKey).Select(c => c.Key)]))
+                .ToArray();
         }
     }
 

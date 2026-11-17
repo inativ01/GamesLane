@@ -47,6 +47,37 @@ namespace GamesLane.Server.Data.Migrations
                     b.ToTable("ActivityCounts");
                 });
 
+            modelBuilder.Entity("GamesLane.Server.Data.DeviceToken", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsSandbox")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.HasIndex("UserKey");
+
+                    b.ToTable("DeviceTokens");
+                });
+
             modelBuilder.Entity("GamesLane.Server.Data.ExternalLogin", b =>
                 {
                     b.Property<string>("Provider")

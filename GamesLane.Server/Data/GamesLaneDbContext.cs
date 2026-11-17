@@ -5,7 +5,8 @@ namespace GamesLane.Server.Data;
 
 /// <summary>
 /// The GamesLane database: saved users, their external accounts, icons and game options, saved game sessions, the
-/// number of games started per day, the anonymous daily activity counts, and the keys that sign login tokens.
+/// number of games started per day, the anonymous daily activity counts, the iPhones that get turn notifications, and
+/// the keys that sign login tokens.
 /// </summary>
 public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
@@ -43,6 +44,11 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
     /// The anonymous activity counts per day: visits, games opened, created, joined and finished, and invites opened.
     /// </summary>
     public DbSet<ActivityCount> ActivityCounts => Set<ActivityCount>();
+
+    /// <summary>
+    /// The iPhones that get a notification when it is their user's turn.
+    /// </summary>
+    public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
 
     /// <summary>
     /// The keys ASP.NET Core uses to encrypt and sign login tokens, so tokens stay valid after a restart.
@@ -110,6 +116,16 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
             count.Property(c => c.Event).HasMaxLength(30);
             count.Property(c => c.GameType).HasMaxLength(50);
             count.Property(c => c.Detail).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<DeviceToken>(device =>
+        {
+            device.HasKey(d => d.Token);
+            device.Property(d => d.Token).HasMaxLength(200);
+            device.Property(d => d.UserKey).HasMaxLength(100);
+            device.Property(d => d.Language).HasMaxLength(10);
+            device.HasIndex(d => d.UserKey);
+            device.HasIndex(d => d.UpdatedAt);
         });
     }
 }

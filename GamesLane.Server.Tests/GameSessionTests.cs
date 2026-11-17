@@ -534,6 +534,38 @@ public class GameSessionTests
     }
 
     [Fact]
+    public void The_awaited_players_are_the_users_whose_turn_it_is_with_their_connections_and_none_outside_a_game()
+    {
+        var session = Seated(new TicTacToeSession("ABC123"));
+        Assert.Empty(session.GetAwaitedPlayers());
+
+        session.TryNewGame(Alice, 0, out _);
+        session.Enter(Alice, AliceProfile, "conn-a2");
+        var alice = Assert.Single(session.GetAwaitedPlayers());
+        Assert.Equal(Alice, alice.UserKey);
+        Assert.Equal(["conn-a", "conn-a2"], alice.ConnectionIds.Order());
+
+        Assert.True(session.TryMove(Alice, 0, 0, out var error), error);
+        session.Disconnect("conn-b", Now);
+        var bob = Assert.Single(session.GetAwaitedPlayers());
+        Assert.Equal((Bob, 0), (bob.UserKey, bob.ConnectionIds.Count));
+
+        Assert.Empty(Finish(Started(new TicTacToeSession("XYZ789"))).GetAwaitedPlayers());
+    }
+
+    [Fact]
+    public void A_user_holding_several_awaited_seats_is_awaited_once()
+    {
+        var session = TheGang();
+        session.TryTakeSeat(Alice, AliceProfile, "conn-a", 0, out _);
+        session.TryTakeSeat(Alice, AliceProfile, "conn-a", 1, out _);
+        session.TryTakeSeat(Bob, BobProfile, "conn-b", 2, out _);
+        Assert.True(session.TryNewGame(Alice, 0, out var error), error);
+
+        Assert.Equal([Alice, Bob], session.GetAwaitedPlayers().Select(p => p.UserKey).Order());
+    }
+
+    [Fact]
     public void A_disconnected_player_is_absent_at_once_and_away_after_the_reconnect_window()
     {
         var session = Started(new TicTacToeSession("ABC123"));
