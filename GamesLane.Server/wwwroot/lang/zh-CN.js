@@ -14,7 +14,6 @@ TRANSLATIONS["zh-CN"] = {
     "New to this game? Tap ? for how to play.": "第一次玩这个游戏？请点击 ? 查看玩法。",
     "Could not load the help. Check your connection and try again.": "无法加载帮助。请检查网络连接后重试。",
     "Connection lost. Reconnecting…": "连接已断开。正在重新连接…",
-    "Connection lost. Reload the page to reconnect.": "连接已断开。请刷新页面重新连接。",
     "Could not connect to the server. Reload the page to try again.": "无法连接到服务器。请刷新页面重试。",
     "Could not reach the server. Check your connection and try again.": "无法访问服务器。请检查网络连接后重试。",
     "Something went wrong.": "出错了。",
