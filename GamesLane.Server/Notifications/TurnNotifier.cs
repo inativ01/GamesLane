@@ -40,18 +40,28 @@ public class TurnNotifier(
     public void ConnectionClosed(string connectionId) => _hidden.TryRemove(connectionId, out _);
 
     /// <inheritdoc />
+    /// <remarks>Never throws: errors are logged, so the change itself always goes on.</remarks>
     public Task SessionChangedAsync(IGameSession session)
     {
-        var awaited = session.GetAwaitedPlayers();
-        var previous = _awaited.GetValue(session, _ => new AwaitedUsers());
         List<string> newlyAwaited;
-        lock (previous)
+        try
         {
-            newlyAwaited = previous.Seen
-                ? [.. awaited.Where(p => !previous.UserKeys.Contains(p.UserKey) && !IsWatching(p)).Select(p => p.UserKey)]
-                : [];
-            previous.UserKeys = [.. awaited.Select(p => p.UserKey)];
-            previous.Seen = true;
+            var previous = _awaited.GetValue(session, _ => new AwaitedUsers());
+            // The state is read while holding the lock, so overlapping changes are compared in the order they are read.
+            lock (previous)
+            {
+                var awaited = session.GetAwaitedPlayers();
+                newlyAwaited = previous.Seen
+                    ? [.. awaited.Where(p => !previous.UserKeys.Contains(p.UserKey) && !IsWatching(p)).Select(p => p.UserKey)]
+                    : [];
+                previous.UserKeys = [.. awaited.Select(p => p.UserKey)];
+                previous.Seen = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Could not check whose turn it is in session {SessionId}.", session.Id);
+            return Task.CompletedTask;
         }
 
         if (newlyAwaited.Count == 0 || !sender.IsConfigured)

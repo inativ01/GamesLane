@@ -25,6 +25,11 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
     // The registerForNotifications calls waiting for the device token (see AppDelegate), used on the main thread only.
     private var tokenCalls: [CAPPluginCall] = []
 
+    /// The page of the notification the app was launched with (set by SceneDelegate), opened once the plugin loads.
+    static var launchPath: String?
+    // The launch notification's page once opened, so the same tap reported again to didReceive is not opened twice.
+    private var openedLaunchPath: String?
+
     override public func load() {
         NotificationCenter.default.addObserver(self, selector: #selector(openUniversalLink(_:)),
                                                name: .capacitorOpenUniversalLink, object: nil)
@@ -33,6 +38,25 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
         NotificationCenter.default.addObserver(self, selector: #selector(didFailToRegisterForNotifications(_:)),
                                                name: .capacitorDidFailToRegisterForRemoteNotifications, object: nil)
         bridge?.notificationRouter.pushNotificationHandler = self
+        // Opened after the web view starts loading the first page, so the game's page replaces it.
+        if let path = Self.launchPath {
+            Self.launchPath = nil
+            openedLaunchPath = path
+            open(notificationPath: path)
+        }
+    }
+
+    /// The page a turn notification opens (`path` in the notification, e.g. /backgammon.html?session=ABC123).
+    static func notificationPath(_ response: UNNotificationResponse) -> String? {
+        response.notification.request.content.userInfo["path"] as? String
+    }
+
+    /// Opens a notification's page, if it is a path on the server the app shows.
+    private func open(notificationPath path: String) {
+        guard let link = URLComponents(string: path), link.host == nil, link.path.hasPrefix("/") else {
+            return
+        }
+        open(path: link.path, query: link.query)
     }
 
     /// Opens a join link the app was opened with in the web view, on the server the app shows.
@@ -60,9 +84,9 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
     }
 
     /// Registers the device for notifications and resolves with `{ token, sandbox }`: Apple's device token for the app
-    /// (hexadecimal), and whether it is for Apple's development servers (an app built for development, not TestFlight
-    /// or the App Store). With `ask`, the user is asked to allow notifications if they have not answered yet. Rejects
-    /// with the code DENIED when notifications are not allowed.
+    /// (hexadecimal), and whether it is for Apple's development servers (see `usesSandbox`). With `ask`, the user is
+    /// asked to allow notifications if they have not answered yet. Rejects with the code DENIED when notifications are
+    /// not allowed.
     @objc func registerForNotifications(_ call: CAPPluginCall) {
         let ask = call.getBool("ask") ?? false
         let center = UNUserNotificationCenter.current()
@@ -96,16 +120,36 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
             return
         }
         let token = deviceToken.map { String(format: "%02x", $0) }.joined()
-        #if DEBUG
-        let sandbox = true
-        #else
-        let sandbox = false
-        #endif
         DispatchQueue.main.async {
-            self.tokenCalls.forEach { $0.resolve(["token": token, "sandbox": sandbox]) }
+            self.tokenCalls.forEach { $0.resolve(["token": token, "sandbox": Self.usesSandbox]) }
             self.tokenCalls.removeAll()
         }
     }
+
+    /// Whether the device token is for Apple's development (sandbox) servers. iOS chooses them by the signing profile,
+    /// not the build configuration: an app signed for development embeds a profile whose `aps-environment` is
+    /// `development`. TestFlight and App Store builds embed none, and use the production servers. The Simulator uses
+    /// the development servers.
+    private static let usesSandbox: Bool = {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        guard let url = Bundle.main.url(forResource: "embedded", withExtension: "mobileprovision"),
+              let data = try? Data(contentsOf: url),
+              let text = String(data: data, encoding: .isoLatin1),
+              let start = text.range(of: "<?xml"),
+              let end = text.range(of: "</plist>", range: start.upperBound..<text.endIndex) else {
+            return false
+        }
+        // The profile is a signed message around a property list; Latin-1 keeps each byte as one character.
+        let plist = Data(text[start.lowerBound..<end.upperBound].unicodeScalars.map { UInt8($0.value) })
+        guard let profile = try? PropertyListSerialization.propertyList(from: plist, format: nil) as? [String: Any],
+              let entitlements = profile["Entitlements"] as? [String: Any] else {
+            return false
+        }
+        return entitlements["aps-environment"] as? String == "development"
+        #endif
+    }()
 
     @objc private func didFailToRegisterForNotifications(_ notification: Notification) {
         let error = notification.object as? Error
@@ -121,13 +165,16 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
         [.banner, .list, .sound]
     }
 
-    /// A tapped turn notification opens its game (`path` in the notification, e.g. /backgammon.html?session=ABC123).
+    /// A tapped turn notification opens its game, unless it is the one the app was launched with, already opened.
     public func didReceive(response: UNNotificationResponse) {
-        guard let path = response.notification.request.content.userInfo["path"] as? String,
-              let link = URLComponents(string: path), link.host == nil, link.path.hasPrefix("/") else {
+        guard let path = Self.notificationPath(response) else {
             return
         }
-        open(path: link.path, query: link.query)
+        if path == openedLaunchPath {
+            openedLaunchPath = nil
+            return
+        }
+        open(notificationPath: path)
     }
 
     /// Opens `url` (the server's /auth/signin/{provider}?app=true...) in Apple's sign-in window, and resolves with

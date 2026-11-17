@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Threading.RateLimiting;
 using GamesLane.Server.Auth;
 using GamesLane.Server.Hubs;
 
@@ -16,14 +17,26 @@ public record DeviceRequest(string? Token, bool Sandbox, string? Language);
 /// </summary>
 public static partial class NotificationEndpoints
 {
+    /// <summary>
+    /// The rate limit for registering devices: at most <see cref="DevicesPerHour"/> per address in an hour, so made-up
+    /// tokens cannot fill the database (anyone can become a guest).
+    /// </summary>
+    public const string DeviceRateLimit = "devices";
+
+    private const int DevicesPerHour = 60;
+
     [GeneratedRegex("^[0-9a-fA-F]{64,200}$")]
     private static partial Regex DeviceTokenFormat();
 
     /// <summary>
-    /// Registers the devices, Apple's notification service, the texts, the notifier, and the cleanup of unused devices.
+    /// Registers the devices, Apple's notification service, the texts, the notifier, the cleanup of unused devices,
+    /// and the registrations' rate limit.
     /// </summary>
     public static void AddGamesLaneNotifications(this WebApplicationBuilder builder)
     {
+        builder.Services.AddRateLimiter(options => options.AddPolicy(DeviceRateLimit, context => RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = DevicesPerHour, Window = TimeSpan.FromHours(1) })));
         builder.Services.AddHttpClient(ApnsPushSender.HttpClientName);
         builder.Services.AddSingleton<IDeviceTokenRepository, DeviceTokenRepository>();
         builder.Services.AddSingleton<IPushSender, ApnsPushSender>();
@@ -61,6 +74,6 @@ public static partial class NotificationEndpoints
             await devices.SaveAsync(request.Token!.ToLowerInvariant(), GameHub.GetUserKey(context.User, ""), request.Sandbox,
                 texts.Language(request.Language), timeProvider.GetUtcNow());
             return Results.NoContent();
-        });
+        }).RequireRateLimiting(DeviceRateLimit);
     }
 }
