@@ -7,6 +7,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
 
+        // Launched by tapping a turn notification: the plugin opens its game once it loads.
+        if let response = connectionOptions.notificationResponse {
+            GamesLanePlugin.launchPath = GamesLanePlugin.notificationPath(response)
+        }
         window = UIWindow(windowScene: windowScene)
         window?.rootViewController = GamesLaneViewController()
         window?.makeKeyAndVisible()

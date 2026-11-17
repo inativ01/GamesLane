@@ -3,6 +3,7 @@ using GamesLane.Server.Data;
 using GamesLane.Server.Feedback;
 using GamesLane.Server.Games;
 using GamesLane.Server.Hubs;
+using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
 using GamesLane.Server.Users;
 using Microsoft.AspNetCore.SignalR;
@@ -72,7 +73,7 @@ public static class AccountEndpoints
         // After logging in or out, gives the seats of the previous user (proven by their login token) to the current one,
         // in every session in memory.
         app.MapPost("/auth/transfer", async (TransferRequest request, HttpContext context, IGameSessionStore store,
-            IHubContext<GameHub> hub, TimeProvider timeProvider) =>
+            IHubContext<GameHub> hub, ITurnNotifier notifier, TimeProvider timeProvider) =>
         {
             if (AuthSetup.GetProfile(context.User) is null)
             {
@@ -84,15 +85,16 @@ public static class AccountEndpoints
                 return Error("Your previous login has expired.");
             }
 
-            await TransferSeatsAsync(store, hub, previous, context.User, timeProvider.GetUtcNow());
+            await TransferSeatsAsync(store, hub, notifier, previous, context.User, timeProvider.GetUtcNow());
             return Results.NoContent();
         });
 
-        // Deletes the logged-in saved user (with their external accounts, icons and game options) and logs in a new
-        // guest, who gets their seats in every session in memory, as after logging out. Sign in with Apple's tokens are
-        // revoked first, as Apple requires.
+        // Deletes the logged-in saved user (with their external accounts, icons, game options and the iPhones that get
+        // their turn notifications) and logs in a new guest, who gets their seats in every session in memory, as after
+        // logging out. Sign in with Apple's tokens are revoked first, as Apple requires.
         app.MapPost("/auth/delete", async (HttpContext context, IUserService users, IGameSessionStore store,
-            IHubContext<GameHub> hub, TimeProvider timeProvider, AppleAccountTokens appleTokens) =>
+            IHubContext<GameHub> hub, ITurnNotifier notifier, IDeviceTokenRepository devices, TimeProvider timeProvider,
+            AppleAccountTokens appleTokens) =>
         {
             if (AuthSetup.GetSavedUserId(context.User) is not { } id)
             {
@@ -105,8 +107,9 @@ public static class AccountEndpoints
             }
 
             await users.DeleteUserAsync(id);
+            await devices.DeleteForUserAsync(GameHub.GetUserKey(context.User, ""));
             var guest = NewGuest();
-            await TransferSeatsAsync(store, hub, context.User, guest, timeProvider.GetUtcNow());
+            await TransferSeatsAsync(store, hub, notifier, context.User, guest, timeProvider.GetUtcNow());
             return Token(context, guest);
         });
 
@@ -269,8 +272,8 @@ public static class AccountEndpoints
     /// Gives the seats of <paramref name="from"/> to <paramref name="to"/>, shown with the new name and icon, in every
     /// session in memory, and sends the new state of each session that changed.
     /// </summary>
-    private static async Task TransferSeatsAsync(IGameSessionStore store, IHubContext<GameHub> hub, ClaimsPrincipal from,
-        ClaimsPrincipal to, DateTimeOffset now)
+    private static async Task TransferSeatsAsync(IGameSessionStore store, IHubContext<GameHub> hub, ITurnNotifier notifier,
+        ClaimsPrincipal from, ClaimsPrincipal to, DateTimeOffset now)
     {
         var fromKey = GameHub.GetUserKey(from, "");
         var toKey = GameHub.GetUserKey(to, "");
@@ -279,7 +282,7 @@ public static class AccountEndpoints
         {
             if (session.TransferSeats(fromKey, toKey, profile, now))
             {
-                await GameHub.BroadcastState(hub.Clients, store, session);
+                await GameHub.BroadcastState(hub.Clients, store, notifier, session);
             }
         }
     }

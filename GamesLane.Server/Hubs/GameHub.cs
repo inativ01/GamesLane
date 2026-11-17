@@ -2,6 +2,7 @@ using System.Security.Claims;
 using GamesLane.Server.Auth;
 using GamesLane.Server.Games.FinalCard;
 using GamesLane.Server.Games.Wazoo;
+using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
 using GamesLane.Server.Stats;
 using GamesLane.Server.Users;
@@ -14,13 +15,15 @@ namespace GamesLane.Server.Hubs;
 /// Everyone with a session's page open (players and spectators) joins the session's group and receives public
 /// <see cref="StateUpdated"/> messages. Private, per-player information is returned only to the calling connection.
 /// Players are logged-in users, identified by their user ID, so they keep their seats after a refresh or reconnect.
-/// Games created and players joining someone else's game are counted in <see cref="ActivityCounter"/>.
+/// Games created and players joining someone else's game are counted in <see cref="ActivityCounter"/>. After every
+/// change, <see cref="ITurnNotifier"/> notifies the iPhone app's users whose turn it has become.
 /// </summary>
 public class GameHub(
     IGameSessionStore store,
     TimeProvider timeProvider,
     IGameOptionsService savedOptions,
     ActivityCounter activity,
+    ITurnNotifier notifier,
     ILogger<GameHub> logger) : Hub, IGameHub
 {
     /// <summary>
@@ -76,6 +79,13 @@ public class GameHub(
             session.HasSeatOffer(UserKey));
     }
 
+    /// <inheritdoc />
+    public Task SetPageHidden(bool hidden)
+    {
+        notifier.SetPageHidden(Context.ConnectionId, hidden);
+        return Task.CompletedTask;
+    }
+
     /// <summary>
     /// Marks the connection's user as disconnected in every session where they hold a seat, and updates the observer
     /// count of the sessions they were watching.
@@ -83,6 +93,7 @@ public class GameHub(
     /// </summary>
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
+        notifier.ConnectionClosed(Context.ConnectionId);
         foreach (var session in store.All)
         {
             if (session.Disconnect(Context.ConnectionId, timeProvider.GetUtcNow()))
@@ -450,9 +461,11 @@ public class GameHub(
 
     /// <summary>
     /// Sends the session's public state to everyone in the session, and each player's private information to their
-    /// own connections only, then saves the session. Also used outside the hub, by <see cref="DisconnectedSeatsMonitor"/>.
+    /// own connections only, lets <paramref name="notifier"/> notify the users whose turn it has become, then saves the
+    /// session. Also used outside the hub, by <see cref="DisconnectedSeatsMonitor"/>.
     /// </summary>
-    internal static async Task BroadcastState(IHubClients<IClientProxy> clients, IGameSessionStore store, IGameSession session)
+    internal static async Task BroadcastState(IHubClients<IClientProxy> clients, IGameSessionStore store,
+        ITurnNotifier notifier, IGameSession session)
     {
         await clients.Group(SessionGroup(session.Id)).SendAsync(StateUpdated, session.GetPublicState());
         foreach (var update in session.GetPrivateUpdates())
@@ -460,6 +473,8 @@ public class GameHub(
             await clients.Client(update.ConnectionId).SendAsync(PrivateStateUpdated, update.State);
         }
 
+        // Sent in the background, so the players do not wait for Apple.
+        _ = notifier.SessionChangedAsync(session);
         await store.SaveAsync(session);
     }
 
@@ -497,7 +512,7 @@ public class GameHub(
     /// <summary>
     /// Sends the session's public state to everyone in the session, and saves it.
     /// </summary>
-    private Task BroadcastState(IGameSession session) => BroadcastState(Clients, store, session);
+    private Task BroadcastState(IGameSession session) => BroadcastState(Clients, store, notifier, session);
 
     /// <summary>
     /// Sends the session's public state to everyone in the session, without saving it: for changes that are not saved,

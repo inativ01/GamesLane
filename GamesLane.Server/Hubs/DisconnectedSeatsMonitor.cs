@@ -1,3 +1,4 @@
+using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,6 +13,7 @@ namespace GamesLane.Server.Hubs;
 public class DisconnectedSeatsMonitor(
     IGameSessionStore store,
     IHubContext<GameHub> hub,
+    ITurnNotifier notifier,
     TimeProvider timeProvider,
     ILogger<DisconnectedSeatsMonitor> logger) : BackgroundService
 {
@@ -48,7 +50,7 @@ public class DisconnectedSeatsMonitor(
                 {
                     if (session.UpdateAwaySeats(now))
                     {
-                        await GameHub.BroadcastState(hub.Clients, store, session);
+                        await GameHub.BroadcastState(hub.Clients, store, notifier, session);
                     }
 
                     var idle = session.IsIdle(now, IdleLimit(session));

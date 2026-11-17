@@ -27,7 +27,7 @@ It is a complete reimplementation of the original [GamesLane](https://github.com
 - Plain HTML, CSS and JavaScript (no build step)
 - xUnit tests
 - Hosted on Render (Docker)
-- iPhone app: Capacitor, showing the site (see the [developer guide](docs/developer-guide.md#iphone-app))
+- iPhone app: Capacitor, showing the site, with turn notifications through Apple's push notification service (see the [developer guide](docs/developer-guide.md#iphone-app))
 
 ## Getting started
 
