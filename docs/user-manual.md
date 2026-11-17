@@ -263,26 +263,43 @@ The rules of each game, with its options, for reference.
 
 ### Final Card rules
 
-2–10 players, in one of two styles (the **Style** option): **US Style** (default), with the UNO rules and cards, or **Israeli Style**, with the Super TAKI rules and cards (see [Israeli Style](#israeli-style) below). In US Style the deck has 108 cards: in each color (red, yellow, green, blue) one 0, two of each number 1 to 9, two Stop, two Change Direction and two +2; and four Change Color and four Change Color +4. Each player gets 7 cards, and the next card is turned up to start the discard pile. Each hand is started by the next seat.
+2–10 players. Be the first to play all your cards. The **Style** option chooses the cards and rules: **US Style** (the default) or **Israeli Style**.
 
-- **A turn:** play a card that matches the top of the discard pile by color, or by number or symbol, or a card without a color; or draw. A Change Color chooses the color to play next.
-- **Drawing:** if the card drawn can be played, you may play it; otherwise the turn passes. You may draw even when you could play.
-- **Action cards:** Stop: the next player misses their turn. Change Direction: play goes the other way (with two players it works like a Stop). +2 / Change Color +4: the next player has 2 / 4 penalty cards to draw and misses their turn. Turned up at the start of a hand, a Stop skips the first player, a Change Direction makes the player before them start in the other direction, and a +2 gives the first player 2 penalty cards and makes them miss their turn.
-- **Penalty cards** (from a +2, a Change Color +4, a challenge, a +3, or being caught): the player must draw them before anything else.
-- **Final Card!:** call it on your final card, or before playing your second-to-last card, to be protected while you hold that one card (drawing ends the protection). Calling it also catches every other player holding one card unprotected: they draw 2 penalty cards (4 in Israeli Style).
-- **Options:** in US Style (in Israeli Style, only **Game end**, with **One game** or **Pyramid**):
-  - **Game end:** **One game** (the first to play all their cards wins); **Score target** (default; 100, 200, 300 or 500 points, 500 by default): the winner of each hand scores the cards left in the other hands (a number its value, an action card 20, a card without a color 50), and the first to reach the target wins; **Pyramid:** a player who plays all their cards is dealt one card fewer than last time (7, then 6, 5 … 1; in Israeli Style 8, then 7 … 1); the first to play their last single card wins, and play goes on until everyone is ranked.
-  - **Stacking:** which draw cards can answer a draw card; the next player then draws all the cards unless they stack again. **No stacking** (default), **+2 on +2**, **+2 on +2 and +4 on +4**, or **+2 on +2, +4 on +4 and +4 on +2**.
-  - **Drawing:** **Draw one card** (default), or **Draw until you can play**.
-  - **Change Color +4:** **Always allowed**; **Only without the color**: only when you hold no card of the color to play; **Can be challenged** (default): the player it is played on may challenge instead of drawing. If the player of the Change Color +4 held a card of the color to play, they draw the cards instead; if not, the challenger draws 2 more (6 instead of 4) and misses their turn.
-- <a id="israeli-style"></a>**Israeli Style** (the Super TAKI rules): 116 cards: in each color two of each number 1 and 3 to 9 (no 0, and the +2 cards instead of the 2s), and two each of Stop, Change Direction, +2, Plus (a big + on the card) and TAKI; and four Change Color, and two each of SuperTAKI (TAKI on the joker's octagon), Crown, +3 and +3 Breaker (a crossed-out +3). Each player gets 8 cards.
-  - **Drawing:** one card, which cannot be played until your next turn: the turn passes.
-  - **Change Direction** with two players changes the direction and nothing else: the other player plays next.
-  - **+2:** a +2 can always answer a +2 (or a Crown cancels them); the player who cannot draws them all and misses their turn.
-  - **Plus:** play another card. If you cannot, draw a card (the turn passes). A Plus as your last card does not win: you must draw.
-  - **TAKI:** after it, play as many cards of its color as you like, then close it. Only the last action card in a TAKI acts. **SuperTAKI:** a TAKI in the color to play.
-  - **Crown:** can be played on any card, even on +2 cards to draw or a +3 (it cancels them); then play any card, or draw.
-  - **+3:** every other player draws 3 cards, unless the next player answers with a Crown. **+3 Breaker:** played on a +3, even out of turn, makes the player of the +3 draw the 3 cards instead; played on any other card, its player draws 3.
+**Common rules (both styles)**
+
+- **The cards** come in four colors (red, yellow, green, blue), plus cards without a color. One card is turned up to start the discard pile; each hand is started by the next seat.
+- **A turn:** play a card that matches the top of the discard pile by color, or by number or symbol, or a card without a color; or draw. You may draw even when you could play. When the draw pile runs out, the discard pile (except its top card) is shuffled into a new one.
+- **Action cards:**
+  - **Stop:** the next player misses their turn.
+  - **Change Direction:** play goes the other way.
+  - **+2:** the next player draws 2 cards and misses their turn.
+  - **Change Color:** choose the color to play next.
+- **Penalty cards** (cards you must draw because of another player's card, or for being caught): draw them all before you do anything else.
+- **Final Card!:** call it while you hold your last card, or before playing your second-to-last card, to be protected while you hold that one card; drawing ends the protection. Calling it also catches every other player who holds one card and is not protected: they draw penalty cards (2 in US Style, 4 in Israeli Style).
+
+**US Style**
+
+- **The cards:** 108. In each color, one 0, two of each number 1 to 9, two Stop, two Change Direction and two +2; and four Change Color and four Change Color +4. Each player gets 7 cards.
+- **Change Color +4:** choose the color to play next; the next player draws 4 cards and misses their turn.
+- **Change Direction** with two players works like a Stop.
+- **Drawing:** if the card you draw can be played, you may play it at once.
+- **Options:**
+  - **Game end:** **One game**: the first to play all their cards wins. **Score target** (the default; 100, 200, 300 or 500 points, 500 by default): the winner of each hand scores the cards left in the other hands (a number its value, an action card 20, a card without a color 50), and the first to reach the target wins. **Pyramid:** a player who plays all their cards is dealt one card fewer than last time (7, then 6 … 1); the first to play their last single card wins, and play goes on until everyone is ranked.
+  - **Stacking:** **No stacking** (the default), **+2 on +2**, **+2 on +2 and +4 on +4**, or **+2 on +2, +4 on +4 and +4 on +2**. A stacked card passes all the cards to draw on to the next player, unless they stack again.
+  - **Drawing:** **Draw one card** (the default), or **Draw until you can play**.
+  - **Change Color +4:** **Always allowed**; **Only without the color** (only when you hold no card of the color to play); or **Can be challenged** (the default): the next player may challenge instead of drawing. If the player of the +4 held a card of the color to play, they draw the 4 cards instead; if not, the challenger draws 6 cards and misses their turn.
+
+<a id="israeli-style"></a>**Israeli Style**
+
+- **The cards:** 116. In each color, two of each number 1 and 3 to 9 (no 0 or 2), two Stop, two Change Direction, two +2, two Plus and two TAKI; and four Change Color, and two each of SuperTAKI, Crown, +3 and +3 Breaker. Each player gets 8 cards.
+- **Drawing:** a card you draw cannot be played until your next turn.
+- **Change Direction** with two players only changes the direction: the other player plays next.
+- **+2:** can always be answered with another +2; the player who cannot answer draws them all.
+- **Plus:** play another card; if you cannot, draw. A Plus cannot be your last card.
+- **TAKI:** play as many cards of its color as you like, one by one, then close the TAKI. Only the last action card in it does its action. **SuperTAKI:** a TAKI in the color to play.
+- **Crown:** can be played on any card, and cancels the +2 cards or the +3 waiting to be drawn; then play any card, or draw.
+- **+3:** every other player draws 3 cards, unless the next player cancels it with a Crown. **+3 Breaker:** any other player can answer a +3 with it, even out of turn; the player of the +3 then draws the 3 cards. Played on any other card, a +3 Breaker makes its own player draw 3.
+- **Options:** **Game end** only: **One game** (the default), or **Pyramid** (8 cards, then 7 … 1).
 
 ### Yaniv rules
 
