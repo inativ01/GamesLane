@@ -14,7 +14,6 @@ TRANSLATIONS.he = {
     "New to this game? Tap ? for how to play.": "חדשים במשחק הזה? הקישו על ? כדי לדעת איך משחקים.",
     "Could not load the help. Check your connection and try again.": "לא ניתן לטעון את העזרה. בדקו את החיבור ונסו שוב.",
     "Connection lost. Reconnecting…": "החיבור אבד. מתחברים מחדש…",
-    "Connection lost. Reload the page to reconnect.": "החיבור אבד. טענו את הדף מחדש כדי להתחבר.",
     "Could not connect to the server. Reload the page to try again.": "לא ניתן להתחבר לשרת. טענו את הדף מחדש כדי לנסות שוב.",
     "Could not reach the server. Check your connection and try again.": "לא ניתן להגיע לשרת. בדקו את החיבור ונסו שוב.",
     "Something went wrong.": "משהו השתבש.",

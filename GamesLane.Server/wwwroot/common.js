@@ -197,11 +197,41 @@ const connection = new signalR.HubConnectionBuilder()
     .withServerTimeout(10000)
     .build();
 
+// Pages listen for this event to catch up once the connection is back (e.g. a game page enters its session again).
+const RECONNECTED_EVENT = "connectionrestored";
 let pageClosing = false;
-connection.onreconnecting(() => showError(t("Connection lost. Reconnecting…")));
-connection.onclose(() => {
-    if (!pageClosing) showError(t("Connection lost. Reload the page to reconnect."));
-});
+let connectionMessage = "";
+let firstConnectDone = false;
+let restarting = false;
+
+// The connection's own messages are cleared once it works again; other errors stay.
+function showConnectionError(message) {
+    connectionMessage = message;
+    showError(message);
+}
+
+function connectionRestored() {
+    if (connectionMessage && $("error").textContent === connectionMessage) showError("");
+    connectionMessage = "";
+    dispatchEvent(new Event(RECONNECTED_EVENT));
+}
+
+// Once the automatic reconnection gives up (e.g. a phone asleep for a while), the page connects again as soon as it is
+// in view, so it never needs a reload.
+async function restartConnection() {
+    if (!firstConnectDone || restarting || pageClosing || document.hidden
+        || connection.state !== signalR.HubConnectionState.Disconnected) return;
+    restarting = true;
+    showConnectionError(t("Connection lost. Reconnecting…"));
+    const ok = await connect();
+    restarting = false;
+    if (ok) connectionRestored();
+}
+
+connection.onreconnecting(() => showConnectionError(t("Connection lost. Reconnecting…")));
+connection.onreconnected(connectionRestored);
+connection.onclose(restartConnection);
+document.addEventListener("visibilitychange", restartConnection);
 
 // When the page closes (or the browser leaves it), the connection is closed on purpose, so the server knows at once
 // instead of waiting for the keep-alive messages to stop. A page the browser brings back from its cache reloads, to
@@ -226,11 +256,14 @@ async function connect() {
             console.warn("Could not connect to the server; retrying.", err);
         }
     }
-    showError(t("Could not connect to the server. Reload the page to try again."));
+    showConnectionError(t("Could not connect to the server. Reload the page to try again."));
     return false;
 }
 
-const ready = accountReady.then(connect);
+const ready = accountReady.then(connect).then((ok) => {
+    firstConnectDone = true;
+    return ok;
+});
 
 // Anonymous visit counts (see the privacy policy, and VisitReport on the server), from the main screen and the games'
 // pages. Once a day (UTC) per browser: the visit, where it came from (a campaign's utm_source, another site, "invite"
@@ -2516,10 +2549,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         view.refresh();
     });
     connection.on("ChatMessageReceived", (message) => chat.receive(message));
-    connection.onreconnected(() => {
-        showError("");
-        enter();
-    });
+    addEventListener(RECONNECTED_EVENT, enter);
 
     endGame.addEventListener("click", () => {
         showMenu(false);

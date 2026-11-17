@@ -14,7 +14,6 @@ TRANSLATIONS.fr = {
     "New to this game? Tap ? for how to play.": "Nouveau dans ce jeu ? Touche ? pour savoir comment jouer.",
     "Could not load the help. Check your connection and try again.": "Impossible de charger l'aide. Vérifie ta connexion et réessaie.",
     "Connection lost. Reconnecting…": "Connexion perdue. Reconnexion…",
-    "Connection lost. Reload the page to reconnect.": "Connexion perdue. Recharge la page pour te reconnecter.",
     "Could not connect to the server. Reload the page to try again.": "Impossible de se connecter au serveur. Recharge la page pour réessayer.",
     "Could not reach the server. Check your connection and try again.": "Impossible de joindre le serveur. Vérifie ta connexion et réessaie.",
     "Something went wrong.": "Un problème est survenu.",
