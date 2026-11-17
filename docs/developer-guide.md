@@ -503,8 +503,8 @@ _Last updated: 2026-11-15. Keep this section current; it is the hand-off point b
 
 ### Sign-in providers
 - **Google:** working on the live site. OAuth client in Google Cloud Console (project "GamesLane"); redirect URI `https://gameslane.onrender.com/signin-google`; privacy policy at `/privacy.html`.
-- **Microsoft:** code ready; app registration in the Entra admin center not done yet (redirect URI `https://gameslane.onrender.com/signin-microsoft`).
-- **Discord:** code ready; application in the Discord Developer Portal not created yet (redirect URI `https://gameslane.onrender.com/signin-discord`).
+- **Microsoft:** working on the live site. App registration in the Entra admin center; redirect URI `https://gameslane.onrender.com/signin-microsoft`.
+- **Discord:** working on the live site. Application in the Discord Developer Portal; redirect URI `https://gameslane.onrender.com/signin-discord`.
 - **Apple:** Apple Developer Program (team `7Z69JFQYCV`). App ID `com.gameslane.app` with Push Notifications, Sign in with Apple and Associated Domains; Services ID `com.gameslane.web` (domain `gameslane.onrender.com`, return URL `https://gameslane.onrender.com/signin-apple`); one key for APNs and Sign in with Apple, on Render as the secret file `apple-key.p8` with `Apple__KeyId` (see [Sign-in setup](#sign-in-setup)).
 
 ### Next steps

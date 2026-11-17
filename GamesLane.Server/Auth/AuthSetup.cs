@@ -282,7 +282,7 @@ public static class AuthSetup
                 ? await SignInExternalAsync(context, users, account)
                 : Results.Unauthorized());
 
-        app.MapGet(AppSignInPath, async (HttpContext context) =>
+        app.MapGet(AppSignInPath, async Task<IResult> (HttpContext context) =>
             Results.Redirect(await ReadExternalAccountAsync(context) is ({ } account, var properties)
                 && properties?.Items.TryGetValue(ChallengeItem, out var challenge) == true && IsAppSignInChallenge(challenge)
                     ? AppReturnUrl(CreateAppSignInCode(context, account, challenge!), null)
