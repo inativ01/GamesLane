@@ -214,7 +214,7 @@ public class FinalCardGame : IFinalCardGame
         }
         else if (inTaki || (Rules.IsIsraeli && card.IsTaki))
         {
-            // A TAKI (or SuperTAKI, in the color to play) starts a run of its color; the run goes on until the player
+            // A TAKI (or Rainbow TAKI, in the color to play) starts a run of its color; the run goes on until the player
             // closes it, or has no card left to play in it.
             _takiColor = Color;
             if (hand.Count == 0 || Playable(player).Count == 0)
@@ -520,7 +520,7 @@ public class FinalCardGame : IFinalCardGame
     /// Change Color +4 only without a card of the color to play; any other card without a color; otherwise a card of the
     /// color to play or of the leading card's number or symbol. In Israeli Style, a +3 nobody has answered yet can only be
     /// answered with a +3 Breaker (by any other player) or a Crown (by the player to play); during a TAKI, only a card of
-    /// its color, a SuperTAKI, a Change Color, a Crown or a +3; and after a Crown, any card.
+    /// its color, a Rainbow TAKI, a Change Color, a Crown or a +3; and after a Crown, any card.
     /// </summary>
     private bool CanPlay(int player, FinalCardCard card, out string? error)
     {
@@ -543,8 +543,8 @@ public class FinalCardGame : IFinalCardGame
     }
 
     /// <summary>
-    /// Whether <paramref name="card"/> needs a color chosen: a Change Color, a Change Color +4, or a SuperTAKI after a Crown
-    /// (otherwise a SuperTAKI takes the color to play).
+    /// Whether <paramref name="card"/> needs a color chosen: a Change Color, a Change Color +4, or a Rainbow TAKI after a Crown
+    /// (otherwise a Rainbow TAKI takes the color to play).
     /// </summary>
     private bool ChoosesColor(FinalCardCard card) =>
         card.Value is FinalCardValue.Wild or FinalCardValue.WildDrawFour || (card.IsTaki && card.IsWild && AnyCard && _takiColor is null);
@@ -617,7 +617,7 @@ public class FinalCardGame : IFinalCardGame
     }
 
     /// <summary>
-    /// <paramref name="player"/>'s TAKI is closed: the action of its last card is carried out (a TAKI or SuperTAKI played on
+    /// <paramref name="player"/>'s TAKI is closed: the action of its last card is carried out (a TAKI or Rainbow TAKI played on
     /// its own has none).
     /// </summary>
     private void CloseTaki(int player)

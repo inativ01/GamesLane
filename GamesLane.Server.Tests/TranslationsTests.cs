@@ -7,7 +7,7 @@ using GamesLane.Server.Sessions;
 namespace GamesLane.Server.Tests;
 
 // Checks the translation files in wwwroot/lang against each other, the languages in i18n.js, the pages, the
-// translated privacy policies and help, and the app manifest.
+// translated privacy policies and help, the app manifest, and the main screen's pictures.
 public partial class TranslationsTests
 {
     private static readonly string Wwwroot = FindWwwroot();
@@ -40,6 +40,9 @@ public partial class TranslationsTests
 
     [GeneratedRegex(@"^    ""?([\w-]+)""?: \{ title:", RegexOptions.Multiline)]
     private static partial Regex OfflineTexts();
+
+    [GeneratedRegex(@"(?:src|srcset)=""(images/[^"" ]+)")]
+    private static partial Regex ImageSource();
 
     [Theory]
     [MemberData(nameof(TranslatedLanguages))]
@@ -170,6 +173,16 @@ public partial class TranslationsTests
 
         var offline = OfflineTexts().Matches(File.ReadAllText(Path.Combine(Wwwroot, "sw.js"))).Select(match => match.Groups[1].Value);
         Assert.Equal(LanguageCodes().Order(), offline.Order());
+    }
+
+    // The main screen's pictures (the splash screens, the GamesLane name and the games) are all in wwwroot/images.
+    [Fact]
+    public void Every_picture_on_the_main_screen_exists()
+    {
+        var sources = ImageSource().Matches(File.ReadAllText(Path.Combine(Wwwroot, "index.html"))).Select(match => match.Groups[1].Value).ToList();
+        Assert.Contains("images/splash-landscape.jpg", sources);
+        Assert.Contains("images/splash-portrait.jpg", sources);
+        Assert.All(sources, source => Assert.True(File.Exists(Path.Combine(Wwwroot, source)), $"{source} is missing."));
     }
 
     private static List<string> HelpSections(string html) => HelpSection().Matches(html).Select(match => match.Groups[1].Value).ToList();

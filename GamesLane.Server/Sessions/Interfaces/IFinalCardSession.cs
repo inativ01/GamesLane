@@ -13,7 +13,7 @@ public interface IFinalCardSession : IRoundBasedSession
 {
     /// <summary>
     /// <paramref name="seat"/>, which <paramref name="userKey"/> must hold, plays <paramref name="card"/>, choosing
-    /// <paramref name="color"/> for a Change Color, a Change Color +4, or a SuperTAKI after a Crown. In Israeli Style, a +3
+    /// <paramref name="color"/> for a Change Color, a Change Color +4, or a Rainbow TAKI after a Crown. In Israeli Style, a +3
     /// Breaker can answer a +3 out of turn.
     /// </summary>
     bool TryPlay(string userKey, int seat, string? card, FinalCardColor? color, [NotNullWhen(false)] out string? error);

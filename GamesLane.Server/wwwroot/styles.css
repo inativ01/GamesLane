@@ -155,7 +155,8 @@ a.button.small {
 }
 
 /* The splash screen on the main screen: when the app is opened in a tab, and when the GamesLane name on another page
-   is used. */
+   is used. The picture fills the screen; what does not fit is cut off evenly at its edges, around the text in the
+   middle. */
 .splash {
     display: none;
 }
@@ -184,7 +185,8 @@ html.splash-done .splash {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center;
 }
 
 /* The help button in the header, before the language picker, and the tip under it on a user's first visit. */
@@ -880,18 +882,48 @@ input {
     font-size: 1.15rem;
 }
 
-/* Main screen: public and private games side by side (one under the other on narrow screens); choosing to create or
-   join a game shows the list of games instead. Each column has three rows (title and hint, Create a game, then Join a
-   game or the code box); side by side, the rows line up across the columns. Columns may shrink below their content's
-   natural width, so they fit narrow screens. */
+/* Main screen: public and private games side by side (one under the other on narrow portrait screens); choosing to
+   create or join a game shows the list of games instead. Each column has three rows (title and hint, Create a game,
+   then Join a game or the code box); side by side, the rows line up across the columns. Columns may shrink below their
+   content's natural width, so they fit narrow screens. The page fills the screen's height: the menu is in the middle
+   of the space under the top bar, and the privacy policy and feedback links are at the bottom. One under the other,
+   the two panels share out the free height evenly: the same space above, between and below them. */
+
+body:has(> main.home) {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
 
 main.home {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    width: 100%;
     max-width: 960px;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+#home {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+}
+
+#home:has(> #picker[hidden]) {
+    justify-content: center;
+}
+
+main.home > footer {
+    margin-top: 0.75rem;
 }
 
 .menu-columns {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    justify-content: space-evenly;
     column-gap: 0.75rem;
 }
 
@@ -919,8 +951,10 @@ main.home {
     min-height: 3.25rem;
 }
 
-@media (min-width: 700px) {
+@media (min-width: 700px), (orientation: landscape) and (min-width: 560px) {
     .menu-columns {
+        display: grid;
+        flex: none;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-rows: repeat(3, auto);
     }
@@ -944,7 +978,37 @@ main.home {
     margin: 0 0 0.5rem;
 }
 
+/* Short screens, such as a phone on its side: a slimmer top bar and tighter panels, so the menu fits. */
+@media (orientation: landscape) and (max-height: 500px) {
+    body:has(> main.home) .top {
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+    }
+
+    body:has(> main.home) .brand-name {
+        height: 34px;
+    }
+
+    main.home {
+        padding-top: 0.25rem;
+    }
+
+    .menu-columns .panel {
+        margin: 0.4rem 0;
+        padding: 0.75rem;
+    }
+
+    .menu-column {
+        row-gap: 0.6rem;
+    }
+
+    main.home > footer {
+        margin-top: 0.5rem;
+    }
+}
+
 #picker {
+    width: 100%;
     max-width: 680px;
     margin-inline: auto;
 }
@@ -1162,11 +1226,11 @@ main.home {
 }
 
 footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem 1.25rem;
     margin-top: 1rem;
-}
-
-footer a + a {
-    margin-inline-start: 1.25rem;
 }
 
 /* The feedback form: the comment box and the "Include my name" tick box. */

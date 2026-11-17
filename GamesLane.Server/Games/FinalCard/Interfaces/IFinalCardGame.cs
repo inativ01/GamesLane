@@ -109,7 +109,7 @@ public interface IFinalCardGame
 
     /// <summary>
     /// <paramref name="player"/>, whose turn it is, plays <paramref name="card"/>, choosing <paramref name="color"/> for a
-    /// Change Color, a Change Color +4, or a SuperTAKI after a Crown. In Israeli Style, any other player can also play a +3
+    /// Change Color, a Change Color +4, or a Rainbow TAKI after a Crown. In Israeli Style, any other player can also play a +3
     /// Breaker on a +3 nobody has answered yet: the player of the +3 then has 3 penalty cards to draw.
     /// </summary>
     bool TryPlay(int player, FinalCardCard card, FinalCardColor? color, out string? error);

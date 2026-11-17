@@ -266,7 +266,7 @@ public interface IGameHub
     /// <summary>
     /// Final Card: <paramref name="seat"/>, which the caller must hold, plays <paramref name="card"/> (short text such as "R7",
     /// "GS", "B+2", "W", "W+4", or in Israeli Style "R+", "RT", "WT", "WC", "W+3" or "W+3X"), choosing
-    /// <paramref name="color"/> for a Change Color, a Change Color +4, or a SuperTAKI after a Crown. In Israeli Style, any
+    /// <paramref name="color"/> for a Change Color, a Change Color +4, or a Rainbow TAKI after a Crown. In Israeli Style, any
     /// seat can play a +3 Breaker on a +3 nobody has answered yet, in or out of turn.
     /// </summary>
     Task PlayCard(string sessionId, int seat, string? card, FinalCardColor? color);
