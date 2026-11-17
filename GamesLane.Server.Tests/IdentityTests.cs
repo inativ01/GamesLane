@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -7,7 +8,9 @@ using GamesLane.Server.Hubs;
 using GamesLane.Server.Sessions;
 using GamesLane.Server.Users;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -266,6 +269,26 @@ public class IdentityTests
     {
         Assert.Equal("/auth/app-return?code=a%2Bb%2Fc", AuthSetup.AppReturnUrl("a+b/c", null));
         Assert.Equal("/auth/app-return?error=failed", AuthSetup.AppReturnUrl(null, "failed"));
+    }
+
+    [Fact]
+    public async Task The_end_of_an_external_sign_in_redirects_the_iPhone_app_sign_in_window()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseUrls("http://127.0.0.1:0");
+        builder.AddGamesLaneAuth();
+        builder.Services.AddScoped<IUserService, UserService>();
+        await using var app = builder.Build();
+        app.UseAuthentication();
+        app.UseRateLimiter();
+        app.MapExternalSignInEndpoints();
+        await app.StartAsync();
+
+        using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { BaseAddress = new Uri(app.Urls.First()) };
+        var response = await client.GetAsync(AuthSetup.AppSignInPath);
+
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/auth/app-return?error=failed", response.Headers.Location?.OriginalString);
     }
 
     [Theory]

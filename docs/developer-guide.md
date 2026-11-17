@@ -501,8 +501,8 @@ _Last updated: 2026-11-17. Keep this section current; it is the hand-off point b
   - `ConnectionStrings__GamesLane`: Neon `production` branch (set; required — the server does not start without it). Either the .NET (`Host=...;`) or the URL (`postgresql://...`) format works.
   - `Authentication__Google__ClientId` / `__ClientSecret`: set, working
   - `Apple__KeyId`, with the secret file `apple-key.p8` (Sign in with Apple on the website, and the iPhone app's turn notifications)
-  - `Authentication__Microsoft__ClientId` / `__ClientSecret`: not set yet
-  - `Authentication__Discord__ClientId` / `__ClientSecret`: not set yet
+  - `Authentication__Microsoft__ClientId` / `__ClientSecret`: set, working
+  - `Authentication__Discord__ClientId` / `__ClientSecret`: set, working
 
 ### Neon (PostgreSQL database)
 - Project `GamesLane` (ID `gentle-cherry-51286211`), region AWS US East 2 (Ohio).
@@ -512,20 +512,19 @@ _Last updated: 2026-11-17. Keep this section current; it is the hand-off point b
 
 ### Sign-in providers
 - **Google:** working on the live site. OAuth client in Google Cloud Console (project "GamesLane"); redirect URI `https://gameslane.onrender.com/signin-google`; privacy policy at `/privacy.html`.
-- **Microsoft:** code ready; app registration in the Entra admin center not done yet (redirect URI `https://gameslane.onrender.com/signin-microsoft`).
-- **Discord:** code ready; application in the Discord Developer Portal not created yet (redirect URI `https://gameslane.onrender.com/signin-discord`).
+- **Microsoft:** working on the live site. App registration in the Entra admin center; redirect URI `https://gameslane.onrender.com/signin-microsoft`.
+- **Discord:** working on the live site. Application in the Discord Developer Portal; redirect URI `https://gameslane.onrender.com/signin-discord`.
 - **Apple:** Apple Developer Program (team `7Z69JFQYCV`). App ID `com.gameslane.app` with Push Notifications, Sign in with Apple and Associated Domains; Services ID `com.gameslane.web` (domain `gameslane.onrender.com`, return URL `https://gameslane.onrender.com/signin-apple`); one key for APNs and Sign in with Apple, on Render as the secret file `apple-key.p8` with `Apple__KeyId` (see [Sign-in setup](#sign-in-setup)).
 
 ### Next steps
 1. Linking a Google account to a registered user (deferred).
-2. Microsoft and Discord sign-in: app registration (Entra admin center, Discord Developer Portal) and the environment variables on Render.
-3. Game history (deferred). Visitor countries need a location lookup (e.g. MaxMind GeoLite2) or Cloudflare in front of Render; until then the browser language stands in.
-4. Backgammon: possible extras (a move list, variants such as Nackgammon or Acey-deucey).
-5. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
-6. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
-7. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
-8. iPhone app: check on a phone Sign in with Apple (app and website), Google sign-in returning at `/auth/app-return`, join links opening the app, and turn notifications (allowing them when first seated, a notification with the phone locked, with another app in front and with the app closed, none while the game is on screen, and tapping one opening the game); check that the Apple key on Render has APNs enabled. Then TestFlight and the App Store.
-9. iPhone app, more native features (Apple's App Store guideline 4.2 rejects apps that only show a website; turn notifications are done, see **Turn notifications** under [Architecture](#architecture)). Possibly: the native share sheet for a private game's code and join link; keeping the screen awake during a game on a shared screen; an offline screen with Try again instead of `www/index.html`'s static text.
+2. Game history (deferred). Visitor countries need a location lookup (e.g. MaxMind GeoLite2) or Cloudflare in front of Render; until then the browser language stands in.
+3. Backgammon: possible extras (a move list, variants such as Nackgammon or Acey-deucey).
+4. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
+5. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
+6. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
+7. iPhone app: sign-in with Apple, Google, Microsoft and Discord checked on a phone, in the app and on the website. Still to check: join links opening the app, and turn notifications (allowing them when first seated, a notification with the phone locked, with another app in front and with the app closed, none while the game is on screen, and tapping one opening the game, also when the app was closed); check that the Apple key on Render has APNs enabled. Then TestFlight and the App Store.
+8. iPhone app, more native features (Apple's App Store guideline 4.2 rejects apps that only show a website; turn notifications are done, see **Turn notifications** under [Architecture](#architecture)). Possibly: the native share sheet for a private game's code and join link; keeping the screen awake during a game on a shared screen; an offline screen with Try again instead of `www/index.html`'s static text.
 
 ## Working conventions
 - Ask before adding or upgrading packages.
