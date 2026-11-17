@@ -190,7 +190,7 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
         }
 
         DispatchQueue.main.async {
-            let completion: ASWebAuthenticationSession.CompletionHandler = { [weak self] callbackURL, error in
+            let completion: ASWebAuthenticationSession.CompletionHandler = { [weak self = self] callbackURL, error in
                 self?.session = nil
                 if let callbackURL {
                     call.resolve(["url": callbackURL.absoluteString])
