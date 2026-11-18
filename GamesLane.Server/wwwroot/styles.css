@@ -5401,12 +5401,14 @@ main.spades #game-screen > :not(.rp-top) {
     --trick-card: 1.6rem;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: 100%;
     height: var(--trick-height, calc(6.2 * var(--trick-card)));
     direction: ltr;
 }
 
 .trick-place {
     position: relative;
+    grid-row: 1;
     display: flex;
     justify-content: center;
     align-items: center;
