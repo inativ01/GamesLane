@@ -4515,11 +4515,12 @@ main.tricks .my-hand-title {
     border: 0;
     border-radius: 0.3em;
     background: none;
+    box-shadow: none;
     cursor: pointer;
 }
 
-.rp-card:hover,
-.rp-card:focus-visible {
+button.rp-card:not(:disabled):hover,
+button.rp-card:focus-visible {
     background: none;
 }
 
@@ -4704,9 +4705,15 @@ main.tricks .my-hand-title {
     white-space: nowrap;
 }
 
-/* Wazoo: the five dice in a row, and the scorecard with a column per player. */
+/* Wazoo: the five dice in a row, and the scorecard with the user's column and the shown player's (see fitPlay in
+   wazoo.js: the dice and the scorecard are sized in em, at the largest font size at which they fit the screen); then
+   the players' table. */
 main.wazoo {
     max-width: 980px;
+}
+
+.yz-play {
+    font-size: 16px;
 }
 
 /* The dice stay centred; the Roll button follows them (on their right, or on their left in Hebrew). */
@@ -4714,33 +4721,34 @@ main.wazoo {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: clamp(0.4rem, 2vw, 0.9rem);
-    margin: 1rem 0 1.4rem;
+    gap: min(2vw, 0.6em);
+    margin: 0.6em 0 1.3em;
 }
 
 .yz-dice {
     grid-column: 2;
     display: flex;
     justify-content: center;
-    gap: clamp(0.4rem, 2vw, 0.9rem);
+    gap: min(2vw, 0.6em);
     direction: ltr;
 }
 
+/* The 🎲 Roll button is a square with rounded corners, as in Backgammon. */
 button.yz-roll {
     grid-column: 3;
     justify-self: start;
-    width: clamp(3.2rem, 15vw, 5rem);
+    width: min(15vw, 4.2em);
+    min-width: 0;
     aspect-ratio: 1;
     padding: 0;
-    border-radius: 50%;
-    font-size: clamp(1.8rem, 8vw, 2.8rem);
+    border-radius: var(--radius);
+    font-size: min(6vw, 1.6em);
     line-height: 1;
-    box-shadow: 0 4px 14px rgba(194, 86, 26, 0.35);
 }
 
 .yz-die {
     position: relative;
-    width: clamp(3.2rem, 15vw, 5rem);
+    width: min(15vw, 4.2em);
     aspect-ratio: 1;
     padding: 0;
     border-radius: 18%;
@@ -4783,9 +4791,9 @@ button.yz-roll {
 .yz-die-label {
     position: absolute;
     inset-inline: 0;
-    bottom: -1.35rem;
+    bottom: -1.35em;
     color: var(--primary-dark);
-    font-size: 0.75rem;
+    font-size: 0.75em;
     font-weight: 700;
 }
 
@@ -4808,18 +4816,52 @@ button.yz-roll {
 }
 
 .yz-message {
-    margin: 0.4rem 0;
+    margin: 0.3em 0;
     color: var(--muted);
 }
 
-/* The scorecard scrolls sideways on narrow screens when there are many players. */
-.yz-card-wrap {
-    margin: 0.6rem 0;
-    overflow-x: auto;
+/* The scorecard: the upper section, then the lower one under it as one table (its head is left out), or beside it on
+   a landscape screen. The columns keep their widths, so a name too long for its column shows only the icon. */
+.yz-sheet {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0.4em 0;
+}
+
+.yz-sheet .yz-lower thead {
+    display: none;
+}
+
+.yz-sheet .yz-upper {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.yz-sheet .yz-lower {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+}
+
+@media (orientation: landscape) {
+    .yz-sheet {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: start;
+        gap: 0.6em;
+    }
+
+    .yz-sheet .yz-lower thead {
+        display: table-header-group;
+    }
+
+    .yz-sheet .yz-upper,
+    .yz-sheet .yz-lower {
+        border-radius: var(--radius);
+    }
 }
 
 .yz-card {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     border-radius: var(--radius);
     background: var(--surface);
@@ -4829,25 +4871,45 @@ button.yz-roll {
 
 .yz-card th,
 .yz-card td {
-    padding: 0.3rem 0.5rem;
+    padding: 0.22em 0.4em;
     border-bottom: 1px solid var(--line);
     text-align: center;
     white-space: nowrap;
 }
 
-.yz-card th[scope="row"] {
-    text-align: start;
+.yz-card thead th:first-child {
+    width: 48%;
 }
 
+.yz-card th[scope="row"] {
+    overflow: hidden;
+    text-align: start;
+    text-overflow: ellipsis;
+}
+
+/* A box's note goes after its name, and is left out when it does not fit (it stays in the name's tooltip). */
 .yz-card th small {
-    display: block;
+    margin-inline-start: 0.4em;
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 0.78em;
     font-weight: 400;
 }
 
+.yz-card th.no-note small {
+    display: none;
+}
+
 .yz-card thead th {
-    font-size: 0.9rem;
+    overflow: hidden;
+    font-size: 0.9em;
+}
+
+.yz-card thead .seat-label {
+    max-width: 100%;
+}
+
+.yz-card thead th.icon-only .seat-label-name {
+    display: none;
 }
 
 .yz-card thead th.winner::after {
@@ -4869,13 +4931,13 @@ button.yz-roll {
 }
 
 .yz-card tr.yz-total td {
-    font-size: 1.15rem;
+    font-size: 1.15em;
 }
 
 /* What the dice would score in an open box: an outlined button on the player's turn, a faint number for everyone else. */
 .yz-option {
-    min-width: 2.6rem;
-    padding: 0.1rem 0.45rem;
+    min-width: 2.6em;
+    padding: 0.05em 0.45em;
     border-radius: 8px;
     background: #fff;
     box-shadow: inset 0 0 0 1.5px var(--primary);
@@ -4896,6 +4958,31 @@ button.yz-option:not(:disabled):hover {
 
 .yz-option.zero {
     opacity: 0.6;
+}
+
+/* The players' table: a line per player with their total; the player to play is outlined, and tapping a player shows
+   their scorecard beside the user's (marked). */
+button.yz-player {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font-weight: inherit;
+    text-align: start;
+    box-shadow: none;
+}
+
+button.yz-player:not(:disabled):hover {
+    background: none;
+}
+
+.rp-players li.shown {
+    background: #ffe9bf;
 }
 
 /* Final Card: the color to play and the direction on the right of the status bar; on top, the piles centered on the

@@ -2,7 +2,9 @@
 
 // Wazoo: 1 to 8 players take turns in seat order for 13 rounds. On their turn, a player rolls the five dice up to three
 // times, tapping dice to keep them between rolls, then taps an open box of their scorecard to score the dice there.
-// Everyone sees the dice and every scorecard; the open boxes of the player to play show what the dice would score.
+// Everyone sees the dice; the scorecard shows the user's column and the player to play's (or the player tapped in the
+// players' table, until the turn passes), and the players' table every player's total. The open boxes of the player to
+// play show what the dice would score.
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const ROUNDS = 13;
@@ -128,24 +130,53 @@ function scoreBox(game, box, points) {
     call("Score", wazoo.sessionId, game.turn, box.key).catch(() => {});
 }
 
-// The scorecard: a column per player (the player to play is highlighted), a row per box, and the totals. The open boxes
-// of the player to play show what the dice would score there; on the viewer's turn, tapping one scores it.
-function renderCard(game, state, view, canAct, rolling) {
+// The user's seat in the scorecard: the seat to play if the user holds it, otherwise the one of theirs that played last
+// (the first before the seat to play, in seat order); null for watchers.
+function mySeat(game, view) {
+    const seats = game.players.map((player) => player.seat);
+    const at = Math.max(0, seats.indexOf(game.turn));
+    for (let i = 0; i < seats.length; i++) {
+        const seat = seats[(at - i + seats.length) % seats.length];
+        if (view.isMe(seat)) return seat;
+    }
+    return null;
+}
+
+// The player tapped in the players' table, shown until the turn passes; otherwise the player to play (the winner once
+// the game is over).
+let picked = null;
+const turnKey = (game) => `${game.round}:${game.turn}:${game.isOver}`;
+const shownSeat = (game) => (picked?.turn === turnKey(game) ? picked.seat : game.isOver ? game.winners[0] : game.turn);
+
+// The scorecard's players: the user's seat, then the shown player (once, when they are the same).
+function cardPlayers(game, view) {
+    const seats = [...new Set([mySeat(game, view), shownSeat(game)].filter((seat) => seat !== null && seat !== undefined))];
+    return seats.map((seat) => game.players.find((player) => player.seat === seat)).filter(Boolean);
+}
+
+// The scorecard: a column per player shown (the player to play is highlighted), a row per box, and the totals, in two
+// tables: the upper section with its total and bonus, and the lower one with the Wazoo bonus and the total. The open
+// boxes of the player to play show what the dice would score there; on the viewer's turn, tapping one scores it.
+function renderCard(game, state, view, canAct, rolling, players) {
     const turnClass = (player) => (!game.isOver && player.seat === game.turn ? "turn" : null);
     const rowHead = (text, note) => {
         const th = el("th", null, text);
         th.scope = "row";
+        th.title = note ? `${text}: ${note}` : text;
         if (note) th.append(el("small", null, note));
         return th;
     };
-    const head = el("tr", null, el("th"), ...game.players.map((player) => {
+    const head = () => el("thead", null, el("tr", null, el("th"), ...players.map((player) => {
         const th = el("th", turnClass(player), seatLabel(state, player.seat, view));
         th.scope = "col";
+        th.title = seatName(state, player.seat, view);
         th.classList.toggle("winner", game.winners.includes(player.seat));
         return th;
-    }));
-    const boxRow = (box, i) => el("tr", null, rowHead(t(box.label), box.note && t(box.note)), ...game.players.map((player) => {
+    })));
+    const boxRow = (box, i) => el("tr", null, rowHead(t(box.label), box.note && t(box.note)), ...players.map((player) => {
         const td = el("td", turnClass(player));
+        td.dataset.seat = String(player.seat);
+        td.dataset.box = box.key;
         const score = player.scores[i];
         const option = player.seat === game.turn && !rolling ? game.possibleScores[i] : null;
         if (score !== null) {
@@ -162,31 +193,85 @@ function renderCard(game, state, view, canAct, rolling) {
         return td;
     }));
     const sumRow = (label, note, value, className) => el("tr", className,
-        rowHead(label, note), ...game.players.map((player) => el("td", turnClass(player), String(value(player)))));
+        rowHead(label, note), ...players.map((player) => el("td", turnClass(player), String(value(player)))));
     const plus = (points) => (points ? `+${points}` : "–");
-    $("yz-card").replaceChildren(
-        el("thead", null, head),
-        el("tbody", null,
-            ...BOXES.slice(0, UPPER).map((box, i) => boxRow(box, i)),
-            sumRow(t("Upper total"), null, (player) => player.upperTotal, "yz-sum"),
-            sumRow(t("Bonus"), t("35 for 63 or more"), (player) => plus(player.upperBonus), "yz-sum"),
-            ...BOXES.slice(UPPER).map((box, i) => boxRow(box, UPPER + i)),
-            sumRow(t("Wazoo bonus"), t("100 for each extra Wazoo"), (player) => plus(player.wazooBonus), "yz-sum"),
-            sumRow(t("Total"), null, (player) => player.total, "yz-sum yz-total")));
+    $("yz-upper").replaceChildren(head(), el("tbody", null,
+        ...BOXES.slice(0, UPPER).map((box, i) => boxRow(box, i)),
+        sumRow(t("Upper total"), null, (player) => player.upperTotal, "yz-sum"),
+        sumRow(t("Bonus"), t("35 for 63 or more"), (player) => plus(player.upperBonus), "yz-sum")));
+    $("yz-lower").replaceChildren(head(), el("tbody", null,
+        ...BOXES.slice(UPPER).map((box, i) => boxRow(box, UPPER + i)),
+        sumRow(t("Wazoo bonus"), t("100 for each extra Wazoo"), (player) => plus(player.wazooBonus), "yz-sum"),
+        sumRow(t("Total"), null, (player) => player.total, "yz-sum yz-total")));
+}
+
+// The players' table: shown until a player hides it (remembered on this device). Observers always see it.
+const TABLE_SHOWN_KEY = "wazoo.tableShown";
+const tableShown = () => localStorage.getItem(TABLE_SHOWN_KEY) !== "0";
+
+// A player in the table: name and total; the player to play is outlined, and the players in the scorecard are marked.
+// Tapping a player shows their scorecard beside the user's until the turn passes.
+function playerItem(game, state, view, player, shown) {
+    const button = el("button", "yz-player", el("span", "rp-start", seatLabel(state, player.seat, view)),
+        el("span", "rp-end", el("strong", null, t("{n} points", { n: player.total }))));
+    button.type = "button";
+    button.setAttribute("aria-pressed", String(shown));
+    button.addEventListener("click", () => {
+        picked = { seat: player.seat, turn: turnKey(game) };
+        wazoo.refresh();
+    });
+    const item = el("li", null, button);
+    item.classList.toggle("turn", !game.isOver && player.seat === game.turn);
+    item.classList.toggle("shown", shown);
+    return item;
+}
+
+function renderTable(game, state, view, players) {
+    const shown = !view.isPlayer || tableShown();
+    $("yz-round").textContent = game.isOver ? t("Final scores") : t("Round {n} of {total}", { n: game.round, total: ROUNDS });
+    $("yz-toggle-table").hidden = !view.isPlayer;
+    $("yz-toggle-table").textContent = t(shown ? "Hide table" : "Show table");
+    $("yz-table-body").hidden = !shown;
+    $("yz-players").replaceChildren(...game.players.map((player) =>
+        playerItem(game, state, view, player, players.includes(player))));
+}
+
+// The dice and the scorecard take the largest font size (9 to 18 pixels) at which they fit the screen; then a name too
+// long for its column shows only the icon, and a note too long for its row is left out.
+function fitPlay() {
+    if ($("game-screen").hidden) return;
+    const play = $("yz-play");
+    const fits = () => play.getBoundingClientRect().bottom + scrollY <= innerHeight - 4;
+    let low = 9;
+    let high = 18;
+    play.style.fontSize = `${high}px`;
+    if (!fits()) {
+        while (high - low > 0.5) {
+            const size = (low + high) / 2;
+            play.style.fontSize = `${size}px`;
+            if (fits()) low = size; else high = size;
+        }
+        play.style.fontSize = `${low}px`;
+    }
+    play.querySelectorAll("thead th").forEach((th) => {
+        th.classList.remove("icon-only");
+        const name = th.querySelector(".seat-label-name");
+        if (name && name.scrollWidth > name.clientWidth) th.classList.add("icon-only");
+    });
+    play.querySelectorAll("th[scope='row']").forEach((th) => {
+        th.classList.remove("no-note");
+        if (th.scrollWidth > th.clientWidth) th.classList.add("no-note");
+    });
 }
 
 let current = null;
 
-// A box scored: the chip's clink, and the new score drops into its box.
+// A box scored: the chip's clink, and the new score drops into its box (when its player is in the scorecard).
 function noticeScore(game, view) {
     const last = game.lastTurn;
     if (!view.changed("score", [game.round, last?.seat, last?.category]) || !last) return;
     playGameSound("chip");
-    const column = game.players.findIndex((p) => p.seat === last.seat);
-    const row = BOXES.findIndex((box) => box.key === last.category);
-    const rows = $("yz-card").tBodies[0]?.rows;
-    const index = row < UPPER ? row : row + 2;
-    rows?.[index]?.cells[column + 1]?.classList.add("scored");
+    $("yz-sheet").querySelector(`td[data-seat="${last.seat}"][data-box="${last.category}"]`)?.classList.add("scored");
 }
 
 const wazoo = startSessionPage("Wazoo", (game, state, view) => {
@@ -195,7 +280,7 @@ const wazoo = startSessionPage("Wazoo", (game, state, view) => {
     const canAct = !game.isOver && view.isMe(game.turn);
     current = { game, canAct };
 
-    showScores(state, view, [game.isOver ? t("Final scores") : t("Round {n} of {total}", { n: game.round, total: ROUNDS })],
+    showScores(state, view, [],
         game.players.map((player) => ({ seat: player.seat, score: player.total, acting: !game.isOver && player.seat === game.turn })));
     const { status, message } = wazooTexts(game, state, view);
     $("status").textContent = status;
@@ -210,10 +295,18 @@ const wazoo = startSessionPage("Wazoo", (game, state, view) => {
     roll.hidden = !(canAct && game.rollsLeft > 0);
     roll.title = game.rollsLeft === ROLLS ? t("Roll") : t("Roll again ({n} left)", { n: game.rollsLeft });
     roll.setAttribute("aria-label", roll.title);
-    renderCard(game, state, view, canAct, rolling);
+    const players = cardPlayers(game, view);
+    renderCard(game, state, view, canAct, rolling, players);
+    renderTable(game, state, view, players);
+    fitPlay();
     noticeScore(game, view);
 });
 
 $("yz-roll").addEventListener("click", () => {
     if (current?.canAct) call("RollDice", wazoo.sessionId, current.game.turn).catch(() => {});
 });
+$("yz-toggle-table").addEventListener("click", () => {
+    localStorage.setItem(TABLE_SHOWN_KEY, tableShown() ? "0" : "1");
+    wazoo.refresh();
+});
+addEventListener("resize", () => requestAnimationFrame(fitPlay));

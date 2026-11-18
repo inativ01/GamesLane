@@ -140,6 +140,8 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 
 - Tap 🎲 **Roll**, up to three times. Between rolls, tap dice to keep them; tap again to let them go.
 - Your open boxes show what the dice would score there: tap one to score. The game asks before scoring 0.
+- The scorecard fits on one screen and shows your column and the column of the player to play (with several seats, your seat that played last). If a name does not fit, only the player's icon is shown.
+- The table under it shows the round and each player's total (**Hide table** / **Show table**). Tap a player there to see their scorecard instead of the player to play's, until the turn passes.
 
 ### Final Card
 
