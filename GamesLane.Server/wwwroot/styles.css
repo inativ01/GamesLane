@@ -796,6 +796,13 @@ a.provider-button:not(.provider-discord, .provider-apple).is-busy::before {
     gap: 0.35rem;
 }
 
+.seat-label-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .icon-picker {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
@@ -1306,14 +1313,14 @@ label.check {
     }
 }
 
-/* As tall as the header above it (the GamesLane name's height and padding). When everything does not fit on one line,
-   the user's role is left out (see fitSessionInfo in common.js), and if the rest still does not fit, it takes two lines:
-   the game's picture and name on the first, the rest on the second. The picture and name keep to the start
-   (left, or right in Hebrew) and the name grows to fill its line, so the other items keep to the end on every line. */
+/* As tall as the header above it (the GamesLane name's height and padding), always on one line. When everything does
+   not fit, the user's role is left out (see fitSessionInfo in common.js), and if the rest still does not fit, the game's
+   name is cut short with "…". The picture and name keep to the start (left, or right in Hebrew) and the name grows to
+   fill the line, so the other items keep to the end. */
 .session-bar {
     position: relative;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: flex-end;
     gap: 0.4rem 0.6rem;
@@ -1332,8 +1339,8 @@ label.check {
 }
 
 .session-name {
-    flex: 1 0 auto;
-    max-width: calc(100% - 40px - 0.6rem);
+    flex: 1 1 auto;
+    min-width: 0;
     margin: 0;
     overflow: hidden;
     font-size: 1.2rem;
@@ -1439,6 +1446,13 @@ button.session-menu-button[aria-expanded="true"] {
 .code.copyable:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
+}
+
+/* Narrow screens, such as a phone held upright: a smaller game code, without the key. */
+@media (max-width: 520px) {
+    .session-bar .code { padding: 0.1rem 0.45rem; }
+    .session-bar .code span { display: none; }
+    .session-bar .code strong { font-size: 0.95rem; letter-spacing: 0.06em; }
 }
 
 .session-menu-value {
@@ -1775,8 +1789,8 @@ button.icon-button {
     line-height: 1;
 }
 
-/* The score row, on its own line under the status, in the status bar's color: the match facts (round, game, draws) and
-   a chip per player with their score; the seat to act is outlined. */
+/* The score row, on its own line under the status, in the status bar's color: a chip per player with their score; the
+   seat to act is outlined. When the chips do not fit on one line, the names are left out (see fitScores in common.js). */
 .score-row {
     display: flex;
     flex-basis: 100%;
@@ -1795,10 +1809,14 @@ button.icon-button {
     display: none;
 }
 
-/* The match facts on a line of their own; the players' chips share the next line if both fit, otherwise one each. */
+.score-row.compact .seat-label-name {
+    display: none;
+}
+
+/* The match facts (round, game, draws), at the bottom of the game screen above the game's options. */
 .score-facts {
-    flex-basis: 100%;
-    color: #5a544d;
+    margin: 0.5rem 0;
+    color: var(--muted);
     font-weight: 600;
     text-align: center;
 }
@@ -4290,7 +4308,8 @@ main.backgammon {
 }
 
 /* A phone on its side: the board as high as the screen under the status bar (see fitBoard in backgammon.js), with the
-   buttons in a column beside it; the message and the game's options come under it. */
+   players' scores (see placeScores) and the buttons in a column beside it; the message, the match facts and the game's
+   options come under it. */
 @media (orientation: landscape) and (max-height: 500px) {
     main.backgammon {
         max-width: none;
@@ -4300,17 +4319,41 @@ main.backgammon {
     main.backgammon #game-screen {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas: "board actions" "message message" "options options";
+        grid-template-areas: "board side" "message message" "facts facts" "options options";
         align-items: center;
         column-gap: 0.5rem;
     }
 
     main.backgammon .bg-board { grid-area: board; margin: 0; }
     main.backgammon .bg-message { grid-area: message; }
+    main.backgammon .score-facts { grid-area: facts; }
     main.backgammon .game-options { grid-area: options; }
 
+    main.backgammon .bg-side {
+        grid-area: side;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    main.backgammon .bg-side .score-row {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+        border-top: none;
+    }
+
+    main.backgammon .bg-side .score-chip {
+        max-width: 9rem;
+        background: var(--surface-soft);
+    }
+
+    main.backgammon .bg-side .score-chip .seat-label {
+        min-width: 0;
+    }
+
     main.backgammon .game-actions {
-        grid-area: actions;
         flex-direction: column;
         flex-wrap: nowrap;
         gap: 0.4rem;

@@ -464,8 +464,8 @@ function backgammonTexts(game, state, view) {
     return { status, message };
 }
 
-// The score row in the status bar: the match length, the game number and the Crawford game, then each player's color,
-// name, match score and pip count, with the seat to act outlined.
+// The score row: each player's color, name, match score and pip count, with the seat to act outlined; the match length,
+// the game number and the Crawford game at the bottom.
 function showScoreboard(game, state, view) {
     const acting = game.phase === "GameOver" || game.phase === "MatchOver" ? null : actingSeat(game);
     showScores(state, view,
@@ -479,8 +479,19 @@ function showScoreboard(game, state, view) {
         })));
 }
 
-// A phone on its side (as in styles.css), where the buttons are beside the board.
+// A phone on its side (as in styles.css), where the scores and the buttons are beside the board.
 const phoneLandscape = matchMedia("(orientation: landscape) and (max-height: 500px)");
+
+// The players' scores: in the status bar, or on a phone on its side, beside the board above the buttons.
+function placeScores() {
+    const scores = $("scores");
+    if (phoneLandscape.matches) {
+        if (scores.parentElement !== $("bg-side")) $("bg-side").prepend(scores);
+    } else if (scores.parentElement !== $("status-bar")) {
+        $("status-bar").append(scores);
+    }
+    fitScores();
+}
 
 // The whole page fits the screen without scrolling: the board shrinks by however much the page is too tall (down to
 // 160 pixels high). On a phone on its side, the board takes the whole height under the status bar instead, and the
@@ -511,6 +522,7 @@ const backgammon = startSessionPage("Backgammon", (game, state, view) => {
     }
     current = { game, view, viewer, canMove };
 
+    placeScores();
     showScoreboard(game, state, view);
     $("bg-board").replaceChildren(drawGame(game, viewer, canMove, game.canDouble && view.isMe(game.turn)));
     const { status, message } = backgammonTexts(game, state, view);
@@ -537,7 +549,10 @@ const backgammon = startSessionPage("Backgammon", (game, state, view) => {
     fitBoard();
 }, (seat) => `${["⚪", "⚫"][seat]} ${colorName(seat)}`);
 
-addEventListener("resize", () => requestAnimationFrame(fitBoard));
+addEventListener("resize", () => requestAnimationFrame(() => {
+    placeScores();
+    fitBoard();
+}));
 
 // Tapping the board: a checker that can go to only one place moves there; otherwise it is selected and its
 // destinations are marked. Tapping a marked destination moves the selected checker there.
