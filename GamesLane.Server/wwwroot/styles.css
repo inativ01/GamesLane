@@ -4449,6 +4449,7 @@ main.tricks {
 /* During a game, less space above the hand, so the hand and the table fit on the screen. */
 main.rich-poor:has(#game-screen:not([hidden])),
 main.yaniv:has(#game-screen:not([hidden])),
+main.final-card:has(#game-screen:not([hidden])),
 main.tricks:has(#game-screen:not([hidden])) {
     padding-top: 0.25rem;
 }
@@ -4522,7 +4523,7 @@ main.tricks .my-hand-title {
    and their slots narrow further when the hand is wider than the panel; the last card keeps its full width. A long
    hand on a phone takes two rows. */
 .rp-hand .rp-cards {
-    --rp-card: clamp(1.8rem, min(8vw, 5.2vh), 3rem);
+    --rp-card: calc(clamp(1.8rem, min(8vw, 5.2vh), 3rem) * var(--card-fit, 1));
     display: flex;
     flex-wrap: nowrap;
     justify-content: flex-start;
@@ -4622,7 +4623,7 @@ button.rp-card:focus-visible {
 }
 
 .rp-pile-cards .card {
-    font-size: clamp(1.4rem, min(6vw, 4vh), 2.4rem);
+    font-size: calc(clamp(1.4rem, min(6vw, 4vh), 2.4rem) * var(--card-fit, 1));
 }
 
 /* The cards on the table, on top for everyone, on the same felt as the players' table. */
@@ -5138,8 +5139,21 @@ button.final-card-pile:disabled {
 }
 
 .final-card-pile .card {
-    font-size: clamp(1.4rem, min(6vw, 4vh), 2.4rem);
+    font-size: calc(clamp(1.4rem, min(6vw, 4vh), 2.4rem) * var(--card-fit, 1));
     user-select: none;
+}
+
+/* A short landscape screen, such as a phone held sideways: the closed pile's count on its left and "Open pile" on the
+   open pile's right, to keep the table short so the hand fits (see fitHandPanel in common.js). */
+@media (orientation: landscape) and (max-height: 500px) {
+    button.final-card-pile {
+        flex-direction: row;
+        gap: 0.4rem;
+    }
+
+    button.final-card-pile:first-child .final-card-pile-label {
+        order: -1;
+    }
 }
 
 /* A wild card on the pile: a ring of the color chosen. */
@@ -5248,7 +5262,7 @@ button.yaniv-pile:disabled {
 }
 
 .yaniv-pile .card {
-    font-size: clamp(1.4rem, min(6vw, 4vh), 2.4rem);
+    font-size: calc(clamp(1.4rem, min(6vw, 4vh), 2.4rem) * var(--card-fit, 1));
 }
 
 .card.yaniv-no-card {
@@ -5274,7 +5288,7 @@ button.yaniv-pile:disabled {
 }
 
 .yaniv-staged .card {
-    font-size: clamp(1.1rem, min(4.5vw, 3vh), 1.8rem);
+    font-size: calc(clamp(1.1rem, min(4.5vw, 3vh), 1.8rem) * var(--card-fit, 1));
 }
 
 .yaniv-message {
@@ -5394,6 +5408,19 @@ button.yaniv-pass:not(:disabled):hover {
 .trick-place.trick-right { grid-area: right; --arrive-x: 80px; --arrive-y: 0; }
 .trick-place.trick-bottom { grid-area: bottom; flex-direction: column-reverse; --arrive-x: 0; --arrive-y: 100px; }
 
+/* A short landscape screen, such as a phone held sideways: the players at the top and at the bottom side by side,
+   staggered (the top one raised, the bottom one lowered), so the table is about one card tall and the hand fits (see
+   fitHandPanel in common.js). */
+@media (orientation: landscape) and (max-height: 500px) {
+    .trick-table {
+        grid-template-columns: 1fr auto auto 1fr;
+        grid-template-areas: "left top bottom right";
+    }
+
+    .trick-place.trick-top { margin-bottom: 1.5rem; }
+    .trick-place.trick-bottom { margin-top: 1.5rem; }
+}
+
 /* The card just played slides in from its player's side of the table. */
 .trick-place .card.arrive {
     animation: trick-arrive 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both;
@@ -5433,7 +5460,7 @@ button.yaniv-pass:not(:disabled):hover {
 }
 
 .trick-place .card {
-    font-size: clamp(1.3rem, min(5.5vw, 3.6vh), 2.2rem);
+    font-size: calc(clamp(1.3rem, min(5.5vw, 3.6vh), 2.2rem) * var(--card-fit, 1));
 }
 
 .trick-player-score {
@@ -5532,7 +5559,7 @@ button.yaniv-pass:not(:disabled):hover {
 .domino {
     display: inline-flex;
     flex: none;
-    font-size: clamp(0.8rem, min(3.6vw, 2.4vh), 1.1rem);
+    font-size: calc(clamp(0.8rem, min(3.6vw, 2.4vh), 1.1rem) * var(--card-fit, 1));
     border: 1px solid #3b3127;
     border-radius: 0.35em;
     background: #fffdf5;

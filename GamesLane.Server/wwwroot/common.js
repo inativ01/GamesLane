@@ -1831,6 +1831,31 @@ addEventListener("resize", fitScores);
 // A landscape screen (as in styles.css), where the score row is in the game screen, at the top of the screen's end side.
 const landscapeScreen = matchMedia("(orientation: landscape)");
 
+// On a short landscape screen (as in styles.css), such as a phone held sideways, the first of the user's hand panels
+// (in the card games and Dominoes) fits on the screen, buttons included: the cards or tiles on the table and in the
+// hands shrink together (--card-fit on the game screen, down to half their size) until it does.
+const shortLandscapeScreen = matchMedia("(orientation: landscape) and (max-height: 500px)");
+
+function fitHandPanel() {
+    const screen = $("game-screen");
+    if (!screen) return;
+    screen.style.removeProperty("--card-fit");
+    const panel = screen.querySelector(".rp-hand, .domino-hand");
+    if (!shortLandscapeScreen.matches || screen.hidden || !panel) return;
+    const fits = () => panel.getBoundingClientRect().bottom + scrollY <= innerHeight - 4;
+    if (fits()) return;
+    let low = 0.5;
+    let high = 1;
+    while (high - low > 0.02) {
+        const fit = (low + high) / 2;
+        screen.style.setProperty("--card-fit", String(fit));
+        if (fits()) low = fit; else high = fit;
+    }
+    screen.style.setProperty("--card-fit", String(low));
+}
+
+addEventListener("resize", () => requestAnimationFrame(fitHandPanel));
+
 // The score row: in the status bar, or on a landscape screen, first in the game screen's element place (Tic-tac-toe,
 // Backgammon and Wazoo), which gives the board or the dice their full size and the scores the room left.
 function placeScores(place) {
@@ -2606,6 +2631,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             playGameSound("turn");
         }
         wasActing = myTurn;
+        fitHandPanel();
     }
 
     async function enter() {
