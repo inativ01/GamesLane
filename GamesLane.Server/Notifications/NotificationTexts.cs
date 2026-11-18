@@ -27,7 +27,7 @@ public partial class NotificationTexts
     public static readonly IReadOnlyDictionary<GameType, string> GameNames = new Dictionary<GameType, string>
     {
         [GameType.TicTacToe] = "Tic-tac-toe",
-        [GameType.TheGang] = "The Gang",
+        [GameType.PokerHeist] = "Poker Heist",
         [GameType.Backgammon] = "Backgammon",
         [GameType.RichManPoorMan] = "Rich man, poor man",
         [GameType.Wazoo] = "Wazoo",

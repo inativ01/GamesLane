@@ -1,10 +1,10 @@
 using GamesLane.Server.Games;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 using GamesLane.Server.Sessions;
 
 namespace GamesLane.Server.Tests;
 
-public class TheGangGameTests
+public class PokerHeistGameTests
 {
     // Hand ranking
 
@@ -88,7 +88,7 @@ public class TheGangGameTests
 
         Assert.Equal(1, game.Heist);
         Assert.Equal(0, game.Stage);
-        Assert.Equal(TheGangPhase.Betting, game.Phase);
+        Assert.Equal(PokerHeistPhase.Betting, game.Phase);
         Assert.Empty(game.VisibleCommunityCards);
         Assert.Equal([1, 2, 3], game.MiddleChips);
         Assert.Equal(2, game.HoleCards(0).Count);
@@ -173,12 +173,12 @@ public class TheGangGameTests
         var game = NewGame();
         PlayAllStages(game, [1, 2, 3]);
 
-        Assert.Equal(TheGangPhase.Reveal, game.Phase);
+        Assert.Equal(PokerHeistPhase.Reveal, game.Phase);
         Assert.Equal(5, game.VisibleCommunityCards.Count);
         Assert.Equal([0, 1, 2], game.RevealOrder);
 
         RevealAll(game);
-        Assert.Equal(TheGangPhase.HeistOver, game.Phase);
+        Assert.Equal(PokerHeistPhase.HeistOver, game.Phase);
         Assert.Equal([true, true, true], game.RevealedInOrder);
         Assert.Equal((1, 0), (game.Vaults, game.Alarms));
     }
@@ -205,7 +205,7 @@ public class TheGangGameTests
     [InlineData("8C 4S 9H 7S AS AD KS 9D 5H 2C 8D", new[] { 0, 1 })]
     public void A_weaker_hand_of_the_same_ranking_names_its_first_lower_cards(string deck, int[] cards)
     {
-        var game = new TheGangGame(3, () => Cards(deck));
+        var game = new PokerHeistGame(3, () => Cards(deck));
         PlayAllStages(game, [2, 1, 3]);
         RevealAll(game);
 
@@ -217,7 +217,7 @@ public class TheGangGameTests
     [Fact]
     public void Equal_hands_may_be_in_either_order()
     {
-        var game = new TheGangGame(3, () => Cards("2C 3D 4C 5D 6C 7D AS KS QS JS 10S"));
+        var game = new PokerHeistGame(3, () => Cards("2C 3D 4C 5D 6C 7D AS KS QS JS 10S"));
         PlayAllStages(game, [3, 2, 1]);
         RevealAll(game);
 
@@ -262,7 +262,7 @@ public class TheGangGameTests
         Assert.True(game.TryNextHeist(1, out _));
 
         Assert.Equal((2, 2), (game.Heist, game.Shuffles));
-        Assert.Equal(TheGangPhase.Betting, game.Phase);
+        Assert.Equal(PokerHeistPhase.Betting, game.Phase);
         Assert.Equal([1, 2, 3], game.MiddleChips);
         Assert.Null(game.Chip(3, 0));
     }
@@ -295,34 +295,34 @@ public class TheGangGameTests
     [Fact]
     public void Basic_mode_draws_no_cards()
     {
-        var rules = new TheGangRules(TheGangMode.Basic, 3, [TheGangCards.Blackout], [TheGangCards.Investor]);
-        var game = new TheGangGame(3, () => Cards(RankedDeck), rules);
+        var rules = new PokerHeistRules(PokerHeistMode.Basic, 3, [PokerHeistCards.Blackout], [PokerHeistCards.Investor]);
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), rules);
 
         Assert.Empty(game.Cards);
-        Assert.Equal(TheGangMode.Basic, game.Mode);
+        Assert.Equal(PokerHeistMode.Basic, game.Mode);
     }
 
     [Fact]
     public void The_first_heist_gets_the_chosen_number_of_challenge_cards_in_any_combination()
     {
-        string[] challenges = [TheGangCards.QuickAccess, TheGangCards.MotionDetector, TheGangCards.HastyGetaway];
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(3, challenges));
+        string[] challenges = [PokerHeistCards.QuickAccess, PokerHeistCards.MotionDetector, PokerHeistCards.HastyGetaway];
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(3, challenges));
 
         Assert.Equal(challenges.Order(), game.Cards.Select(c => c.Key).Order());
-        Assert.All(game.Cards, c => Assert.Equal(TheGangCardKind.Challenge, c.Kind));
+        Assert.All(game.Cards, c => Assert.Equal(PokerHeistCardKind.Challenge, c.Kind));
         Assert.Equal([0, 2], game.SkippedStages);
     }
 
     [Fact]
     public void Avoiding_clashes_keeps_quick_access_apart_from_the_white_chip_cards()
     {
-        string[] challenges = [TheGangCards.QuickAccess, TheGangCards.MotionDetector, TheGangCards.LaserTripwires];
+        string[] challenges = [PokerHeistCards.QuickAccess, PokerHeistCards.MotionDetector, PokerHeistCards.LaserTripwires];
         for (var seed = 0; seed < 20; seed++)
         {
-            var rules = new TheGangRules(TheGangMode.Advanced, 3, challenges, [], AvoidClashes: true);
-            var keys = new TheGangGame(3, () => Cards(RankedDeck), rules, new Random(seed)).Cards.Select(c => c.Key).ToArray();
+            var rules = new PokerHeistRules(PokerHeistMode.Advanced, 3, challenges, [], AvoidClashes: true);
+            var keys = new PokerHeistGame(3, () => Cards(RankedDeck), rules, new Random(seed)).Cards.Select(c => c.Key).ToArray();
 
-            Assert.True(keys is [TheGangCards.QuickAccess] || !keys.Contains(TheGangCards.QuickAccess), string.Join(", ", keys));
+            Assert.True(keys is [PokerHeistCards.QuickAccess] || !keys.Contains(PokerHeistCards.QuickAccess), string.Join(", ", keys));
         }
     }
 
@@ -330,7 +330,7 @@ public class TheGangGameTests
     public void With_quick_access_the_white_chip_cards_have_no_effect()
     {
         var deck = "3D 4H 9C 5S KD KH JC 7D 9H JS KC AS AD";
-        var game = new TheGangGame(3, () => Cards(deck), Advanced(2, [TheGangCards.QuickAccess, TheGangCards.MotionDetector]));
+        var game = new PokerHeistGame(3, () => Cards(deck), Advanced(2, [PokerHeistCards.QuickAccess, PokerHeistCards.MotionDetector]));
         var before = game.HoleCards(0).ToArray();
 
         PlayStage(game, [1, 2, 3]);
@@ -342,17 +342,17 @@ public class TheGangGameTests
     [Fact]
     public void Cards_are_added_after_each_heist_and_stay_in_play_each_drawn_once()
     {
-        var rules = Advanced(0, [TheGangCards.Blackout], [TheGangCards.Investor]);
-        var game = new TheGangGame(3, () => Cards(RankedDeck), rules);
+        var rules = Advanced(0, [PokerHeistCards.Blackout], [PokerHeistCards.Investor]);
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), rules);
         Assert.Empty(game.Cards);
 
         PlayHeist(game, [1, 2, 3]);
-        Assert.Equal(TheGangCards.Blackout, Assert.Single(game.Cards).Key);
-        Assert.Equal([TheGangCards.Blackout], game.NewCards);
+        Assert.Equal(PokerHeistCards.Blackout, Assert.Single(game.Cards).Key);
+        Assert.Equal([PokerHeistCards.Blackout], game.NewCards);
 
         PlayHeist(game, [3, 2, 1]);
-        Assert.Equal([TheGangCards.Blackout, TheGangCards.Investor], game.Cards.Select(c => c.Key));
-        Assert.Equal([TheGangCards.Investor], game.NewCards);
+        Assert.Equal([PokerHeistCards.Blackout, PokerHeistCards.Investor], game.Cards.Select(c => c.Key));
+        Assert.Equal([PokerHeistCards.Investor], game.NewCards);
 
         PlayHeist(game, [1, 2, 3]);
         Assert.Equal(2, game.Cards.Count);
@@ -362,8 +362,8 @@ public class TheGangGameTests
     [Fact]
     public void Avoiding_clashes_also_considers_the_cards_already_in_play()
     {
-        var rules = new TheGangRules(TheGangMode.Advanced, 1, [TheGangCards.QuickAccess, TheGangCards.MotionDetector], [], AvoidClashes: true);
-        var game = new TheGangGame(3, () => Cards(RankedDeck), rules);
+        var rules = new PokerHeistRules(PokerHeistMode.Advanced, 1, [PokerHeistCards.QuickAccess, PokerHeistCards.MotionDetector], [], AvoidClashes: true);
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), rules);
         var first = Assert.Single(game.Cards).Key;
 
         PlayHeist(game, [1, 2, 3]);
@@ -374,37 +374,37 @@ public class TheGangGameTests
     [Fact]
     public void Coordinator_then_con_artist_happen_by_themselves_before_the_betting()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(0, [], [TheGangCards.ConArtist, TheGangCards.Coordinator]));
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(0, [], [PokerHeistCards.ConArtist, PokerHeistCards.Coordinator]));
         FailHeist(game);
         FailHeist(game);
         Assert.Equal(2, game.Cards.Count);
         Assert.Empty(game.Decisions);
 
-        Assert.Equal((TheGangPhase.Preparing, TheGangCards.Coordinator), (game.Phase, game.PreparingCard));
+        Assert.Equal((PokerHeistPhase.Preparing, PokerHeistCards.Coordinator), (game.Phase, game.PreparingCard));
         Enumerable.Range(0, 3).ToList().ForEach(p => Assert.True(game.TryPassCard(p, 0, out _)));
-        Assert.Equal((TheGangPhase.Preparing, TheGangCards.ConArtist), (game.Phase, game.PreparingCard));
+        Assert.Equal((PokerHeistPhase.Preparing, PokerHeistCards.ConArtist), (game.Phase, game.PreparingCard));
         Enumerable.Range(0, 3).ToList().ForEach(p => Assert.True(game.TryConfirmSeen(p, out _)));
 
-        Assert.Equal((TheGangPhase.Betting, 0), (game.Phase, game.Stage));
+        Assert.Equal((PokerHeistPhase.Betting, 0), (game.Phase, game.Stage));
     }
 
     [Fact]
     public void Investor_and_math_whiz_together_show_both_facts()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(0, [], [TheGangCards.Investor, TheGangCards.MathWhiz]));
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(0, [], [PokerHeistCards.Investor, PokerHeistCards.MathWhiz]));
         PlayHeist(game, [3, 2, 1]);
         PlayHeist(game, [3, 2, 1]);
 
         Assert.Equal("2 face cards · 20 total", game.Announcement(2));
-        Assert.Equal([new TheGangFact(TheGangCards.Investor, "2 face cards"), new TheGangFact(TheGangCards.MathWhiz, "20 total")], game.Facts(2));
+        Assert.Equal([new PokerHeistFact(PokerHeistCards.Investor, "2 face cards"), new PokerHeistFact(PokerHeistCards.MathWhiz, "20 total")], game.Facts(2));
     }
 
     [Fact]
     public void Investor_announces_the_cards_held_when_the_betting_starts()
     {
         // Player 0: 3D 4H; player 1: 5S KD; player 2: KH 2C. Coordinator passes each first card to the next player.
-        var game = new TheGangGame(3, () => Cards("3D 4H 5S KD KH 2C 7D 9H JS KC QD"),
-            Advanced(0, [], [TheGangCards.Investor, TheGangCards.Coordinator]));
+        var game = new PokerHeistGame(3, () => Cards("3D 4H 5S KD KH 2C 7D 9H JS KC QD"),
+            Advanced(0, [], [PokerHeistCards.Investor, PokerHeistCards.Coordinator]));
         FailHeist(game);
         FailHeist(game);
         Assert.Equal(2, game.Cards.Count);
@@ -418,20 +418,20 @@ public class TheGangGameTests
     [Fact]
     public void Quick_access_starts_with_three_shared_cards_and_yellow_chips()
     {
-        var game = WithChallenge(TheGangCards.QuickAccess);
+        var game = WithChallenge(PokerHeistCards.QuickAccess);
 
         Assert.Equal(1, game.Stage);
         Assert.Equal(3, game.VisibleCommunityCards.Count);
         Assert.Equal([0], game.SkippedStages);
         PlayAllStages(game, [1, 2, 3]);
         Assert.Null(game.Chip(0, 0));
-        Assert.Equal(TheGangPhase.Reveal, game.Phase);
+        Assert.Equal(PokerHeistPhase.Reveal, game.Phase);
     }
 
     [Fact]
     public void Hasty_getaway_goes_from_yellow_straight_to_red()
     {
-        var game = WithChallenge(TheGangCards.HastyGetaway);
+        var game = WithChallenge(PokerHeistCards.HastyGetaway);
         PlayStage(game, [1, 2, 3]);
         PlayStage(game, [1, 2, 3]);
 
@@ -442,7 +442,7 @@ public class TheGangGameTests
     [Fact]
     public void Noise_sensors_lock_the_one_star_chip_until_the_red_stage()
     {
-        var game = WithChallenge(TheGangCards.NoiseSensors);
+        var game = WithChallenge(PokerHeistCards.NoiseSensors);
         Assert.True(game.TryTakeChip(0, 1, out _));
 
         Assert.Equal([1], game.LockedChips);
@@ -466,7 +466,7 @@ public class TheGangGameTests
     [Fact]
     public void Ventilation_shaft_locks_the_highest_chip()
     {
-        var game = WithChallenge(TheGangCards.VentilationShaft);
+        var game = WithChallenge(PokerHeistCards.VentilationShaft);
         game.TryTakeChip(0, 3, out _);
 
         Assert.Equal([3], game.LockedChips);
@@ -477,14 +477,14 @@ public class TheGangGameTests
 
     [Theory]
     // First 3 shared cards 2C 7D 9H: no face card, so only Laser Tripwires goes off (highest white chip: player 2).
-    [InlineData(TheGangCards.LaserTripwires, RankedDeck + " AS AD", 2)]
-    [InlineData(TheGangCards.MotionDetector, RankedDeck + " AS AD", null)]
+    [InlineData(PokerHeistCards.LaserTripwires, RankedDeck + " AS AD", 2)]
+    [InlineData(PokerHeistCards.MotionDetector, RankedDeck + " AS AD", null)]
     // First 3 shared cards JC 7D 9H: a face card, so only Motion Detector goes off (1-star white chip: player 0).
-    [InlineData(TheGangCards.MotionDetector, "3D 4H 9C 5S KD KH JC 7D 9H JS KC AS AD", 0)]
-    [InlineData(TheGangCards.LaserTripwires, "3D 4H 9C 5S KD KH JC 7D 9H JS KC AS AD", null)]
+    [InlineData(PokerHeistCards.MotionDetector, "3D 4H 9C 5S KD KH JC 7D 9H JS KC AS AD", 0)]
+    [InlineData(PokerHeistCards.LaserTripwires, "3D 4H 9C 5S KD KH JC 7D 9H JS KC AS AD", null)]
     public void Alarm_cards_give_new_private_cards_when_the_first_shared_cards_appear(string challenge, string deck, int? redrawn)
     {
-        var game = new TheGangGame(3, () => Cards(deck), Advanced(1, [challenge]));
+        var game = new PokerHeistGame(3, () => Cards(deck), Advanced(1, [challenge]));
         var before = Enumerable.Range(0, 3).Select(p => game.HoleCards(p).ToArray()).ToArray();
 
         PlayStage(game, [1, 2, 3]);
@@ -499,7 +499,7 @@ public class TheGangGameTests
     [Fact]
     public void The_stage_after_new_private_cards_waits_until_their_player_confirms()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(1, [TheGangCards.LaserTripwires]));
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(1, [PokerHeistCards.LaserTripwires]));
         PlayStage(game, [1, 2, 3]);
         Assert.Equal((2, false), (game.RedrawnPlayer, game.IsRedrawConfirmed));
 
@@ -524,7 +524,7 @@ public class TheGangGameTests
     [Fact]
     public void Blackout_removes_each_stages_chips_when_the_next_starts()
     {
-        var game = WithChallenge(TheGangCards.Blackout);
+        var game = WithChallenge(PokerHeistCards.Blackout);
         Assert.False(game.AreChipsDiscarded(0));
 
         PlayStage(game, [1, 2, 3]);
@@ -536,8 +536,8 @@ public class TheGangGameTests
     public void Security_cameras_deal_three_private_cards_and_count_the_best_five_of_eight()
     {
         // Player 0: 3D 4H 9C; player 1: 5S KD KH; player 2: 2C 7D 9H; shared: JS KC 9S 9D 2D.
-        var game = new TheGangGame(3, () => Cards("3D 4H 9C 5S KD KH 2C 7D 9H JS KC 9S 9D 2D"),
-            Advanced(1, [TheGangCards.SecurityCameras]));
+        var game = new PokerHeistGame(3, () => Cards("3D 4H 9C 5S KD KH 2C 7D 9H JS KC 9S 9D 2D"),
+            Advanced(1, [PokerHeistCards.SecurityCameras]));
 
         Assert.All(Enumerable.Range(0, 3), p => Assert.Equal(3, game.HoleCards(p).Count));
         PlayAllStages(game, [1, 2, 3]);
@@ -548,21 +548,21 @@ public class TheGangGameTests
     [Fact]
     public void Eight_players_can_play_a_heist_with_three_private_cards_each()
     {
-        var game = new TheGangGame(8, () => Deck.Shuffled(new Random(3)), Advanced(1, [TheGangCards.SecurityCameras]));
+        var game = new PokerHeistGame(8, () => Deck.Shuffled(new Random(3)), Advanced(1, [PokerHeistCards.SecurityCameras]));
 
         Assert.All(Enumerable.Range(0, 8), p => Assert.Equal(3, game.HoleCards(p).Count));
         PlayAllStages(game, [1, 2, 3, 4, 5, 6, 7, 8]);
         RevealAll(game);
-        Assert.Equal(TheGangPhase.HeistOver, game.Phase);
-        Assert.Throws<ArgumentOutOfRangeException>(() => new TheGangGame(9, () => Deck.Shuffled(Random.Shared)));
+        Assert.Equal(PokerHeistPhase.HeistOver, game.Phase);
+        Assert.Throws<ArgumentOutOfRangeException>(() => new PokerHeistGame(9, () => Deck.Shuffled(Random.Shared)));
     }
 
     [Theory]
-    [InlineData(TheGangCards.Investor, "0 face cards", "0 face cards", "2 face cards")]
-    [InlineData(TheGangCards.MathWhiz, "7 total", "14 total", "20 total")]
+    [InlineData(PokerHeistCards.Investor, "0 face cards", "0 face cards", "2 face cards")]
+    [InlineData(PokerHeistCards.MathWhiz, "7 total", "14 total", "20 total")]
     public void Specialists_show_everyone_a_fact_about_each_hand(string specialist, string first, string second, string third)
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(0, [], [specialist]));
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(0, [], [specialist]));
         Assert.All(Enumerable.Range(0, 3), p => Assert.Null(game.Announcement(p)));
 
         PlayHeist(game, [3, 2, 1]);
@@ -572,10 +572,10 @@ public class TheGangGameTests
     [Fact]
     public void Coordinator_everyone_passes_a_card_to_the_next_player_before_the_betting()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(0, [], [TheGangCards.Coordinator]));
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(0, [], [PokerHeistCards.Coordinator]));
         PlayHeist(game, [3, 2, 1]);
 
-        Assert.Equal(TheGangPhase.Preparing, game.Phase);
+        Assert.Equal(PokerHeistPhase.Preparing, game.Phase);
         Assert.False(game.TryTakeChip(0, 2, out var error));
         Assert.Equal("The betting starts once everyone has done the specialist card's step.", error);
 
@@ -584,10 +584,10 @@ public class TheGangGameTests
         Assert.Equal(Card.Parse("3D"), game.PassingCard(0));
         Assert.True(game.IsPrepared(0));
         Assert.True(game.TryPassCard(1, 0, out _));
-        Assert.Equal(TheGangPhase.Preparing, game.Phase);
+        Assert.Equal(PokerHeistPhase.Preparing, game.Phase);
         Assert.True(game.TryPassCard(2, 1, out _));
 
-        Assert.Equal(TheGangPhase.Betting, game.Phase);
+        Assert.Equal(PokerHeistPhase.Betting, game.Phase);
         Assert.Equal(Cards("4H KH"), game.HoleCards(0));
         Assert.Equal(Cards("5S 3D"), game.HoleCards(1));
         Assert.Equal(Cards("KD 9C"), game.HoleCards(2));
@@ -597,19 +597,19 @@ public class TheGangGameTests
     [Fact]
     public void Con_artist_reshuffles_the_private_cards_once_everyone_has_seen_them()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(0, [], [TheGangCards.ConArtist]), new Random(7));
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(0, [], [PokerHeistCards.ConArtist]), new Random(7));
         PlayHeist(game, [3, 2, 1]);
         var before = Enumerable.Range(0, 3).SelectMany(game.HoleCards).ToArray();
         var shuffles = game.Shuffles;
 
         Assert.True(game.TryConfirmSeen(0, out _));
         Assert.True(game.TryConfirmSeen(1, out _));
-        Assert.Equal(TheGangPhase.Preparing, game.Phase);
+        Assert.Equal(PokerHeistPhase.Preparing, game.Phase);
         Assert.Equal(shuffles, game.Shuffles);
         Assert.False(game.TryPassCard(2, 0, out _));
         Assert.True(game.TryConfirmSeen(2, out _));
 
-        Assert.Equal((TheGangPhase.Betting, shuffles + 1), (game.Phase, game.Shuffles));
+        Assert.Equal((PokerHeistPhase.Betting, shuffles + 1), (game.Phase, game.Shuffles));
         Assert.All(Enumerable.Range(0, 3), p => Assert.Equal(2, game.HoleCards(p).Count));
         Assert.Equal(before.Select(c => c.ToString()).Order(), Enumerable.Range(0, 3).SelectMany(game.HoleCards).Select(c => c.ToString()).Order());
     }
@@ -619,25 +619,25 @@ public class TheGangGameTests
     [Fact]
     public void A_group_decision_takes_effect_once_everyone_agrees_to_the_latest_proposal()
     {
-        var game = WithSpecialist(TheGangCards.GetawayDriver);
+        var game = WithSpecialist(PokerHeistCards.GetawayDriver);
 
-        Assert.False(game.TryAgree(0, TheGangCards.GetawayDriver, true, out var error));
+        Assert.False(game.TryAgree(0, PokerHeistCards.GetawayDriver, true, out var error));
         Assert.Equal("Complete the proposal first.", error);
-        Assert.False(game.TryPropose(0, TheGangCards.GetawayDriver, null, null, out error));
+        Assert.False(game.TryPropose(0, PokerHeistCards.GetawayDriver, null, null, out error));
         Assert.Equal("Choose a player.", error);
-        Assert.False(game.TryPropose(0, TheGangCards.GetawayDriver, 1, "9", out error));
+        Assert.False(game.TryPropose(0, PokerHeistCards.GetawayDriver, 1, "9", out error));
         Assert.Equal("This card does not choose a value.", error);
 
-        Assert.True(game.TryPropose(0, TheGangCards.GetawayDriver, 1, null, out _));
-        game.TryAgree(0, TheGangCards.GetawayDriver, true, out _);
-        game.TryAgree(1, TheGangCards.GetawayDriver, true, out _);
-        Assert.True(game.TryPropose(1, TheGangCards.GetawayDriver, 2, null, out _));
+        Assert.True(game.TryPropose(0, PokerHeistCards.GetawayDriver, 1, null, out _));
+        game.TryAgree(0, PokerHeistCards.GetawayDriver, true, out _);
+        game.TryAgree(1, PokerHeistCards.GetawayDriver, true, out _);
+        Assert.True(game.TryPropose(1, PokerHeistCards.GetawayDriver, 2, null, out _));
         Assert.Empty(game.Decisions[0].Agreed);
 
-        AgreeAll(game, TheGangCards.GetawayDriver);
+        AgreeAll(game, PokerHeistCards.GetawayDriver);
         Assert.True(game.Decisions[0].IsDone);
-        Assert.Equal(new TheGangResult(2, TheGangCards.GetawayDriver, "Pair"), Assert.Single(game.Results));
-        Assert.False(game.TryPropose(0, TheGangCards.GetawayDriver, 0, null, out error));
+        Assert.Equal(new PokerHeistResult(2, PokerHeistCards.GetawayDriver, "Pair"), Assert.Single(game.Results));
+        Assert.False(game.TryPropose(0, PokerHeistCards.GetawayDriver, 0, null, out error));
         Assert.Equal("That cannot be decided now.", error);
     }
 
@@ -647,20 +647,20 @@ public class TheGangGameTests
     [InlineData(0, "A", "no As")]
     public void Mastermind_shows_how_many_of_a_value_the_chosen_player_has(int player, string value, string text)
     {
-        var game = WithSpecialist(TheGangCards.Mastermind);
+        var game = WithSpecialist(PokerHeistCards.Mastermind);
 
-        Assert.False(game.TryPropose(0, TheGangCards.Mastermind, player, "1", out _));
-        Assert.True(game.TryPropose(0, TheGangCards.Mastermind, player, null, out _));
-        Assert.False(game.TryAgree(0, TheGangCards.Mastermind, true, out _));
-        Assert.True(game.TryPropose(0, TheGangCards.Mastermind, player, value, out _));
-        AgreeAll(game, TheGangCards.Mastermind);
+        Assert.False(game.TryPropose(0, PokerHeistCards.Mastermind, player, "1", out _));
+        Assert.True(game.TryPropose(0, PokerHeistCards.Mastermind, player, null, out _));
+        Assert.False(game.TryAgree(0, PokerHeistCards.Mastermind, true, out _));
+        Assert.True(game.TryPropose(0, PokerHeistCards.Mastermind, player, value, out _));
+        AgreeAll(game, PokerHeistCards.Mastermind);
 
         Assert.Equal(text, Assert.Single(game.Results).Text);
     }
 
     [Theory]
-    [InlineData(TheGangCards.Hacker, "A♠")]
-    [InlineData(TheGangCards.Jack, "J★")]
+    [InlineData(PokerHeistCards.Hacker, "A♠")]
+    [InlineData(PokerHeistCards.Jack, "J★")]
     public void Hacker_and_jack_add_a_card_and_the_stage_waits_for_a_discard(string specialist, string added)
     {
         var game = WithSpecialist(specialist);
@@ -668,7 +668,7 @@ public class TheGangGameTests
         AgreeAll(game, specialist);
 
         Assert.Equal(["3♦", "4♥", added], game.HoleCards(0).Select(c => c.ToString()));
-        Assert.Equal((0, TheGangStep.Discard), (game.PendingPlayer, game.PendingStep));
+        Assert.Equal((0, PokerHeistStep.Discard), (game.PendingPlayer, game.PendingStep));
         PlayStage(game, [1, 2, 3]);
         Assert.Equal(0, game.Stage);
         Assert.False(game.TryDiscard(1, 0, out _));
@@ -681,11 +681,11 @@ public class TheGangGameTests
     [Fact]
     public void Informant_shows_one_card_to_one_other_player_only()
     {
-        var game = WithSpecialist(TheGangCards.Informant);
-        game.TryPropose(2, TheGangCards.Informant, 0, null, out _);
-        AgreeAll(game, TheGangCards.Informant);
+        var game = WithSpecialist(PokerHeistCards.Informant);
+        game.TryPropose(2, PokerHeistCards.Informant, 0, null, out _);
+        AgreeAll(game, PokerHeistCards.Informant);
 
-        Assert.Equal(TheGangStep.ShowCard, game.PendingStep);
+        Assert.Equal(PokerHeistStep.ShowCard, game.PendingStep);
         Assert.False(game.TryShowCard(0, 1, 0, out var error));
         Assert.Equal("Choose another player to show the card to.", error);
         Assert.True(game.TryShowCard(0, 1, 2, out _));
@@ -693,7 +693,7 @@ public class TheGangGameTests
         Assert.Equal((0, 2), game.ShownBetween);
         Assert.Equal(Card.Parse("4H"), game.ShownCardFor(2));
         Assert.Null(game.ShownCardFor(1));
-        Assert.Equal(TheGangStep.None, game.PendingStep);
+        Assert.Equal(PokerHeistStep.None, game.PendingStep);
     }
 
     [Fact]
@@ -701,10 +701,10 @@ public class TheGangGameTests
     {
         // Player 0: pair of twos; player 1: pair of nines; player 2: pair of kings. Shared cards do not help.
         const string deck = "2C 2D 9C 9D KD KH 3S 5H 7C JS QD";
-        var game = new TheGangGame(3, () => Cards(deck), Advanced(0, [], [TheGangCards.Muscle]));
+        var game = new PokerHeistGame(3, () => Cards(deck), Advanced(0, [], [PokerHeistCards.Muscle]));
         PlayHeist(game, [3, 2, 1]);
-        game.TryPropose(0, TheGangCards.Muscle, 0, null, out _);
-        AgreeAll(game, TheGangCards.Muscle);
+        game.TryPropose(0, PokerHeistCards.Muscle, 0, null, out _);
+        AgreeAll(game, PokerHeistCards.Muscle);
 
         PlayAllStages(game, [3, 1, 2]);
         RevealAll(game);
@@ -714,10 +714,10 @@ public class TheGangGameTests
     }
 
     [Theory]
-    [InlineData(TheGangCards.RetinaScan, "K", true)]
-    [InlineData(TheGangCards.RetinaScan, "A", false)]
-    [InlineData(TheGangCards.FingerprintScan, "Three of a kind", true)]
-    [InlineData(TheGangCards.FingerprintScan, "Pair", false)]
+    [InlineData(PokerHeistCards.RetinaScan, "K", true)]
+    [InlineData(PokerHeistCards.RetinaScan, "A", false)]
+    [InlineData(PokerHeistCards.FingerprintScan, "Three of a kind", true)]
+    [InlineData(PokerHeistCards.FingerprintScan, "Pair", false)]
     public void Scans_need_a_right_guess_about_the_strongest_hand(string scan, string guess, bool right)
     {
         var game = WithChallenge(scan);
@@ -749,7 +749,7 @@ public class TheGangGameTests
     [InlineData(new[] { 1, 3, 2 })]
     public void Scans_are_skipped_when_the_hands_are_already_out_of_order(int[] chips)
     {
-        var game = WithChallenge(TheGangCards.RetinaScan);
+        var game = WithChallenge(PokerHeistCards.RetinaScan);
         PlayAllStages(game, chips);
         game.TryRevealNext(0, out _);
         game.TryRevealNext(1, out _);
@@ -757,7 +757,7 @@ public class TheGangGameTests
         var scan = Assert.Single(game.Decisions);
         Assert.False(scan.IsOpen);
         Assert.True(scan.IsSkipped);
-        Assert.False(game.TryPropose(0, TheGangCards.RetinaScan, null, "K", out _));
+        Assert.False(game.TryPropose(0, PokerHeistCards.RetinaScan, null, "K", out _));
         Assert.True(game.TryRevealNext(2, out var error), error);
 
         Assert.Equal((0, 1), (game.Vaults, game.Alarms));
@@ -768,7 +768,7 @@ public class TheGangGameTests
     [Fact]
     public void A_scan_is_not_skipped_while_the_hands_are_in_order()
     {
-        var game = WithChallenge(TheGangCards.FingerprintScan);
+        var game = WithChallenge(PokerHeistCards.FingerprintScan);
         Assert.False(Assert.Single(game.Decisions).IsSkipped);
         PlayAllStages(game, [1, 2, 3]);
         game.TryRevealNext(0, out _);
@@ -782,24 +782,24 @@ public class TheGangGameTests
     public void A_user_who_sees_the_strongest_hand_takes_no_part_in_the_scan()
     {
         // Players 1 and 2 are on the same screen; player 2 has the strongest hand.
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(1, [TheGangCards.RetinaScan]),
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(1, [PokerHeistCards.RetinaScan]),
             sameHolder: (a, b) => a == b || (a >= 1 && b >= 1));
         PlayAllStages(game, [1, 2, 3]);
         game.TryRevealNext(0, out _);
         game.TryRevealNext(1, out _);
 
         Assert.Equal([0], Assert.Single(game.Decisions).Voters);
-        Assert.False(game.TryAgree(1, TheGangCards.RetinaScan, true, out var error));
+        Assert.False(game.TryAgree(1, PokerHeistCards.RetinaScan, true, out var error));
         Assert.Equal("You do not take part in this decision.", error);
-        Assert.True(game.TryPropose(0, TheGangCards.RetinaScan, null, "K", out _));
-        Assert.True(game.TryAgree(0, TheGangCards.RetinaScan, true, out _));
+        Assert.True(game.TryPropose(0, PokerHeistCards.RetinaScan, null, "K", out _));
+        Assert.True(game.TryAgree(0, PokerHeistCards.RetinaScan, true, out _));
         Assert.True(Assert.Single(game.Decisions).IsDone);
     }
 
     [Fact]
     public void When_one_user_plays_every_seat_only_the_strongest_hand_sits_out_the_scan()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(1, [TheGangCards.FingerprintScan]), sameHolder: (_, _) => true);
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(1, [PokerHeistCards.FingerprintScan]), sameHolder: (_, _) => true);
         PlayAllStages(game, [1, 2, 3]);
         game.TryRevealNext(0, out _);
         game.TryRevealNext(1, out _);
@@ -810,7 +810,7 @@ public class TheGangGameTests
     [Fact]
     public void Each_user_is_ready_once_for_all_their_hands()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck), sameHolder: OneUserPlaysOneAndTwo);
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), sameHolder: OneUserPlaysOneAndTwo);
         game.TryTakeChip(0, 1, out _);
         game.TryTakeChip(1, 2, out _);
         game.TryTakeChip(2, 3, out _);
@@ -828,28 +828,28 @@ public class TheGangGameTests
     [Fact]
     public void Each_user_agrees_once_for_all_their_seats()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(0, [], [TheGangCards.GetawayDriver]),
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(0, [], [PokerHeistCards.GetawayDriver]),
             sameHolder: OneUserPlaysOneAndTwo);
         PlayHeist(game, [3, 2, 1]);
-        game.TryPropose(0, TheGangCards.GetawayDriver, 1, null, out _);
+        game.TryPropose(0, PokerHeistCards.GetawayDriver, 1, null, out _);
 
-        Assert.True(game.TryAgree(2, TheGangCards.GetawayDriver, true, out _));
+        Assert.True(game.TryAgree(2, PokerHeistCards.GetawayDriver, true, out _));
         Assert.Equal([1, 2], game.Decisions[0].Agreed);
-        Assert.True(game.TryAgree(0, TheGangCards.GetawayDriver, true, out _));
+        Assert.True(game.TryAgree(0, PokerHeistCards.GetawayDriver, true, out _));
         Assert.True(game.Decisions[0].IsDone);
     }
 
     [Fact]
     public void Each_user_confirms_once_that_they_have_seen_their_cards()
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck), Advanced(0, [], [TheGangCards.ConArtist]),
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck), Advanced(0, [], [PokerHeistCards.ConArtist]),
             sameHolder: OneUserPlaysOneAndTwo);
         PlayHeist(game, [3, 2, 1]);
 
         Assert.True(game.TryConfirmSeen(1, out _));
         Assert.True(game.IsPrepared(2));
         Assert.True(game.TryConfirmSeen(0, out _));
-        Assert.Equal(TheGangPhase.Betting, game.Phase);
+        Assert.Equal(PokerHeistPhase.Betting, game.Phase);
     }
 
     [Theory]
@@ -863,20 +863,20 @@ public class TheGangGameTests
     [Fact]
     public void Options_turn_into_rules()
     {
-        var defaults = TheGangRules.FromOptions(GameOptions.Normalize(GameType.TheGang, new Dictionary<string, string>
+        var defaults = PokerHeistRules.FromOptions(GameOptions.Normalize(GameType.PokerHeist, new Dictionary<string, string>
         {
-            [TheGangOptions.Mode] = "Advanced",
-            [TheGangOptions.Specialists] = TheGangCards.MathWhiz,
+            [PokerHeistOptions.Mode] = "Advanced",
+            [PokerHeistOptions.Specialists] = PokerHeistCards.MathWhiz,
         }));
 
-        Assert.Equal(TheGangMode.Advanced, defaults.Mode);
+        Assert.Equal(PokerHeistMode.Advanced, defaults.Mode);
         Assert.Equal(1, defaults.FirstHeistChallenges);
-        Assert.Equal(TheGangCards.Challenges.Select(c => c.Key), defaults.Challenges);
-        Assert.Equal(TheGangCards.Specialists.Select(c => c.Key).Where(k => k != TheGangCards.MathWhiz), defaults.Specialists);
+        Assert.Equal(PokerHeistCards.Challenges.Select(c => c.Key), defaults.Challenges);
+        Assert.Equal(PokerHeistCards.Specialists.Select(c => c.Key).Where(k => k != PokerHeistCards.MathWhiz), defaults.Specialists);
         Assert.False(defaults.AvoidClashes);
         Assert.False(defaults.Jokers);
-        Assert.True(TheGangRules.FromOptions(GameOptions.Normalize(GameType.TheGang,
-            new Dictionary<string, string> { [TheGangOptions.Jokers] = TheGangOptions.Yes })).Jokers);
+        Assert.True(PokerHeistRules.FromOptions(GameOptions.Normalize(GameType.PokerHeist,
+            new Dictionary<string, string> { [PokerHeistOptions.Jokers] = PokerHeistOptions.Yes })).Jokers);
     }
 
     // Full hand values at the reveal
@@ -917,7 +917,7 @@ public class TheGangGameTests
     [Fact]
     public void A_joker_on_the_table_becomes_two_cards_and_each_hand_uses_one_of_them()
     {
-        var game = new TheGangGame(3, () => Cards(JokerOnTheTable + " AS AD"), Jokers());
+        var game = new PokerHeistGame(3, () => Cards(JokerOnTheTable + " AS AD"), Jokers());
         PlayStage(game, [1, 2, 3]);
 
         Assert.Equal([Cards("AS AD"), Cards("9H"), Cards("JS")], game.VisibleCommunity);
@@ -928,14 +928,14 @@ public class TheGangGameTests
     [Fact]
     public void A_joker_among_a_table_jokers_replacements_is_replaced_again_and_all_three_cards_show()
     {
-        var game = new TheGangGame(3, () => Cards(JokerOnTheTable + " JOKER AS KD QD"), Jokers());
+        var game = new PokerHeistGame(3, () => Cards(JokerOnTheTable + " JOKER AS KD QD"), Jokers());
         PlayStage(game, [1, 2, 3]);
 
         Assert.Equal(Cards("KD QD AS"), game.VisibleCommunity[0]);
     }
 
     // Player 0 is dealt a joker and 3C; the rest of the deck follows the shared cards.
-    private static TheGangGame JokerInHand(string rest) =>
+    private static PokerHeistGame JokerInHand(string rest) =>
         new(3, () => Cards("JOKER 3C 5S 6D 2C 7D 9H JS KC 4S 8S " + rest), Jokers());
 
     [Fact]
@@ -943,7 +943,7 @@ public class TheGangGameTests
     {
         var game = JokerInHand("AS AD");
 
-        Assert.Equal((TheGangPhase.Preparing, TheGangGame.JokersStep), (game.Phase, game.PreparingCard));
+        Assert.Equal((PokerHeistPhase.Preparing, PokerHeistGame.JokersStep), (game.Phase, game.PreparingCard));
         Assert.Equal(Cards("AS AD"), game.JokerOffer(0));
         Assert.True(game.IsPrepared(1));
         Assert.False(game.TryTakeChip(1, 1, out var error));
@@ -955,7 +955,7 @@ public class TheGangGameTests
         Assert.Equal(Cards("AD 3C"), game.HoleCards(0));
         Assert.Equal(1, game.JokerSwaps(0));
         Assert.Null(game.JokerOffer(0));
-        Assert.Equal(TheGangPhase.Betting, game.Phase);
+        Assert.Equal(PokerHeistPhase.Betting, game.Phase);
     }
 
     [Theory]
@@ -974,13 +974,13 @@ public class TheGangGameTests
         }
 
         Assert.Equal(Cards(hand), game.HoleCards(0));
-        Assert.Equal(TheGangPhase.Betting, game.Phase);
+        Assert.Equal(PokerHeistPhase.Betting, game.Phase);
     }
 
     [Fact]
     public void Two_jokers_in_a_hand_are_swapped_one_after_the_other()
     {
-        var game = new TheGangGame(3, () => Cards("JOKER JOKER 5S 6D 2C 7D 9H JS KC 4S 8S AS AD KS KD"), Jokers());
+        var game = new PokerHeistGame(3, () => Cards("JOKER JOKER 5S 6D 2C 7D 9H JS KC 4S 8S AS AD KS KD"), Jokers());
 
         Assert.Equal(Cards("AS AD"), game.JokerOffer(0));
         game.TryChooseJokerCard(0, 0, out _);
@@ -989,18 +989,18 @@ public class TheGangGameTests
 
         Assert.Equal(Cards("AS KD"), game.HoleCards(0));
         Assert.Equal(2, game.JokerSwaps(0));
-        Assert.Equal(TheGangPhase.Betting, game.Phase);
+        Assert.Equal(PokerHeistPhase.Betting, game.Phase);
     }
 
     [Fact]
     public void A_joker_drawn_during_the_betting_must_be_swapped_before_the_stage_ends()
     {
         // The second heist's Hacker draws the card after the shared cards: a joker.
-        var game = new TheGangGame(3, () => Cards(RankedDeck + " JOKER AS AD"),
-            Advanced(0, [], [TheGangCards.Hacker]) with { Jokers = true });
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck + " JOKER AS AD"),
+            Advanced(0, [], [PokerHeistCards.Hacker]) with { Jokers = true });
         FailHeist(game);
-        game.TryPropose(0, TheGangCards.Hacker, 0, null, out _);
-        AgreeAll(game, TheGangCards.Hacker);
+        game.TryPropose(0, PokerHeistCards.Hacker, 0, null, out _);
+        AgreeAll(game, PokerHeistCards.Hacker);
 
         Assert.Equal(Cards("AS AD"), game.JokerOffer(0));
         Assert.False(game.TryDiscard(0, 0, out var error));
@@ -1018,13 +1018,13 @@ public class TheGangGameTests
     public void With_the_jokers_option_the_deck_gets_two_jokers()
     {
         // Each joker is put at the first place in the deck, so player 0 is dealt both.
-        var game = new TheGangGame(3, () => Cards(RankedDeck + " AS AD KS QS"), Jokers(), new FirstPlace());
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck + " AS AD KS QS"), Jokers(), new FirstPlace());
 
         Assert.Equal(Cards("JOKER JOKER"), game.HoleCards(0));
         Assert.NotNull(game.JokerOffer(0));
     }
 
-    private static TheGangRules Jokers() => TheGangRules.Basic with { Jokers = true };
+    private static PokerHeistRules Jokers() => PokerHeistRules.Basic with { Jokers = true };
 
     // Always picks the first place.
     private sealed class FirstPlace : Random
@@ -1035,39 +1035,39 @@ public class TheGangGameTests
     // Player 0: high card king; player 1: pair of nines; player 2: three kings.
     private const string RankedDeck = "3D 4H 9C 5S KD KH 2C 7D 9H JS KC";
 
-    private static TheGangGame NewGame() => new(3, () => Cards(RankedDeck));
+    private static PokerHeistGame NewGame() => new(3, () => Cards(RankedDeck));
 
     // Players 1 and 2 are played by the same user.
     private static bool OneUserPlaysOneAndTwo(int a, int b) => a == b || (a >= 1 && b >= 1);
 
-    private static TheGangRules Advanced(int firstHeist, string[] challenges, string[]? specialists = null) =>
-        new(TheGangMode.Advanced, firstHeist, challenges, specialists ?? []);
+    private static PokerHeistRules Advanced(int firstHeist, string[] challenges, string[]? specialists = null) =>
+        new(PokerHeistMode.Advanced, firstHeist, challenges, specialists ?? []);
 
-    private static TheGangGame WithChallenge(string challenge) =>
+    private static PokerHeistGame WithChallenge(string challenge) =>
         new(3, () => Cards(RankedDeck), Advanced(1, [challenge]));
 
     // A failed first heist, so the second heist has this specialist card.
-    private static TheGangGame WithSpecialist(string specialist)
+    private static PokerHeistGame WithSpecialist(string specialist)
     {
-        var game = new TheGangGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(0, [], [specialist]));
+        var game = new PokerHeistGame(3, () => Cards(RankedDeck + " AS AD"), Advanced(0, [], [specialist]));
         PlayHeist(game, [3, 2, 1]);
         return game;
     }
 
     // Does the steps before the betting (Coordinator: everyone passes their first card; Con Artist: everyone has seen).
-    private static void Prepare(TheGangGame game)
+    private static void Prepare(PokerHeistGame game)
     {
-        while (game.Phase == TheGangPhase.Preparing)
+        while (game.Phase == PokerHeistPhase.Preparing)
         {
             var card = game.PreparingCard;
             for (var player = 0; player < game.PlayerCount && game.PreparingCard == card; player++)
             {
-                if (game.IsPrepared(player) && card == TheGangCards.ConArtist)
+                if (game.IsPrepared(player) && card == PokerHeistCards.ConArtist)
                 {
                     continue;
                 }
 
-                var done = card == TheGangCards.Coordinator
+                var done = card == PokerHeistCards.Coordinator
                     ? game.TryPassCard(player, 0, out var error)
                     : game.TryConfirmSeen(player, out error);
                 Assert.True(done, error);
@@ -1075,7 +1075,7 @@ public class TheGangGameTests
         }
     }
 
-    private static void AgreeAll(TheGangGame game, string card)
+    private static void AgreeAll(PokerHeistGame game, string card)
     {
         for (var player = 0; player < game.PlayerCount; player++)
         {
@@ -1083,7 +1083,7 @@ public class TheGangGameTests
         }
     }
 
-    private static void PlayHeist(TheGangGame game, int[] chips)
+    private static void PlayHeist(PokerHeistGame game, int[] chips)
     {
         var heist = game.Heist;
         Prepare(game);
@@ -1093,7 +1093,7 @@ public class TheGangGameTests
     }
 
     // Plays a heist that fails: the strongest hand takes the 1-star chip.
-    private static void FailHeist(TheGangGame game)
+    private static void FailHeist(PokerHeistGame game)
     {
         Prepare(game);
         var strongestFirst = Enumerable.Range(0, game.PlayerCount)
@@ -1104,7 +1104,7 @@ public class TheGangGameTests
 
     private static Card[] Cards(string cards) => cards.Split(' ').Select(Card.Parse).ToArray();
 
-    private static void PlayStage(TheGangGame game, int[] chips)
+    private static void PlayStage(PokerHeistGame game, int[] chips)
     {
         for (var player = 0; player < chips.Length; player++)
         {
@@ -1118,7 +1118,7 @@ public class TheGangGameTests
 
         // A user is ready once for all their players, so players already made ready are skipped.
         var stage = game.Stage;
-        for (var player = 0; player < chips.Length && game.Stage == stage && game.Phase == TheGangPhase.Betting; player++)
+        for (var player = 0; player < chips.Length && game.Stage == stage && game.Phase == PokerHeistPhase.Betting; player++)
         {
             if (!game.IsReady(player))
             {
@@ -1127,17 +1127,17 @@ public class TheGangGameTests
         }
     }
 
-    private static void PlayAllStages(TheGangGame game, int[] chips)
+    private static void PlayAllStages(PokerHeistGame game, int[] chips)
     {
-        while (game.Phase == TheGangPhase.Betting)
+        while (game.Phase == PokerHeistPhase.Betting)
         {
             PlayStage(game, chips);
         }
     }
 
-    private static void RevealAll(TheGangGame game)
+    private static void RevealAll(PokerHeistGame game)
     {
-        while (game.Phase == TheGangPhase.Reveal)
+        while (game.Phase == PokerHeistPhase.Reveal)
         {
             Assert.True(game.TryRevealNext(game.Revealed, out var error), error);
         }

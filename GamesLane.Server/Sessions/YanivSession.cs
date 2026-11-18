@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 using GamesLane.Server.Games.Yaniv;
 
 namespace GamesLane.Server.Sessions;

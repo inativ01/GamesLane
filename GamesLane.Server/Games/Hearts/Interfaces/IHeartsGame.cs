@@ -1,4 +1,4 @@
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 using GamesLane.Server.Games.Tricks;
 
 namespace GamesLane.Server.Games.Hearts;

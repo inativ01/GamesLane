@@ -1,5 +1,5 @@
 using GamesLane.Server.Games.RichManPoorMan;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 
 namespace GamesLane.Server.Tests;
 

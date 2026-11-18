@@ -1,9 +1,9 @@
-namespace GamesLane.Server.Games.TheGang;
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
 /// Challenge cards make a heist harder; specialist cards help.
 /// </summary>
-public enum TheGangCardKind
+public enum PokerHeistCardKind
 {
     Challenge,
     Specialist,
@@ -13,7 +13,7 @@ public enum TheGangCardKind
 /// What the group agrees on for a card: a player, a player and a card value, a card value, or a hand ranking. Cards
 /// with <see cref="None"/> take effect by themselves.
 /// </summary>
-public enum TheGangChoice
+public enum PokerHeistChoice
 {
     None,
     Player,
@@ -24,14 +24,14 @@ public enum TheGangChoice
 
 /// <summary>
 /// A challenge or specialist card of the advanced game: its key (used in options), name, what it does, and what the
-/// group must agree on for it (<see cref="TheGangChoice.None"/> if nothing). The full texts are in <c>docs/the-gang/</c>.
+/// group must agree on for it (<see cref="PokerHeistChoice.None"/> if nothing). The full texts are in <c>docs/poker-heist/</c>.
 /// </summary>
-public record TheGangCard(string Key, string Name, TheGangCardKind Kind, string Text, TheGangChoice Choice = TheGangChoice.None);
+public record PokerHeistCard(string Key, string Name, PokerHeistCardKind Kind, string Text, PokerHeistChoice Choice = PokerHeistChoice.None);
 
 /// <summary>
 /// The challenge and specialist cards that are available so far, and which cards are never used in the same heist.
 /// </summary>
-public static class TheGangCards
+public static class PokerHeistCards
 {
     public const string QuickAccess = "quick-access";
     public const string NoiseSensors = "noise-sensors";
@@ -57,59 +57,59 @@ public static class TheGangCards
     /// <summary>
     /// The challenge cards, in the order shown in the options.
     /// </summary>
-    public static IReadOnlyList<TheGangCard> Challenges { get; } =
+    public static IReadOnlyList<PokerHeistCard> Challenges { get; } =
     [
-        new(QuickAccess, "Quick Access", TheGangCardKind.Challenge,
+        new(QuickAccess, "Quick Access", PokerHeistCardKind.Challenge,
             "No white chips: the heist starts with 3 shared cards and the yellow chips."),
-        new(NoiseSensors, "Noise Sensors", TheGangCardKind.Challenge,
+        new(NoiseSensors, "Noise Sensors", PokerHeistCardKind.Challenge,
             "The 1-star white, yellow and orange chips are locked: whoever takes one first keeps it."),
-        new(MotionDetector, "Motion Detector", TheGangCardKind.Challenge,
+        new(MotionDetector, "Motion Detector", PokerHeistCardKind.Challenge,
             "If the first 3 shared cards include a J, Q or K, whoever has the 1-star white chip gets new pocket cards."),
-        new(RetinaScan, "Retina Scan", TheGangCardKind.Challenge,
+        new(RetinaScan, "Retina Scan", PokerHeistCardKind.Challenge,
             "Before the strongest hand is revealed, the others agree on a card value its player holds. If wrong, the heist fails.",
-            TheGangChoice.Rank),
-        new(HastyGetaway, "Hasty Getaway", TheGangCardKind.Challenge,
+            PokerHeistChoice.Rank),
+        new(HastyGetaway, "Hasty Getaway", PokerHeistCardKind.Challenge,
             "No orange chips: after the yellow stage, the red stage starts with all 5 shared cards."),
-        new(VentilationShaft, "Ventilation Shaft", TheGangCardKind.Challenge,
+        new(VentilationShaft, "Ventilation Shaft", PokerHeistCardKind.Challenge,
             "The highest white, yellow and orange chips are locked: whoever takes one first keeps it."),
-        new(LaserTripwires, "Laser Tripwires", TheGangCardKind.Challenge,
+        new(LaserTripwires, "Laser Tripwires", PokerHeistCardKind.Challenge,
             "If none of the first 3 shared cards is a J, Q or K, whoever has the highest white chip gets new pocket cards."),
-        new(Blackout, "Blackout", TheGangCardKind.Challenge,
+        new(Blackout, "Blackout", PokerHeistCardKind.Challenge,
             "Each stage's chips are removed when the next stage starts, so remember who had which chips."),
-        new(FingerprintScan, "Fingerprint Scan", TheGangCardKind.Challenge,
+        new(FingerprintScan, "Fingerprint Scan", PokerHeistCardKind.Challenge,
             "Before the strongest hand is revealed, the others agree on its hand ranking. If wrong, the heist fails.",
-            TheGangChoice.Ranking),
-        new(SecurityCameras, "Security Cameras", TheGangCardKind.Challenge,
+            PokerHeistChoice.Ranking),
+        new(SecurityCameras, "Security Cameras", PokerHeistCardKind.Challenge,
             "Everyone gets 3 pocket cards; the best 5 of your 3 cards and the 5 shared cards count."),
     ];
 
     /// <summary>
     /// The specialist cards, in the order shown in the options.
     /// </summary>
-    public static IReadOnlyList<TheGangCard> Specialists { get; } =
+    public static IReadOnlyList<PokerHeistCard> Specialists { get; } =
     [
-        new(Informant, "Informant", TheGangCardKind.Specialist,
-            "The group chooses a player, who secretly shows one of their cards to one other player.", TheGangChoice.Player),
-        new(GetawayDriver, "Getaway Driver", TheGangCardKind.Specialist,
-            "The group chooses a player; everyone sees the ranking of that player's current hand (e.g. a pair).", TheGangChoice.Player),
-        new(Investor, "Investor", TheGangCardKind.Specialist,
+        new(Informant, "Informant", PokerHeistCardKind.Specialist,
+            "The group chooses a player, who secretly shows one of their cards to one other player.", PokerHeistChoice.Player),
+        new(GetawayDriver, "Getaway Driver", PokerHeistCardKind.Specialist,
+            "The group chooses a player; everyone sees the ranking of that player's current hand (e.g. a pair).", PokerHeistChoice.Player),
+        new(Investor, "Investor", PokerHeistCardKind.Specialist,
             "Once the pocket cards are dealt, everyone's number of face cards (J, Q, K) is shown to all."),
-        new(Mastermind, "Mastermind", TheGangCardKind.Specialist,
+        new(Mastermind, "Mastermind", PokerHeistCardKind.Specialist,
             "The group chooses a player and a card value; everyone sees how many of that value the player has.",
-            TheGangChoice.PlayerAndRank),
-        new(Hacker, "Hacker", TheGangCardKind.Specialist,
-            "The group chooses a player, who draws a card from the deck, then discards one of their cards.", TheGangChoice.Player),
-        new(Coordinator, "Coordinator", TheGangCardKind.Specialist,
+            PokerHeistChoice.PlayerAndRank),
+        new(Hacker, "Hacker", PokerHeistCardKind.Specialist,
+            "The group chooses a player, who draws a card from the deck, then discards one of their cards.", PokerHeistChoice.Player),
+        new(Coordinator, "Coordinator", PokerHeistCardKind.Specialist,
             "Once the pocket cards are dealt, everyone picks one of their cards and passes it to the next player, all at once."),
-        new(Jack, "Jack", TheGangCardKind.Specialist,
+        new(Jack, "Jack", PokerHeistCardKind.Specialist,
             "The group chooses a player, who gets the \"Jack\" card (a J without a suit: never part of a flush) and discards one card.",
-            TheGangChoice.Player),
-        new(MathWhiz, "Math Whiz", TheGangCardKind.Specialist,
+            PokerHeistChoice.Player),
+        new(MathWhiz, "Math Whiz", PokerHeistCardKind.Specialist,
             "Once the pocket cards are dealt, everyone's total card value is shown to all (2–10 as numbered, J, Q and K 10, A 11)."),
-        new(ConArtist, "Con Artist", TheGangCardKind.Specialist,
+        new(ConArtist, "Con Artist", PokerHeistCardKind.Specialist,
             "Once the pocket cards are dealt and everyone has looked at them, all pocket cards are shuffled and dealt again."),
-        new(Muscle, "Muscle", TheGangCardKind.Specialist,
-            "The group chooses a player, whose hand beats every other hand of the same ranking at the reveal.", TheGangChoice.Player),
+        new(Muscle, "Muscle", PokerHeistCardKind.Specialist,
+            "The group chooses a player, whose hand beats every other hand of the same ranking at the reveal.", PokerHeistChoice.Player),
     ];
 
     /// <summary>
@@ -126,7 +126,7 @@ public static class TheGangCards
     /// <summary>
     /// The card with this key, or null.
     /// </summary>
-    public static TheGangCard? Find(string key) =>
+    public static PokerHeistCard? Find(string key) =>
         Challenges.Concat(Specialists).FirstOrDefault(c => c.Key == key);
 
     /// <summary>

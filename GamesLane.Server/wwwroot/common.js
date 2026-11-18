@@ -53,7 +53,7 @@ translatePage();
 $("account").before(languagePicker() ?? "");
 
 const GAME_PAGES = {
-    TicTacToe: "/tictactoe.html", TheGang: "/the-gang.html", Backgammon: "/backgammon.html",
+    TicTacToe: "/tictactoe.html", PokerHeist: "/poker-heist.html", Backgammon: "/backgammon.html",
     RichManPoorMan: "/rich-man-poor-man.html", Wazoo: "/wazoo.html", FinalCard: "/final-card.html", Yaniv: "/yaniv.html",
     Hearts: "/hearts.html",
     Spades: "/spades.html",
@@ -1584,7 +1584,7 @@ function svgElement(tag, attributes, ...children) {
     return element;
 }
 
-// A suit as a shape in the card's color (the suitless "★" of The Gang's Jack card as text).
+// A suit as a shape in the card's color (the suitless "★" of Poker Heist's Jack card as text).
 function suitShape(suit, className) {
     const shapes = SUIT_SHAPES[suit];
     if (!shapes) {

@@ -1,4 +1,4 @@
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 using GamesLane.Server.Games.Yaniv;
 
 namespace GamesLane.Server.Tests;
@@ -271,7 +271,7 @@ public class YanivGameTests
 
     private static Card[] Cards(string cards) => [.. cards.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(Card)];
 
-    private static Card Card(string text) => GamesLane.Server.Games.TheGang.Card.Parse(text);
+    private static Card Card(string text) => GamesLane.Server.Games.PokerHeist.Card.Parse(text);
 
     private static void AssertRefused(bool done, string? error, string expected)
     {

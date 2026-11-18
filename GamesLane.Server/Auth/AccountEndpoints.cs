@@ -180,7 +180,7 @@ public static class AccountEndpoints
             return Results.File(icon.Data, icon.ContentType);
         });
 
-        // Saved users' order of the games on the main screen: a list of game names, e.g. ["Backgammon", "TheGang"].
+        // Saved users' order of the games on the main screen: a list of game names, e.g. ["Backgammon", "PokerHeist"].
         app.MapPut("/api/game-order", async (string[]? body, HttpContext context, IUserService users) =>
         {
             if (AuthSetup.GetSavedUserId(context.User) is not { } id)
@@ -236,7 +236,7 @@ public static class AccountEndpoints
     }
 
     /// <summary>
-    /// The game type named in an address, e.g. <c>TheGang</c> (any case), or null if there is no such game.
+    /// The game type named in an address, e.g. <c>PokerHeist</c> (any case), or null if there is no such game.
     /// </summary>
     private static GameType? ParseGameType(string name) =>
         Enum.TryParse<GameType>(name, ignoreCase: true, out var type) && Enum.IsDefined(type) && !int.TryParse(name, out _)

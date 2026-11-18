@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using GamesLane.Server.Games.Hearts;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 
 namespace GamesLane.Server.Sessions;
 

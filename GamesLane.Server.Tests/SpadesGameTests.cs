@@ -1,5 +1,5 @@
 using GamesLane.Server.Games.Spades;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 
 namespace GamesLane.Server.Tests;
 
@@ -156,7 +156,7 @@ public class SpadesGameTests
         }
     }
 
-    private static Card Card(string text) => GamesLane.Server.Games.TheGang.Card.Parse(text);
+    private static Card Card(string text) => GamesLane.Server.Games.PokerHeist.Card.Parse(text);
 
     private static void AssertRefused(bool done, string? error, string expected)
     {

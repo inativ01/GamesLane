@@ -1,6 +1,6 @@
 "use strict";
 
-// The Gang: players rank their hands by taking numbered chips over four stages (white, yellow, orange, red).
+// Poker Heist: players rank their hands by taking numbered chips over four stages (white, yellow, orange, red).
 // Each player's own two cards come in view.private; the shared screen never sees them before the reveal.
 // The page shows players the top of the table (the shared cards), then their own hand, and the rest of the table
 // (with the heist's cards) below. Players can hide that part of the table, e.g. when a second device shows it; the choice is
@@ -8,7 +8,7 @@
 
 const STAGES = ["White", "Yellow", "Orange", "Red"];
 const TO_FINISH = 3;
-const TABLE_HIDDEN_KEY = "theGang.tableHidden";
+const TABLE_HIDDEN_KEY = "pokerHeist.tableHidden";
 
 function chipElement(stage, number, content = number) {
     const chip = el("span", `chip stage-${stage}`, String(content));
@@ -78,7 +78,7 @@ function userNames(state, seats) {
 // Whether a scan's guess must be agreed before the strongest hand can be revealed.
 const awaitsScan = (game) => game.decisions.some((d) => d.isOpen && (d.choice === "Rank" || d.choice === "Ranking"));
 
-function gangStatus(game, state, view) {
+function heistStatus(game, state, view) {
     switch (game.phase) {
         case "Preparing": {
             const waiting = userNames(state, game.playingSeats.filter((s) => !game.preparedSeats.includes(s)));
@@ -100,7 +100,7 @@ function gangStatus(game, state, view) {
                 : view.isPlayer ? `👉 🃏 ${t("Reveal the hands, lowest red chip first")}` : `🃏 ${t("Revealing, lowest red chip first…")}`;
         default:
             if (game.vaults >= TO_FINISH) {
-                return `🎉 ${t("Three vaults: the gang wins!")}`;
+                return `🎉 ${t("Three vaults: the crew wins!")}`;
             }
             if (game.alarms >= TO_FINISH) {
                 return `🚨 ${t("Three alarms: game over")}`;
@@ -119,7 +119,7 @@ function heistCards(game) {
         const open = openCards.has(card.key);
         const kind = el("span", "heist-card-kind", t(card.kind === "Challenge" ? "Challenge" : "Specialist"));
         const art = el("img", "heist-card-art");
-        art.src = `/images/the-gang/${card.key}.svg`;
+        art.src = `/images/poker-heist/${card.key}.svg`;
         art.alt = "";
         const name = translateServerText(card.name);
         const item = el("li", `heist-card ${card.kind.toLowerCase()}${isNew ? " new" : ""}${open ? " open" : ""}`,
@@ -137,7 +137,7 @@ function heistCards(game) {
             : t(unused ? "{name} (not used in this heist): tap for details" : "{name}: tap for details", { name });
         const toggle = () => {
             open ? openCards.delete(card.key) : openCards.add(card.key);
-            gang.refresh();
+            pokerHeist.refresh();
             requestAnimationFrame(() => $("heist-cards").querySelector(`[data-key="${card.key}"]`)?.focus());
         };
         item.dataset.key = card.key;
@@ -532,7 +532,7 @@ function confirmButton(game, view) {
         return [];
     }
     const confirmed = seats.every((s) => game.readySeats.includes(s));
-    const confirm = button(t(confirmed ? "Confirmed" : "Confirm"), confirmed ? "gang-confirm secondary" : "gang-confirm",
+    const confirm = button(t(confirmed ? "Confirmed" : "Confirm"), confirmed ? "heist-confirm secondary" : "heist-confirm",
         () => call("SetReady", view.sessionId, seats[0], !confirmed).catch(() => {}));
     confirm.title = confirmed ? t("Confirmed: tap to undo") : "";
     confirm.setAttribute("aria-pressed", String(confirmed));
@@ -724,7 +724,7 @@ function noticeMoves(game, view) {
     }
 }
 
-let gangState = null;
+let heistState = null;
 // Players on a phone or tablet (a touch screen without a mouse) start with the table hidden, as a shared screen usually
 // shows it; on a computer it is shown. Once a player hides or shows it, their choice is remembered on this device.
 const savedTableHidden = localStorage.getItem(TABLE_HIDDEN_KEY);
@@ -732,13 +732,13 @@ let tableHidden = savedTableHidden === null
     ? matchMedia("(hover: none) and (pointer: coarse)").matches
     : savedTableHidden === "1";
 
-const gang = startSessionPage("TheGang", (game, state, view) => {
-    gangState = game;
+const pokerHeist = startSessionPage("PokerHeist", (game, state, view) => {
+    heistState = game;
     noticeStolenChips(game, view);
     noticeShuffles(view, state, game.shuffles);
     noticeMoves(game, view);
-    $("status").textContent = gangStatus(game, state, view);
-    // A cooperative game: everyone, players and observers, gets confetti whenever the gang opens a vault.
+    $("status").textContent = heistStatus(game, state, view);
+    // A cooperative game: everyone, players and observers, gets confetti whenever the crew opens a vault.
     if (game.phase === "HeistOver" && game.succeeded) {
         celebrate(state, `heist-${game.heist}`);
     }
@@ -789,11 +789,11 @@ addEventListener("resize", () => requestAnimationFrame(fitTable));
 $("toggle-table").addEventListener("click", () => {
     tableHidden = !tableHidden;
     localStorage.setItem(TABLE_HIDDEN_KEY, tableHidden ? "1" : "0");
-    gang.refresh();
+    pokerHeist.refresh();
 });
 $("reveal-next").addEventListener("click", () => {
-    call("RevealNext", gang.sessionId, gangState?.revealed.length ?? 0).catch(() => {});
+    call("RevealNext", pokerHeist.sessionId, heistState?.revealed.length ?? 0).catch(() => {});
 });
 $("next-heist").addEventListener("click", () => {
-    call("NextHeist", gang.sessionId, gangState?.heist ?? 1).catch(() => {});
+    call("NextHeist", pokerHeist.sessionId, heistState?.heist ?? 1).catch(() => {});
 });

@@ -8,7 +8,7 @@ How to play on GamesLane. The rules of each game are in the [appendix](#appendix
 - [Public games](#public-games)
 - [During a game](#during-a-game)
 - [Game options](#game-options)
-- [Playing each game](#playing-each-game): [Tic-tac-toe](#tic-tac-toe), [Backgammon](#backgammon), [The Gang](#the-gang), [Rich man, poor man](#rich-man-poor-man), [Wazoo](#wazoo), [Final Card](#final-card), [Yaniv](#yaniv), [Hearts](#hearts), [Spades](#spades), [Dominoes](#dominoes)
+- [Playing each game](#playing-each-game): [Tic-tac-toe](#tic-tac-toe), [Backgammon](#backgammon), [Poker Heist](#poker-heist), [Rich man, poor man](#rich-man-poor-man), [Wazoo](#wazoo), [Final Card](#final-card), [Yaniv](#yaniv), [Hearts](#hearts), [Spades](#spades), [Dominoes](#dominoes)
 - [Installing the app](#installing-the-app)
 - [Languages](#languages)
 - [Help and feedback](#help-and-feedback)
@@ -52,7 +52,7 @@ Tap your icon and name in the top bar.
   | Game | Players |
   | --- | --- |
   | Tic-tac-toe, Backgammon | 2 |
-  | The Gang | 3–8 |
+  | Poker Heist | 3–8 |
   | Rich man, poor man | 4–12 |
   | Wazoo | 1–8 |
   | Final Card | 2–10 |
@@ -119,7 +119,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 - On a portrait screen (higher than it is wide), the board is as wide as the screen, with the buttons under it; scroll down for the match and the game's options.
 - On a landscape screen (wider than it is high, such as a computer or a phone held sideways), the board fills the screen's height, with the scores and the buttons beside it. Players' names are left out when they do not fit; their icons and scores stay.
 
-### The Gang
+### Poker Heist
 
 - Your pocket cards are on your screen only, under the shared cards.
 - To take a chip, tap it in the middle or at another player; tap your own chip to put it back. You hear an alert when someone takes your chip.
@@ -209,7 +209,7 @@ The rules of each game, with its options, for reference.
 - **Moving:** a checker on the bar must enter first. A point with two or more opposing checkers is blocked; a single opposing checker is hit. Bearing off starts once all your checkers are home. Use as many dice as you can (all four with doubles); if only one die can be used, use the larger one when possible.
 - **Doubling cube** (option, on by default; not in 1-point matches): before rolling, a player may double; the other takes (and owns the cube) or drops (and loses the game at the cube's value). Crawford rule: no doubling in the game after a player first comes within one point of winning the match.
 
-### The Gang rules
+### Poker Heist rules
 
 3–8 players. The cooperative poker game by John Cooper and Kory Heath. Each heist:
 
@@ -219,7 +219,7 @@ The rules of each game, with its options, for reference.
 - 3 vaults win the game; 3 alarms lose it.
 - **My hand's ranking** (option, Hidden by default): shows each player the ranking their own cards make so far.
 - **Jokers** (option, off by default): the deck has two jokers. A player dealt a joker swaps it for one of two new cards. A joker among the shared cards is replaced by two cards, and each hand may use one of them.
-- **Advanced mode** (option **Mode**; Basic by default) adds challenge and specialist cards. The first heist gets 0–3 challenge cards (option, default 1); after a successful heist, one challenge card is added, and after a failed one, a specialist card. They stay for the rest of the game. Players can turn cards off, and the option **Cards that cancel each other** can keep such pairs apart. The "Decide which of you…" specialist cards are optional, each at most once per heist; the others apply by themselves. The full card texts are in [`the-gang/`](the-gang/).
+- **Advanced mode** (option **Mode**; Basic by default) adds challenge and specialist cards. The first heist gets 0–3 challenge cards (option, default 1); after a successful heist, one challenge card is added, and after a failed one, a specialist card. They stay for the rest of the game. Players can turn cards off, and the option **Cards that cancel each other** can keep such pairs apart. The "Decide which of you…" specialist cards are optional, each at most once per heist; the others apply by themselves. The full card texts are in [`poker-heist/`](poker-heist/).
 
 ### Rich man, poor man rules
 

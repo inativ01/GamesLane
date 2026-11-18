@@ -1,4 +1,4 @@
-namespace GamesLane.Server.Games.TheGang;
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
 /// Playing with jokers (the deck has two). A joker dealt to the table is replaced by two cards stacked in one column
@@ -9,7 +9,7 @@ namespace GamesLane.Server.Games.TheGang;
 /// (Motion Detector, Laser Tripwires, Hacker), when the stage cannot end until the player has chosen. Everyone sees that
 /// a player swapped a joker, but not which cards.
 /// </summary>
-public partial class TheGangGame
+public partial class PokerHeistGame
 {
     /// <summary>
     /// <see cref="PreparingCard"/> while players swap the jokers they were dealt, before the betting.
@@ -57,11 +57,11 @@ public partial class TheGangGame
         _jokerOffers[player] = null;
         OfferJoker(player);
 
-        if (Phase == TheGangPhase.Preparing && PreparingCard == JokersStep && _jokerOffers.All(o => o is null))
+        if (Phase == PokerHeistPhase.Preparing && PreparingCard == JokersStep && _jokerOffers.All(o => o is null))
         {
             FinishPreparing();
         }
-        else if (Phase == TheGangPhase.Betting && CanEndStage)
+        else if (Phase == PokerHeistPhase.Betting && CanEndStage)
         {
             EndStage();
         }

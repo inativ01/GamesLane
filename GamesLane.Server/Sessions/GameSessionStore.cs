@@ -226,7 +226,7 @@ public class GameSessionStore(
     public static GameSession New(GameType type, string id) => type switch
     {
         GameType.TicTacToe => new TicTacToeSession(id),
-        GameType.TheGang => new TheGangSession(id),
+        GameType.PokerHeist => new PokerHeistSession(id),
         GameType.Backgammon => new BackgammonSession(id),
         GameType.RichManPoorMan => new RichManPoorManSession(id),
         GameType.Wazoo => new WazooSession(id),
@@ -244,7 +244,7 @@ public class GameSessionStore(
     public static string PageFor(GameType type) => type switch
     {
         GameType.TicTacToe => "/tictactoe.html",
-        GameType.TheGang => "/the-gang.html",
+        GameType.PokerHeist => "/poker-heist.html",
         GameType.Backgammon => "/backgammon.html",
         GameType.RichManPoorMan => "/rich-man-poor-man.html",
         GameType.Wazoo => "/wazoo.html",

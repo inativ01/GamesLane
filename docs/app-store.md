@@ -14,12 +14,10 @@ Everything App Store Connect asks for when submitting the GamesLane iPhone app (
 
 ## Before submitting
 
-Open decisions (most likely reasons for a rejection):
+Decided:
 
-1. **Chat with strangers (guideline 1.2, user-generated content).** Public games seat people who do not know each other, and the game chat is open to them. Apple asks an app with such content for a way to filter objectionable messages, to report them, to block a user, and published contact details. GamesLane has only the per-user **Chat** switch (it hides the chat) and the **Send feedback** form. Choose one before submitting:
-   - turn the chat off in public games (private games are played with people one invited), or
-   - add **Report** and **Block** to the chat, and a word filter.
-2. **The Gang's name (guideline 5.2, intellectual property).** "The Gang" is the name of a published card game. Make sure using its name and card texts is allowed, or rename it in the app, as was done for Final Card and Wazoo.
+- **Chat (guideline 1.2, user-generated content):** public games, which seat people who do not know each other, have no chat. Only private games, played with people one invited, have it.
+- **Game names (guideline 5.2, intellectual property):** every game has its own name in GamesLane. Poker Heist's challenge and specialist cards follow a published game's cards; make sure their texts and pictures may be used.
 
 Checklist:
 
@@ -40,11 +38,11 @@ Checklist:
 | Primary language | English (U.S.) |
 | Category | Games; subcategories **Board** and **Card** |
 | Secondary category | Entertainment (optional) |
-| Content rights | Does not contain, show or access third-party content (the sounds are Kenney's Casino Audio, CC0; see open decision 2 for The Gang) |
+| Content rights | Does not contain, show or access third-party content (the sounds are Kenney's Casino Audio, CC0) |
 | Privacy policy URL | https://gameslane.onrender.com/privacy.html |
 | Copyright | `2026 Isaac Nativ` |
 
-**Languages:** the app shows all seven of the site's languages, but the App Store lists only the ones the app bundle declares, which is English today. To list them all, add `CFBundleLocalizations` (`en`, `he`, `es`, `fr`, `pt-BR`, `zh-Hans`, `zh-Hant`) to `Info.plist`. The listing itself can also be translated in App Store Connect (each language's name, subtitle, description and keywords).
+**Languages:** the app declares the site's seven languages (`CFBundleLocalizations` in `Info.plist`: `en`, `he`, `es`, `fr`, `pt-BR`, `zh-Hans`, `zh-Hant`), so the App Store can list them. After uploading a build, check that the version page shows them. The listing itself can also be translated in App Store Connect (each language's name, subtitle, description and keywords).
 
 ## Version page: the listing
 
@@ -66,7 +64,7 @@ Checklist:
 > • Yaniv: call Yaniv with the lowest hand, but beware of Assaf
 > • Final Card: the fast shedding game, in US or Israeli style
 > • Rich man, poor man: the shedding game for 4 to 12 players
-> • The Gang: the cooperative poker game
+> • Poker Heist: the cooperative poker game
 > • Wazoo: the classic five-dice game, alone or with up to 8 players
 > • Tic-tac-toe
 >
@@ -147,13 +145,13 @@ Answer the questionnaire as follows; App Store Connect then computes the rating.
 | Simulated gambling | None (card and dice games played for points; no betting and no money) |
 | Contests | None |
 | Unrestricted web access | No (other sites open in Safari) |
-| User-generated content | Yes: display names, profile pictures and chat |
-| Messaging and chat | Yes: chat between the players of a game, including strangers in public games (unless the chat is turned off there, see [Before submitting](#before-submitting)) |
+| User-generated content | Yes: display names and profile pictures, seen by the other players, and chat in private games |
+| Messaging and chat | Yes: chat between the players of a private game, who invited each other by link or code. Public games have no chat |
 | Advertising | No |
 | Parental controls, age assurance | No |
 | Medical or wellness topics | No |
 
-With open chat between strangers, expect 13+; without chat in public games, likely lower.
+The questionnaire decides the rating; with chat limited to invited players, expect a low one (likely 9+).
 
 ## Pricing and availability
 
@@ -167,7 +165,7 @@ With open chat between strangers, expect 13+; without chat in public games, like
 | --- | --- |
 | Sign-in required | No. Everyone plays as a guest; no account is needed |
 | Demo account | None needed |
-| Contact | First name, last name, phone and email of the person Apple may call during the review |
+| Contact | Isaac Nativ, gameslane@yahoo.com, and a phone number (App Store Connect requires all four fields: first name, last name, phone and email; Apple uses them only during the review) |
 | Notes | The text under [Review notes](#review-notes) |
 | Attachment (optional) | A short screen recording of a game with turn notifications helps |
 
@@ -198,7 +196,10 @@ ACCOUNT DELETION
 Profile (your name at the top right) > Delete account deletes the account and its data at once; for Sign in with Apple, the app also revokes its Apple token.
 
 CONTENT
-Players choose a display name and can chat during a game. Private games are played only with people one invites by link or code. Comments and reports can be sent from the Send feedback link at the bottom of the main screen and the menu of every game.
+Players choose a display name. Chat is available only in private games, which are played with people one invites by link or code; public games, which match people who do not know each other, have no chat. Each player can also hide the chat in their profile. Comments and reports can be sent from the Send feedback link at the bottom of the main screen and the menu of every game.
 
 The server is always on; games are played live over the internet.
+
+CONTACT
+gameslane@yahoo.com
 ```

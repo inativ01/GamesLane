@@ -190,7 +190,7 @@ TRANSLATIONS["zh-CN"] = {
     "You are no longer in this game.": "您已不在这局游戏中。",
     "Drag a game by its ⋮⋮ handle to change the order.": "按住游戏的 ⋮⋮ 手柄拖动即可更改顺序。",
     "Drag to move": "拖动以移动",
-    "The Gang": "The Gang",
+    "Poker Heist": "Poker Heist",
     "A team poker heist. Rank your hands in secret.": "团队扑克大劫案。秘密地为你们的手牌排名。",
     "3–8 players": "3–8 名玩家",
     "2 players": "2 名玩家",
@@ -803,8 +803,8 @@ TRANSLATIONS["zh-CN"] = {
     "{name} wins round {n}": "{name} 赢得第 {n} 轮",
     "Cell {n}": "格子 {n}",
 
-    // The Gang
-    "The Gang - GamesLane": "The Gang - GamesLane",
+    // Poker Heist
+    "Poker Heist - GamesLane": "Poker Heist - GamesLane",
     "Next heist": "下一次劫案",
     "Reveal next hand": "亮出下一手牌",
     "Heist": "劫案",
@@ -834,7 +834,7 @@ TRANSLATIONS["zh-CN"] = {
     "Agree on the guess before the strongest hand is revealed": "请在最强手牌亮出前商定猜测",
     "Reveal the hands, lowest red chip first": "请亮出手牌，从最小的红色筹码开始",
     "Revealing, lowest red chip first…": "正在亮牌，从最小的红色筹码开始…",
-    "Three vaults: the gang wins!": "三个金库：团伙获胜！",
+    "Three vaults: the crew wins!": "三个金库：团队获胜！",
     "Three alarms: game over": "三次警报：游戏结束",
     "The vault is open!": "金库打开了！",
     "The alarm went off!": "警报响了！",
@@ -911,7 +911,7 @@ TRANSLATIONS["zh-CN"] = {
     "Swapped {n} jokers": "已替换 {n} 张王牌",
     "Weaker than the hand before": "比上一手牌弱",
 
-    // The Gang: hand rankings, cards and options (from the server)
+    // Poker Heist: hand rankings, cards and options (from the server)
     "High card": "高牌",
     "Pair": "一对",
     "Two pair": "两对",
@@ -990,7 +990,7 @@ TRANSLATIONS["zh-CN"] = {
     "Avoid": "避免",
     "Never draw them for the same heist.": "同一次劫案中绝不同时抽到它们。",
 
-    // The Gang: messages from the server
+    // Poker Heist: messages from the server
     "Chips are numbered 1 to {n}.": "筹码编号为 1 到 {n}。",
     "You already have that chip.": "您已经有这个筹码了。",
     "That chip is locked: whoever took it first keeps it.": "这个筹码已锁定：先拿到的人保留。",

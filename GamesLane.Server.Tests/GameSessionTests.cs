@@ -1,7 +1,7 @@
 using GamesLane.Server.Games.Backgammon;
 using GamesLane.Server.Games.Dominoes;
 using GamesLane.Server.Games.RichManPoorMan;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 using GamesLane.Server.Games.TicTacToe;
 using GamesLane.Server.Games.FinalCard;
 using GamesLane.Server.Games.Hearts;
@@ -70,7 +70,7 @@ public class GameSessionTests
     [Fact]
     public void Opening_a_private_lobby_for_the_first_time_takes_the_next_empty_seat()
     {
-        var session = new TheGangSession("ABC123");
+        var session = new PokerHeistSession("ABC123");
         session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out _);
 
         session.Enter(Bob, BobProfile, "conn-b");
@@ -83,7 +83,7 @@ public class GameSessionTests
     [Fact]
     public void A_user_who_left_their_seat_keeps_watching_when_they_open_the_lobby_again()
     {
-        var session = new TheGangSession("ABC123");
+        var session = new PokerHeistSession("ABC123");
         session.Enter(Alice, AliceProfile, "conn-a");
         Assert.True(session.IsSeated(Alice));
 
@@ -100,11 +100,11 @@ public class GameSessionTests
         full.Enter(Carol, CarolProfile, "conn-c");
         Assert.False(full.IsSeated(Carol));
 
-        var started = StartedTheGang();
+        var started = StartedPokerHeist();
         started.Enter("user:dan", new PlayerProfile("Dan", "🐻"), "conn-d");
         Assert.False(started.IsSeated("user:dan"));
 
-        var lobby = Public(new TheGangSession("ABC123"));
+        var lobby = Public(new PokerHeistSession("ABC123"));
         lobby.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out _);
         lobby.Enter(Carol, CarolProfile, "conn-c");
         Assert.False(lobby.IsSeated(Carol));
@@ -167,7 +167,7 @@ public class GameSessionTests
     [Fact]
     public void In_the_lobby_the_seats_after_a_freed_seat_move_up()
     {
-        var session = TheGang();
+        var session = PokerHeist();
         session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out _);
         session.TryTakeNextSeat(Bob, BobProfile, "conn-b", out _);
         session.TryTakeNextSeat(Carol, CarolProfile, "conn-c", out _);
@@ -259,7 +259,7 @@ public class GameSessionTests
     [Fact]
     public void In_a_public_game_only_the_creator_chooses_the_options_and_starts_it()
     {
-        var session = Public(new TheGangSession("ABC123"));
+        var session = Public(new PokerHeistSession("ABC123"));
         session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out _);
         session.TryTakeNextSeat(Bob, BobProfile, "conn-b", out _);
         session.TryTakeNextSeat(Carol, CarolProfile, "conn-c", out _);
@@ -345,7 +345,7 @@ public class GameSessionTests
     [Fact]
     public void When_the_creator_leaves_a_public_lobby_the_next_seated_player_becomes_the_creator()
     {
-        var session = Public(new TheGangSession("ABC123"));
+        var session = Public(new PokerHeistSession("ABC123"));
         session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out _);
         session.TryTakeNextSeat(Bob, BobProfile, "conn-b", out _);
         session.LeaveAllSeats(Alice);
@@ -449,8 +449,8 @@ public class GameSessionTests
         Assert.False(session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out error));
         Assert.Equal("Only a user opening the game without a seat can take a disconnected player's seat.", error);
 
-        var gang = StartedTheGang();
-        Assert.False(gang.TryTakeSeat("user:dan", new PlayerProfile("Dan", "🐻"), "conn-d", 3, out error));
+        var heist = StartedPokerHeist();
+        Assert.False(heist.TryTakeSeat("user:dan", new PlayerProfile("Dan", "🐻"), "conn-d", 3, out error));
         Assert.Equal("The game has already started. You can watch it.", error);
     }
 
@@ -492,7 +492,7 @@ public class GameSessionTests
     [Fact]
     public void Only_disconnected_seats_are_offered_and_the_list_follows_players_coming_back()
     {
-        var session = StartedTheGang();
+        var session = StartedPokerHeist();
         session.Disconnect("conn-b", Now);
         session.Disconnect("conn-c", Now);
         session.Enter("user:dan", new PlayerProfile("Dan", "🐻"), "conn-d");
@@ -556,7 +556,7 @@ public class GameSessionTests
     [Fact]
     public void A_user_holding_several_awaited_seats_is_awaited_once()
     {
-        var session = TheGang();
+        var session = PokerHeist();
         session.TryTakeSeat(Alice, AliceProfile, "conn-a", 0, out _);
         session.TryTakeSeat(Alice, AliceProfile, "conn-a", 1, out _);
         session.TryTakeSeat(Bob, BobProfile, "conn-b", 2, out _);
@@ -676,7 +676,7 @@ public class GameSessionTests
     [Fact]
     public void A_game_with_an_empty_seat_can_be_ended_and_replaced_with_fewer_players()
     {
-        var session = TheGang();
+        var session = PokerHeist();
         foreach (var (user, profile, conn) in new[] { (Alice, AliceProfile, "conn-a"), (Bob, BobProfile, "conn-b"),
                      (Carol, CarolProfile, "conn-c"), ("user:dan", new PlayerProfile("Dan", "🐻"), "conn-d") })
         {
@@ -688,7 +688,7 @@ public class GameSessionTests
         session.TryEndGame(Alice, out _);
 
         Assert.True(session.TryNewGame(Carol, 1, out var error), error);
-        Assert.Equal([0, 1, 2], Gang(session).PlayingSeats);
+        Assert.Equal([0, 1, 2], HeistState(session).PlayingSeats);
     }
 
     [Fact]
@@ -957,9 +957,9 @@ public class GameSessionTests
     [Fact]
     public void Every_game_plays_on_the_same_after_being_saved_and_loaded()
     {
-        var gang = StartedTheGang();
-        gang.TryTakeChip(Alice, 0, 2, out _);
-        AssertSameAfterReload(gang, () => new TheGangSession("ABC123"),
+        var heist = StartedPokerHeist();
+        heist.TryTakeChip(Alice, 0, 2, out _);
+        AssertSameAfterReload(heist, () => new PokerHeistSession("ABC123"),
             s => s.TryTakeChip(Bob, 1, 3, out var e) ? null : e);
 
         var backgammon = Started(new BackgammonSession("ABC123", Dice(6, 1, 6, 1)));
@@ -1211,15 +1211,15 @@ public class GameSessionTests
         Assert.Equal(1, session.GetState().Round);
     }
 
-    // The Gang
+    // Poker Heist
 
     // Seat 0: high card king; seat 1: pair of nines; seat 2: three kings.
-    private static TheGangSession TheGang() =>
+    private static PokerHeistSession PokerHeist() =>
         new("ABC123", () => "3D 4H 9C 5S KD KH 2C 7D 9H JS KC".Split(' ').Select(Card.Parse).ToArray());
 
-    private static TheGangSession StartedTheGang()
+    private static PokerHeistSession StartedPokerHeist()
     {
-        var session = TheGang();
+        var session = PokerHeist();
         session.Enter(Alice, AliceProfile, "conn-a");
         session.Enter(Bob, BobProfile, "conn-b");
         session.Enter(Carol, CarolProfile, "conn-c");
@@ -1231,12 +1231,12 @@ public class GameSessionTests
         return session;
     }
 
-    private static TheGangState Gang(TheGangSession session) => Assert.IsType<TheGangState>(session.GetPublicState().Game);
+    private static PokerHeistState HeistState(PokerHeistSession session) => Assert.IsType<PokerHeistState>(session.GetPublicState().Game);
 
     [Fact]
-    public void The_gang_needs_at_least_3_of_its_6_seats()
+    public void Poker_heist_needs_at_least_3_of_its_6_seats()
     {
-        var session = TheGang();
+        var session = PokerHeist();
         session.TryTakeSeat(Alice, AliceProfile, "conn-a", 0, out _);
         session.TryTakeSeat(Bob, BobProfile, "conn-b", 4, out _);
 
@@ -1249,54 +1249,54 @@ public class GameSessionTests
     [Fact]
     public void Each_player_sees_only_their_own_cards()
     {
-        var session = StartedTheGang();
+        var session = StartedPokerHeist();
 
-        var updates = session.GetPrivateUpdates().ToDictionary(u => u.ConnectionId, u => Assert.IsType<TheGangPrivateState>(u.State));
+        var updates = session.GetPrivateUpdates().ToDictionary(u => u.ConnectionId, u => Assert.IsType<PokerHeistPrivateState>(u.State));
         Assert.Equal(["conn-a", "conn-b", "conn-c"], updates.Keys.Order());
         Assert.Equal(["3♦", "4♥"], updates["conn-a"].Hands.Single().Cards);
         Assert.Equal(["K♦", "K♥"], updates["conn-c"].Hands.Single().Cards);
         Assert.Null(session.GetPrivateState("connection:tv"));
-        Assert.Empty(Gang(session).Revealed);
+        Assert.Empty(HeistState(session).Revealed);
     }
 
     [Fact]
     public void With_the_option_players_see_their_own_hand_ranking()
     {
-        var plain = StartedTheGang();
-        Assert.Null(Assert.IsType<TheGangPrivateState>(plain.GetPrivateState(Carol)).Hands.Single().Ranking);
+        var plain = StartedPokerHeist();
+        Assert.Null(Assert.IsType<PokerHeistPrivateState>(plain.GetPrivateState(Carol)).Hands.Single().Ranking);
 
-        var session = TheGang();
+        var session = PokerHeist();
         session.TryTakeSeat(Alice, AliceProfile, "conn-a", 0, out _);
         session.TryTakeSeat(Bob, BobProfile, "conn-b", 1, out _);
         session.TryTakeSeat(Carol, CarolProfile, "conn-c", 2, out _);
         Assert.True(session.TrySetOptions(Alice, new Dictionary<string, string>
         {
-            [TheGangOptions.ShowHandRanking] = TheGangOptions.Yes,
+            [PokerHeistOptions.ShowHandRanking] = PokerHeistOptions.Yes,
         }, out var error), error);
         session.TryNewGame(Alice, 0, out _);
 
-        Assert.Equal("Pair", Assert.IsType<TheGangPrivateState>(session.GetPrivateState(Carol)).Hands.Single().Ranking);
-        Assert.Equal("High card", Assert.IsType<TheGangPrivateState>(session.GetPrivateState(Alice)).Hands.Single().Ranking);
+        Assert.Equal("Pair", Assert.IsType<PokerHeistPrivateState>(session.GetPrivateState(Carol)).Hands.Single().Ranking);
+        Assert.Equal("High card", Assert.IsType<PokerHeistPrivateState>(session.GetPrivateState(Alice)).Hands.Single().Ranking);
     }
 
     [Fact]
     public void A_user_with_two_seats_sees_both_hands()
     {
-        var session = TheGang();
+        var session = PokerHeist();
         session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out _);
         session.TryTakeNextSeat(Bob, BobProfile, "conn-b", out _);
         session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out _);
         session.TryNewGame(Alice, 0, out _);
 
-        var hands = Assert.IsType<TheGangPrivateState>(session.GetPrivateState(Alice)).Hands;
+        var hands = Assert.IsType<PokerHeistPrivateState>(session.GetPrivateState(Alice)).Hands;
         Assert.Equal([0, 2], hands.Select(h => h.Seat));
-        Assert.Equal([0, 1, 2], Gang(session).PlayingSeats);
+        Assert.Equal([0, 1, 2], HeistState(session).PlayingSeats);
     }
 
     [Fact]
     public void No_private_information_is_sent_in_the_lobby()
     {
-        var session = StartedTheGang();
+        var session = StartedPokerHeist();
         session.TryLeaveSeat(Bob, 1, out _);
         Assert.NotNull(session.GetPrivateState(Alice));
         session.TryEndGame(Alice, out _);
@@ -1308,19 +1308,19 @@ public class GameSessionTests
     [Fact]
     public void Players_only_take_chips_for_their_own_seats()
     {
-        var session = StartedTheGang();
+        var session = StartedPokerHeist();
 
         Assert.False(session.TryTakeChip(Bob, 0, 1, out var error));
         Assert.Equal("Only players in this game can make moves.", error);
         Assert.True(session.TryTakeChip(Alice, 0, 1, out error), error);
-        Assert.Equal(1, Gang(session).Chips[0][0]);
+        Assert.Equal(1, HeistState(session).Chips[0][0]);
     }
 
     [Fact]
     public void A_full_heist_reveals_hands_to_everyone_one_at_a_time()
     {
-        var session = StartedTheGang();
-        for (var stage = 0; stage < TheGangGame.StageCount; stage++)
+        var session = StartedPokerHeist();
+        for (var stage = 0; stage < PokerHeistGame.StageCount; stage++)
         {
             session.TryTakeChip(Alice, 0, 1, out _);
             session.TryTakeChip(Bob, 1, 2, out _);
@@ -1330,28 +1330,28 @@ public class GameSessionTests
             session.TrySetReady(Carol, 2, true, out _);
         }
 
-        Assert.Equal(TheGangPhase.Reveal, Gang(session).Phase);
+        Assert.Equal(PokerHeistPhase.Reveal, HeistState(session).Phase);
         Assert.False(session.TryRevealNext("connection:tv", 0, out _));
         Assert.True(session.TryRevealNext(Bob, 0, out var error), error);
 
-        var revealed = Assert.Single(Gang(session).Revealed);
+        var revealed = Assert.Single(HeistState(session).Revealed);
         Assert.Equal(0, revealed.Seat);
         Assert.Equal("High card: K, J, 9, 7, 4", revealed.Name);
 
         session.TryRevealNext(Alice, 1, out _);
         session.TryRevealNext(Alice, 2, out _);
-        var state = Gang(session);
-        Assert.Equal(TheGangPhase.HeistOver, state.Phase);
+        var state = HeistState(session);
+        Assert.Equal(PokerHeistPhase.HeistOver, state.Phase);
         Assert.Equal(1, state.Vaults);
         Assert.Equal(["Pair: 9, 9, K, J, 7", "Three of a kind: K, K, K, J, 9"], state.Revealed.Skip(1).Select(h => h.Name));
         Assert.True(session.TryNextHeist(Carol, 1, out error), error);
-        Assert.Equal(2, Gang(session).Heist);
+        Assert.Equal(2, HeistState(session).Heist);
     }
 
     [Fact]
     public void Leaving_during_a_heist_the_game_waits_once_the_others_are_ready_and_a_new_player_continues_that_hand()
     {
-        var session = StartedTheGang();
+        var session = StartedPokerHeist();
         session.TryTakeChip(Alice, 0, 2, out _);
         session.TryLeaveSeat(Alice, 0, out _);
 
@@ -1365,8 +1365,8 @@ public class GameSessionTests
         Assert.True(session.TryTakeSeat("user:dan", new PlayerProfile("Dan", "🐢"), "conn-d", 0, out var error), error);
         Assert.Empty(session.GetPublicState().WaitingSeats);
 
-        Assert.Equal(2, Gang(session).Chips[0][0]);
-        var dan = Assert.IsType<TheGangPrivateState>(session.GetPrivateState("user:dan")).Hands.Single();
+        Assert.Equal(2, HeistState(session).Chips[0][0]);
+        var dan = Assert.IsType<PokerHeistPrivateState>(session.GetPrivateState("user:dan")).Hands.Single();
         Assert.Equal(["3♦", "4♥"], dan.Cards);
         Assert.Null(session.GetPrivateState(Alice));
     }

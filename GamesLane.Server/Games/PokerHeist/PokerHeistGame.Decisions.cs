@@ -1,4 +1,4 @@
-namespace GamesLane.Server.Games.TheGang;
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
 /// The cards where the group decides together. Any voter proposes (a player, a value, or both); everyone sees it; once
@@ -8,26 +8,26 @@ namespace GamesLane.Server.Games.TheGang;
 /// scans (Retina Scan, Fingerprint Scan) are decided by everyone except the strongest hand's player, just before that
 /// hand is revealed; they are skipped if the hands are already out of order, since the heist fails anyway.
 /// </summary>
-public partial class TheGangGame
+public partial class PokerHeistGame
 {
     private Dictionary<string, Decision> _decisions = [];
-    private List<TheGangResult> _results = [];
+    private List<PokerHeistResult> _results = [];
     private (int From, Card Card, int To)? _shown;
     private int? _muscle;
     private bool _scanFailed;
 
     /// <inheritdoc />
-    public IReadOnlyList<TheGangDecisionInfo> Decisions => [.. _decisions.Values.Select(d => new TheGangDecisionInfo(
+    public IReadOnlyList<PokerHeistDecisionInfo> Decisions => [.. _decisions.Values.Select(d => new PokerHeistDecisionInfo(
         d.Card.Key, d.Card.Choice, d.Player, d.Value, Voters(d), [.. d.Agreed.Order()], IsOpen(d), d.Done, IsSkipped(d)))];
 
     /// <inheritdoc />
-    public IReadOnlyList<TheGangResult> Results => _results;
+    public IReadOnlyList<PokerHeistResult> Results => _results;
 
     /// <inheritdoc />
     public int? PendingPlayer { get; private set; }
 
     /// <inheritdoc />
-    public TheGangStep PendingStep { get; private set; }
+    public PokerHeistStep PendingStep { get; private set; }
 
     /// <inheritdoc />
     public (int From, int To)? ShownBetween => _shown is { } s ? (s.From, s.To) : null;
@@ -36,7 +36,7 @@ public partial class TheGangGame
     public Card? ShownCardFor(int player) => _shown is { } s && s.To == player ? s.Card : null;
 
     /// <inheritdoc />
-    public bool? Succeeded => Phase == TheGangPhase.HeistOver ? HeistSucceeds : null;
+    public bool? Succeeded => Phase == PokerHeistPhase.HeistOver ? HeistSucceeds : null;
 
     /// <inheritdoc />
     public bool TryPropose(int player, string card, int? target, string? value, out string? error)
@@ -48,13 +48,13 @@ public partial class TheGangGame
 
         // A proposal may be partial (e.g. Mastermind's player before its value); agreeing needs a complete one.
         var choice = decision.Card.Choice;
-        var needsPlayer = choice is TheGangChoice.Player or TheGangChoice.PlayerAndRank;
-        var needsValue = choice is not TheGangChoice.Player;
-        var valueError = choice == TheGangChoice.Ranking ? "Choose a hand ranking." : "Choose a card value.";
+        var needsPlayer = choice is PokerHeistChoice.Player or PokerHeistChoice.PlayerAndRank;
+        var needsValue = choice is not PokerHeistChoice.Player;
+        var valueError = choice == PokerHeistChoice.Ranking ? "Choose a hand ranking." : "Choose a card value.";
         error = target is not null && !needsPlayer ? "This card does not choose a player."
             : value is not null && !needsValue ? "This card does not choose a value."
             : target is { } t && (t < 0 || t >= PlayerCount) ? "Choose a player."
-            : value is not null && !TheGangValues.IsValid(choice, value) ? valueError
+            : value is not null && !PokerHeistValues.IsValid(choice, value) ? valueError
             : target is null && value is null ? (needsPlayer ? "Choose a player." : valueError)
             : null;
         if (error is not null)
@@ -101,7 +101,7 @@ public partial class TheGangGame
     /// <inheritdoc />
     public bool TryShowCard(int player, int cardIndex, int to, out string? error)
     {
-        if (!TryCheckStep(player, TheGangStep.ShowCard, cardIndex, out error))
+        if (!TryCheckStep(player, PokerHeistStep.ShowCard, cardIndex, out error))
         {
             return false;
         }
@@ -120,7 +120,7 @@ public partial class TheGangGame
     /// <inheritdoc />
     public bool TryDiscard(int player, int cardIndex, out string? error)
     {
-        if (!TryCheckStep(player, TheGangStep.Discard, cardIndex, out error))
+        if (!TryCheckStep(player, PokerHeistStep.Discard, cardIndex, out error))
         {
             return false;
         }
@@ -151,10 +151,10 @@ public partial class TheGangGame
     /// Whether a scan is not needed: the hands are revealed and already out of order, so the heist fails anyway.
     /// </summary>
     private bool IsSkipped(Decision decision) =>
-        IsScan(decision) && !decision.Done && Phase is (TheGangPhase.Reveal or TheGangPhase.HeistOver) && !AllHandsInOrder;
+        IsScan(decision) && !decision.Done && Phase is (PokerHeistPhase.Reveal or PokerHeistPhase.HeistOver) && !AllHandsInOrder;
 
     /// <inheritdoc />
-    public TheGangWeakness? Weakness(int index)
+    public PokerHeistWeakness? Weakness(int index)
     {
         if (index <= 0 || index >= Revealed || !IsWeaker(_revealOrder[index], _revealOrder[index - 1]))
         {
@@ -165,7 +165,7 @@ public partial class TheGangGame
         var rankings = HandRankings.All.ToList();
         if (rankings.IndexOf(HandRankings.Of(hand)) < rankings.IndexOf(HandRankings.Of(before)))
         {
-            return new TheGangWeakness(true, []);
+            return new PokerHeistWeakness(true, []);
         }
 
         var (mine, theirs) = (hand.FiveRanks, before.FiveRanks);
@@ -173,7 +173,7 @@ public partial class TheGangGame
         if (first < 0 || mine[first] > theirs[first])
         {
             // Only Muscle makes an equal or stronger hand of the same ranking weaker.
-            return new TheGangWeakness(true, []);
+            return new PokerHeistWeakness(true, []);
         }
 
         var last = first;
@@ -182,7 +182,7 @@ public partial class TheGangGame
             last++;
         }
 
-        return new TheGangWeakness(false, [.. Enumerable.Range(first, last - first + 1)]);
+        return new PokerHeistWeakness(false, [.. Enumerable.Range(first, last - first + 1)]);
     }
 
     /// <summary>
@@ -205,16 +205,16 @@ public partial class TheGangGame
     /// </summary>
     private void ResetDecisions()
     {
-        _decisions = _cards.Where(c => c.Choice != TheGangChoice.None).ToDictionary(c => c.Key, c => new Decision(c));
+        _decisions = _cards.Where(c => c.Choice != PokerHeistChoice.None).ToDictionary(c => c.Key, c => new Decision(c));
         _results = [];
         _shown = null;
         _muscle = null;
         _scanFailed = false;
         PendingPlayer = null;
-        PendingStep = TheGangStep.None;
+        PendingStep = PokerHeistStep.None;
     }
 
-    private static bool IsScan(Decision decision) => decision.Card.Kind == TheGangCardKind.Challenge;
+    private static bool IsScan(Decision decision) => decision.Card.Kind == PokerHeistCardKind.Challenge;
 
     /// <summary>
     /// The players who decide: everyone, or for a scan, everyone except the players of the user who holds the strongest
@@ -238,8 +238,8 @@ public partial class TheGangGame
     /// step to take), scans just before the strongest hand is revealed.
     /// </summary>
     private bool IsOpen(Decision decision) => !decision.Done && (IsScan(decision)
-        ? Phase == TheGangPhase.Reveal && Revealed == PlayerCount - 1 && AllHandsInOrder
-        : Phase == TheGangPhase.Betting && PendingStep == TheGangStep.None);
+        ? Phase == PokerHeistPhase.Reveal && Revealed == PlayerCount - 1 && AllHandsInOrder
+        : Phase == PokerHeistPhase.Betting && PendingStep == PokerHeistStep.None);
 
     private bool TryGetOpenDecision(int player, string card, out Decision decision, out string? error)
     {
@@ -262,14 +262,14 @@ public partial class TheGangGame
         var player = decision.Player ?? (_revealOrder.Length > 0 ? _revealOrder[^1] : -1);
         switch (decision.Card.Key)
         {
-            case TheGangCards.Informant:
-                (PendingPlayer, PendingStep) = (player, TheGangStep.ShowCard);
+            case PokerHeistCards.Informant:
+                (PendingPlayer, PendingStep) = (player, PokerHeistStep.ShowCard);
                 break;
-            case TheGangCards.GetawayDriver:
+            case PokerHeistCards.GetawayDriver:
                 _results.Add(new(player, decision.Card.Key, HandRankings.OfCards(CountingCards(player), VisibleCommunity)));
                 break;
-            case TheGangCards.Mastermind:
-                var count = _holeCards[player].Count(c => c.Rank == TheGangValues.RankOf(decision.Value));
+            case PokerHeistCards.Mastermind:
+                var count = _holeCards[player].Count(c => c.Rank == PokerHeistValues.RankOf(decision.Value));
                 _results.Add(new(player, decision.Card.Key, count switch
                 {
                     0 => $"no {decision.Value}s",
@@ -277,21 +277,21 @@ public partial class TheGangGame
                     _ => $"{count} {decision.Value}s",
                 }));
                 break;
-            case TheGangCards.Hacker:
+            case PokerHeistCards.Hacker:
                 _holeCards[player] = [.. _holeCards[player], DrawCard()];
-                (PendingPlayer, PendingStep) = (player, TheGangStep.Discard);
+                (PendingPlayer, PendingStep) = (player, PokerHeistStep.Discard);
                 OfferJoker(player);
                 break;
-            case TheGangCards.Jack:
+            case PokerHeistCards.Jack:
                 _holeCards[player] = [.. _holeCards[player], Card.SuitlessJack];
-                (PendingPlayer, PendingStep) = (player, TheGangStep.Discard);
+                (PendingPlayer, PendingStep) = (player, PokerHeistStep.Discard);
                 break;
-            case TheGangCards.Muscle:
+            case PokerHeistCards.Muscle:
                 _muscle = player;
                 break;
-            case TheGangCards.RetinaScan or TheGangCards.FingerprintScan:
-                var right = decision.Card.Key == TheGangCards.RetinaScan
-                    ? _holeCards[player].Any(c => c.Rank == TheGangValues.RankOf(decision.Value))
+            case PokerHeistCards.RetinaScan or PokerHeistCards.FingerprintScan:
+                var right = decision.Card.Key == PokerHeistCards.RetinaScan
+                    ? _holeCards[player].Any(c => c.Rank == PokerHeistValues.RankOf(decision.Value))
                     : HandRankings.Of(Hand(player)) == decision.Value;
                 _scanFailed |= !right;
                 _results.Add(new(player, decision.Card.Key, $"guessed {decision.Value}: {(right ? "right" : "wrong")}", right));
@@ -299,7 +299,7 @@ public partial class TheGangGame
         }
     }
 
-    private bool TryCheckStep(int player, TheGangStep step, int cardIndex, out string? error)
+    private bool TryCheckStep(int player, PokerHeistStep step, int cardIndex, out string? error)
     {
         error = PendingPlayer != player || PendingStep != step ? "That is not possible now."
             : _jokerOffers[player] is not null ? "First swap your joker."
@@ -313,8 +313,8 @@ public partial class TheGangGame
     /// </summary>
     private void FinishStep()
     {
-        (PendingPlayer, PendingStep) = (null, TheGangStep.None);
-        if (Phase == TheGangPhase.Betting && CanEndStage)
+        (PendingPlayer, PendingStep) = (null, PokerHeistStep.None);
+        if (Phase == PokerHeistPhase.Betting && CanEndStage)
         {
             EndStage();
         }
@@ -323,9 +323,9 @@ public partial class TheGangGame
     /// <summary>
     /// A card's group decision while it is being made.
     /// </summary>
-    private sealed class Decision(TheGangCard card)
+    private sealed class Decision(PokerHeistCard card)
     {
-        public TheGangCard Card { get; } = card;
+        public PokerHeistCard Card { get; } = card;
 
         public int? Player { get; set; }
 

@@ -189,64 +189,64 @@ public interface IGameHub
     Task DeclineSeat(string sessionId, string playerId);
 
     /// <summary>
-    /// The Gang: <paramref name="seat"/> takes a chip of the current stage, from the middle or from another player.
+    /// Poker Heist: <paramref name="seat"/> takes a chip of the current stage, from the middle or from another player.
     /// </summary>
     Task TakeChip(string sessionId, int seat, int chip);
 
     /// <summary>
-    /// The Gang: <paramref name="seat"/> puts its chip of the current stage back in the middle.
+    /// Poker Heist: <paramref name="seat"/> puts its chip of the current stage back in the middle.
     /// </summary>
     Task ReturnChip(string sessionId, int seat);
 
     /// <summary>
-    /// The Gang: marks <paramref name="seat"/> ready (or not) to end the current stage, together with the caller's other
+    /// Poker Heist: marks <paramref name="seat"/> ready (or not) to end the current stage, together with the caller's other
     /// seats (each user is ready once).
     /// </summary>
     Task SetReady(string sessionId, int seat, bool ready);
 
     /// <summary>
-    /// The Gang, Coordinator: <paramref name="seat"/>, which the caller must hold, picks its card number
+    /// Poker Heist, Coordinator: <paramref name="seat"/>, which the caller must hold, picks its card number
     /// <paramref name="cardIndex"/> (from 0) to pass to the next player.
     /// </summary>
     Task PassCard(string sessionId, int seat, int cardIndex);
 
     /// <summary>
-    /// The Gang, Con Artist: <paramref name="seat"/>, which the caller must hold, has seen its cards (and so have the
+    /// Poker Heist, Con Artist: <paramref name="seat"/>, which the caller must hold, has seen its cards (and so have the
     /// caller's other seats).
     /// </summary>
     Task ConfirmSeen(string sessionId, int seat);
 
     /// <summary>
-    /// The Gang: <paramref name="seat"/>, which the caller must hold, proposes a choice for the group decision of
+    /// Poker Heist: <paramref name="seat"/>, which the caller must hold, proposes a choice for the group decision of
     /// <paramref name="card"/>: a seat and/or a value (a card value such as "9", or a hand ranking such as "Pair").
     /// </summary>
     Task Propose(string sessionId, int seat, string card, int? targetSeat, string? value);
 
     /// <summary>
-    /// The Gang: <paramref name="seat"/>, which the caller must hold, agrees (or no longer agrees) to the proposal, for
+    /// Poker Heist: <paramref name="seat"/>, which the caller must hold, agrees (or no longer agrees) to the proposal, for
     /// all the caller's seats that vote (each user votes once).
     /// </summary>
     Task Agree(string sessionId, int seat, string card, bool agree);
 
     /// <summary>
-    /// The Gang, Informant: the chosen <paramref name="seat"/> secretly shows its card number <paramref name="cardIndex"/>
+    /// Poker Heist, Informant: the chosen <paramref name="seat"/> secretly shows its card number <paramref name="cardIndex"/>
     /// to <paramref name="toSeat"/>.
     /// </summary>
     Task ShowCard(string sessionId, int seat, int cardIndex, int toSeat);
 
     /// <summary>
-    /// The Gang, Hacker and Jack: the chosen <paramref name="seat"/> discards its card number <paramref name="cardIndex"/>.
+    /// Poker Heist, Hacker and Jack: the chosen <paramref name="seat"/> discards its card number <paramref name="cardIndex"/>.
     /// </summary>
     Task DiscardCard(string sessionId, int seat, int cardIndex);
 
     /// <summary>
-    /// The Gang, with jokers: <paramref name="seat"/>, which the caller must hold, picks card <paramref name="index"/>
+    /// Poker Heist, with jokers: <paramref name="seat"/>, which the caller must hold, picks card <paramref name="index"/>
     /// (0 or 1) of the two offered for its joker; picking an offered joker swaps it for two more cards.
     /// </summary>
     Task ChooseJokerCard(string sessionId, int seat, int index);
 
     /// <summary>
-    /// The Gang, Motion Detector and Laser Tripwires: <paramref name="seat"/>, which the caller must hold, confirms it
+    /// Poker Heist, Motion Detector and Laser Tripwires: <paramref name="seat"/>, which the caller must hold, confirms it
     /// got new pocket cards.
     /// </summary>
     Task ConfirmRedraw(string sessionId, int seat);
@@ -379,12 +379,12 @@ public interface IGameHub
     Task PassTurn(string sessionId, int seat);
 
     /// <summary>
-    /// The Gang: reveals the next hand, if <paramref name="revealed"/> hands have been revealed so far.
+    /// Poker Heist: reveals the next hand, if <paramref name="revealed"/> hands have been revealed so far.
     /// </summary>
     Task RevealNext(string sessionId, int revealed);
 
     /// <summary>
-    /// The Gang: deals the heist after <paramref name="heist"/>, once its hands are revealed.
+    /// Poker Heist: deals the heist after <paramref name="heist"/>, once its hands are revealed.
     /// </summary>
     Task NextHeist(string sessionId, int heist);
 }

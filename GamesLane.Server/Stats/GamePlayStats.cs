@@ -32,7 +32,7 @@ public static class GamePlayStats
     /// </summary>
     public static IReadOnlyList<GameType> UsualOrder { get; } =
     [
-        GameType.TheGang, GameType.Backgammon, GameType.RichManPoorMan, GameType.FinalCard, GameType.Yaniv, GameType.Hearts,
+        GameType.PokerHeist, GameType.Backgammon, GameType.RichManPoorMan, GameType.FinalCard, GameType.Yaniv, GameType.Hearts,
         GameType.Spades, GameType.Dominoes, GameType.Wazoo, GameType.TicTacToe,
     ];
 

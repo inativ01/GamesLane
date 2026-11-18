@@ -1,4 +1,4 @@
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 
 namespace GamesLane.Server.Games.Yaniv;
 
