@@ -167,6 +167,7 @@ TRANSLATIONS.fr = {
     "Log in to chat.": "Connecte-toi pour discuter.",
     "Write a message of 1 to {n} characters.": "Écris un message de 1 à {n} caractères.",
     "Open the game to chat.": "Ouvre la partie pour discuter.",
+    "Public games have no chat.": "Les parties publiques n'ont pas de discussion.",
 
     // Main screen
     "Public games": "Parties publiques",
@@ -189,7 +190,7 @@ TRANSLATIONS.fr = {
     "You are no longer in this game.": "Tu n'es plus dans cette partie.",
     "Drag a game by its ⋮⋮ handle to change the order.": "Fais glisser un jeu par sa poignée ⋮⋮ pour changer l'ordre.",
     "Drag to move": "Fais glisser pour déplacer",
-    "The Gang": "The Gang",
+    "Poker Heist": "Poker Heist",
     "A team poker heist. Rank your hands in secret.": "Un casse au poker en équipe. Classez vos mains en secret.",
     "3–8 players": "3–8 joueurs",
     "2 players": "2 joueurs",
@@ -801,8 +802,8 @@ TRANSLATIONS.fr = {
     "{name} wins round {n}": "{name} remporte la manche {n}",
     "Cell {n}": "Case {n}",
 
-    // The Gang
-    "The Gang - GamesLane": "The Gang - GamesLane",
+    // Poker Heist
+    "Poker Heist - GamesLane": "Poker Heist - GamesLane",
     "Next heist": "Casse suivant",
     "Reveal next hand": "Révéler la main suivante",
     "Heist": "Casse",
@@ -832,7 +833,7 @@ TRANSLATIONS.fr = {
     "Agree on the guess before the strongest hand is revealed": "Mettez-vous d'accord sur la prédiction avant que la main la plus forte soit révélée",
     "Reveal the hands, lowest red chip first": "Révélez les mains, en commençant par le jeton rouge le plus bas",
     "Revealing, lowest red chip first…": "Révélation, du jeton rouge le plus bas…",
-    "Three vaults: the gang wins!": "Trois coffres : le gang gagne !",
+    "Three vaults: the crew wins!": "Trois coffres : l'équipe gagne !",
     "Three alarms: game over": "Trois alarmes : partie perdue",
     "The vault is open!": "Le coffre est ouvert !",
     "The alarm went off!": "L'alarme s'est déclenchée !",
@@ -909,7 +910,7 @@ TRANSLATIONS.fr = {
     "Swapped {n} jokers": "A échangé {n} jokers",
     "Weaker than the hand before": "Plus faible que la main précédente",
 
-    // The Gang: hand rankings, cards and options (from the server)
+    // Poker Heist: hand rankings, cards and options (from the server)
     "High card": "Carte haute",
     "Pair": "Paire",
     "Two pair": "Double paire",
@@ -988,7 +989,7 @@ TRANSLATIONS.fr = {
     "Avoid": "Éviter",
     "Never draw them for the same heist.": "Ne jamais les tirer pour le même casse.",
 
-    // The Gang: messages from the server
+    // Poker Heist: messages from the server
     "Chips are numbered 1 to {n}.": "Les jetons sont numérotés de 1 à {n}.",
     "You already have that chip.": "Tu as déjà ce jeton.",
     "That chip is locked: whoever took it first keeps it.": "Ce jeton est verrouillé : le premier qui l'a pris le garde.",

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>The Gang - GamesLane</title>
+    <title>Poker Heist - GamesLane</title>
     <link rel="icon" href="images/logo-32.png">
     <link rel="apple-touch-icon" href="images/logo-180.png">
     <link rel="manifest" href="/manifest.webmanifest">
@@ -27,8 +27,8 @@
         <div id="account" class="account"></div>
     </header>
     <div class="session-bar">
-        <img class="session-art" src="images/games/the-gang.svg" alt="">
-        <h2 class="session-name" data-i18n>The Gang</h2>
+        <img class="session-art" src="images/games/poker-heist.svg" alt="">
+        <h2 class="session-name" data-i18n>Poker Heist</h2>
         <span id="session-info" class="session-info"></span>
         <p class="code" title="Game code" data-i18n-attr="title"><span aria-hidden="true">🔑</span> <strong id="session-code"></strong></p>
     </div>
@@ -36,7 +36,7 @@
         <p id="status" class="status"></p>
     </div>
 </div>
-<main class="gang">
+<main class="poker-heist">
     <section id="session">
         <div id="invite" class="invite" hidden>
             <h3 data-i18n>Invite friends</h3>
@@ -72,7 +72,7 @@
             <div id="my-hands"></div>
             <div id="my-decisions" class="my-decisions" hidden></div>
             <!-- The heist's and the game's buttons, under the user's hands and decisions. -->
-            <div class="game-actions gang-controls">
+            <div class="game-actions heist-controls">
                 <button id="reveal-next" type="button" hidden data-i18n>Reveal next hand</button>
                 <button id="next-heist" type="button" hidden data-i18n>Next heist</button>
                 <button id="play-again" type="button" hidden data-i18n>Play again</button>
@@ -82,7 +82,7 @@
             <!-- Everything observers see. Players can hide it, e.g. when a TV shows it. -->
             <section class="table-view" aria-label="Table" data-i18n-attr="aria-label">
                 <div class="table-head">
-                    <div class="gang-score">
+                    <div class="heist-score">
                         <span><span data-i18n>Heist</span> <strong id="heist"></strong></span>
                         <span>💰 <strong id="vaults"></strong></span>
                         <span>🚨 <strong id="alarms"></strong></span>
@@ -105,6 +105,6 @@
     <p id="error" class="error" role="alert"></p>
 </main>
 <script src="common.js"></script>
-<script src="the-gang.js"></script>
+<script src="poker-heist.js"></script>
 </body>
 </html>

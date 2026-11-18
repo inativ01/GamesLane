@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 namespace GamesLane.Server.Sessions;
 
 /// <summary>
-/// A session of The Gang for 3 to 8 seats. Each player's cards are private and sent only to them.
+/// A session of Poker Heist for 3 to 8 seats. Each player's cards are private and sent only to them.
 /// </summary>
-public interface ITheGangSession : IGameSession
+public interface IPokerHeistSession : IGameSession
 {
     /// <summary>
     /// <paramref name="seat"/>, which <paramref name="userKey"/> must hold, takes a chip of the current stage.

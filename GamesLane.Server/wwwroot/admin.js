@@ -6,11 +6,11 @@
 // anyone else is told the page is not available.
 
 const GAME_LABELS = {
-    TheGang: "The Gang", Backgammon: "Backgammon", RichManPoorMan: "Rich man, poor man", FinalCard: "Final Card",
+    PokerHeist: "Poker Heist", Backgammon: "Backgammon", RichManPoorMan: "Rich man, poor man", FinalCard: "Final Card",
     Yaniv: "Yaniv", Hearts: "Hearts", Spades: "Spades", Dominoes: "Dominoes", Wazoo: "Wazoo", TicTacToe: "Tic-tac-toe",
 };
 const GAME_COLORS = {
-    TheGang: "#d62828", Backgammon: "#8a5a2b", RichManPoorMan: "#e5a400", FinalCard: "#1d5bd6",
+    PokerHeist: "#d62828", Backgammon: "#8a5a2b", RichManPoorMan: "#e5a400", FinalCard: "#1d5bd6",
     Yaniv: "#23913a", Hearts: "#e0567a", Spades: "#2c3e50", Dominoes: "#5d4037", Wazoo: "#8e44ad", TicTacToe: "#17a2b8",
 };
 const HIDDEN_KEY = "admin.hiddenGames";

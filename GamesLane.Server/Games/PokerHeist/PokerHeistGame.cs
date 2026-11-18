@@ -1,9 +1,11 @@
-namespace GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PlayingCards;
+
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
 /// The phases of a heist.
 /// </summary>
-public enum TheGangPhase
+public enum PokerHeistPhase
 {
     /// <summary>Players take chips; the stage ends when everyone holds a chip and is ready.</summary>
     Betting,
@@ -22,14 +24,14 @@ public enum TheGangPhase
 }
 
 /// <summary>
-/// The Gang rules. <c>newDeck</c> supplies a shuffled deck for each heist. With <c>n</c> pocket cards each (2, or 3 with
+/// Poker Heist rules. <c>newDeck</c> supplies a shuffled deck for each heist. With <c>n</c> pocket cards each (2, or 3 with
 /// Security Cameras), player <c>i</c> gets the deck's cards <c>n·i</c> to <c>n·i+n-1</c>; the five shared cards follow.
 /// In Advanced mode, the first heist gets the chosen number of challenge cards; after a successful heist, one challenge
 /// card is added, and after a failed one, one specialist card. Cards stay in play for the rest of the game; each card is
 /// drawn at most once. Cards that cancel each other may be in play together (the cancelled card has no effect) unless
 /// the rules avoid clashes.
 /// </summary>
-public partial class TheGangGame : ITheGangGame
+public partial class PokerHeistGame : IPokerHeistGame
 {
     /// <summary>
     /// The fewest players.
@@ -51,7 +53,7 @@ public partial class TheGangGame : ITheGangGame
     /// </summary>
     public const int HeistsToFinish = 3;
 
-    private readonly TheGangRules _rules;
+    private readonly PokerHeistRules _rules;
     private Func<IReadOnlyList<Card>> _newDeck;
     private Random _random;
     private Func<int, int, bool> _sameHolder;
@@ -61,23 +63,23 @@ public partial class TheGangGame : ITheGangGame
     private Card[][] _holeCards = [];
     private Card[][] _slots = [];
     private int[] _revealOrder = [];
-    private TheGangCard[] _cards = [];
+    private PokerHeistCard[] _cards = [];
     private IReadOnlyList<Card> _deck = [];
     private int _nextCard;
     private Card?[] _passing = [];
     private bool[] _prepared = [];
     private string[] _newCards = [];
-    private TheGangFact[][] _announcements = [];
+    private PokerHeistFact[][] _announcements = [];
 
     /// <summary>
     /// Starts the first heist. <paramref name="rules"/> defaults to the basic game; <paramref name="random"/> draws the cards.
     /// <paramref name="sameHolder"/> tells whether two players are played by the same user (one screen), so a user who
     /// sees the strongest hand does not take part in the scans' guesses; by default, every player is a different user.
     /// </summary>
-    public TheGangGame(
+    public PokerHeistGame(
         int playerCount,
         Func<IReadOnlyList<Card>> newDeck,
-        TheGangRules? rules = null,
+        PokerHeistRules? rules = null,
         Random? random = null,
         Func<int, int, bool>? sameHolder = null)
     {
@@ -85,12 +87,12 @@ public partial class TheGangGame : ITheGangGame
         ArgumentOutOfRangeException.ThrowIfLessThan(playerCount, MinPlayers);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(playerCount, MaxPlayers);
         PlayerCount = playerCount;
-        _rules = rules ?? TheGangRules.Basic;
+        _rules = rules ?? PokerHeistRules.Basic;
         _random = random ?? Random.Shared;
         _newDeck = newDeck;
         _chips = new int?[StageCount, playerCount];
         _ready = new bool[playerCount];
-        DrawCards(TheGangCardKind.Challenge, _rules.FirstHeistChallenges);
+        DrawCards(PokerHeistCardKind.Challenge, _rules.FirstHeistChallenges);
         Deal();
     }
 
@@ -105,7 +107,7 @@ public partial class TheGangGame : ITheGangGame
     public int PlayerCount { get; }
 
     /// <inheritdoc />
-    public TheGangMode Mode => _rules.Mode;
+    public PokerHeistMode Mode => _rules.Mode;
 
     /// <inheritdoc />
     public IReadOnlyList<string> NewCards => _newCards;
@@ -114,7 +116,7 @@ public partial class TheGangGame : ITheGangGame
     public string? PreparingCard { get; private set; }
 
     /// <inheritdoc />
-    public IReadOnlyList<TheGangCard> Cards => _cards;
+    public IReadOnlyList<PokerHeistCard> Cards => _cards;
 
     /// <inheritdoc />
     public int? RedrawnPlayer { get; private set; }
@@ -124,11 +126,11 @@ public partial class TheGangGame : ITheGangGame
 
     /// <inheritdoc />
     public IReadOnlyList<int> SkippedStages =>
-        [.. new[] { Has(TheGangCards.QuickAccess) ? 0 : -1, Has(TheGangCards.HastyGetaway) ? 2 : -1 }.Where(s => s >= 0)];
+        [.. new[] { Has(PokerHeistCards.QuickAccess) ? 0 : -1, Has(PokerHeistCards.HastyGetaway) ? 2 : -1 }.Where(s => s >= 0)];
 
     /// <inheritdoc />
     public IReadOnlyList<int> LockedChips =>
-        Phase == TheGangPhase.Betting ? [.. Enumerable.Range(1, PlayerCount).Where(chip => IsLocked(Stage, chip))] : [];
+        Phase == PokerHeistPhase.Betting ? [.. Enumerable.Range(1, PlayerCount).Where(chip => IsLocked(Stage, chip))] : [];
 
     /// <inheritdoc />
     public int Heist { get; private set; } = 1;
@@ -140,7 +142,7 @@ public partial class TheGangGame : ITheGangGame
     public int Stage { get; private set; }
 
     /// <inheritdoc />
-    public TheGangPhase Phase { get; private set; }
+    public PokerHeistPhase Phase { get; private set; }
 
     /// <inheritdoc />
     public int Vaults { get; private set; }
@@ -153,17 +155,17 @@ public partial class TheGangGame : ITheGangGame
 
     /// <inheritdoc />
     public IReadOnlyList<IReadOnlyList<Card>> VisibleCommunity =>
-        Phase is TheGangPhase.Reveal or TheGangPhase.HeistOver ? _slots : _slots[..(Stage == 0 ? 0 : Stage + 2)];
+        Phase is PokerHeistPhase.Reveal or PokerHeistPhase.HeistOver ? _slots : _slots[..(Stage == 0 ? 0 : Stage + 2)];
 
     /// <inheritdoc />
     public IReadOnlyList<Card> VisibleCommunityCards => [.. VisibleCommunity.SelectMany(slot => slot)];
 
     /// <inheritdoc />
-    public bool IsPrepared(int player) => Phase == TheGangPhase.Preparing
+    public bool IsPrepared(int player) => Phase == PokerHeistPhase.Preparing
         && (PreparingCard == JokersStep ? _jokerOffers[player] is null : _prepared[player]);
 
     /// <inheritdoc />
-    public Card? PassingCard(int player) => Phase == TheGangPhase.Preparing ? _passing[player] : null;
+    public Card? PassingCard(int player) => Phase == PokerHeistPhase.Preparing ? _passing[player] : null;
 
     /// <inheritdoc />
     public IReadOnlyList<int> MiddleChips =>
@@ -185,14 +187,14 @@ public partial class TheGangGame : ITheGangGame
     public bool IsReady(int player) => _ready[player];
 
     /// <inheritdoc />
-    public bool AreChipsDiscarded(int stage) => Has(TheGangCards.Blackout) && stage < Stage;
+    public bool AreChipsDiscarded(int stage) => Has(PokerHeistCards.Blackout) && stage < Stage;
 
     /// <inheritdoc />
     public string? Announcement(int player) =>
         Facts(player) is { Count: > 0 } facts ? string.Join(" · ", facts.Select(f => f.Text)) : null;
 
     /// <inheritdoc />
-    public IReadOnlyList<TheGangFact> Facts(int player) => _announcements.ElementAtOrDefault(player) ?? [];
+    public IReadOnlyList<PokerHeistFact> Facts(int player) => _announcements.ElementAtOrDefault(player) ?? [];
 
     /// <inheritdoc />
     public HandValue Hand(int player) => HandEvaluator.Best(CountingCards(player), _slots);
@@ -305,7 +307,7 @@ public partial class TheGangGame : ITheGangGame
     /// <inheritdoc />
     public bool TryPassCard(int player, int cardIndex, out string? error)
     {
-        if (!TryCheckPreparing(player, TheGangCards.Coordinator, out error))
+        if (!TryCheckPreparing(player, PokerHeistCards.Coordinator, out error))
         {
             return false;
         }
@@ -336,7 +338,7 @@ public partial class TheGangGame : ITheGangGame
     /// <inheritdoc />
     public bool TryConfirmSeen(int player, out string? error)
     {
-        if (!TryCheckPreparing(player, TheGangCards.ConArtist, out error))
+        if (!TryCheckPreparing(player, PokerHeistCards.ConArtist, out error))
         {
             return false;
         }
@@ -374,7 +376,7 @@ public partial class TheGangGame : ITheGangGame
 
         error = null;
         IsRedrawConfirmed = true;
-        if (Phase == TheGangPhase.Betting && CanEndStage)
+        if (Phase == PokerHeistPhase.Betting && CanEndStage)
         {
             EndStage();
         }
@@ -391,7 +393,7 @@ public partial class TheGangGame : ITheGangGame
             return true;
         }
 
-        if (Phase != TheGangPhase.Reveal)
+        if (Phase != PokerHeistPhase.Reveal)
         {
             error = "There is no hand to reveal now.";
             return false;
@@ -406,7 +408,7 @@ public partial class TheGangGame : ITheGangGame
         Revealed++;
         if (Revealed == PlayerCount)
         {
-            Phase = TheGangPhase.HeistOver;
+            Phase = PokerHeistPhase.HeistOver;
             if (HeistSucceeds)
             {
                 Vaults++;
@@ -429,7 +431,7 @@ public partial class TheGangGame : ITheGangGame
             return true;
         }
 
-        if (Phase != TheGangPhase.HeistOver)
+        if (Phase != PokerHeistPhase.HeistOver)
         {
             error = "The heist is not over yet.";
             return false;
@@ -443,7 +445,7 @@ public partial class TheGangGame : ITheGangGame
 
         var succeeded = HeistSucceeds;
         Heist++;
-        DrawCards(succeeded ? TheGangCardKind.Challenge : TheGangCardKind.Specialist, 1);
+        DrawCards(succeeded ? PokerHeistCardKind.Challenge : PokerHeistCardKind.Specialist, 1);
         Deal();
         return true;
     }
@@ -454,7 +456,7 @@ public partial class TheGangGame : ITheGangGame
     /// Whether the betting stage can end: everyone is ready, no chosen player has a step or a joker waiting, and a player
     /// who got new pocket cards has confirmed it.
     /// </summary>
-    private bool CanEndStage => _ready.All(r => r) && MiddleChips.Count == 0 && PendingStep == TheGangStep.None && !AwaitsJokers
+    private bool CanEndStage => _ready.All(r => r) && MiddleChips.Count == 0 && PendingStep == PokerHeistStep.None && !AwaitsJokers
         && (RedrawnPlayer is null || IsRedrawConfirmed);
 
     /// <summary>
@@ -470,8 +472,8 @@ public partial class TheGangGame : ITheGangGame
     private void CheckAlarmsOnTheFlop()
     {
         var hasFace = _slots.Take(3).SelectMany(slot => slot).Any(c => c.Rank is >= 11 and <= 13);
-        var chip = Has(TheGangCards.MotionDetector) && hasFace ? 1
-            : Has(TheGangCards.LaserTripwires) && !hasFace ? PlayerCount
+        var chip = Has(PokerHeistCards.MotionDetector) && hasFace ? 1
+            : Has(PokerHeistCards.LaserTripwires) && !hasFace ? PlayerCount
             : (int?)null;
         var player = Enumerable.Range(0, PlayerCount).FirstOrDefault(p => chip is not null && _chips[0, p] == chip, -1);
         if (player < 0)
@@ -490,24 +492,24 @@ public partial class TheGangGame : ITheGangGame
     /// </summary>
     private bool IsLocked(int stage, int chip) =>
         stage < StageCount - 1 &&
-        ((Has(TheGangCards.NoiseSensors) && chip == 1) || (Has(TheGangCards.VentilationShaft) && chip == PlayerCount));
+        ((Has(PokerHeistCards.NoiseSensors) && chip == 1) || (Has(PokerHeistCards.VentilationShaft) && chip == PlayerCount));
 
     /// <summary>
     /// Adds up to <paramref name="count"/> random cards of a kind to the cards in play (only in Advanced mode): enabled,
     /// not used before in this game, and if the rules say so, not cancelling a card in play. Cards stay in play for the
     /// rest of the game.
     /// </summary>
-    private void DrawCards(TheGangCardKind kind, int count)
+    private void DrawCards(PokerHeistCardKind kind, int count)
     {
-        var drawn = new List<TheGangCard>();
-        var enabled = kind == TheGangCardKind.Challenge ? _rules.Challenges : _rules.Specialists;
-        while (Mode == TheGangMode.Advanced && drawn.Count < count)
+        var drawn = new List<PokerHeistCard>();
+        var enabled = kind == PokerHeistCardKind.Challenge ? _rules.Challenges : _rules.Specialists;
+        while (Mode == PokerHeistMode.Advanced && drawn.Count < count)
         {
             var candidates = enabled
                 .Where(key => !_usedCards.Contains(key)
-                    && !(_rules.AvoidClashes && _cards.Concat(drawn).Any(d => TheGangCards.Clash(d.Key, key))))
-                .Select(TheGangCards.Find)
-                .OfType<TheGangCard>()
+                    && !(_rules.AvoidClashes && _cards.Concat(drawn).Any(d => PokerHeistCards.Clash(d.Key, key))))
+                .Select(PokerHeistCards.Find)
+                .OfType<PokerHeistCard>()
                 .Where(card => card.Kind == kind)
                 .ToArray();
             if (candidates.Length == 0)
@@ -533,9 +535,9 @@ public partial class TheGangGame : ITheGangGame
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(player, PlayerCount);
         error = Phase switch
         {
-            TheGangPhase.Betting => null,
-            TheGangPhase.Preparing when PreparingCard == JokersStep => "The betting starts once every joker has been swapped.",
-            TheGangPhase.Preparing => "The betting starts once everyone has done the specialist card's step.",
+            PokerHeistPhase.Betting => null,
+            PokerHeistPhase.Preparing when PreparingCard == JokersStep => "The betting starts once every joker has been swapped.",
+            PokerHeistPhase.Preparing => "The betting starts once everyone has done the specialist card's step.",
             _ => "The betting is over for this heist.",
         };
         return error is null;
@@ -548,7 +550,7 @@ public partial class TheGangGame : ITheGangGame
     {
         ArgumentOutOfRangeException.ThrowIfNegative(player);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(player, PlayerCount);
-        error = Phase == TheGangPhase.Preparing && PreparingCard == card ? null : "That is not possible now.";
+        error = Phase == PokerHeistPhase.Preparing && PreparingCard == card ? null : "That is not possible now.";
         return error is null;
     }
 
@@ -575,7 +577,7 @@ public partial class TheGangGame : ITheGangGame
         }
 
         _revealOrder = Enumerable.Range(0, PlayerCount).OrderBy(p => _chips[Stage, p]).ToArray();
-        Phase = TheGangPhase.Reveal;
+        Phase = PokerHeistPhase.Reveal;
     }
 
     /// <summary>
@@ -587,7 +589,7 @@ public partial class TheGangGame : ITheGangGame
     {
         var deck = WithJokers(_newDeck());
         Shuffles++;
-        var perPlayer = Has(TheGangCards.SecurityCameras) ? 3 : 2;
+        var perPlayer = Has(PokerHeistCards.SecurityCameras) ? 3 : 2;
         _holeCards = Enumerable.Range(0, PlayerCount).Select(p => deck.Skip(perPlayer * p).Take(perPlayer).ToArray()).ToArray();
         _slots = [.. deck.Skip(perPlayer * PlayerCount).Take(5).Select(card => (Card[])[card])];
         _deck = deck;
@@ -621,7 +623,7 @@ public partial class TheGangGame : ITheGangGame
         _prepared = new bool[PlayerCount];
         _passing = new Card?[PlayerCount];
         PreparingCard = card;
-        Phase = TheGangPhase.Preparing;
+        Phase = PokerHeistPhase.Preparing;
     }
 
     /// <summary>
@@ -630,7 +632,7 @@ public partial class TheGangGame : ITheGangGame
     /// </summary>
     private void FinishPreparing()
     {
-        string[] steps = [JokersStep, TheGangCards.Coordinator, TheGangCards.ConArtist];
+        string[] steps = [JokersStep, PokerHeistCards.Coordinator, PokerHeistCards.ConArtist];
         var next = steps.Skip(Array.IndexOf(steps, PreparingCard) + 1).FirstOrDefault(Has);
         if (next is not null)
         {
@@ -649,21 +651,21 @@ public partial class TheGangGame : ITheGangGame
     {
         _announcements = [.. _holeCards.Select(cards =>
         {
-            var facts = new List<TheGangFact>();
-            if (Has(TheGangCards.Investor))
+            var facts = new List<PokerHeistFact>();
+            if (Has(PokerHeistCards.Investor))
             {
                 var faces = cards.Count(c => c.Rank is >= 11 and <= 13);
-                facts.Add(new(TheGangCards.Investor, faces == 1 ? "1 face card" : $"{faces} face cards"));
+                facts.Add(new(PokerHeistCards.Investor, faces == 1 ? "1 face card" : $"{faces} face cards"));
             }
 
-            if (Has(TheGangCards.MathWhiz))
+            if (Has(PokerHeistCards.MathWhiz))
             {
-                facts.Add(new(TheGangCards.MathWhiz, $"{cards.Sum(c => c.Rank == Card.Ace ? 11 : Math.Min(c.Rank, 10))} total"));
+                facts.Add(new(PokerHeistCards.MathWhiz, $"{cards.Sum(c => c.Rank == Card.Ace ? 11 : Math.Min(c.Rank, 10))} total"));
             }
 
             return facts.ToArray();
         })];
         PreparingCard = null;
-        Phase = TheGangPhase.Betting;
+        Phase = PokerHeistPhase.Betting;
     }
 }

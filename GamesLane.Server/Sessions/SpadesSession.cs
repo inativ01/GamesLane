@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using GamesLane.Server.Games.Spades;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PlayingCards;
 
 namespace GamesLane.Server.Sessions;
 

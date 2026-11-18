@@ -268,47 +268,47 @@ public class GameHub(
 
     /// <inheritdoc />
     public Task TakeChip(string sessionId, int seat, int chip) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryTakeChip(UserKey, seat, chip, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryTakeChip(UserKey, seat, chip, out error));
 
     /// <inheritdoc />
     public Task ReturnChip(string sessionId, int seat) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryReturnChip(UserKey, seat, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryReturnChip(UserKey, seat, out error));
 
     /// <inheritdoc />
     public Task SetReady(string sessionId, int seat, bool ready) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TrySetReady(UserKey, seat, ready, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TrySetReady(UserKey, seat, ready, out error));
 
     /// <inheritdoc />
     public Task PassCard(string sessionId, int seat, int cardIndex) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryPassCard(UserKey, seat, cardIndex, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryPassCard(UserKey, seat, cardIndex, out error));
 
     /// <inheritdoc />
     public Task ConfirmSeen(string sessionId, int seat) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryConfirmSeen(UserKey, seat, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryConfirmSeen(UserKey, seat, out error));
 
     /// <inheritdoc />
     public Task Propose(string sessionId, int seat, string card, int? targetSeat, string? value) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryPropose(UserKey, seat, card, targetSeat, value, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryPropose(UserKey, seat, card, targetSeat, value, out error));
 
     /// <inheritdoc />
     public Task Agree(string sessionId, int seat, string card, bool agree) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryAgree(UserKey, seat, card, agree, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryAgree(UserKey, seat, card, agree, out error));
 
     /// <inheritdoc />
     public Task ShowCard(string sessionId, int seat, int cardIndex, int toSeat) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryShowCard(UserKey, seat, cardIndex, toSeat, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryShowCard(UserKey, seat, cardIndex, toSeat, out error));
 
     /// <inheritdoc />
     public Task DiscardCard(string sessionId, int seat, int cardIndex) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryDiscard(UserKey, seat, cardIndex, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryDiscard(UserKey, seat, cardIndex, out error));
 
     /// <inheritdoc />
     public Task ChooseJokerCard(string sessionId, int seat, int index) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryChooseJokerCard(UserKey, seat, index, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryChooseJokerCard(UserKey, seat, index, out error));
 
     /// <inheritdoc />
     public Task ConfirmRedraw(string sessionId, int seat) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryConfirmRedraw(UserKey, seat, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryConfirmRedraw(UserKey, seat, out error));
 
     /// <inheritdoc />
     public Task Roll(string sessionId, int seat) =>
@@ -453,11 +453,11 @@ public class GameHub(
 
     /// <inheritdoc />
     public Task RevealNext(string sessionId, int revealed) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryRevealNext(UserKey, revealed, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryRevealNext(UserKey, revealed, out error));
 
     /// <inheritdoc />
     public Task NextHeist(string sessionId, int heist) =>
-        Act(sessionId, (ITheGangSession s, out string? error) => s.TryNextHeist(UserKey, heist, out error));
+        Act(sessionId, (IPokerHeistSession s, out string? error) => s.TryNextHeist(UserKey, heist, out error));
 
     /// <summary>
     /// Sends the session's public state to everyone in the session, and each player's private information to their

@@ -1,21 +1,21 @@
-namespace GamesLane.Server.Games.TheGang;
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
 /// Basic rules, or advanced rules with challenge cards.
 /// </summary>
-public enum TheGangMode
+public enum PokerHeistMode
 {
     Basic,
     Advanced,
 }
 
 /// <summary>
-/// The options of The Gang.
+/// The options of Poker Heist.
 /// </summary>
-public static class TheGangOptions
+public static class PokerHeistOptions
 {
     /// <summary>
-    /// The key of the <see cref="TheGangMode"/> option.
+    /// The key of the <see cref="PokerHeistMode"/> option.
     /// </summary>
     public const string Mode = "mode";
 
@@ -59,7 +59,7 @@ public static class TheGangOptions
     /// </summary>
     public const string No = "No";
 
-    private static readonly GameOptionCondition WhenAdvanced = new(Mode, nameof(TheGangMode.Advanced));
+    private static readonly GameOptionCondition WhenAdvanced = new(Mode, nameof(PokerHeistMode.Advanced));
 
     /// <summary>
     /// All options, in the order they are shown. The card options only apply in Advanced mode.
@@ -70,11 +70,11 @@ public static class TheGangOptions
             Mode,
             "Mode",
             [
-                new GameOptionChoice(nameof(TheGangMode.Basic), "Basic", "The standard rules."),
-                new GameOptionChoice(nameof(TheGangMode.Advanced), "Advanced",
+                new GameOptionChoice(nameof(PokerHeistMode.Basic), "Basic", "The standard rules."),
+                new GameOptionChoice(nameof(PokerHeistMode.Advanced), "Advanced",
                     "With challenge and specialist cards: after a successful heist, a challenge card is added; after a failed one, a specialist card. Cards stay for the rest of the game."),
             ],
-            nameof(TheGangMode.Basic)),
+            nameof(PokerHeistMode.Basic)),
         new GameOption(
             Jokers,
             "Jokers",
@@ -99,8 +99,8 @@ public static class TheGangOptions
             [.. Enumerable.Range(0, 4).Select(n => new GameOptionChoice(n.ToString(), n.ToString()))],
             "1",
             ShownWhen: WhenAdvanced),
-        new GameOption(Challenges, "Challenge cards", CardChoices(TheGangCards.Challenges), "", GameOptionKind.Set, WhenAdvanced),
-        new GameOption(Specialists, "Specialist cards", CardChoices(TheGangCards.Specialists), "", GameOptionKind.Set, WhenAdvanced),
+        new GameOption(Challenges, "Challenge cards", CardChoices(PokerHeistCards.Challenges), "", GameOptionKind.Set, WhenAdvanced),
+        new GameOption(Specialists, "Specialist cards", CardChoices(PokerHeistCards.Specialists), "", GameOptionKind.Set, WhenAdvanced),
         new GameOption(
             AvoidClashes,
             "Cards that cancel each other",
@@ -113,14 +113,14 @@ public static class TheGangOptions
     ];
 
     /// <summary>
-    /// One choice per card, with its name, what it does, and its picture (<c>/images/the-gang/{key}.svg</c>).
+    /// One choice per card, with its name, what it does, and its picture (<c>/images/poker-heist/{key}.svg</c>).
     /// </summary>
-    private static GameOptionChoice[] CardChoices(IEnumerable<TheGangCard> cards) =>
-        [.. cards.Select(c => new GameOptionChoice(c.Key, c.Name, c.Text, $"/images/the-gang/{c.Key}.svg"))];
+    private static GameOptionChoice[] CardChoices(IEnumerable<PokerHeistCard> cards) =>
+        [.. cards.Select(c => new GameOptionChoice(c.Key, c.Name, c.Text, $"/images/poker-heist/{c.Key}.svg"))];
 
     /// <summary>
     /// The mode in <paramref name="options"/>, Basic if it is missing or unknown.
     /// </summary>
-    public static TheGangMode ModeOf(IReadOnlyDictionary<string, string> options) =>
-        Enum.TryParse<TheGangMode>(options.GetValueOrDefault(Mode), out var mode) && Enum.IsDefined(mode) ? mode : TheGangMode.Basic;
+    public static PokerHeistMode ModeOf(IReadOnlyDictionary<string, string> options) =>
+        Enum.TryParse<PokerHeistMode>(options.GetValueOrDefault(Mode), out var mode) && Enum.IsDefined(mode) ? mode : PokerHeistMode.Basic;
 }

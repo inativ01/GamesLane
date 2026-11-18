@@ -1,8 +1,8 @@
-namespace GamesLane.Server.Games.TheGang;
+namespace GamesLane.Server.Games.PlayingCards;
 
 /// <summary>
-/// A card suit. <see cref="None"/> is only for the "Jack" specialist card, which has no suit and so never makes a flush;
-/// <see cref="Joker"/> only for the jokers.
+/// A card suit, shared by the card games. <see cref="None"/> is for a card without a suit, such as Poker Heist's "Jack"
+/// specialist card; <see cref="Joker"/> only for the jokers.
 /// </summary>
 public enum Suit
 {
@@ -16,7 +16,7 @@ public enum Suit
 
 /// <summary>
 /// A playing card. <see cref="Rank"/> is 2 to 14, where 11 is a jack, 12 a queen, 13 a king and 14 an ace; a joker
-/// (<see cref="Joker"/>) has rank 0. Jokers never count in a hand: they are replaced by other cards.
+/// (<see cref="Joker"/>) has rank 0. What a joker counts for is up to each game.
 /// </summary>
 public readonly record struct Card(int Rank, Suit Suit)
 {
@@ -41,7 +41,7 @@ public readonly record struct Card(int Rank, Suit Suit)
     public override string ToString() => IsJoker ? JokerText : $"{RankSymbol(Rank)}{SuitSymbol(Suit)}";
 
     /// <summary>
-    /// The "Jack" specialist card: a jack without a suit.
+    /// A jack without a suit, such as Poker Heist's "Jack" specialist card.
     /// </summary>
     public static Card SuitlessJack { get; } = new(11, Suit.None);
 

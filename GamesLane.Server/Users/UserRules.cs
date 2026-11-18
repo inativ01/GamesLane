@@ -116,7 +116,7 @@ public static partial class UserRules
     public static bool IsCardStyle([NotNullWhen(true)] string? style) => style is not null && UserSettings.CardStyles.Contains(style);
 
     /// <summary>
-    /// Checks the order of games chosen on the main screen: game names (e.g. <c>TheGang</c>), each an existing game,
+    /// Checks the order of games chosen on the main screen: game names (e.g. <c>PokerHeist</c>), each an existing game,
     /// listed once. Games left out keep their usual place after the listed ones. On success, <paramref name="stored"/>
     /// is the order as saved: the names separated by commas.
     /// </summary>

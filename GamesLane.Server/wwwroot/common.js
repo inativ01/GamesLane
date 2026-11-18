@@ -37,11 +37,36 @@ async function registerForNotifications(ask) {
     }
 }
 
+// In the iPhone app, the screen stays on while a game is played (e.g. a shared screen on the table), and for
+// AWAKE_AFTER_GAME once it is over, so the result can be read; elsewhere it dims as usual. The app keeps the setting
+// across pages, so every page starts by turning it off.
+const AWAKE_AFTER_GAME = 5 * 60 * 1000;
+let screenKeptAwake = null;
+let awakePhase = null;
+let awakeTimer = 0;
+
+function keepScreenAwake(on) {
+    if (typeof appPlugin?.keepAwake !== "function" || screenKeptAwake === on) return;
+    screenKeptAwake = on;
+    appPlugin.keepAwake({ on }).catch(() => {});
+}
+
+// Keeps the screen on for the session's phase: on while "Playing", on for a while once "Over", off in the lobby.
+function keepScreenAwakeFor(phase) {
+    if (phase === awakePhase) return;
+    awakePhase = phase;
+    clearTimeout(awakeTimer);
+    keepScreenAwake(phase === "Playing" || phase === "Over");
+    if (phase === "Over") awakeTimer = setTimeout(() => keepScreenAwake(false), AWAKE_AFTER_GAME);
+}
+
+keepScreenAwake(false);
+
 translatePage();
 $("account").before(languagePicker() ?? "");
 
 const GAME_PAGES = {
-    TicTacToe: "/tictactoe.html", TheGang: "/the-gang.html", Backgammon: "/backgammon.html",
+    TicTacToe: "/tictactoe.html", PokerHeist: "/poker-heist.html", Backgammon: "/backgammon.html",
     RichManPoorMan: "/rich-man-poor-man.html", Wazoo: "/wazoo.html", FinalCard: "/final-card.html", Yaniv: "/yaniv.html",
     Hearts: "/hearts.html",
     Spades: "/spades.html",
@@ -1572,7 +1597,7 @@ function svgElement(tag, attributes, ...children) {
     return element;
 }
 
-// A suit as a shape in the card's color (the suitless "★" of The Gang's Jack card as text).
+// A suit as a shape in the card's color (the suitless "★" of Poker Heist's Jack card as text).
 function suitShape(suit, className) {
     const shapes = SUIT_SHAPES[suit];
     if (!shapes) {
@@ -1987,13 +2012,16 @@ function startChat(sessionId, view) {
         }
     });
 
-    // With the chat off, 💬 and the chat are hidden. The boxes in the chat show the current settings.
+    // Public games have no chat (the server refuses it); available stays false until the session's state is known.
+    let available = false;
+
+    // With the chat off, or in a public game, 💬 and the chat are hidden. The boxes in the chat show the current settings.
     function applySettings() {
         const { chat, sound } = userSettings();
         panel.querySelector('[name="chat"]').checked = chat;
         panel.querySelector('[name="sound"]').checked = sound;
-        button.hidden = !chat;
-        if (!chat) {
+        button.hidden = !chat || !available;
+        if (button.hidden) {
             show(false);
             toast.hidden = true;
         }
@@ -2004,6 +2032,12 @@ function startChat(sessionId, view) {
 
     return {
         button,
+        // Whether the session has a chat: private games only.
+        setAvailable(on) {
+            if (available === on) return;
+            available = on;
+            applySettings();
+        },
         // The messages from entering the session (again, after reconnecting): no notifications, only the unread count.
         load(history) {
             history.forEach((m) => messages.set(m.number, m));
@@ -2499,6 +2533,8 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             return;
         }
         if (view.isPlayer) registerForNotifications(true);
+        keepScreenAwakeFor(state.phase);
+        chat.setAvailable(!state.isPublic);
         const inLobby = state.phase === "Lobby";
         const taken = state.seats.filter(Boolean).length;
 

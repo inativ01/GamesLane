@@ -1,9 +1,11 @@
-namespace GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PlayingCards;
+
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
 /// A private step a chosen player must take before the stage can end: show a card (Informant) or discard one (Hacker, Jack).
 /// </summary>
-public enum TheGangStep
+public enum PokerHeistStep
 {
     None,
     ShowCard,
@@ -15,9 +17,9 @@ public enum TheGangStep
 /// whether it has been carried out, and for a scan, whether it was skipped because the heist fails anyway. Players are
 /// game player numbers.
 /// </summary>
-public record TheGangDecisionInfo(
+public record PokerHeistDecisionInfo(
     string Card,
-    TheGangChoice Choice,
+    PokerHeistChoice Choice,
     int? Player,
     string? Value,
     IReadOnlyList<int> Voters,
@@ -31,13 +33,13 @@ public record TheGangDecisionInfo(
 /// scans' guesses about the strongest hand, with <see cref="Passed"/> telling whether the guess was right (null for
 /// other cards).
 /// </summary>
-public record TheGangResult(int Player, string Card, string Text, bool? Passed = null);
+public record PokerHeistResult(int Player, string Card, string Text, bool? Passed = null);
 
 /// <summary>
 /// What a specialist card shows everyone about a player's pocket cards when the betting starts: the card's key
 /// (Investor or Math Whiz) and the fact, e.g. "2 face cards" or "17 total".
 /// </summary>
-public record TheGangFact(string Card, string Text);
+public record PokerHeistFact(string Card, string Text);
 
 /// <summary>
 /// The first reason a revealed hand is weaker than the hand before it: its ranking is lower (<see cref="Ranking"/>), or
@@ -45,12 +47,12 @@ public record TheGangFact(string Card, string Text);
 /// <see cref="HandValue.FiveRanks"/>, with all the cards of that value in a row, e.g. both cards of a lower pair).
 /// With Muscle, a hand of the same ranking as Muscle's hand before it is weaker because of its ranking.
 /// </summary>
-public record TheGangWeakness(bool Ranking, IReadOnlyList<int> Cards);
+public record PokerHeistWeakness(bool Ranking, IReadOnlyList<int> Cards);
 
 /// <summary>
 /// The values players can name: card values ("2" to "10", "J", "Q", "K", "A") and hand rankings.
 /// </summary>
-public static class TheGangValues
+public static class PokerHeistValues
 {
     /// <summary>
     /// The card values, from 2 to ace.
@@ -65,10 +67,10 @@ public static class TheGangValues
     /// <summary>
     /// Whether <paramref name="value"/> is one of the values <paramref name="choice"/> names.
     /// </summary>
-    public static bool IsValid(TheGangChoice choice, string value) => choice switch
+    public static bool IsValid(PokerHeistChoice choice, string value) => choice switch
     {
-        TheGangChoice.PlayerAndRank or TheGangChoice.Rank => RankOf(value) is not null,
-        TheGangChoice.Ranking => HandRankings.All.Contains(value),
+        PokerHeistChoice.PlayerAndRank or PokerHeistChoice.Rank => RankOf(value) is not null,
+        PokerHeistChoice.Ranking => HandRankings.All.Contains(value),
         _ => false,
     };
 }

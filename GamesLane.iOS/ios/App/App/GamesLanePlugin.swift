@@ -5,8 +5,8 @@ import UIKit
 import UserNotifications
 
 /// The app's own features for the site, which calls them as `window.Capacitor.Plugins.GamesLane` (see common.js):
-/// signing in with a provider in Apple's sign-in window, Sign in with Apple, vibrating when the user's turn comes, and
-/// turn notifications. Join links (universal links, https://<server>/join/...) and tapped notifications open their page
+/// signing in with a provider in Apple's sign-in window, Sign in with Apple, vibrating when the user's turn comes, turn
+/// notifications, and keeping the screen on during a game. Join links (universal links, https://<server>/join/...) and tapped notifications open their page
 /// in the app's web view.
 @objc(GamesLanePlugin)
 public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPresentationContextProviding,
@@ -17,7 +17,8 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
         CAPPluginMethod(name: "signIn", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "signInWithApple", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "vibrate", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "registerForNotifications", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "registerForNotifications", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "keepAwake", returnType: CAPPluginReturnPromise)
     ]
 
     private var session: ASWebAuthenticationSession?
@@ -264,6 +265,16 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
     @objc func vibrate(_ call: CAPPluginCall) {
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
         call.resolve()
+    }
+
+    /// Keeps the screen on (`on: true`) or lets it dim and lock as usual (`on: false`). iOS applies it only while the
+    /// app is in front.
+    @objc func keepAwake(_ call: CAPPluginCall) {
+        let on = call.getBool("on") ?? false
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = on
+            call.resolve()
+        }
     }
 
     public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {

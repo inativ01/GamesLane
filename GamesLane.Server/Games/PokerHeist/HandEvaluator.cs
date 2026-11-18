@@ -1,4 +1,6 @@
-namespace GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PlayingCards;
+
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
 /// Poker hand categories, from weakest to strongest.

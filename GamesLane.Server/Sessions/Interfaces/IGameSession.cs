@@ -199,7 +199,7 @@ public interface IGameSession
 
     /// <summary>
     /// Adds a chat message from <paramref name="userKey"/>, shown with <paramref name="profile"/>. Anyone with the session
-    /// open can chat, seated or watching. Only the latest <see cref="GameSession.ChatHistoryLength"/> messages are kept.
+    /// open can chat, seated or watching, except in public games, which have no chat. Only the latest <see cref="GameSession.ChatHistoryLength"/> messages are kept.
     /// </summary>
     bool TrySendChat(string userKey, PlayerProfile profile, string? text, DateTimeOffset now,
         [NotNullWhen(true)] out ChatMessage? message, [NotNullWhen(false)] out string? error);
