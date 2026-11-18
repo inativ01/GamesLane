@@ -4297,6 +4297,11 @@ main.backgammon {
 .bg-arrow-step { fill: #ffb02e; stroke: #fff; stroke-width: 3; }
 .bg-arrow-number { fill: var(--black); font-size: 18px; font-weight: 800; pointer-events: none; }
 
+/* The 🎲 Roll button is square: as high as it is wide. */
+#bg-roll {
+    aspect-ratio: 1;
+}
+
 #bg-last-move[aria-pressed="true"] {
     background: #ffe2a1;
     box-shadow: inset 0 0 0 2px var(--gold);
