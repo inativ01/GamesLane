@@ -22,12 +22,14 @@ public interface IGameSession
     /// Registers a connection that opened the session page. If <paramref name="profile"/> is given (the user is logged in),
     /// updates the name and icon on the user's seats and returns the user's player ID. A logged-in user opening a private
     /// session for the first time while it is in the lobby takes the next empty seat if there is one. A logged-in user
-    /// without a seat who opens or reconnects to a private game in progress is offered its absent seats if it has any.
+    /// without a seat who opens or reconnects to a private game in progress is offered its absent seats whenever it has
+    /// any, even if they chose to watch before.
     /// </summary>
     string? Enter(string userKey, PlayerProfile? profile, string connectionId);
 
     /// <summary>
-    /// Whether <paramref name="userKey"/> is offered an absent seat of the game in progress (see <see cref="Enter"/>).
+    /// Whether <paramref name="userKey"/> is offered an absent seat of the private game in progress: they are logged in,
+    /// watch it without a seat, have not chosen to watch since they last opened it, and it has a seat they can take.
     /// </summary>
     bool HasSeatOffer(string userKey);
 

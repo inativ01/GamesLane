@@ -225,9 +225,8 @@ function handPanel(game, state, view, hand) {
         button.addEventListener("click", () => pickCard(hand, index));
         return el("span", "rp-slot", button);
     });
-    const title = myHands(game, view).length > 1 ? playerName(state, hand.seat) : t("Your cards");
-    const head = el("div", "my-hand-title", title, ...(myTurn ? [el("span", "rp-your-turn", `👉 ${t("Your turn")}`)] : []));
-    const foot = el("div", "yaniv-hand-foot", el("p", "yaniv-score", t("Hand score: {n}", { n: hand.handScore })));
+    const foot = el("div", "yaniv-hand-foot", ...(myTurn ? [yourTurnTag()] : []),
+        el("p", "yaniv-score", t("Hand score: {n}", { n: hand.handScore })));
     if (myTurn && hand.canCallYaniv) {
         const call = el("button", "yaniv-call", t("Yaniv!"));
         call.type = "button";
@@ -241,7 +240,7 @@ function handPanel(game, state, view, hand) {
         pass.addEventListener("click", () => send("PassLastTurn", hand.seat));
         foot.append(pass);
     }
-    return el("div", `my-hand rp-hand yaniv-hand${myTurn ? " my-turn" : ""}`, head, el("div", "card-row rp-cards", ...slots), foot);
+    return el("div", `my-hand rp-hand yaniv-hand${myTurn ? " my-turn" : ""}`, el("div", "card-row rp-cards", ...slots), foot);
 }
 
 // A player in the table: name, Yaniv once called, cards in hand and points; players who are out are faded.

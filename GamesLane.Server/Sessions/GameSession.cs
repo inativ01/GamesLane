@@ -77,6 +77,8 @@ public record SeatInfo(string PlayerId, string Name, string Icon, SeatStatus Sta
 /// <see cref="IsPublic"/> tells a public game; <see cref="HostPlayerId"/> is its creator's player ID (who alone chooses
 /// the options and starts it), and <see cref="Notice"/> a message for everyone, e.g. that a player left the game.
 /// <see cref="ObserverCount"/> is the number of open connections to the session of users who hold no seat.
+/// <see cref="SeatOffers"/> are the player IDs of the users offered an absent seat of the game in progress (see
+/// <see cref="GameSession.HasSeatOffer"/>).
 /// </summary>
 public record SessionState(
     string SessionId,
@@ -95,7 +97,8 @@ public record SessionState(
     bool IsPublic,
     string? HostPlayerId,
     string? Notice,
-    int ObserverCount);
+    int ObserverCount,
+    IReadOnlyList<string> SeatOffers);
 
 /// <summary>
 /// A game in progress where the user holds a seat but is not connected (Reconnecting or Away), so the other players are
@@ -105,11 +108,10 @@ public record WaitingGame(string SessionId, GameType GameType, bool IsPublic);
 
 /// <summary>
 /// Returned when a page enters a session: the public state, plus the caller's player ID if they are logged in, and
-/// their private game information (e.g. their cards) if they hold seats in a game that has any, the session's latest
-/// chat messages, oldest first, and whether the caller is offered an absent seat of the game in progress
-/// (<see cref="SeatOffer"/>; see <see cref="GameSession.HasSeatOffer"/>).
+/// their private game information (e.g. their cards) if they hold seats in a game that has any, and the session's latest
+/// chat messages, oldest first.
 /// </summary>
-public record SessionEntry(SessionState State, string? PlayerId, object? Private, IReadOnlyList<ChatMessage> Chat, bool SeatOffer);
+public record SessionEntry(SessionState State, string? PlayerId, object? Private, IReadOnlyList<ChatMessage> Chat);
 
 /// <summary>
 /// A chat message, as everyone in the session sees it. <see cref="Number"/> counts the session's messages from 1;
@@ -134,8 +136,8 @@ public record AwaitedPlayer(string UserKey, IReadOnlyList<string> ConnectionIds)
 /// ones: when a seat is freed, the seats after it move up.
 /// A user who disconnects keeps their seats for <see cref="ReconnectWindow"/>; then they are Away. In the lobby, and once
 /// a game is over, an Away user's seats are freed. During a game, they keep them until they come back or a newcomer
-/// takes them: a user without a seat who opens the game, or reconnects to it, while it has absent seats is offered them
-/// (see <see cref="HasSeatOffer"/>); players, and watchers who are not offered a seat, cannot take them. A
+/// takes them: a logged-in user without a seat watching the game while it has absent seats is offered them, as soon as
+/// a seat is absent (see <see cref="HasSeatOffer"/>); players, and watchers who are not offered a seat, cannot take them. A
 /// disconnected player's seat is absent at once; the game goes on until it
 /// needs them (see <see cref="AwaitedSeats"/>), and then the players can skip them where the game allows it
 /// (<see cref="TrySkipPlayer"/>), or end the game. Any seated player can end a game.
@@ -185,8 +187,8 @@ public abstract class GameSession : IGameSession
     private IReadOnlyDictionary<string, string> _options;
     private readonly List<ChatMessage> _chat = [];
     private int _chatCount;
-    // During a game: the users offered an absent seat when they last opened it or reconnected to it.
-    private readonly HashSet<string> _seatOffers = [];
+    // During a game: the users who chose to watch instead of taking an absent seat, since they last opened it.
+    private readonly HashSet<string> _declinedSeatOffers = [];
 
     /// <summary>
     /// Creates an empty session in the lobby, with the game's default options. Throws if the game's seat counts are invalid.
@@ -496,7 +498,8 @@ public abstract class GameSession : IGameSession
     /// updates the name and icon on the user's seats and returns the user's player ID. A logged-in user opening a private
     /// session for the first time while it is in the lobby takes the next empty seat if there is one; later, they keep
     /// watching until they take a seat. A logged-in user without a seat who opens or reconnects to a private game in
-    /// progress is offered its absent seats if it has any (see <see cref="HasSeatOffer"/>); otherwise they watch it.
+    /// progress is offered its absent seats whenever it has any, even if they chose to watch before (see
+    /// <see cref="HasSeatOffer"/>).
     /// </summary>
     public string? Enter(string userKey, PlayerProfile? profile, string connectionId)
     {
@@ -519,29 +522,22 @@ public abstract class GameSession : IGameSession
                 seat!.Profile = profile;
             }
 
-            if (HasUnfinishedGame && !_isPublic && !HoldsSeat(userKey) && OfferedSeats().Any())
-            {
-                _seatOffers.Add(userKey);
-            }
-            else
-            {
-                _seatOffers.Remove(userKey);
-            }
-
+            _declinedSeatOffers.Remove(userKey);
             return PlayerIdFor(userKey);
         }
     }
 
     /// <summary>
-    /// Whether <paramref name="userKey"/> is offered an absent seat of the game in progress: they last opened it, or
-    /// reconnected to it, without a seat while it had absent seats, and have neither taken one nor chosen to watch (see
-    /// <see cref="DeclineSeatOffer"/>).
+    /// Whether <paramref name="userKey"/> is offered an absent seat of the private game in progress: they are logged in,
+    /// have the game open without a seat, and have not chosen to watch since they last opened it (see
+    /// <see cref="DeclineSeatOffer"/>), and the game has a seat they can take. The offer comes as soon as a seat is absent,
+    /// not only when they open the game.
     /// </summary>
     public bool HasSeatOffer(string userKey)
     {
         lock (Sync)
         {
-            return HasUnfinishedGame && _seatOffers.Contains(userKey);
+            return IsOfferedASeat(userKey);
         }
     }
 
@@ -553,7 +549,7 @@ public abstract class GameSession : IGameSession
     {
         lock (Sync)
         {
-            return _seatOffers.Remove(userKey);
+            return IsOfferedASeat(userKey) && _declinedSeatOffers.Add(userKey);
         }
     }
 
@@ -657,9 +653,9 @@ public abstract class GameSession : IGameSession
                 _host = toUserKey;
             }
 
-            if (_seatOffers.Remove(fromUserKey))
+            if (_declinedSeatOffers.Remove(fromUserKey))
             {
-                _seatOffers.Add(toUserKey);
+                _declinedSeatOffers.Add(toUserKey);
             }
 
             var wasDisconnected = _disconnectedSince.Remove(fromUserKey, out var since);
@@ -751,7 +747,7 @@ public abstract class GameSession : IGameSession
                 : !HasUnfinishedGame ? (seat >= SeatLimit ? "All seats are taken." : _seats[seat] is null ? null : "That seat is taken.")
                 : !_gameSeats.Contains(seat) ? "The game has already started. You can watch it."
                 : !IsAbsent(seat) ? "That seat is taken."
-                : !_seatOffers.Contains(userKey) ? "Only a user opening the game without a seat can take a disconnected player's seat."
+                : !IsOfferedASeat(userKey) ? "Only a user opening the game without a seat can take a disconnected player's seat."
                 : SeatingDuringGameError(seat);
             if (error is not null)
             {
@@ -761,7 +757,6 @@ public abstract class GameSession : IGameSession
             var previous = _seats[seat]?.UserKey;
             _seats[seat] = new Seat(userKey, profile);
             PlayerIdFor(userKey);
-            _seatOffers.Remove(userKey);
             if (previous is not null && !HoldsSeat(previous))
             {
                 _disconnectedSince.Remove(previous);
@@ -810,7 +805,7 @@ public abstract class GameSession : IGameSession
 
     /// <summary>
     /// Gives up one of the user's seats. During a game, the seat is then absent, and a user left without a seat watches
-    /// the game.
+    /// the game (they are not offered the absent seats until they open it again).
     /// </summary>
     public bool TryLeaveSeat(string userKey, int seat, [NotNullWhen(false)] out string? error)
     {
@@ -824,6 +819,11 @@ public abstract class GameSession : IGameSession
 
             var leaver = LeaverOfPublicGame([seat]);
             VacateSeat(seat);
+            if (!HoldsSeat(userKey))
+            {
+                _declinedSeatOffers.Add(userKey);
+            }
+
             if (leaver is not null)
             {
                 EndGameAfterLeaving(leaver);
@@ -895,7 +895,7 @@ public abstract class GameSession : IGameSession
         _notice = null;
         StartNewGame(seats);
         _onGameScreen = true;
-        _seatOffers.Clear();
+        _declinedSeatOffers.Clear();
         error = null;
         return true;
     }
@@ -1025,7 +1025,8 @@ public abstract class GameSession : IGameSession
                 _isPublic,
                 _host is null ? null : PlayerIdFor(_host),
                 _notice,
-                _connections.Values.Count(userKey => !HoldsSeat(userKey)));
+                _connections.Values.Count(userKey => !HoldsSeat(userKey)),
+                [.. _connections.Values.Distinct().Where(IsOfferedASeat).Select(PlayerIdFor)]);
         }
     }
 
@@ -1225,7 +1226,7 @@ public abstract class GameSession : IGameSession
     protected void EndGameInLobby()
     {
         _onGameScreen = false;
-        _seatOffers.Clear();
+        _declinedSeatOffers.Clear();
         FreeAwaySeats();
         CloseGapsInLobby();
     }
@@ -1371,6 +1372,13 @@ public abstract class GameSession : IGameSession
     /// The absent seats of the game in progress a newcomer can take.
     /// </summary>
     private IEnumerable<int> OfferedSeats() => AbsentGameSeats().Where(s => SeatingDuringGameError(s) is null);
+
+    /// <summary>
+    /// Whether <paramref name="userKey"/> is offered an absent seat (see <see cref="HasSeatOffer"/>).
+    /// </summary>
+    private bool IsOfferedASeat(string userKey) =>
+        HasUnfinishedGame && !_isPublic && _playerIds.ContainsKey(userKey) && IsConnected(userKey) && !HoldsSeat(userKey)
+        && !_declinedSeatOffers.Contains(userKey) && OfferedSeats().Any();
 
     /// <summary>
     /// The seats the game in progress waits for: its awaited seats (see <see cref="AwaitedSeats"/>), in order, once all of

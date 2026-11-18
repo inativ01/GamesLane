@@ -117,10 +117,40 @@ function trickTable(game, state, view, { turn = null, facts = () => [], arrived 
     }));
 }
 
-// One of the user's hands, in a box as in Rich man, poor man that glows while `myTurn`: its title, its cards (sorted by
-// the server; while `active`, those `canPick(card)` allows are buttons calling `onPick(card)`, and the others are
-// greyed; the `chosen` ones are raised), and under them `foot` (e.g. buttons).
-function trickHand(state, view, hand, { title, myTurn = false, active = false, canPick = () => false, chosen = [], onPick = () => {}, foot = [] }) {
+// The table (see styles.css) is as high as the room above the bottom of the user's first hand allows (for observers,
+// above the bottom of the screen), at least one card high and at most as high as it is wide; its cards are as large as
+// that height allows, at most half as wide as a quarter of the table, between 16 and 40 pixels (their font size). The
+// left and right players' names go above their cards when there is room, otherwise beside them, and run further
+// towards the middle when they pass under the top player's card and name (roomy); when a name does not fit, every name
+// is left out.
+const TRICK_CARD_HEIGHT = 3.9;
+
+function fitTrickTable() {
+    const table = document.querySelector("#game-screen .trick-table");
+    if (!table || $("game-screen").hidden) return;
+    table.classList.remove("names-above", "roomy", "icons-only");
+    const below = document.querySelector("#game-screen .rp-hand") ?? table.closest(".rp-top");
+    const room = table.offsetHeight + innerHeight - 4 - (below.getBoundingClientRect().bottom + scrollY);
+    const size = Math.max(16, Math.min(40, room / TRICK_CARD_HEIGHT, table.clientWidth / 8 / 2.6));
+    const height = Math.max(TRICK_CARD_HEIGHT * size, Math.min(room, table.clientWidth));
+    table.style.setProperty("--trick-card", `${size}px`);
+    table.style.setProperty("--trick-height", `${height}px`);
+    const names = [...table.querySelectorAll(".trick-player")];
+    const nameHeight = Math.max(0, ...names.map((name) => name.offsetHeight));
+    const above = (height - TRICK_CARD_HEIGHT * size) / 2 - nameHeight - 6;
+    if (above >= 0) table.classList.add("names-above");
+    if (above >= Math.max(TRICK_CARD_HEIGHT * size, nameHeight) + 4) table.classList.add("roomy");
+    const cut = names.some((name) => name.scrollWidth > name.clientWidth
+        || [...name.querySelectorAll(".seat-label-name")].some((label) => label.scrollWidth > label.clientWidth));
+    if (cut) table.classList.add("icons-only");
+}
+
+addFitter(fitTrickTable);
+
+// One of the user's hands, in a box as in Rich man, poor man that glows while `myTurn`: its cards (sorted by the server;
+// while `active`, those `canPick(card)` allows are buttons calling `onPick(card)`, and the others are greyed; the
+// `chosen` ones are raised), and under them "Your turn" while `myTurn` and `foot` (e.g. buttons).
+function trickHand(state, view, hand, { myTurn = false, active = false, canPick = () => false, chosen = [], onPick = () => {}, foot = [] }) {
     const slots = hand.cards.map((card) => {
         const face = cardElement(card);
         face.classList.toggle("chosen", chosen.includes(card));
@@ -137,11 +167,10 @@ function trickHand(state, view, hand, { title, myTurn = false, active = false, c
         button.addEventListener("click", () => onPick(card));
         return el("span", "rp-slot", button);
     });
-    const head = el("div", "my-hand-title", title ?? (view.mySeats.length > 1 ? trickPlayerName(state, hand.seat) : t("Your cards")),
-        ...(myTurn ? [el("span", "rp-your-turn", `👉 ${t("Your turn")}`)] : []));
-    const panel = el("div", `my-hand rp-hand trick-hand${myTurn ? " my-turn" : ""}`, head, el("div", "card-row rp-cards", ...slots));
-    if (foot.length > 0) {
-        panel.append(el("div", "trick-hand-foot", ...foot));
+    const panel = el("div", `my-hand rp-hand trick-hand${myTurn ? " my-turn" : ""}`, el("div", "card-row rp-cards", ...slots));
+    const bottom = [...(myTurn ? [yourTurnTag()] : []), ...foot];
+    if (bottom.length > 0) {
+        panel.append(el("div", "trick-hand-foot", ...bottom));
     }
     return panel;
 }

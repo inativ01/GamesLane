@@ -75,8 +75,7 @@ public class GameHub(
             await activity.CountAsync(ActivityEvent.JoinGame, session.Type, ActivityCounter.Private);
         }
 
-        return new SessionEntry(session.GetPublicState(), playerId, session.GetPrivateState(UserKey), session.GetChat(),
-            session.HasSeatOffer(UserKey));
+        return new SessionEntry(session.GetPublicState(), playerId, session.GetPrivateState(UserKey), session.GetChat());
     }
 
     /// <inheritdoc />

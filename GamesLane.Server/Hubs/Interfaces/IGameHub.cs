@@ -47,8 +47,8 @@ public interface IGameHub
     Task TakeSeat(string sessionId);
 
     /// <summary>
-    /// Logged-in users offered a seat when they opened or reconnected to a game in progress (<see cref="SessionEntry.SeatOffer"/>). Takes
-    /// the absent game seat <paramref name="seat"/> and continues that player's game.
+    /// Logged-in users offered a seat of a game in progress they watch (<see cref="SessionState.SeatOffers"/>). Takes the
+    /// absent game seat <paramref name="seat"/> and continues that player's game.
     /// </summary>
     Task TakeOfferedSeat(string sessionId, int seat);
 

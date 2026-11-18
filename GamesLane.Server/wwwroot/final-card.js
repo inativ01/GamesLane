@@ -296,9 +296,7 @@ function handPanel(game, state, view, hand) {
         return el("span", "rp-slot", button);
     });
 
-    const title = view.mySeats.length > 1 ? playerName(state, hand.seat) : t("Your cards");
-    const head = el("div", "my-hand-title", title, ...(myTurn ? [el("span", "rp-your-turn", `👉 ${t("Your turn")}`)] : []));
-    const panel = el("div", `my-hand rp-hand final-card-hand${glows ? " my-turn" : ""}`, head, el("div", "card-row rp-cards", ...slots));
+    const panel = el("div", `my-hand rp-hand final-card-hand${glows ? " my-turn" : ""}`, el("div", "card-row rp-cards", ...slots));
     const buttons = el("div", "actions final-card-actions");
     const button = (text, onClick, className = "") => {
         const b = el("button", className, text);
@@ -337,6 +335,9 @@ function handPanel(game, state, view, hand) {
     }
     if (me.finished !== null) {
         panel.append(el("p", "hint", t("You finished in place {n}!", { n: me.finished })));
+    }
+    if (myTurn) {
+        buttons.append(yourTurnTag());
     }
     const toDraw = me.penaltyCards > 0 ? me.penaltyCards : !myTurn ? 1 : game.threeBy !== null ? 3 : game.pendingDraw;
     const draw = button(drawText(toDraw), () => send("DrawCard", hand.seat), me.penaltyCards > 0 ? "" : "secondary");

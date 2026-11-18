@@ -456,14 +456,39 @@ public class GameSessionTests
     }
 
     [Fact]
-    public void A_user_without_a_seat_is_offered_the_absent_seats_each_time_they_open_or_reconnect_and_can_watch_instead()
+    public void A_user_watching_without_a_seat_is_offered_an_absent_seat_as_soon_as_its_player_disconnects()
     {
         var session = Started(new TicTacToeSession("ABC123"));
-        session.Enter(Carol, CarolProfile, "conn-c");
+        var carolId = session.Enter(Carol, CarolProfile, "conn-c");
         Assert.False(session.HasSeatOffer(Carol));
+        Assert.Empty(session.GetPublicState().SeatOffers);
+
         session.Disconnect("conn-b", Now);
-        Assert.False(session.HasSeatOffer(Carol));
-        session.Enter(Carol, CarolProfile, "conn-c2");
+
+        Assert.True(session.HasSeatOffer(Carol));
+        Assert.Equal([carolId], session.GetPublicState().SeatOffers);
+        Assert.True(session.TryTakeSeat(Carol, CarolProfile, "conn-c", 1, out var error), error);
+        Assert.Empty(session.GetPublicState().SeatOffers);
+    }
+
+    [Fact]
+    public void A_player_leaving_their_seat_during_a_game_is_not_offered_it_until_they_open_the_game_again()
+    {
+        var session = Started(new TicTacToeSession("ABC123"));
+        Assert.True(session.TryLeaveSeat(Bob, 1, out _));
+        Assert.False(session.HasSeatOffer(Bob));
+
+        session.Enter(Bob, BobProfile, "conn-b2");
+
+        Assert.True(session.HasSeatOffer(Bob));
+    }
+
+    [Fact]
+    public void A_user_without_a_seat_is_offered_the_absent_seats_and_can_watch_instead_until_they_open_the_game_again()
+    {
+        var session = Started(new TicTacToeSession("ABC123"));
+        session.Disconnect("conn-b", Now);
+        session.Enter(Carol, CarolProfile, "conn-c");
         Assert.True(session.HasSeatOffer(Carol));
 
         const string Dan = "user:dan";
