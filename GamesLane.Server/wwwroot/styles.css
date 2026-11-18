@@ -4716,39 +4716,50 @@ main.wazoo {
     font-size: 16px;
 }
 
-/* The dice stay centred; the Roll button follows them (on their right, or on their left in Hebrew). */
+/* The dice and the Roll button after them (on their right, or on their left in Hebrew) are the same size, and shrink
+   together to fit the row. The dice stay centred: an empty space as wide as the button is before them while the button
+   shows, and it shrinks first when the row is short of room. */
 .yz-dice-row {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
+    justify-content: center;
     align-items: center;
     gap: min(2vw, 0.6em);
     margin: 0.6em 0 1.3em;
 }
 
+.yz-dice-row:has(> .yz-roll:not([hidden]))::before {
+    content: "";
+    flex: 0 1000 5.4em;
+    min-width: 0;
+}
+
 .yz-dice {
-    grid-column: 2;
     display: flex;
+    flex: 0 1 auto;
     justify-content: center;
     gap: min(2vw, 0.6em);
+    min-width: 0;
     direction: ltr;
 }
 
 /* The 🎲 Roll button is a square with rounded corners, as in Backgammon. */
 button.yz-roll {
-    grid-column: 3;
-    justify-self: start;
-    width: min(15vw, 4.2em);
+    flex: 0 1 5.4em;
     min-width: 0;
     aspect-ratio: 1;
     padding: 0;
     border-radius: var(--radius);
-    font-size: min(6vw, 1.6em);
     line-height: 1;
+}
+
+button.yz-roll span {
+    font-size: min(7vw, 2em);
 }
 
 .yz-die {
     position: relative;
-    width: min(15vw, 4.2em);
+    flex: 0 1 5.4em;
+    min-width: 0;
     aspect-ratio: 1;
     padding: 0;
     border-radius: 18%;
@@ -4877,8 +4888,14 @@ button.yz-roll {
     white-space: nowrap;
 }
 
-.yz-card thead th:first-child {
+/* Every row sets the column widths, so the upper and lower sections line up when the lower one's head is left out. A
+   line separates the box names from the scores, and the two players' columns. */
+.yz-card tr > :first-child {
     width: 48%;
+}
+
+.yz-card tr > :nth-child(n + 2) {
+    border-inline-start: 2px solid #c9ae86;
 }
 
 .yz-card th[scope="row"] {
