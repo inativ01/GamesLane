@@ -2146,8 +2146,8 @@ function optionsList(state) {
  * view.private is this user's private game information (e.g. their cards), for games that have it, or null.
  * The session bar shows the user's role ("You: …"): seatRole(seat, state) gives a seat's name (by default "Seat 2"), or
  * "Watching" for an observer. While a game is on, the status bar under it shows #status; while the game waits for
- * disconnected players, its players see a "Waiting for …" pop-up (see updateWaiting), and a user without a seat opening
- * or reconnecting to a game with disconnected players is offered their seats (see updateSeatOffer).
+ * disconnected players, its players see a "Waiting for …" pop-up (see updateWaiting), and a user watching it without a
+ * seat is offered their seats as soon as there are any (see updateSeatOffer).
  * view.changed(name, value) tells a page whether something it shows with a sound or an animation (e.g. the cards on
  * the pile) changed since the last update: never on the first update when the page opens during a game, but always on
  * the first one after the lobby (the start of a game). When the status bar turns gold for the user, a short chime
@@ -2230,10 +2230,10 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         if (!waiting.open) waiting.showModal();
     }
 
-    // A user without a seat who opens or reconnects to a game with disconnected players (entry.seatOffer) is offered
-    // their seats: they take one, or choose Watch. A seat taken by someone else, or whose player comes back, leaves the
-    // list; with none left, the user watches.
-    let seatOffer = false;
+    // A user watching a game without a seat is offered the disconnected players' seats as soon as there are any
+    // (state.seatOffers): they take one, or choose Watch, until they open the game or reconnect again. A seat taken by
+    // someone else, or whose player comes back, leaves the list; with none left, the offer closes.
+    let declined = false;
     const offer = el("dialog", "dialog seat-offer");
     offer.addEventListener("cancel", (event) => {
         event.preventDefault();
@@ -2242,21 +2242,17 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
     document.body.append(offer);
 
     function declineSeatOffer() {
-        seatOffer = false;
+        declined = true;
         if (offer.open) offer.close();
         call("DeclineSeatOffer", sessionId).catch(() => {});
     }
 
     function updateSeatOffer(state) {
-        if (!seatOffer) return;
-        const seats = state.phase === "Playing" && !view.isPlayer ? state.absentSeats : [];
+        const offered = Boolean(view.playerId) && (state.seatOffers ?? []).includes(view.playerId);
+        if (!offered) declined = false;
+        const seats = offered && !declined && state.phase === "Playing" && !view.isPlayer ? state.absentSeats : [];
         if (seats.length === 0) {
-            if (view.isPlayer) {
-                seatOffer = false;
-                if (offer.open) offer.close();
-            } else {
-                declineSeatOffer();
-            }
+            if (offer.open) offer.close();
             return;
         }
         const watch = el("button", "secondary", t("Watch"));
@@ -2661,7 +2657,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
 
         view.playerId = entry.playerId ?? null;
         view.private = entry.private ?? null;
-        seatOffer = Boolean(entry.seatOffer);
+        declined = false;
         update(entry.state);
         chat.load(entry.chat ?? []);
     }

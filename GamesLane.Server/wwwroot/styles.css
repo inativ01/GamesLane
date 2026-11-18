@@ -5405,17 +5405,19 @@ button.yaniv-pass:not(:disabled):hover {
 .trick-place.trick-bottom { grid-area: bottom; flex-direction: column-reverse; --arrive-x: 0; --arrive-y: 100px; }
 
 /* A short landscape screen, such as a phone held sideways: the players at the top and at the bottom side by side and
-   staggered by half a card (the top one raised, with its name on the card's right; the bottom one lowered, with its
-   name on the card's left), between the players on the left and on the right, so the table is about one and a half
-   cards tall and the hand fits (see fitHandPanel in common.js). */
+   staggered by half a card (the top one raised, with its name at the top of the card's right; the bottom one lowered,
+   with its name at the bottom of the card's left), close together between the players on the left and on the right,
+   so the table is about one and a half cards tall and the hand fits (see fitHandPanel in common.js). */
 @media (orientation: landscape) and (max-height: 500px) {
     .trick-table {
-        grid-template-columns: 1fr auto auto 1fr;
+        grid-template-columns: repeat(4, auto);
         grid-template-areas: "left top . right" "left top bottom right" "left . bottom right";
+        justify-content: center;
+        column-gap: 0.8rem;
     }
 
-    .trick-place.trick-top { flex-direction: row-reverse; }
-    .trick-place.trick-bottom { flex-direction: row; }
+    .trick-place.trick-top { flex-direction: row-reverse; align-items: flex-start; }
+    .trick-place.trick-bottom { flex-direction: row; align-items: flex-end; }
 }
 
 /* The card just played slides in from its player's side of the table. */
