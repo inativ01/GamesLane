@@ -115,7 +115,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 - Before rolling, **Double** (or tap the cube) offers a double; the other player answers **Take** or **Drop**.
 - **Last move** shows the last turn's moves as numbered arrows.
 - You see the board from your side. The score shows the match, the scores and the pip counts.
-- On a phone held sideways, the board fills the screen's height, with the scores and the buttons beside it.
+- On a landscape screen (wider than it is high, such as a computer or a phone held sideways), the board fills the screen's height, with the scores and the buttons beside it. Players' names are left out when they do not fit; their icons and scores stay.
 
 ### The Gang
 

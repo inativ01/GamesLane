@@ -479,13 +479,13 @@ function showScoreboard(game, state, view) {
         })));
 }
 
-// A phone on its side (as in styles.css), where the scores and the buttons are beside the board.
-const phoneLandscape = matchMedia("(orientation: landscape) and (max-height: 500px)");
+// A landscape screen (as in styles.css), where the scores and the buttons are beside the board.
+const landscape = matchMedia("(orientation: landscape)");
 
-// The players' scores: in the status bar, or on a phone on its side, beside the board above the buttons.
+// The players' scores: in the status bar, or on a landscape screen, beside the board above the buttons.
 function placeScores() {
     const scores = $("scores");
-    if (phoneLandscape.matches) {
+    if (landscape.matches) {
         if (scores.parentElement !== $("bg-side")) $("bg-side").prepend(scores);
     } else if (scores.parentElement !== $("status-bar")) {
         $("status-bar").append(scores);
@@ -494,15 +494,18 @@ function placeScores() {
 }
 
 // The whole page fits the screen without scrolling: the board shrinks by however much the page is too tall (down to
-// 160 pixels high). On a phone on its side, the board takes the whole height under the status bar instead, and the
-// message and the game's options are scrolled to under it.
+// 160 pixels high). On a landscape screen, the board takes the whole height under the status bar instead, as wide as
+// the room beside the scores and the buttons allows, and the message and the game's options are scrolled to under it.
 function fitBoard() {
     const board = document.querySelector("#bg-board .bg-svg");
     if (!board || $("game-screen").hidden) return;
     board.style.maxHeight = "none";
-    if (phoneLandscape.matches) {
-        const top = board.getBoundingClientRect().top + scrollY;
-        board.style.maxHeight = `${Math.max(160, innerHeight - top - 4)}px`;
+    $("bg-board").style.width = "";
+    if (landscape.matches) {
+        const height = Math.max(160, innerHeight - (board.getBoundingClientRect().top + scrollY) - 4);
+        const room = $("game-screen").clientWidth - $("bg-side").offsetWidth - 12;
+        board.style.maxHeight = `${height}px`;
+        $("bg-board").style.width = `${Math.max(160, Math.min(room, height * WIDTH / HEIGHT))}px`;
         return;
     }
     const overflow = document.documentElement.scrollHeight - innerHeight;

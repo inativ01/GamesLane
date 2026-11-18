@@ -4307,10 +4307,10 @@ main.backgammon {
     color: var(--muted);
 }
 
-/* A phone on its side: the board as high as the screen under the status bar (see fitBoard in backgammon.js), with the
+/* A landscape screen: the board as high as the screen under the status bar (see fitBoard in backgammon.js), with the
    players' scores (see placeScores) and the buttons in a column beside it; the message, the match facts and the game's
    options come under it. */
-@media (orientation: landscape) and (max-height: 500px) {
+@media (orientation: landscape) {
     main.backgammon {
         max-width: none;
         padding: 0.25rem 0.5rem 1rem;
@@ -4318,8 +4318,9 @@ main.backgammon {
 
     main.backgammon #game-screen {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: auto auto;
         grid-template-areas: "board side" "message message" "facts facts" "options options";
+        justify-content: center;
         align-items: center;
         column-gap: 0.5rem;
     }
@@ -4345,7 +4346,7 @@ main.backgammon {
     }
 
     main.backgammon .bg-side .score-chip {
-        max-width: 9rem;
+        max-width: 10rem;
         background: var(--surface-soft);
     }
 

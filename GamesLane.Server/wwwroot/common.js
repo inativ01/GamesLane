@@ -1786,16 +1786,17 @@ function showScores(state, view, facts, players) {
     fitScores();
 }
 
-// The players' chips stay on one line: when they do not fit with the names, the names are left out (the icons, marks
-// and scores stay). Chips stacked on purpose (a column, as beside Backgammon's board) keep their names.
+// When the players' names do not fit in full (the chips take more than one line, or, in chips stacked in a column as
+// beside Backgammon's board, a name is cut short), every name is left out: the icons, marks and scores stay.
 function fitScores() {
     const row = $("scores");
     if (!row) return;
     row.classList.remove("compact");
     const chips = [...row.children];
-    if (chips.length < 2 || getComputedStyle(row).flexDirection.startsWith("column")) return;
-    const lineEnd = chips[0].offsetTop + chips[0].offsetHeight;
-    if (chips.some((chip) => chip.offsetTop >= lineEnd)) row.classList.add("compact");
+    const cut = [...row.querySelectorAll(".seat-label-name")].some((name) => name.scrollWidth > name.clientWidth);
+    const lineEnd = chips[0] ? chips[0].offsetTop + chips[0].offsetHeight : 0;
+    const wraps = !getComputedStyle(row).flexDirection.startsWith("column") && chips.some((chip) => chip.offsetTop >= lineEnd);
+    if (cut || wraps) row.classList.add("compact");
 }
 
 addEventListener("resize", fitScores);
