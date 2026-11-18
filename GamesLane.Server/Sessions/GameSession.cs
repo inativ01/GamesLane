@@ -1031,7 +1031,8 @@ public abstract class GameSession : IGameSession
 
     /// <summary>
     /// Adds a chat message from <paramref name="userKey"/>, shown with <paramref name="profile"/>. Anyone with the session
-    /// open can chat, seated or watching. Runs of spaces and line breaks become one space. Only the latest
+    /// open can chat, seated or watching, except in public games (played with strangers), which have no chat. Runs of
+    /// spaces and line breaks become one space. Only the latest
     /// <see cref="ChatHistoryLength"/> messages are kept.
     /// </summary>
     public bool TrySendChat(string userKey, PlayerProfile profile, string? text, DateTimeOffset now,
@@ -1044,6 +1045,12 @@ public abstract class GameSession : IGameSession
             if (text.Length is 0 or > MaxChatLength)
             {
                 error = $"Write a message of 1 to {MaxChatLength} characters.";
+                return false;
+            }
+
+            if (_isPublic)
+            {
+                error = "Public games have no chat.";
                 return false;
             }
 

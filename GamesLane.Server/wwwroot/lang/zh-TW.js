@@ -167,6 +167,7 @@ TRANSLATIONS["zh-TW"] = {
     "Log in to chat.": "請登入後聊天。",
     "Write a message of 1 to {n} characters.": "請輸入 1 到 {n} 個字元的訊息。",
     "Open the game to chat.": "請開啟遊戲後聊天。",
+    "Public games have no chat.": "公開遊戲沒有聊天功能。",
 
     // Main screen
     "Public games": "公開遊戲",

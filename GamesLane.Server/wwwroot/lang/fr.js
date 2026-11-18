@@ -167,6 +167,7 @@ TRANSLATIONS.fr = {
     "Log in to chat.": "Connecte-toi pour discuter.",
     "Write a message of 1 to {n} characters.": "Écris un message de 1 à {n} caractères.",
     "Open the game to chat.": "Ouvre la partie pour discuter.",
+    "Public games have no chat.": "Les parties publiques n'ont pas de discussion.",
 
     // Main screen
     "Public games": "Parties publiques",

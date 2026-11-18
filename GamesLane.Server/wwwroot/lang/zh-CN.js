@@ -167,6 +167,7 @@ TRANSLATIONS["zh-CN"] = {
     "Log in to chat.": "请登录后聊天。",
     "Write a message of 1 to {n} characters.": "请输入 1 到 {n} 个字符的消息。",
     "Open the game to chat.": "请打开游戏后聊天。",
+    "Public games have no chat.": "公开游戏没有聊天功能。",
 
     // Main screen
     "Public games": "公开游戏",

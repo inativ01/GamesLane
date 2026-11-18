@@ -167,6 +167,7 @@ TRANSLATIONS.he = {
     "Log in to chat.": "התחברו כדי לכתוב בצ'אט.",
     "Write a message of 1 to {n} characters.": "כתבו הודעה באורך 1 עד {n} תווים.",
     "Open the game to chat.": "פתחו את המשחק כדי לכתוב בצ'אט.",
+    "Public games have no chat.": "במשחקים ציבוריים אין צ'אט.",
 
     // Main screen
     "Public games": "משחקים ציבוריים",

@@ -921,6 +921,16 @@ public class GameSessionTests
     }
 
     [Fact]
+    public void Public_games_have_no_chat()
+    {
+        var session = PublicTicTacToe();
+
+        Assert.False(session.TrySendChat(Alice, AliceProfile, "Hi", Now, out _, out var error));
+        Assert.Equal("Public games have no chat.", error);
+        Assert.Empty(session.GetChat());
+    }
+
+    [Fact]
     public void Only_the_latest_chat_messages_are_kept_and_they_are_saved_with_the_session()
     {
         var session = Seated(new TicTacToeSession("ABC123"));

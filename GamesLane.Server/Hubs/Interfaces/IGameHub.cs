@@ -98,7 +98,7 @@ public interface IGameHub
 
     /// <summary>
     /// Logged-in users who have the session open (players and watchers). Sends a chat message of 1 to
-    /// <see cref="GameSession.MaxChatLength"/> characters to everyone in the session.
+    /// <see cref="GameSession.MaxChatLength"/> characters to everyone in the session. Not in public games, which have no chat.
     /// </summary>
     Task SendChatMessage(string sessionId, string text);
 

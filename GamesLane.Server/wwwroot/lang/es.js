@@ -167,6 +167,7 @@ TRANSLATIONS.es = {
     "Log in to chat.": "Inicia sesión para chatear.",
     "Write a message of 1 to {n} characters.": "Escribe un mensaje de 1 a {n} caracteres.",
     "Open the game to chat.": "Abre la partida para chatear.",
+    "Public games have no chat.": "Las partidas públicas no tienen chat.",
 
     // Main screen
     "Public games": "Partidas públicas",

@@ -1999,13 +1999,16 @@ function startChat(sessionId, view) {
         }
     });
 
-    // With the chat off, 💬 and the chat are hidden. The boxes in the chat show the current settings.
+    // Public games have no chat (the server refuses it); available stays false until the session's state is known.
+    let available = false;
+
+    // With the chat off, or in a public game, 💬 and the chat are hidden. The boxes in the chat show the current settings.
     function applySettings() {
         const { chat, sound } = userSettings();
         panel.querySelector('[name="chat"]').checked = chat;
         panel.querySelector('[name="sound"]').checked = sound;
-        button.hidden = !chat;
-        if (!chat) {
+        button.hidden = !chat || !available;
+        if (button.hidden) {
             show(false);
             toast.hidden = true;
         }
@@ -2016,6 +2019,12 @@ function startChat(sessionId, view) {
 
     return {
         button,
+        // Whether the session has a chat: private games only.
+        setAvailable(on) {
+            if (available === on) return;
+            available = on;
+            applySettings();
+        },
         // The messages from entering the session (again, after reconnecting): no notifications, only the unread count.
         load(history) {
             history.forEach((m) => messages.set(m.number, m));
@@ -2512,6 +2521,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         }
         if (view.isPlayer) registerForNotifications(true);
         keepScreenAwake(state.phase === "Playing");
+        chat.setAvailable(!state.isPublic);
         const inLobby = state.phase === "Lobby";
         const taken = state.seats.filter(Boolean).length;
 

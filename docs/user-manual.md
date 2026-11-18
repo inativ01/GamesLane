@@ -68,7 +68,7 @@ Play with other people on GamesLane.
 
 - **Create a game** under **Public games**, then choose a game. As its creator, you choose the [game options](#game-options) and tap **Start**.
 - **Join a game** seats you in a game of your choice that is waiting for players. If there is none, you can create one.
-- A public game has no code or invite link, and nobody can watch it.
+- A public game has no code or invite link, no chat, and nobody can watch it.
 - It starts by itself once all its seats are taken; the creator can also start it once enough players are seated.
 - **Leave game** (on your seat, or in the ☰ menu) gives up your seat. During a game, this ends the game for everyone and returns to the lobby, except in Rich man, poor man and Yaniv, which go on.
 - If your seat is freed while you are away, you cannot return to that game.
@@ -80,7 +80,7 @@ Play with other people on GamesLane.
 - **Notifications (iPhone app):** the first time you sit in a game, the app asks to send notifications. Allow them, and when your turn comes while the game is not on your screen (the phone is locked, another app is open, the app is closed or on another page), a notification says "Your turn" with the game's name. Tap it to go back to the game. To stop them, turn off notifications for GamesLane in the iPhone's Settings.
 - **Screen stays on (iPhone app):** while a game is being played, the screen does not dim or lock, so a phone or iPad showing the table stays on. Elsewhere it dims as usual.
 - **The ☰ menu:** the invite link, how many play and watch, **Leave my seat (watch)**, **End game for everyone**, and **Send feedback**.
-- <a id="chat"></a>**Chat:** 💬 opens the chat, for everyone in the game. New messages show on 💬 and in a short pop-up. In the chat, untick **Chat** to hide it, or **Sound** to turn off all sounds.
+- <a id="chat"></a>**Chat:** 💬 opens the chat, for everyone in the game. Public games have no chat. New messages show on 💬 and in a short pop-up. In the chat, untick **Chat** to hide it, or **Sound** to turn off all sounds.
 - **Watching:** anyone without a seat watches. Watchers never see the players' hidden cards.
 - **The table:** in most card and tile games, **Hide table** hides the players' table (for example when a shared screen shows it), and **Show table** shows it again.
 - **After a game:** **Play again**, or **Back to the lobby**.
