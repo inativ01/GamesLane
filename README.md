@@ -55,6 +55,6 @@ dotnet test
 GamesLane.Server/        ASP.NET Core backend: game rules, sessions, SignalR hub, auth, database, and the web pages (wwwroot/)
 GamesLane.Server.Tests/  Unit tests
 GamesLane.iOS/           iPhone app (Capacitor)
-docs/                    User manual, developer guide, and Poker Heist's card texts
+docs/                    User manual, developer guide and App Store submission
 Dockerfile               Build for Render
 ```

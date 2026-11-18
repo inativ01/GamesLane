@@ -24,7 +24,7 @@ public enum PokerHeistChoice
 
 /// <summary>
 /// A challenge or specialist card of the advanced game: its key (used in options), name, what it does, and what the
-/// group must agree on for it (<see cref="PokerHeistChoice.None"/> if nothing). The full texts are in <c>docs/poker-heist/</c>.
+/// group must agree on for it (<see cref="PokerHeistChoice.None"/> if nothing).
 /// </summary>
 public record PokerHeistCard(string Key, string Name, PokerHeistCardKind Kind, string Text, PokerHeistChoice Choice = PokerHeistChoice.None);
 

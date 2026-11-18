@@ -126,7 +126,7 @@ GamesLane.iOS/                 iPhone app (Capacitor, see iPhone app below)
   ios/App/App/AppDelegate.swift  Passes the device token for notifications to the plugin
   ios/App/App/PrivacyInfo.xcprivacy  The app's privacy manifest: the data it collects (matching the App Store privacy answers in docs/app-store.md), no tracking
   ios/App/App/App.entitlements Push notifications (aps-environment), Sign in with Apple, and the associated domains (applinks, webcredentials) of gameslane.onrender.com
-docs/                          This guide, the user manual and the App Store submission (app-store.md: the listing, privacy answers and review notes); original logo, name and splash pictures (kept out of git); docs/poker-heist/: Poker Heist's card texts
+docs/                          This guide, the user manual and the App Store submission (app-store.md: the listing, privacy answers and review notes); original logo, name and splash pictures (kept out of git)
 ```
 
 ## Sessions and seats
