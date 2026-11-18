@@ -75,7 +75,7 @@ Play with other people on GamesLane.
 
 ## During a game
 
-- **The game bar**, under the top bar, shows the game, your seat, the game code (🔑), the chat (💬) and the menu (☰). On a phone held sideways, the top bars are hidden to leave room for the game: tap the small ▾ tab to show them. In the card games and Dominoes, your cards (or tiles) and their buttons always fit on the screen then: the cards on the table and in your hand get smaller when needed. In Hearts and Spades, on any screen, the table is as wide as the screen and as high as the room above your cards allows; the four cards are side by side (left, top, bottom and right player), and when a name does not fit, only the players' icons are shown. In the card games and Dominoes, **👉 Your turn** shows in the line under your cards (or tiles) on your turn.
+- **The game bar**, under the top bar, shows the game, your seat, the game code (🔑), the chat (💬) and the menu (☰). On a phone held sideways, the top bars are hidden to leave room for the game: tap the small ▾ tab to show them.
 - **The status bar** says what is happening. It turns gold when it is your turn or a button is waiting for you, with a chime, and the phone vibrates where it can. In Tic-tac-toe, Backgammon and Wazoo it also shows each player's score (without the names when they do not fit on one line); on a landscape screen, the scores are at the top of the screen's side instead, beside the board or the dice, and the board or the dice keep their full size. The round or game number is at the bottom of the screen, above the game's options (in Tic-tac-toe on a landscape screen, under the scores).
 - **Notifications (iPhone app):** the first time you sit in a game, the app asks to send notifications. Allow them, and when your turn comes while the game is not on your screen (the phone is locked, another app is open, the app is closed or on another page), a notification says "Your turn" with the game's name. Tap it to go back to the game. To stop them, turn off notifications for GamesLane in the iPhone's Settings.
 - **Screen stays on (iPhone app):** while a game is being played, and for 5 minutes after it ends, the screen does not dim or lock, so a phone or iPad showing the table stays on. Elsewhere it dims as usual.
@@ -131,7 +131,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 ### Rich man, poor man
 
 - Tap cards of one number, then **Select** to throw them, or **Pass**. When you start a round, tapping a card picks all your cards of that number (tap a picked card to throw fewer); otherwise it picks as many as are needed.
-- When it is your turn, your hand glows, **👉 Your turn** shows under your cards, and the status bar says what to do.
+- When it is your turn, your hand glows and the status bar says what to do.
 - In the exchange, the poorer player confirms with **Give these cards**; the richer player taps the cards to give, then **Give**.
 - During the exchange, a watcher can **Ask to join**; any player can **Accept** (choosing the newcomer's place) or **Decline**.
 - **Read throws aloud**, on a screen without a seat such as a TV, says each throw out loud.
