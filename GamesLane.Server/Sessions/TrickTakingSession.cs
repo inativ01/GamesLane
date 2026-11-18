@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using GamesLane.Server.Games.PokerHeist;
+using GamesLane.Server.Games.PlayingCards;
 using GamesLane.Server.Games.Tricks;
 
 namespace GamesLane.Server.Sessions;

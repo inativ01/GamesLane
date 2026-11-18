@@ -1,4 +1,4 @@
-namespace GamesLane.Server.Games.PokerHeist;
+namespace GamesLane.Server.Games.PlayingCards;
 
 /// <summary>
 /// A card suit. <see cref="None"/> is only for the "Jack" specialist card, which has no suit and so never makes a flush;

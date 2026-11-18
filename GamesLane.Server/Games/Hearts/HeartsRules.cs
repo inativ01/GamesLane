@@ -1,4 +1,4 @@
-using GamesLane.Server.Games.PokerHeist;
+using GamesLane.Server.Games.PlayingCards;
 
 namespace GamesLane.Server.Games.Hearts;
 

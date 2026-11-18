@@ -37,8 +37,8 @@ async function registerForNotifications(ask) {
     }
 }
 
-// In the iPhone app, the screen stays on while a game is being played (e.g. a shared screen on the table) and dims as
-// usual elsewhere. The app keeps the setting across pages, so every page starts by turning it off.
+// In the iPhone app, the screen stays on while a game is on screen, played or showing its result (e.g. a shared screen
+// on the table), and dims as usual elsewhere. The app keeps the setting across pages, so every page starts by turning it off.
 let screenKeptAwake = null;
 
 function keepScreenAwake(on) {
@@ -2520,7 +2520,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             return;
         }
         if (view.isPlayer) registerForNotifications(true);
-        keepScreenAwake(state.phase === "Playing");
+        keepScreenAwake(state.phase !== "Lobby");
         chat.setAvailable(!state.isPublic);
         const inLobby = state.phase === "Lobby";
         const taken = state.seats.filter(Boolean).length;

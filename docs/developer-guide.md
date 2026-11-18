@@ -78,9 +78,10 @@ GamesLane.Server/              ASP.NET Core backend
   Sessions/TrickTakingSession.cs  Shared by the trick-taking games' sessions: 4 seats, playing a card, the next hand, the trick as everyone sees it
   Sessions/                    Game-specific sessions; the session store (memory, and the database through SessionRepository); SessionSnapshot, which saves a session as JSON; ExpiredSessionCleanup (hourly, deletes sessions 6 hours after their last activity)
   Games/GameOptions.cs         Game options (rule variants): each game's options, and checking chosen values
+  Games/PlayingCards/          Shared by the card games: Card, Suit and Deck (in no game's namespace, so renaming a game does not change the saved-session fingerprint of the others)
   Games/Tricks/                Shared by the trick-taking games: the 52-card deck, hand order and trick winner (TrickCards), and the play of the tricks (TrickTakingGame: 4 players, 13 cards each, following suit, trumps)
   Games/TicTacToe/             Tic-tac-toe rules
-  Games/PokerHeist/               Poker Heist rules: cards, poker hand ranking, heists
+  Games/PokerHeist/            Poker Heist rules: its cards, poker hand ranking, heists
   Games/Backgammon/            Backgammon rules: position, legal moves, turns, doubling cube, matches, options
   Games/RichManPoorMan/        Rich man, poor man rules: the deck (one set of 2 to A per player), rounds, players who left, the exchange, options
   Games/Wazoo/                 Wazoo rules: scoring each box (with the joker rule), scorecards and bonuses, turns
@@ -101,7 +102,7 @@ GamesLane.Server/              ASP.NET Core backend
     privacy.html               Privacy policy in English (the address registered with Google); privacy.he.html, .es.html, .fr.html, .pt.html, .zh-CN.html, .zh-TW.html: the policy in each language, linked from the main screen in the chosen language
     help.html                  Help in English: one section for the main screen, the lobby and each game; help.he.html, .es.html, .fr.html, .pt.html, .zh-CN.html, .zh-TW.html: the help in each language, shown in the help panel (common.js)
     tictactoe.html/.js         Tic-tac-toe page
-    poker-heist.html/.js          Poker Heist page
+    poker-heist.html/.js       Poker Heist page
     backgammon.html/.js        Backgammon page (the board is drawn as SVG; on a portrait screen, it is as wide as the screen with the buttons under it; on a landscape screen, it is as high as the screen, with the players' scores and the buttons beside it)
     rich-man-poor-man.html/.js Rich man, poor man page
     wazoo.html/.js             Wazoo page
@@ -113,7 +114,7 @@ GamesLane.Server/              ASP.NET Core backend
     manifest.webmanifest       Makes the site installable as an app (name, colors, start page, icons); linked from every page. The main screen (home.js) offers Install app: the browser's own dialog where it sends beforeinstallprompt (Chrome, Edge), otherwise on iPhone and iPad a dialog with the Share steps; not in the installed app (display-mode standalone), in the iPhone app (window.Capacitor.isNativePlatform()) or after Not now (installDismissed in localStorage)
     sw.js                      Service worker, registered by common.js: caches nothing (games are live); only when a page cannot be reached does it show a short offline page in the device's language, with Try again
     images/                    Logo (logo-32/180/256, and the app icons logo-192, logo-512 and logo-maskable-512, the logo inside the safe zone on the page background), the GamesLane name for the header, the splash screens and the card back (web-sized copies of the originals in docs/), game pictures (SVG)
-    images/poker-heist/           A picture (SVG) for each challenge and specialist card, named by the card's key, e.g. quick-access.svg
+    images/poker-heist/        A picture (SVG) for each challenge and specialist card, named by the card's key, e.g. quick-access.svg
     images/flags/              Flags for the language picker
 GamesLane.Server.Tests/        Unit tests
 GamesLane.iOS/                 iPhone app (Capacitor, see iPhone app below)
@@ -473,7 +474,7 @@ For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run i
   - **Join links:** when a universal link (`https://gameslane.onrender.com/join/...`, see `apple-app-site-association`) opens the app, the plugin loads its path in the web view, on the server the app shows.
   - `vibrate()` vibrates the phone once. `vibrateForTurn()` in `common.js` calls it when the user's turn comes (with the turn chime; Rich man, poor man calls it with its own chime); browsers that can vibrate (not Safari) get `navigator.vibrate` instead.
   - `registerForNotifications({ ask })` registers the device for notifications and resolves with `{ token, sandbox }`: Apple's device token (hexadecimal, passed on by `AppDelegate` through Capacitor's `capacitorDidRegisterForRemoteNotifications`) and whether it is for Apple's development (sandbox) servers. iOS chooses those by the signing profile, not the build configuration, so the plugin reads `aps-environment` from the app's embedded profile (`embedded.mobileprovision`): `development` means sandbox; TestFlight and App Store builds embed no profile and use production; the Simulator uses sandbox. With `ask`, iOS asks the user to allow notifications (alerts and sounds) if they have not answered yet; it rejects with `DENIED` when they are not allowed. `registerForNotifications(ask)` in `common.js` calls it without `ask` on every page once the user is known, and with `ask` once per page when the user holds a seat in a game, then posts the result with the page's language to `/api/notifications/device`. Changing the language reloads the page, so the device follows it.
-  - `keepAwake({ on })` keeps the screen on, or lets it dim and lock as usual (`UIApplication.isIdleTimerDisabled`, which iOS applies only while the app is in front). `keepScreenAwake(on)` in `common.js` turns it off when every page loads (the setting lasts across pages) and, in `startSessionPage`, on while the session's game is being played (the Playing phase), for players and watchers alike, so a shared screen on the table stays on.
+  - `keepAwake({ on })` keeps the screen on, or lets it dim and lock as usual (`UIApplication.isIdleTimerDisabled`, which iOS applies only while the app is in front). `keepScreenAwake(on)` in `common.js` turns it off when every page loads (the setting lasts across pages) and, in `startSessionPage`, on while the session's game is on screen (any phase but the lobby: played, or showing its result), for players and watchers alike, so a shared screen on the table stays on.
   - **Tapped notifications:** the plugin is Capacitor's push notification handler (`NotificationHandlerProtocol`): a tapped notification loads its `path` in the web view, on the server the app shows. When the tap launches the app, `SceneDelegate` takes the notification from the scene's connection options (`GamesLanePlugin.launchPath`) and the plugin opens it as it loads, replacing the first page; the same tap reported again to the handler is not opened twice. One that comes while the app is in front shows as a banner (the server sends one only when the game's page is not in view).
 - **Other sites** open in Safari.
 - **Icon and launch screen:** made from `assets/logo.png` (the logo, 1024×1024) on the page background by `npm run assets`, into `ios/App/App/Assets.xcassets`.

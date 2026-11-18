@@ -2,6 +2,7 @@ using GamesLane.Server.Games.Backgammon;
 using GamesLane.Server.Games.Dominoes;
 using GamesLane.Server.Games.RichManPoorMan;
 using GamesLane.Server.Games.PokerHeist;
+using GamesLane.Server.Games.PlayingCards;
 using GamesLane.Server.Games.TicTacToe;
 using GamesLane.Server.Games.FinalCard;
 using GamesLane.Server.Games.Hearts;

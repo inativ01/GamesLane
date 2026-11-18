@@ -1,5 +1,6 @@
 using GamesLane.Server.Games;
 using GamesLane.Server.Games.PokerHeist;
+using GamesLane.Server.Games.PlayingCards;
 using GamesLane.Server.Sessions;
 
 namespace GamesLane.Server.Tests;
