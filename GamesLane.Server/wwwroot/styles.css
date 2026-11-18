@@ -1843,8 +1843,9 @@ main .score-chip .seat-label {
     min-width: 0;
 }
 
-/* Tic-tac-toe on a landscape screen: the board at its full size, centred in the room beside the scores, which get the
-   room the board leaves. */
+/* Tic-tac-toe on a landscape screen: the board as high as the screen under the status bar (see fitBoard in
+   tictactoe.js), centred in the room beside a column at the screen's end side with the scores, the round and the
+   draws under them, and the buttons centred in the rest of its height; the column gets the room the board leaves. */
 @media (orientation: landscape) {
     main.tictactoe {
         max-width: none;
@@ -1853,20 +1854,16 @@ main .score-chip .seat-label {
     main.tictactoe #game-screen {
         display: grid;
         grid-template-columns: 1fr minmax(0, max-content);
-        grid-template-areas: "board scores" "actions actions" "facts facts" "options options";
+        grid-template-rows: auto auto 1fr auto;
+        grid-template-areas: "board scores" "board facts" "board actions" "options options";
         column-gap: 0.5rem;
     }
 
-    main.tictactoe .board { grid-area: board; }
-    main.tictactoe .game-actions { grid-area: actions; }
+    main.tictactoe .board { grid-area: board; justify-self: center; align-self: start; margin: 0; }
+    main.tictactoe .score-row { grid-area: scores; }
     main.tictactoe .score-facts { grid-area: facts; }
+    main.tictactoe .game-actions { grid-area: actions; align-self: center; flex-direction: column; }
     main.tictactoe .game-options { grid-area: options; }
-
-    main.tictactoe .score-row {
-        grid-area: scores;
-        justify-self: end;
-        align-self: start;
-    }
 }
 
 /* The match facts (round, game, draws), at the bottom of the game screen above the game's options. */
@@ -4393,8 +4390,8 @@ main.backgammon {
 
 /* A landscape screen: the board as high as the screen under the status bar (see fitBoard in backgammon.js), centred in
    the room beside a column at the top of the screen's end side with the players' scores (see placeScores in common.js)
-   and the buttons under them; the column gets the room the board leaves. The message, the match facts and the game's
-   options come under it. */
+   and the buttons centred in the rest of its height; the column gets the room the board leaves. The message, the
+   match facts and the game's options come under it. */
 @media (orientation: landscape) {
     main.backgammon {
         max-width: none;
@@ -4415,7 +4412,7 @@ main.backgammon {
 
     main.backgammon .bg-side {
         grid-area: side;
-        align-self: start;
+        align-self: stretch;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -4431,7 +4428,7 @@ main.backgammon {
         flex-direction: column;
         flex-wrap: nowrap;
         gap: 0.4rem;
-        margin: 0;
+        margin: auto 0;
     }
 
     main.backgammon .game-actions button {
@@ -4805,9 +4802,9 @@ button.yz-roll span {
     font-size: calc(var(--yz-die) * 0.4);
 }
 
-/* A landscape screen: the dice row as wide as the screen, the dice and the Roll button at its start (full size, unless
-   they would take more than 80% of the row) and the players' scores stacked at its end, at its top (see placeScores in
-   common.js), in the room the dice leave. The rest keeps the page's width. */
+/* A landscape screen: the dice row as wide as the screen, with the players' scores stacked at its end, at its top (see
+   placeScores in common.js), in the room the dice leave; the dice and the Roll button (full size, unless they would
+   take more than 80% of the row) are centred between the row's start and the scores. The rest keeps the page's width. */
 @media (orientation: landscape) {
     main.wazoo {
         max-width: none;
@@ -4822,16 +4819,16 @@ button.yz-roll span {
     .yz-dice-row {
         --yz-die: min(5.4em, (80cqi - 6 * var(--yz-gap)) / 7);
         display: grid;
-        grid-template-columns: auto auto 1fr minmax(0, max-content);
+        grid-template-columns: 1fr auto auto 1fr minmax(0, max-content);
         align-items: start;
     }
 
     .yz-dice-row:has(> .yz-roll:not([hidden]))::before { content: none; }
-    .yz-dice { grid-area: 1 / 1; }
-    button.yz-roll { grid-area: 1 / 2; }
+    .yz-dice { grid-area: 1 / 2; }
+    button.yz-roll { grid-area: 1 / 3; }
 
     .yz-dice-row .score-row {
-        grid-area: 1 / 4;
+        grid-area: 1 / 5;
         font-size: 0.9em;
     }
 }

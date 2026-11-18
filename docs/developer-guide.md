@@ -101,7 +101,7 @@ GamesLane.Server/              ASP.NET Core backend
     cards.html                 Cards page: the card back and every GamesLane playing card at several sizes (linked from the profile for admins)
     privacy.html               Privacy policy in English (the address registered with Google); privacy.he.html, .es.html, .fr.html, .pt.html, .zh-CN.html, .zh-TW.html: the policy in each language, linked from the main screen in the chosen language
     help.html                  Help in English: one section for the main screen, the lobby and each game; help.he.html, .es.html, .fr.html, .pt.html, .zh-CN.html, .zh-TW.html: the help in each language, shown in the help panel (common.js)
-    tictactoe.html/.js         Tic-tac-toe page
+    tictactoe.html/.js         Tic-tac-toe page (on a landscape screen, the board is as high as the screen, sized by fitBoard, beside a column with the players' scores, the round and the draws, and the buttons)
     poker-heist.html/.js       Poker Heist page
     backgammon.html/.js        Backgammon page (the board is drawn as SVG; on a portrait screen, it is as wide as the screen with the buttons under it; on a landscape screen, it is as high as the screen, beside a column at the screen's end side with the players' scores and the buttons under them)
     rich-man-poor-man.html/.js Rich man, poor man page
