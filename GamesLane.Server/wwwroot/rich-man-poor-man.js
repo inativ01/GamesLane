@@ -166,10 +166,10 @@ function handPanel(game, state, view, hand) {
         const valid = picks.length > 0 && (!current
             || (picks.length === current.cards.length && rankOf(picks[0]) > rankOf(current.cards[0])));
         // Pass and Select at opposite ends of the panel, so one is not tapped instead of the other.
+        buttons.append(yourTurnTag());
         if (current) {
             button(t("Pass"), () => send("Pass"), true, true, "rp-pass");
         }
-        buttons.append(yourTurnTag());
         button(t("Select"), () => send("ThrowCards", picks), valid, false, "rp-select");
     } else if (game.phase === "Playing" || game.phase === "GameOver") {
         if (hand.received && game.phase === "Playing" && !game.lastThrow) {

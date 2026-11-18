@@ -4509,6 +4509,12 @@ main.tricks .my-hand.my-turn {
     font-weight: 800;
 }
 
+/* "Your turn" starts the line under the cards, at its start, with the rest after it. */
+.trick-hand-foot:has(> .rp-your-turn),
+.yaniv-hand-foot:has(> .rp-your-turn) {
+    justify-content: flex-start;
+}
+
 /* The hand, from low to high left to right in every language. The cards overlap, each showing its top-left corner,
    and their slots narrow further when the hand is wider than the panel; the last card keeps its full width. A long
    hand on a phone takes two rows. */
@@ -5398,17 +5404,18 @@ button.yaniv-pass:not(:disabled):hover {
 .trick-place.trick-right { grid-area: right; --arrive-x: 80px; --arrive-y: 0; }
 .trick-place.trick-bottom { grid-area: bottom; flex-direction: column-reverse; --arrive-x: 0; --arrive-y: 100px; }
 
-/* A short landscape screen, such as a phone held sideways: the players at the top and at the bottom side by side,
-   staggered (the top one raised, the bottom one lowered), so the table is about one card tall and the hand fits (see
-   fitHandPanel in common.js). */
+/* A short landscape screen, such as a phone held sideways: the players at the top and at the bottom side by side and
+   staggered by half a card (the top one raised, with its name on the card's right; the bottom one lowered, with its
+   name on the card's left), between the players on the left and on the right, so the table is about one and a half
+   cards tall and the hand fits (see fitHandPanel in common.js). */
 @media (orientation: landscape) and (max-height: 500px) {
     .trick-table {
         grid-template-columns: 1fr auto auto 1fr;
-        grid-template-areas: "left top bottom right";
+        grid-template-areas: "left top . right" "left top bottom right" "left . bottom right";
     }
 
-    .trick-place.trick-top { margin-bottom: 1.5rem; }
-    .trick-place.trick-bottom { margin-top: 1.5rem; }
+    .trick-place.trick-top { flex-direction: row-reverse; }
+    .trick-place.trick-bottom { flex-direction: row; }
 }
 
 /* The card just played slides in from its player's side of the table. */

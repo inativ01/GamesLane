@@ -336,6 +336,9 @@ function handPanel(game, state, view, hand) {
     if (me.finished !== null) {
         panel.append(el("p", "hint", t("You finished in place {n}!", { n: me.finished })));
     }
+    if (myTurn) {
+        buttons.append(yourTurnTag());
+    }
     const toDraw = me.penaltyCards > 0 ? me.penaltyCards : !myTurn ? 1 : game.threeBy !== null ? 3 : game.pendingDraw;
     const draw = button(drawText(toDraw), () => send("DrawCard", hand.seat), me.penaltyCards > 0 ? "" : "secondary");
     draw.disabled = !canDraw(game, hand.seat);
@@ -348,9 +351,6 @@ function handPanel(game, state, view, hand) {
     if (myTurn && game.canChallenge) {
         const challenge = button(t("Challenge!"), () => send("Challenge", hand.seat), "final-card-challenge");
         challenge.title = t("Did they have a card of the color? If so, they draw the cards; if not, you draw 2 more.");
-    }
-    if (myTurn) {
-        buttons.append(yourTurnTag());
     }
     const call = button(t("Final Card!"), () => send("CallFinalCard", hand.seat), "final-card-call");
     call.disabled = game.phase !== "Playing";
