@@ -1825,6 +1825,7 @@ button.icon-button {
 /* On a landscape screen, the score row is in the game screen, at the top of the screen's end side (see placeScores in
    common.js): the chips in a column, as wide as the room there allows. */
 main .score-row {
+    flex: none;
     flex-direction: column;
     align-items: stretch;
     min-width: 0;
