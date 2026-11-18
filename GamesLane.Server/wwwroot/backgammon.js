@@ -493,9 +493,10 @@ function placeScores() {
     fitScores();
 }
 
-// The whole page fits the screen without scrolling: the board shrinks by however much the page is too tall (down to
-// 160 pixels high). On a landscape screen, the board takes the whole height under the status bar instead, as wide as
-// the room beside the scores and the buttons allows, and the message and the game's options are scrolled to under it.
+// On a portrait screen, the board is as wide as the screen, but the buttons under it fit on the screen: the board
+// shrinks by however much they do not (down to 160 pixels high). On a landscape screen, the board takes the whole
+// height under the status bar, as wide as the room beside the scores and the buttons allows. Either way, the message,
+// the match facts and the game's options are scrolled to under it.
 function fitBoard() {
     const board = document.querySelector("#bg-board .bg-svg");
     if (!board || $("game-screen").hidden) return;
@@ -508,7 +509,7 @@ function fitBoard() {
         $("bg-board").style.width = `${Math.max(160, Math.min(room, height * WIDTH / HEIGHT))}px`;
         return;
     }
-    const overflow = document.documentElement.scrollHeight - innerHeight;
+    const overflow = $("bg-side").getBoundingClientRect().bottom + scrollY + 12 - innerHeight;
     if (overflow > 0) {
         board.style.maxHeight = `${Math.max(160, board.getBoundingClientRect().height - overflow)}px`;
     }

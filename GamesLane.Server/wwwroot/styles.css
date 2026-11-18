@@ -4297,9 +4297,32 @@ main.backgammon {
 .bg-arrow-step { fill: #ffb02e; stroke: #fff; stroke-width: 3; }
 .bg-arrow-number { fill: var(--black); font-size: 18px; font-weight: 800; pointer-events: none; }
 
-/* The 🎲 Roll button is square: as high as it is wide. */
+/* The 🎲 Roll button is a square with rounded corners. */
 #bg-roll {
+    width: 5.6rem;
+    min-width: 0;
     aspect-ratio: 1;
+    align-self: center;
+    padding: 0;
+    border-radius: var(--radius);
+    font-size: 1.45rem;
+}
+
+/* A portrait screen: the board as wide as the screen, as long as the buttons under it fit (see fitBoard in
+   backgammon.js); the message, the match facts and the game's options may need a scroll. */
+@media (orientation: portrait) {
+    main.backgammon:has(#game-screen:not([hidden])) {
+        max-width: none;
+        padding-inline: 0;
+    }
+
+    main.backgammon .bg-board {
+        margin-inline: 0;
+    }
+
+    main.backgammon #game-screen > :not(.bg-board) {
+        padding-inline: 0.75rem;
+    }
 }
 
 #bg-last-move[aria-pressed="true"] {
@@ -4372,9 +4395,11 @@ main.backgammon {
         font-size: 1rem;
     }
 
-    main.backgammon .game-actions button.icon-button {
-        padding: 0.3rem 0.8rem;
-        font-size: 1.6rem;
+    main.backgammon .game-actions #bg-roll {
+        width: 4.8rem;
+        min-width: 0;
+        padding: 0;
+        font-size: 1.3rem;
     }
 }
 
