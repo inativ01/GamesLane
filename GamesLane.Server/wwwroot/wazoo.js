@@ -56,9 +56,10 @@ function noticeRoll(game) {
         playGameSound(game.held.filter((held) => !held).length === 1 ? "die" : "dice");
         rollingUntil = Date.now() + ROLL_MS;
         clearInterval(rollTimer);
+        // The last redraw is the one that starts after the animation's end, so it shows the dice rolled.
         rollTimer = setInterval(() => {
-            wazoo.refresh();
             if (Date.now() >= rollingUntil) clearInterval(rollTimer);
+            wazoo.refresh();
         }, 90);
     }
     seenRolls = game.rolls;

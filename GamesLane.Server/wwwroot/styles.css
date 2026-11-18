@@ -4289,6 +4289,46 @@ main.backgammon {
     color: var(--muted);
 }
 
+/* A phone on its side: the board as high as the screen under the status bar (see fitBoard in backgammon.js), with the
+   buttons in a column beside it; the message and the game's options come under it. */
+@media (orientation: landscape) and (max-height: 500px) {
+    main.backgammon {
+        max-width: none;
+        padding: 0.25rem 0.5rem 1rem;
+    }
+
+    main.backgammon #game-screen {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "board actions" "message message" "options options";
+        align-items: center;
+        column-gap: 0.5rem;
+    }
+
+    main.backgammon .bg-board { grid-area: board; margin: 0; }
+    main.backgammon .bg-message { grid-area: message; }
+    main.backgammon .game-options { grid-area: options; }
+
+    main.backgammon .game-actions {
+        grid-area: actions;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0.4rem;
+        margin: 0;
+    }
+
+    main.backgammon .game-actions button {
+        min-width: 6rem;
+        padding: 0.5rem 0.8rem;
+        font-size: 1rem;
+    }
+
+    main.backgammon .game-actions button.icon-button {
+        padding: 0.3rem 0.8rem;
+        font-size: 1.6rem;
+    }
+}
+
 /* Rich man, poor man: the user's own hands on top, and the table (the cards to beat and the players) on green felt. */
 main.rich-poor,
 main.yaniv,

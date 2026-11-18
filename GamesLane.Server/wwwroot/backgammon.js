@@ -229,9 +229,10 @@ function noticeRoll(game) {
             : new Set([game.dice.length ? game.turn : game.lastTurn?.seat]);
         rollingUntil = Date.now() + ROLL_MS;
         clearInterval(rollTimer);
+        // The last redraw is the one that starts after the animation's end, so it shows the dice rolled.
         rollTimer = setInterval(() => {
-            backgammon.refresh();
             if (Date.now() >= rollingUntil) clearInterval(rollTimer);
+            backgammon.refresh();
         }, 90);
     }
     seenRolls = game.rolls;
@@ -478,12 +479,21 @@ function showScoreboard(game, state, view) {
         })));
 }
 
+// A phone on its side (as in styles.css), where the buttons are beside the board.
+const phoneLandscape = matchMedia("(orientation: landscape) and (max-height: 500px)");
+
 // The whole page fits the screen without scrolling: the board shrinks by however much the page is too tall (down to
-// 160 pixels high).
+// 160 pixels high). On a phone on its side, the board takes the whole height under the status bar instead, and the
+// message and the game's options are scrolled to under it.
 function fitBoard() {
     const board = document.querySelector("#bg-board .bg-svg");
     if (!board || $("game-screen").hidden) return;
     board.style.maxHeight = "none";
+    if (phoneLandscape.matches) {
+        const top = board.getBoundingClientRect().top + scrollY;
+        board.style.maxHeight = `${Math.max(160, innerHeight - top - 4)}px`;
+        return;
+    }
     const overflow = document.documentElement.scrollHeight - innerHeight;
     if (overflow > 0) {
         board.style.maxHeight = `${Math.max(160, board.getBoundingClientRect().height - overflow)}px`;

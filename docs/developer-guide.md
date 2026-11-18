@@ -102,7 +102,7 @@ GamesLane.Server/              ASP.NET Core backend
     help.html                  Help in English: one section for the main screen, the lobby and each game; help.he.html, .es.html, .fr.html, .pt.html, .zh-CN.html, .zh-TW.html: the help in each language, shown in the help panel (common.js)
     tictactoe.html/.js         Tic-tac-toe page
     the-gang.html/.js          The Gang page
-    backgammon.html/.js        Backgammon page (the board is drawn as SVG)
+    backgammon.html/.js        Backgammon page (the board is drawn as SVG; on a phone turned sideways, it is as high as the screen and the buttons are beside it)
     rich-man-poor-man.html/.js Rich man, poor man page
     wazoo.html/.js             Wazoo page
     final-card.html/.js        Final Card page (GamesLane cards, each color drawn as the suit of that color)
