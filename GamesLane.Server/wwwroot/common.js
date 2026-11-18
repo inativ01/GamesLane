@@ -1756,16 +1756,17 @@ function seatLabel(state, seat, view, prefix = "") {
     if (info) {
         label.append(iconElement(info.icon));
     }
-    label.append(seatName(state, seat, view));
+    label.append(el("span", "seat-label-name", seatName(state, seat, view)));
     if (info && info.status !== "Present") {
         label.append(reconnectingSpinner(t(info.status === "Away" ? "Away" : "Reconnecting…")));
     }
     return label;
 }
 
-// The score row in the status bar (#scores), for games that keep a score: the match facts (e.g. "Round 3"), then a chip
-// per player with what comes before the name (e.g. a mark), the name, the score and any extra (e.g. a pip count), and
-// the seat to act outlined. Players: [{ seat, before, score, extra, acting }].
+// The score row in the status bar (#scores), for games that keep a score: a chip per player with what comes before the
+// name (e.g. a mark), the icon, the name, the score and any extra (e.g. a pip count), and the seat to act outlined; the
+// match facts (e.g. "Round 3") go at the bottom of the game screen (#score-facts), above the game's options.
+// Players: [{ seat, before, score, extra, acting }].
 function showScores(state, view, facts, players) {
     const chip = (player) => {
         const item = el("li", "score-chip", player.before ?? "", seatLabel(state, player.seat, view),
@@ -1776,10 +1777,29 @@ function showScores(state, view, facts, players) {
         item.classList.toggle("acting", Boolean(player.acting));
         return item;
     };
-    $("scores").replaceChildren(
-        ...(facts.length ? [el("li", "score-facts", facts.filter(Boolean).join(" · "))] : []),
-        ...players.map(chip));
+    $("scores").replaceChildren(...players.map(chip));
+    const factsLine = $("score-facts");
+    if (factsLine) {
+        factsLine.textContent = facts.filter(Boolean).join(" · ");
+        factsLine.hidden = !factsLine.textContent;
+    }
+    fitScores();
 }
+
+// When the players' names do not fit in full (the chips take more than one line, or, in chips stacked in a column as
+// beside Backgammon's board, a name is cut short), every name is left out: the icons, marks and scores stay.
+function fitScores() {
+    const row = $("scores");
+    if (!row) return;
+    row.classList.remove("compact");
+    const chips = [...row.children];
+    const cut = [...row.querySelectorAll(".seat-label-name")].some((name) => name.scrollWidth > name.clientWidth);
+    const lineEnd = chips[0] ? chips[0].offsetTop + chips[0].offsetHeight : 0;
+    const wraps = !getComputedStyle(row).flexDirection.startsWith("column") && chips.some((chip) => chip.offsetTop >= lineEnd);
+    if (cut || wraps) row.classList.add("compact");
+}
+
+addEventListener("resize", fitScores);
 
 // The session's chat, for everyone with the page open (players and watchers): 💬 in the session bar opens it, on the
 // side of the page (the whole screen on phones). While it is closed, each message from someone else adds to the unread
@@ -2256,16 +2276,13 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             { taken: state.seats.filter(Boolean).length, observers: state.observerCount });
     }
 
-    // The role is shown only when the whole session bar fits on one line: otherwise (e.g. on a phone) it is left out.
+    // The session bar is one line. The role is shown only when the game's name fits in full beside it: otherwise (e.g. on
+    // a phone) it is left out.
     function fitSessionInfo() {
         const info = $("session-info");
-        const bar = info.closest(".session-bar");
-        const art = bar.querySelector(".session-art");
+        const name = info.closest(".session-bar").querySelector(".session-name");
         info.style.display = "";
-        const lineEnd = art.offsetTop + art.offsetHeight;
-        const wraps = [...bar.children].some((item) => item.offsetParent !== null
-            && getComputedStyle(item).position !== "absolute" && item.offsetTop >= lineEnd);
-        info.style.display = wraps ? "none" : "";
+        info.style.display = name.scrollWidth > name.clientWidth ? "none" : "";
     }
     addEventListener("resize", fitSessionInfo);
 

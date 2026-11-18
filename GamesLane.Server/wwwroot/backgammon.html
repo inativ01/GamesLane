@@ -64,21 +64,26 @@
 
         <div id="game-screen" hidden>
             <div id="bg-board" class="bg-board"></div>
-            <!-- The turn's and the game's buttons, under the board. -->
-            <div class="game-actions">
-                <button id="bg-roll" type="button" class="icon-button" hidden title="Roll" aria-label="Roll" data-i18n-attr="title,aria-label">🎲</button>
-                <button id="bg-double" type="button" class="secondary" hidden data-i18n>Double</button>
-                <button id="bg-take" type="button" hidden data-i18n>Take</button>
-                <button id="bg-drop" type="button" class="secondary" hidden data-i18n>Drop</button>
-                <button id="bg-undo" type="button" class="secondary" hidden data-i18n>Undo</button>
-                <button id="bg-done" type="button" hidden data-i18n>Done</button>
-                <button id="next-round" type="button" hidden data-i18n>Next game</button>
-                <button id="play-again" type="button" hidden data-i18n>Play again</button>
-                <button id="to-lobby" type="button" class="secondary" hidden data-i18n>Back to the lobby</button>
-                <button id="bg-last-move" type="button" class="secondary" hidden aria-pressed="false" data-i18n>Last move</button>
+            <!-- The turn's and the game's buttons, under the board. On a landscape screen, beside the board, under the
+                 players' scores (moved here from the status bar by backgammon.js). -->
+            <div id="bg-side" class="bg-side">
+                <div class="game-actions">
+                    <button id="bg-roll" type="button" class="icon-button" hidden title="Roll" aria-label="Roll" data-i18n-attr="title,aria-label">🎲</button>
+                    <button id="bg-double" type="button" class="secondary" hidden data-i18n>Double</button>
+                    <button id="bg-take" type="button" hidden data-i18n>Take</button>
+                    <button id="bg-drop" type="button" class="secondary" hidden data-i18n>Drop</button>
+                    <button id="bg-undo" type="button" class="secondary" hidden data-i18n>Undo</button>
+                    <button id="bg-done" type="button" hidden data-i18n>Done</button>
+                    <button id="next-round" type="button" hidden data-i18n>Next game</button>
+                    <button id="play-again" type="button" hidden data-i18n>Play again</button>
+                    <button id="to-lobby" type="button" class="secondary" hidden data-i18n>Back to the lobby</button>
+                    <button id="bg-last-move" type="button" class="secondary" hidden aria-pressed="false" data-i18n>Last move</button>
+                </div>
             </div>
             <p id="bg-message" class="bg-message" hidden></p>
 
+            <!-- The match length, the game number and the Crawford game (filled by showScores in common.js). -->
+            <p id="score-facts" class="score-facts" hidden></p>
             <!-- The game's options, one per line (filled by common.js). -->
             <div id="game-options" class="game-options" hidden></div>
         </div>

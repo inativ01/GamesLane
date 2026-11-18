@@ -76,7 +76,7 @@ Play with other people on GamesLane.
 ## During a game
 
 - **The game bar**, under the top bar, shows the game, your seat, the game code (🔑), the chat (💬) and the menu (☰). On a phone held sideways, the top bars are hidden to leave room for the game: tap the small ▾ tab to show them.
-- **The status bar** says what is happening. It turns gold when it is your turn or a button is waiting for you, with a chime, and the phone vibrates where it can.
+- **The status bar** says what is happening. It turns gold when it is your turn or a button is waiting for you, with a chime, and the phone vibrates where it can. In Tic-tac-toe, Backgammon and Wazoo it also shows each player's score (without the names when they do not fit on one line); the round or game number is at the bottom of the screen, above the game's options.
 - **Notifications (iPhone app):** the first time you sit in a game, the app asks to send notifications. Allow them, and when your turn comes while the game is not on your screen (the phone is locked, another app is open, the app is closed or on another page), a notification says "Your turn" with the game's name. Tap it to go back to the game. To stop them, turn off notifications for GamesLane in the iPhone's Settings.
 - **The ☰ menu:** the invite link, how many play and watch, **Leave my seat (watch)**, **End game for everyone**, and **Send feedback**.
 - <a id="chat"></a>**Chat:** 💬 opens the chat, for everyone in the game. New messages show on 💬 and in a short pop-up. In the chat, untick **Chat** to hide it, or **Sound** to turn off all sounds.
@@ -115,6 +115,8 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 - Before rolling, **Double** (or tap the cube) offers a double; the other player answers **Take** or **Drop**.
 - **Last move** shows the last turn's moves as numbered arrows.
 - You see the board from your side. The score shows the match, the scores and the pip counts.
+- On a portrait screen (higher than it is wide), the board is as wide as the screen, with the buttons under it; scroll down for the match and the game's options.
+- On a landscape screen (wider than it is high, such as a computer or a phone held sideways), the board fills the screen's height, with the scores and the buttons beside it. Players' names are left out when they do not fit; their icons and scores stay.
 
 ### The Gang
 

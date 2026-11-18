@@ -229,9 +229,10 @@ function noticeRoll(game) {
             : new Set([game.dice.length ? game.turn : game.lastTurn?.seat]);
         rollingUntil = Date.now() + ROLL_MS;
         clearInterval(rollTimer);
+        // The last redraw is the one that starts after the animation's end, so it shows the dice rolled.
         rollTimer = setInterval(() => {
-            backgammon.refresh();
             if (Date.now() >= rollingUntil) clearInterval(rollTimer);
+            backgammon.refresh();
         }, 90);
     }
     seenRolls = game.rolls;
@@ -463,8 +464,8 @@ function backgammonTexts(game, state, view) {
     return { status, message };
 }
 
-// The score row in the status bar: the match length, the game number and the Crawford game, then each player's color,
-// name, match score and pip count, with the seat to act outlined.
+// The score row: each player's color, name, match score and pip count, with the seat to act outlined; the match length,
+// the game number and the Crawford game at the bottom.
 function showScoreboard(game, state, view) {
     const acting = game.phase === "GameOver" || game.phase === "MatchOver" ? null : actingSeat(game);
     showScores(state, view,
@@ -478,13 +479,37 @@ function showScoreboard(game, state, view) {
         })));
 }
 
-// The whole page fits the screen without scrolling: the board shrinks by however much the page is too tall (down to
-// 160 pixels high).
+// A landscape screen (as in styles.css), where the scores and the buttons are beside the board.
+const landscape = matchMedia("(orientation: landscape)");
+
+// The players' scores: in the status bar, or on a landscape screen, beside the board above the buttons.
+function placeScores() {
+    const scores = $("scores");
+    if (landscape.matches) {
+        if (scores.parentElement !== $("bg-side")) $("bg-side").prepend(scores);
+    } else if (scores.parentElement !== $("status-bar")) {
+        $("status-bar").append(scores);
+    }
+    fitScores();
+}
+
+// On a portrait screen, the board is as wide as the screen, but the buttons under it fit on the screen: the board
+// shrinks by however much they do not (down to 160 pixels high). On a landscape screen, the board takes the whole
+// height under the status bar, as wide as the room beside the scores and the buttons allows. Either way, the message,
+// the match facts and the game's options are scrolled to under it.
 function fitBoard() {
     const board = document.querySelector("#bg-board .bg-svg");
     if (!board || $("game-screen").hidden) return;
     board.style.maxHeight = "none";
-    const overflow = document.documentElement.scrollHeight - innerHeight;
+    $("bg-board").style.width = "";
+    if (landscape.matches) {
+        const height = Math.max(160, innerHeight - (board.getBoundingClientRect().top + scrollY) - 4);
+        const room = $("game-screen").clientWidth - $("bg-side").offsetWidth - 12;
+        board.style.maxHeight = `${height}px`;
+        $("bg-board").style.width = `${Math.max(160, Math.min(room, height * WIDTH / HEIGHT))}px`;
+        return;
+    }
+    const overflow = $("bg-side").getBoundingClientRect().bottom + scrollY + 12 - innerHeight;
     if (overflow > 0) {
         board.style.maxHeight = `${Math.max(160, board.getBoundingClientRect().height - overflow)}px`;
     }
@@ -501,6 +526,7 @@ const backgammon = startSessionPage("Backgammon", (game, state, view) => {
     }
     current = { game, view, viewer, canMove };
 
+    placeScores();
     showScoreboard(game, state, view);
     $("bg-board").replaceChildren(drawGame(game, viewer, canMove, game.canDouble && view.isMe(game.turn)));
     const { status, message } = backgammonTexts(game, state, view);
@@ -527,7 +553,10 @@ const backgammon = startSessionPage("Backgammon", (game, state, view) => {
     fitBoard();
 }, (seat) => `${["⚪", "⚫"][seat]} ${colorName(seat)}`);
 
-addEventListener("resize", () => requestAnimationFrame(fitBoard));
+addEventListener("resize", () => requestAnimationFrame(() => {
+    placeScores();
+    fitBoard();
+}));
 
 // Tapping the board: a checker that can go to only one place moves there; otherwise it is selected and its
 // destinations are marked. Tapping a marked destination moves the selected checker there.
