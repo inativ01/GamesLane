@@ -145,11 +145,8 @@ function handPanel(game, state, view, hand) {
     const rows = [slots.slice(0, half), slots.slice(half)].filter((row) => row.length)
         .map((row) => el("div", "card-row rp-cards", ...row));
 
-    const title = myHands(view).length > 1 ? playerName(state, hand.seat) : t("Your cards");
     const turn = myTurn && me.finished === null;
-    const head = el("div", "my-hand-title", `${title} · #${me.place}`,
-        ...(turn ? [el("span", "rp-your-turn", `👉 ${t("Your turn")}`)] : []));
-    const panel = el("div", `my-hand rp-hand${turn ? " my-turn" : ""}`, head, ...rows);
+    const panel = el("div", `my-hand rp-hand${turn ? " my-turn" : ""}`, ...rows);
     const buttons = el("div", "actions");
     const button = (text, onClick, enabled = true, secondary = false, className = "") => {
         const b = el("button", `${secondary ? "secondary" : ""} ${className}`.trim(), text);
@@ -172,6 +169,7 @@ function handPanel(game, state, view, hand) {
         if (current) {
             button(t("Pass"), () => send("Pass"), true, true, "rp-pass");
         }
+        buttons.append(yourTurnTag());
         button(t("Select"), () => send("ThrowCards", picks), valid, false, "rp-select");
     } else if (game.phase === "Playing" || game.phase === "GameOver") {
         if (hand.received && game.phase === "Playing" && !game.lastThrow) {

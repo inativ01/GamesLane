@@ -4476,7 +4476,7 @@ main.rich-poor .my-hand .actions .rp-select {
     margin-inline-start: auto;
 }
 
-/* The user's turn: the hand's border glows and pulses, and its title says "Your turn". */
+/* The user's turn: the hand's border glows and pulses, and the line under its cards says "Your turn". */
 main.rich-poor .my-hand.my-turn,
 main.yaniv .my-hand.my-turn,
 main.final-card .my-hand.my-turn,
@@ -4498,16 +4498,6 @@ main.tricks .my-hand.my-turn {
     main.tricks .my-hand.my-turn {
         animation: none;
     }
-}
-
-main.rich-poor .my-hand-title,
-main.yaniv .my-hand-title,
-main.final-card .my-hand-title,
-main.tricks .my-hand-title {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.3rem 0.6rem;
 }
 
 .rp-your-turn {

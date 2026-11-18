@@ -117,10 +117,10 @@ function trickTable(game, state, view, { turn = null, facts = () => [], arrived 
     }));
 }
 
-// One of the user's hands, in a box as in Rich man, poor man that glows while `myTurn`: its title, its cards (sorted by
-// the server; while `active`, those `canPick(card)` allows are buttons calling `onPick(card)`, and the others are
-// greyed; the `chosen` ones are raised), and under them `foot` (e.g. buttons).
-function trickHand(state, view, hand, { title, myTurn = false, active = false, canPick = () => false, chosen = [], onPick = () => {}, foot = [] }) {
+// One of the user's hands, in a box as in Rich man, poor man that glows while `myTurn`: its cards (sorted by the server;
+// while `active`, those `canPick(card)` allows are buttons calling `onPick(card)`, and the others are greyed; the
+// `chosen` ones are raised), and under them "Your turn" while `myTurn` and `foot` (e.g. buttons).
+function trickHand(state, view, hand, { myTurn = false, active = false, canPick = () => false, chosen = [], onPick = () => {}, foot = [] }) {
     const slots = hand.cards.map((card) => {
         const face = cardElement(card);
         face.classList.toggle("chosen", chosen.includes(card));
@@ -137,11 +137,10 @@ function trickHand(state, view, hand, { title, myTurn = false, active = false, c
         button.addEventListener("click", () => onPick(card));
         return el("span", "rp-slot", button);
     });
-    const head = el("div", "my-hand-title", title ?? (view.mySeats.length > 1 ? trickPlayerName(state, hand.seat) : t("Your cards")),
-        ...(myTurn ? [el("span", "rp-your-turn", `👉 ${t("Your turn")}`)] : []));
-    const panel = el("div", `my-hand rp-hand trick-hand${myTurn ? " my-turn" : ""}`, head, el("div", "card-row rp-cards", ...slots));
-    if (foot.length > 0) {
-        panel.append(el("div", "trick-hand-foot", ...foot));
+    const panel = el("div", `my-hand rp-hand trick-hand${myTurn ? " my-turn" : ""}`, el("div", "card-row rp-cards", ...slots));
+    const bottom = [...(myTurn ? [yourTurnTag()] : []), ...foot];
+    if (bottom.length > 0) {
+        panel.append(el("div", "trick-hand-foot", ...bottom));
     }
     return panel;
 }
