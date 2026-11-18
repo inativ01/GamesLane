@@ -1811,8 +1811,8 @@ function showScores(state, view, facts, players) {
     fitScores();
 }
 
-// When the players' names do not fit in full (the chips take more than one line, or, in chips stacked in a column as
-// beside Backgammon's board, a name is cut short), every name is left out: the icons, marks and scores stay.
+// When the players' names do not fit in full (the chips in a line take more than one line, or, in chips stacked as on a
+// landscape screen, a name is cut short), every name is left out: the icons, marks and scores stay.
 function fitScores() {
     const row = $("scores");
     if (!row) return;
@@ -1820,11 +1820,28 @@ function fitScores() {
     const chips = [...row.children];
     const cut = [...row.querySelectorAll(".seat-label-name")].some((name) => name.scrollWidth > name.clientWidth);
     const lineEnd = chips[0] ? chips[0].offsetTop + chips[0].offsetHeight : 0;
-    const wraps = !getComputedStyle(row).flexDirection.startsWith("column") && chips.some((chip) => chip.offsetTop >= lineEnd);
+    const style = getComputedStyle(row);
+    const inLine = style.display.endsWith("flex") && !style.flexDirection.startsWith("column");
+    const wraps = inLine && chips.some((chip) => chip.offsetTop >= lineEnd);
     if (cut || wraps) row.classList.add("compact");
 }
 
 addEventListener("resize", fitScores);
+
+// A landscape screen (as in styles.css), where the score row is in the game screen, at the top of the screen's end side.
+const landscapeScreen = matchMedia("(orientation: landscape)");
+
+// The score row: in the status bar, or on a landscape screen, first in the game screen's element place (Tic-tac-toe,
+// Backgammon and Wazoo), which gives the board or the dice their full size and the scores the room left.
+function placeScores(place) {
+    const scores = $("scores");
+    if (landscapeScreen.matches) {
+        if (scores.parentElement !== place) place.prepend(scores);
+    } else if (scores.parentElement !== $("status-bar")) {
+        $("status-bar").append(scores);
+    }
+    fitScores();
+}
 
 // The session's chat, for everyone with the page open (players and watchers): 💬 in the session bar opens it, on the
 // side of the page (the whole screen on phones). While it is closed, each message from someone else adds to the unread

@@ -37,7 +37,7 @@
         <ul id="scores" class="score-row"></ul>
     </div>
 </div>
-<main>
+<main class="tictactoe">
     <section id="session">
         <div id="invite" class="invite" hidden>
             <h3 data-i18n>Invite friends</h3>
@@ -62,6 +62,8 @@
             </div>
         </div>
 
+        <!-- On a landscape screen, the players' scores are moved from the status bar to the end of the game screen
+             (placeScores in common.js). -->
         <div id="game-screen" hidden>
             <div id="board" class="board"></div>
 
