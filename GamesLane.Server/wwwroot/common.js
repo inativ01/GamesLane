@@ -1859,7 +1859,20 @@ function fitHandPanel() {
     screen.style.setProperty("--card-fit", String(low));
 }
 
-addEventListener("resize", () => requestAnimationFrame(fitHandPanel));
+// What a page sizes to the screen (added with addFitter, e.g. the trick-taking games' table), run after every update
+// and on resize, before fitHandPanel.
+const fitters = [];
+
+function addFitter(fit) {
+    fitters.push(fit);
+}
+
+function fitGameScreen() {
+    fitters.forEach((fit) => fit());
+    fitHandPanel();
+}
+
+addEventListener("resize", () => requestAnimationFrame(fitGameScreen));
 
 // The score row: in the status bar, or on a landscape screen, first in the game screen's element place (Tic-tac-toe,
 // Backgammon and Wazoo), which gives the board or the dice their full size and the scores the room left.
@@ -2632,7 +2645,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             playGameSound("turn");
         }
         wasActing = myTurn;
-        fitHandPanel();
+        fitGameScreen();
     }
 
     async function enter() {

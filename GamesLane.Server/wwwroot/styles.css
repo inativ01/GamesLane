@@ -5377,47 +5377,72 @@ button.yaniv-pass:not(:disabled):hover {
     white-space: nowrap;
 }
 
-/* The trick-taking games: on felt, the four players around the trick (the user at the bottom, then clockwise on the
-   left, at the top and on the right, in every language), each with the card they played; the user's hand in a box that
-   glows on their turn, as in Rich man, poor man. The players on the left and right span both rows, so the table is two
-   cards tall and, with the hand and the head of the players' table, fits on one screen. */
+/* The trick-taking games: on felt as wide as the screen, the four players around the trick (the user at the bottom,
+   then clockwise on the left, at the top and on the right, in every language), each with the card they played; the
+   user's hand in a box that glows on their turn, as in Rich man, poor man. The rest of the game screen keeps the
+   page's width. */
+main.hearts:has(#game-screen:not([hidden])),
+main.spades:has(#game-screen:not([hidden])) {
+    max-width: none;
+}
+
+main.hearts #game-screen > :not(.rp-top),
+main.spades #game-screen > :not(.rp-top) {
+    max-width: calc(980px - 1.5rem);
+    margin-inline: auto;
+}
+
+/* The table's height (--trick-height) and its cards' size (--trick-card) are set by fitTrickTable in tricks.js. The
+   cards are equally spaced across it, in the order left, top, bottom, right: the left and right players' cards in the
+   middle of its height, with their names above them (names-above) or beside them; the top player's card at its top
+   and the bottom player's at its bottom, each with its name on its right, at the top or at the bottom. When a name
+   does not fit, every name is left out (icons-only): the icons stay. */
 .trick-table {
+    --trick-card: 1.6rem;
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    grid-template-areas: "left top right" "left bottom right";
-    align-items: center;
-    justify-items: center;
-    gap: 0.2rem 0.6rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    height: var(--trick-height, calc(6.2 * var(--trick-card)));
     direction: ltr;
 }
 
 .trick-place {
+    position: relative;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 0.25rem;
     min-width: 0;
 }
 
-.trick-place.trick-top { grid-area: top; --arrive-x: 0; --arrive-y: -80px; }
-.trick-place.trick-left { grid-area: left; --arrive-x: -80px; --arrive-y: 0; }
-.trick-place.trick-right { grid-area: right; --arrive-x: 80px; --arrive-y: 0; }
-.trick-place.trick-bottom { grid-area: bottom; flex-direction: column-reverse; --arrive-x: 0; --arrive-y: 100px; }
+.trick-place.trick-left { grid-column: 1; --arrive-x: -80px; --arrive-y: 0; }
+.trick-place.trick-top { grid-column: 2; align-items: flex-start; --arrive-x: 0; --arrive-y: -80px; }
+.trick-place.trick-bottom { grid-column: 3; align-items: flex-end; --arrive-x: 0; --arrive-y: 100px; }
+.trick-place.trick-right { grid-column: 4; --arrive-x: 80px; --arrive-y: 0; }
 
-/* A short landscape screen, such as a phone held sideways: the players at the top and at the bottom side by side and
-   staggered by half a card (the top one raised, with its name at the top of the card's right; the bottom one lowered,
-   with its name at the bottom of the card's left), close together between the players on the left and on the right,
-   so the table is about one and a half cards tall and the hand fits (see fitHandPanel in common.js). */
-@media (orientation: landscape) and (max-height: 500px) {
-    .trick-table {
-        grid-template-columns: repeat(4, auto);
-        grid-template-areas: "left top . right" "left top bottom right" "left . bottom right";
-        justify-content: center;
-        column-gap: 0.8rem;
-    }
+.trick-place .trick-player {
+    position: absolute;
+    z-index: 1;
+    flex-wrap: nowrap;
+    max-width: calc(100% - 2.6 * var(--trick-card) - 0.8rem);
+    overflow: hidden;
+    white-space: nowrap;
+}
 
-    .trick-place.trick-top { flex-direction: row-reverse; align-items: flex-start; }
-    .trick-place.trick-bottom { flex-direction: row; align-items: flex-end; }
+.trick-place.trick-top .trick-player { top: 0; left: calc(50% + 1.3 * var(--trick-card) + 0.4rem); }
+.trick-place.trick-bottom .trick-player { bottom: 0; left: calc(50% + 1.3 * var(--trick-card) + 0.4rem); }
+.trick-place.trick-left .trick-player { top: 50%; left: calc(50% + 1.3 * var(--trick-card) + 0.4rem); transform: translateY(-50%); }
+.trick-place.trick-right .trick-player { top: 50%; right: calc(50% + 1.3 * var(--trick-card) + 0.4rem); transform: translateY(-50%); }
+
+.trick-table.names-above .trick-place:is(.trick-left, .trick-right) .trick-player {
+    top: auto;
+    right: auto;
+    bottom: calc(50% + 1.95 * var(--trick-card) + 0.3rem);
+    left: 50%;
+    max-width: 100%;
+    transform: translateX(-50%);
+}
+
+.trick-table.icons-only .seat-label-name {
+    display: none;
 }
 
 /* The card just played slides in from its player's side of the table. */
@@ -5459,7 +5484,7 @@ button.yaniv-pass:not(:disabled):hover {
 }
 
 .trick-place .card {
-    font-size: calc(clamp(1.3rem, min(5.5vw, 3.6vh), 2.2rem) * var(--card-fit, 1));
+    font-size: var(--trick-card);
 }
 
 .trick-player-score {
