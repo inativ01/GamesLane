@@ -1813,6 +1813,49 @@ button.icon-button {
     display: none;
 }
 
+/* On a landscape screen, the score row is in the game screen, at the top of the screen's end side (see placeScores in
+   common.js): the chips in a column. */
+main .score-row {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    border-top: none;
+}
+
+main .score-chip {
+    max-width: 10rem;
+    background: var(--surface-soft);
+}
+
+main .score-chip .seat-label {
+    min-width: 0;
+}
+
+/* Tic-tac-toe on a landscape screen: the board centred, the scores beside it. */
+@media (orientation: landscape) {
+    main.tictactoe {
+        max-width: 980px;
+    }
+
+    main.tictactoe #game-screen {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        grid-template-areas: ". board scores" "actions actions actions" "facts facts facts" "options options options";
+        column-gap: 0.5rem;
+    }
+
+    main.tictactoe .board { grid-area: board; }
+    main.tictactoe .game-actions { grid-area: actions; }
+    main.tictactoe .score-facts { grid-area: facts; }
+    main.tictactoe .game-options { grid-area: options; }
+
+    main.tictactoe .score-row {
+        grid-area: scores;
+        justify-self: end;
+        align-self: start;
+    }
+}
+
 /* The match facts (round, game, draws), at the bottom of the game screen above the game's options. */
 .score-facts {
     margin: 0.5rem 0;
@@ -4335,9 +4378,9 @@ main.backgammon {
     color: var(--muted);
 }
 
-/* A landscape screen: the board as high as the screen under the status bar (see fitBoard in backgammon.js), with the
-   players' scores (see placeScores) and the buttons in a column beside it; the message, the match facts and the game's
-   options come under it. */
+/* A landscape screen: the board as high as the screen under the status bar (see fitBoard in backgammon.js), centred
+   with the buttons in a column beside it, and the players' scores at the top of the screen's end side (see placeScores
+   in common.js); the message, the match facts and the game's options come under it. */
 @media (orientation: landscape) {
     main.backgammon {
         max-width: none;
@@ -4346,9 +4389,9 @@ main.backgammon {
 
     main.backgammon #game-screen {
         display: grid;
-        grid-template-columns: auto auto;
-        grid-template-areas: "board side" "message message" "facts facts" "options options";
-        justify-content: center;
+        grid-template-columns: 1fr auto auto 1fr;
+        grid-template-areas: ". board side scores" "message message message message" "facts facts facts facts"
+            "options options options options";
         align-items: center;
         column-gap: 0.5rem;
     }
@@ -4366,20 +4409,10 @@ main.backgammon {
         gap: 0.6rem;
     }
 
-    main.backgammon .bg-side .score-row {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 0;
-        border-top: none;
-    }
-
-    main.backgammon .bg-side .score-chip {
-        max-width: 10rem;
-        background: var(--surface-soft);
-    }
-
-    main.backgammon .bg-side .score-chip .seat-label {
-        min-width: 0;
+    main.backgammon .score-row {
+        grid-area: scores;
+        justify-self: end;
+        align-self: start;
     }
 
     main.backgammon .game-actions {
@@ -4716,51 +4749,78 @@ main.wazoo {
     font-size: 16px;
 }
 
-/* The dice and the Roll button after them (on their right, or on their left in Hebrew) are the same size, and shrink
-   together to fit the row. The dice stay centred: an empty space as wide as the button is before them while the button
-   shows, and it shrinks first when the row is short of room. */
+/* The dice and the Roll button after them (on their right, or on their left in Hebrew) are squares of the same size
+   (--yz-die): 5.4em, or less when 6 of them do not fit the row's width. The dice stay centred: an empty space as wide as
+   the button is before them while the button shows, and it narrows when the row is short of room. */
 .yz-dice-row {
+    --yz-gap: min(2vw, 0.6em);
+    --yz-die: min(5.4em, (100cqi - 6 * var(--yz-gap)) / 6);
+    container-type: inline-size;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: min(2vw, 0.6em);
+    gap: var(--yz-gap);
     margin: 0.6em 0 1.3em;
 }
 
 .yz-dice-row:has(> .yz-roll:not([hidden]))::before {
     content: "";
-    flex: 0 1000 5.4em;
+    flex: 0 1 auto;
+    width: var(--yz-die);
     min-width: 0;
 }
 
 .yz-dice {
     display: flex;
-    flex: 0 1 auto;
+    flex: none;
     justify-content: center;
-    gap: min(2vw, 0.6em);
-    min-width: 0;
+    gap: var(--yz-gap);
     direction: ltr;
 }
 
 /* The 🎲 Roll button is a square with rounded corners, as in Backgammon. */
 button.yz-roll {
-    flex: 0 1 5.4em;
+    flex: none;
+    width: var(--yz-die);
+    height: var(--yz-die);
     min-width: 0;
-    aspect-ratio: 1;
     padding: 0;
     border-radius: var(--radius);
     line-height: 1;
 }
 
 button.yz-roll span {
-    font-size: min(7vw, 2em);
+    font-size: calc(var(--yz-die) * 0.4);
+}
+
+/* A landscape screen: the players' scores at the end of the row, at its top (see placeScores in common.js); the dice
+   take at most 60% of the row's width. */
+@media (orientation: landscape) {
+    .yz-dice-row {
+        --yz-die: min(5.4em, (60cqi - 6 * var(--yz-gap)) / 7);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+    }
+
+    .yz-dice-row::before { grid-area: 1 / 2; }
+    .yz-dice { grid-area: 1 / 3; }
+    button.yz-roll { grid-area: 1 / 4; }
+
+    .yz-dice-row .score-row {
+        grid-area: 1 / 5;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        justify-self: end;
+        align-self: start;
+    }
 }
 
 .yz-die {
     position: relative;
-    flex: 0 1 5.4em;
-    min-width: 0;
-    aspect-ratio: 1;
+    flex: none;
+    width: var(--yz-die);
+    height: var(--yz-die);
     padding: 0;
     border-radius: 18%;
     background: none;

@@ -64,6 +64,7 @@ const ticTacToe = startSessionPage("TicTacToe", (game, state, view) => {
         celebrate(state, `round-${game.round}`);
     }
     $("next-round").hidden = !(view.isPlayer && isRoundOver(game));
+    placeScores($("game-screen"));
     showScores(state, view, [t("Round {n}", { n: game.round }), t("Draws: {n}", { n: game.draws })], MARKS.map((mark, seat) => ({
         seat, before: el("span", "score-mark", mark), score: game.scores[seat], acting: !isRoundOver(game) && seat === turnSeat,
     })));
@@ -72,3 +73,4 @@ const ticTacToe = startSessionPage("TicTacToe", (game, state, view) => {
 $("next-round").addEventListener("click", () => {
     call("NextRound", ticTacToe.sessionId, currentRound).catch(() => {});
 });
+addEventListener("resize", () => placeScores($("game-screen")));

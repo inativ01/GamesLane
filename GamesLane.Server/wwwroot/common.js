@@ -1812,7 +1812,7 @@ function showScores(state, view, facts, players) {
 }
 
 // When the players' names do not fit in full (the chips take more than one line, or, in chips stacked in a column as
-// beside Backgammon's board, a name is cut short), every name is left out: the icons, marks and scores stay.
+// on a landscape screen, a name is cut short), every name is left out: the icons, marks and scores stay.
 function fitScores() {
     const row = $("scores");
     if (!row) return;
@@ -1825,6 +1825,18 @@ function fitScores() {
 }
 
 addEventListener("resize", fitScores);
+
+// A landscape screen (as in styles.css), where the score row is in the game screen, at the top of the screen's end side.
+const landscapeScreen = matchMedia("(orientation: landscape)");
+
+// The score row: in the status bar, or on a landscape screen, in the game screen's element place (Tic-tac-toe,
+// Backgammon and Wazoo).
+function placeScores(place) {
+    const scores = $("scores");
+    const parent = landscapeScreen.matches ? place : $("status-bar");
+    if (scores.parentElement !== parent) parent.append(scores);
+    fitScores();
+}
 
 // The session's chat, for everyone with the page open (players and watchers): 💬 in the session bar opens it, on the
 // side of the page (the whole screen on phones). While it is closed, each message from someone else adds to the unread

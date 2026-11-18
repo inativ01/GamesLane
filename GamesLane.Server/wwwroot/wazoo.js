@@ -280,6 +280,7 @@ const wazoo = startSessionPage("Wazoo", (game, state, view) => {
     const canAct = !game.isOver && view.isMe(game.turn);
     current = { game, canAct };
 
+    placeScores($("yz-dice-row"));
     showScores(state, view, [],
         game.players.map((player) => ({ seat: player.seat, score: player.total, acting: !game.isOver && player.seat === game.turn })));
     const { status, message } = wazooTexts(game, state, view);
@@ -309,4 +310,7 @@ $("yz-toggle-table").addEventListener("click", () => {
     localStorage.setItem(TABLE_SHOWN_KEY, tableShown() ? "0" : "1");
     wazoo.refresh();
 });
-addEventListener("resize", () => requestAnimationFrame(fitPlay));
+addEventListener("resize", () => requestAnimationFrame(() => {
+    placeScores($("yz-dice-row"));
+    fitPlay();
+}));

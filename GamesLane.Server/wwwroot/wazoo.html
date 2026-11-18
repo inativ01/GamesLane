@@ -65,7 +65,9 @@
         <div id="game-screen" hidden>
             <!-- The dice and the scorecard, sized to fit the screen (see fitPlay in wazoo.js). -->
             <div id="yz-play" class="yz-play">
-                <div class="yz-dice-row">
+                <!-- On a landscape screen, the players' scores are moved here from the status bar, after the Roll button
+                     (placeScores in common.js). -->
+                <div id="yz-dice-row" class="yz-dice-row">
                     <div id="yz-dice" class="yz-dice"></div>
                     <button id="yz-roll" type="button" class="yz-roll" hidden><span aria-hidden="true">🎲</span></button>
                 </div>
