@@ -120,14 +120,15 @@ function trickTable(game, state, view, { turn = null, facts = () => [], arrived 
 // The table (see styles.css) is as high as the room above the bottom of the user's first hand allows (for observers,
 // above the bottom of the screen), at least one card high and at most as high as it is wide; its cards are as large as
 // that height allows, at most half as wide as a quarter of the table, between 16 and 40 pixels (their font size). The
-// left and right players' names go above their cards when there is room, otherwise beside them; when a name does not
-// fit, every name is left out.
+// left and right players' names go above their cards when there is room, otherwise beside them, and run further
+// towards the middle when they pass under the top player's card and name (roomy); when a name does not fit, every name
+// is left out.
 const TRICK_CARD_HEIGHT = 3.9;
 
 function fitTrickTable() {
     const table = document.querySelector("#game-screen .trick-table");
     if (!table || $("game-screen").hidden) return;
-    table.classList.remove("names-above", "icons-only");
+    table.classList.remove("names-above", "roomy", "icons-only");
     const below = document.querySelector("#game-screen .rp-hand") ?? table.closest(".rp-top");
     const room = table.offsetHeight + innerHeight - 4 - (below.getBoundingClientRect().bottom + scrollY);
     const size = Math.max(16, Math.min(40, room / TRICK_CARD_HEIGHT, table.clientWidth / 8 / 2.6));
@@ -136,7 +137,9 @@ function fitTrickTable() {
     table.style.setProperty("--trick-height", `${height}px`);
     const names = [...table.querySelectorAll(".trick-player")];
     const nameHeight = Math.max(0, ...names.map((name) => name.offsetHeight));
-    if ((height - TRICK_CARD_HEIGHT * size) / 2 >= nameHeight + 6) table.classList.add("names-above");
+    const above = (height - TRICK_CARD_HEIGHT * size) / 2 - nameHeight - 6;
+    if (above >= 0) table.classList.add("names-above");
+    if (above >= Math.max(TRICK_CARD_HEIGHT * size, nameHeight) + 4) table.classList.add("roomy");
     const cut = names.some((name) => name.scrollWidth > name.clientWidth
         || [...name.querySelectorAll(".seat-label-name")].some((label) => label.scrollWidth > label.clientWidth));
     if (cut) table.classList.add("icons-only");
