@@ -16,15 +16,8 @@
     --focus: #e6a93c;
     --radius: 12px;
     --shadow: 0 1px 2px rgba(31, 26, 21, 0.08), 0 4px 14px rgba(31, 26, 21, 0.06);
-    /* The bars' side padding: their content keeps to the page's 680 pixels in the middle of the screen. */
-    --bar-inset: max(0.75rem, calc((100% - 680px) / 2 + 0.75rem));
-}
-
-/* A landscape screen with a game whose play spans the screen (Tic-tac-toe, Backgammon, Wazoo): the bars span it too. */
-@media (orientation: landscape) {
-    body:has(> main.tictactoe, > main.backgammon, > main.wazoo) {
-        --bar-inset: 0.75rem;
-    }
+    /* The bars' side padding: their content keeps to the screen's edges, on every page. */
+    --bar-inset: 0.75rem;
 }
 
 * {
