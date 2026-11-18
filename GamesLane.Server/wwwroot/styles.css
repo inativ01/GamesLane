@@ -16,6 +16,15 @@
     --focus: #e6a93c;
     --radius: 12px;
     --shadow: 0 1px 2px rgba(31, 26, 21, 0.08), 0 4px 14px rgba(31, 26, 21, 0.06);
+    /* The bars' side padding: their content keeps to the page's 680 pixels in the middle of the screen. */
+    --bar-inset: max(0.75rem, calc((100% - 680px) / 2 + 0.75rem));
+}
+
+/* A landscape screen with a game whose play spans the screen (Tic-tac-toe, Backgammon, Wazoo): the bars span it too. */
+@media (orientation: landscape) {
+    body:has(> main.tictactoe, > main.backgammon, > main.wazoo) {
+        --bar-inset: 0.75rem;
+    }
 }
 
 * {
@@ -132,7 +141,7 @@ a.button.small {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 0.4rem max(0.75rem, calc((100% - 680px) / 2 + 0.75rem));
+    padding: 0.4rem var(--bar-inset);
     background: var(--blue);
     color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
@@ -1325,7 +1334,7 @@ label.check {
     justify-content: flex-end;
     gap: 0.4rem 0.6rem;
     min-height: calc(46px + 0.8rem);
-    padding: 0.25rem max(0.75rem, calc((100% - 680px) / 2 + 0.75rem));
+    padding: 0.25rem var(--bar-inset);
     background: linear-gradient(135deg, var(--black), #3a1a10);
     color: #fff;
 }
@@ -1385,7 +1394,7 @@ button.session-menu-button[aria-expanded="true"] {
 .session-menu {
     position: absolute;
     top: calc(100% + 0.3rem);
-    inset-inline-end: max(0.75rem, calc((100% - 680px) / 2 + 0.75rem));
+    inset-inline-end: var(--bar-inset);
     z-index: 15;
     display: flex;
     flex-direction: column;
@@ -1746,7 +1755,7 @@ button.chat-toast span {
     align-items: center;
     justify-content: center;
     gap: 0.2rem 0.5rem;
-    padding: 0.2rem max(0.75rem, calc((100% - 680px) / 2 + 0.75rem));
+    padding: 0.2rem var(--bar-inset);
     background: linear-gradient(180deg, #e4e2df, #d6d3cf);
     border-bottom: 1px solid #c4c0ba;
     text-align: center;
@@ -1825,6 +1834,7 @@ main .score-row {
 }
 
 main .score-chip {
+    min-width: 0;
     max-width: 100%;
     background: var(--surface-soft);
 }
@@ -1837,7 +1847,7 @@ main .score-chip .seat-label {
    room the board leaves. */
 @media (orientation: landscape) {
     main.tictactoe {
-        max-width: 980px;
+        max-width: none;
     }
 
     main.tictactoe #game-screen {
@@ -4388,7 +4398,7 @@ main.backgammon {
 @media (orientation: landscape) {
     main.backgammon {
         max-width: none;
-        padding: 0.25rem 0.5rem 1rem;
+        padding: 0.25rem 0.75rem 1rem;
     }
 
     main.backgammon #game-screen {
@@ -4795,27 +4805,34 @@ button.yz-roll span {
     font-size: calc(var(--yz-die) * 0.4);
 }
 
-/* A landscape screen: the players' scores at the end of the row, at its top (see placeScores in common.js), in the room
-   the dice leave; the dice keep their full size (unless they would take more than 80% of the row), centred in the room
-   beside the scores. */
+/* A landscape screen: the dice row as wide as the screen, the dice and the Roll button at its start (full size, unless
+   they would take more than 80% of the row) and the players' scores stacked at its end, at its top (see placeScores in
+   common.js), in the room the dice leave. The rest keeps the page's width. */
 @media (orientation: landscape) {
+    main.wazoo {
+        max-width: none;
+    }
+
+    main.wazoo .yz-play > :not(.yz-dice-row),
+    main.wazoo .rp-table {
+        max-width: calc(980px - 1.5rem);
+        margin-inline: auto;
+    }
+
     .yz-dice-row {
         --yz-die: min(5.4em, (80cqi - 6 * var(--yz-gap)) / 7);
         display: grid;
-        grid-template-columns: 1fr auto auto auto 1fr minmax(0, max-content);
+        grid-template-columns: auto auto 1fr minmax(0, max-content);
+        align-items: start;
     }
 
-    .yz-dice-row::before { grid-area: 1 / 2; }
-    .yz-dice { grid-area: 1 / 3; }
-    button.yz-roll { grid-area: 1 / 4; }
+    .yz-dice-row:has(> .yz-roll:not([hidden]))::before { content: none; }
+    .yz-dice { grid-area: 1 / 1; }
+    button.yz-roll { grid-area: 1 / 2; }
 
     .yz-dice-row .score-row {
-        grid-area: 1 / 6;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
-        justify-self: end;
-        align-self: start;
+        grid-area: 1 / 4;
+        font-size: 0.9em;
     }
 }
 
