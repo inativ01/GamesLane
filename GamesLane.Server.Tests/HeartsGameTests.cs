@@ -1,5 +1,4 @@
 using GamesLane.Server.Games.Hearts;
-using GamesLane.Server.Games.PokerHeist;
 using GamesLane.Server.Games.PlayingCards;
 
 namespace GamesLane.Server.Tests;

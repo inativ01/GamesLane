@@ -37,14 +37,27 @@ async function registerForNotifications(ask) {
     }
 }
 
-// In the iPhone app, the screen stays on while a game is on screen, played or showing its result (e.g. a shared screen
-// on the table), and dims as usual elsewhere. The app keeps the setting across pages, so every page starts by turning it off.
+// In the iPhone app, the screen stays on while a game is played (e.g. a shared screen on the table), and for
+// AWAKE_AFTER_GAME once it is over, so the result can be read; elsewhere it dims as usual. The app keeps the setting
+// across pages, so every page starts by turning it off.
+const AWAKE_AFTER_GAME = 5 * 60 * 1000;
 let screenKeptAwake = null;
+let awakePhase = null;
+let awakeTimer = 0;
 
 function keepScreenAwake(on) {
     if (typeof appPlugin?.keepAwake !== "function" || screenKeptAwake === on) return;
     screenKeptAwake = on;
     appPlugin.keepAwake({ on }).catch(() => {});
+}
+
+// Keeps the screen on for the session's phase: on while "Playing", on for a while once "Over", off in the lobby.
+function keepScreenAwakeFor(phase) {
+    if (phase === awakePhase) return;
+    awakePhase = phase;
+    clearTimeout(awakeTimer);
+    keepScreenAwake(phase === "Playing" || phase === "Over");
+    if (phase === "Over") awakeTimer = setTimeout(() => keepScreenAwake(false), AWAKE_AFTER_GAME);
 }
 
 keepScreenAwake(false);
@@ -2520,7 +2533,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             return;
         }
         if (view.isPlayer) registerForNotifications(true);
-        keepScreenAwake(state.phase !== "Lobby");
+        keepScreenAwakeFor(state.phase);
         chat.setAvailable(!state.isPublic);
         const inLobby = state.phase === "Lobby";
         const taken = state.seats.filter(Boolean).length;
