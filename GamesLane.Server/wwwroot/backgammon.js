@@ -481,22 +481,22 @@ function showScoreboard(game, state, view) {
 
 // On a portrait screen, the board is as wide as the screen, but the buttons under it fit on the screen: the board
 // shrinks by however much they do not (down to 160 pixels high). On a landscape screen, the board takes the whole
-// height under the status bar, as wide as the room beside the buttons allows, with the width of the scores without
-// names free on both sides so it stays centred; the names then show if they fit in the room left. Either way, the
-// message, the match facts and the game's options are scrolled to under it.
+// height under the status bar, as wide as the room beside the scores (without names) and the buttons allows; the names
+// then show if they fit in the room left. Either way, the message, the match facts and the game's options are scrolled
+// to under it.
 function fitBoard() {
     const board = document.querySelector("#bg-board .bg-svg");
     if (!board || $("game-screen").hidden) return;
     board.style.maxHeight = "none";
     $("bg-board").style.width = "";
     if (landscapeScreen.matches) {
-        const scores = $("scores");
-        scores.classList.add("compact");
-        scores.style.width = "max-content";
-        const scoresWidth = scores.offsetWidth;
-        scores.style.width = "";
+        const side = $("bg-side");
+        $("scores").classList.add("compact");
+        side.style.width = "max-content";
+        const sideWidth = side.offsetWidth;
+        side.style.width = "";
         const height = Math.max(160, innerHeight - (board.getBoundingClientRect().top + scrollY) - 4);
-        const room = $("game-screen").clientWidth - $("bg-side").offsetWidth - 2 * scoresWidth - 28;
+        const room = $("game-screen").clientWidth - sideWidth - 8;
         board.style.maxHeight = `${height}px`;
         $("bg-board").style.width = `${Math.max(160, Math.min(room, height * WIDTH / HEIGHT))}px`;
         fitScores();
@@ -519,7 +519,7 @@ const backgammon = startSessionPage("Backgammon", (game, state, view) => {
     }
     current = { game, view, viewer, canMove };
 
-    placeScores($("game-screen"));
+    placeScores($("bg-side"));
     showScoreboard(game, state, view);
     $("bg-board").replaceChildren(drawGame(game, viewer, canMove, game.canDouble && view.isMe(game.turn)));
     const { status, message } = backgammonTexts(game, state, view);
@@ -547,7 +547,7 @@ const backgammon = startSessionPage("Backgammon", (game, state, view) => {
 }, (seat) => `${["⚪", "⚫"][seat]} ${colorName(seat)}`);
 
 addEventListener("resize", () => requestAnimationFrame(() => {
-    placeScores($("game-screen"));
+    placeScores($("bg-side"));
     fitBoard();
 }));
 

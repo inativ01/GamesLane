@@ -1833,7 +1833,8 @@ main .score-chip .seat-label {
     min-width: 0;
 }
 
-/* Tic-tac-toe on a landscape screen: the board centred, the scores beside it. */
+/* Tic-tac-toe on a landscape screen: the board at its full size, centred in the room beside the scores, which get the
+   room the board leaves. */
 @media (orientation: landscape) {
     main.tictactoe {
         max-width: 980px;
@@ -1841,8 +1842,8 @@ main .score-chip .seat-label {
 
     main.tictactoe #game-screen {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-        grid-template-areas: ". board scores" "actions actions actions" "facts facts facts" "options options options";
+        grid-template-columns: 1fr minmax(0, max-content);
+        grid-template-areas: "board scores" "actions actions" "facts facts" "options options";
         column-gap: 0.5rem;
     }
 
@@ -4380,9 +4381,10 @@ main.backgammon {
     color: var(--muted);
 }
 
-/* A landscape screen: the board as high as the screen under the status bar (see fitBoard in backgammon.js), centred
-   with the buttons in a column beside it, and the players' scores at the top of the screen's end side (see placeScores
-   in common.js); the message, the match facts and the game's options come under it. */
+/* A landscape screen: the board as high as the screen under the status bar (see fitBoard in backgammon.js), centred in
+   the room beside a column at the top of the screen's end side with the players' scores (see placeScores in common.js)
+   and the buttons under them; the column gets the room the board leaves. The message, the match facts and the game's
+   options come under it. */
 @media (orientation: landscape) {
     main.backgammon {
         max-width: none;
@@ -4391,30 +4393,28 @@ main.backgammon {
 
     main.backgammon #game-screen {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
-        grid-template-areas: ". board side scores" "message message message message" "facts facts facts facts"
-            "options options options options";
-        align-items: center;
+        grid-template-columns: 1fr minmax(0, max-content);
+        grid-template-areas: "board side" "message message" "facts facts" "options options";
         column-gap: 0.5rem;
     }
 
-    main.backgammon .bg-board { grid-area: board; margin: 0; }
+    main.backgammon .bg-board { grid-area: board; justify-self: center; margin: 0; }
     main.backgammon .bg-message { grid-area: message; }
     main.backgammon .score-facts { grid-area: facts; }
     main.backgammon .game-options { grid-area: options; }
 
     main.backgammon .bg-side {
         grid-area: side;
+        align-self: start;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 0.6rem;
+        min-width: 0;
     }
 
-    main.backgammon .score-row {
-        grid-area: scores;
-        justify-self: end;
-        align-self: start;
+    main.backgammon .bg-side .score-row {
+        align-self: stretch;
     }
 
     main.backgammon .game-actions {
@@ -4795,13 +4795,14 @@ button.yz-roll span {
     font-size: calc(var(--yz-die) * 0.4);
 }
 
-/* A landscape screen: the players' scores at the end of the row, at its top (see placeScores in common.js); the dice
-   take at most 60% of the row's width. */
+/* A landscape screen: the players' scores at the end of the row, at its top (see placeScores in common.js), in the room
+   the dice leave; the dice keep their full size (unless they would take more than 80% of the row), centred in the room
+   beside the scores. */
 @media (orientation: landscape) {
     .yz-dice-row {
-        --yz-die: min(5.4em, (60cqi - 6 * var(--yz-gap)) / 7);
+        --yz-die: min(5.4em, (80cqi - 6 * var(--yz-gap)) / 7);
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
+        grid-template-columns: 1fr auto auto auto 1fr minmax(0, max-content);
     }
 
     .yz-dice-row::before { grid-area: 1 / 2; }
@@ -4809,7 +4810,7 @@ button.yz-roll span {
     button.yz-roll { grid-area: 1 / 4; }
 
     .yz-dice-row .score-row {
-        grid-area: 1 / 5;
+        grid-area: 1 / 6;
         flex-direction: row;
         align-items: center;
         justify-content: flex-end;

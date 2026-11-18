@@ -1829,12 +1829,15 @@ addEventListener("resize", fitScores);
 // A landscape screen (as in styles.css), where the score row is in the game screen, at the top of the screen's end side.
 const landscapeScreen = matchMedia("(orientation: landscape)");
 
-// The score row: in the status bar, or on a landscape screen, in the game screen's element place (Tic-tac-toe,
-// Backgammon and Wazoo).
+// The score row: in the status bar, or on a landscape screen, first in the game screen's element place (Tic-tac-toe,
+// Backgammon and Wazoo), which gives the board or the dice their full size and the scores the room left.
 function placeScores(place) {
     const scores = $("scores");
-    const parent = landscapeScreen.matches ? place : $("status-bar");
-    if (scores.parentElement !== parent) parent.append(scores);
+    if (landscapeScreen.matches) {
+        if (scores.parentElement !== place) place.prepend(scores);
+    } else if (scores.parentElement !== $("status-bar")) {
+        $("status-bar").append(scores);
+    }
     fitScores();
 }
 

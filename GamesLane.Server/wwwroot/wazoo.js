@@ -262,6 +262,7 @@ function fitPlay() {
         th.classList.remove("no-note");
         if (th.scrollWidth > th.clientWidth) th.classList.add("no-note");
     });
+    fitScores();
 }
 
 let current = null;
