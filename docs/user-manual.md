@@ -76,7 +76,7 @@ Play with other people on GamesLane.
 ## During a game
 
 - **The game bar**, under the top bar, shows the game, your seat, the game code (🔑), the chat (💬) and the menu (☰). On a phone held sideways, the top bars are hidden to leave room for the game: tap the small ▾ tab to show them.
-- **The status bar** says what is happening. It turns gold when it is your turn or a button is waiting for you, with a chime, and the phone vibrates where it can. In Tic-tac-toe, Backgammon and Wazoo it also shows each player's score (without the names when they do not fit on one line); on a landscape screen, the scores are at the top of the screen's side instead, beside the board or the dice, and the board or the dice keep their full size. The round or game number is at the bottom of the screen, above the game's options (in Tic-tac-toe on a landscape screen, under the scores).
+- **The status bar** says what is happening. It turns gold when it is your turn or a button is waiting for you, with a chime, and the phone vibrates where it can.
 - **Notifications (iPhone app):** the first time you sit in a game, the app asks to send notifications. Allow them, and when your turn comes while the game is not on your screen (the phone is locked, another app is open, the app is closed or on another page), a notification says "Your turn" with the game's name. Tap it to go back to the game. To stop them, turn off notifications for GamesLane in the iPhone's Settings.
 - **Screen stays on (iPhone app):** while a game is being played, and for 5 minutes after it ends, the screen does not dim or lock, so a phone or iPad showing the table stays on. Elsewhere it dims as usual.
 - **The ☰ menu:** the invite link, how many play and watch, **Leave my seat (watch)**, **End game for everyone**, and **Send feedback**.
@@ -116,8 +116,6 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 - Before rolling, **Double** (or tap the cube) offers a double; the other player answers **Take** or **Drop**.
 - **Last move** shows the last turn's moves as numbered arrows.
 - You see the board from your side. The score shows the match, the scores and the pip counts.
-- On a portrait screen (higher than it is wide), the board is as wide as the screen, with the buttons under it; scroll down for the match and the game's options.
-- On a landscape screen (wider than it is high, such as a computer or a phone held sideways), the board fills the screen's height, with the scores and the buttons beside it. Players' names are left out when they do not fit; their icons and scores stay.
 
 ### Poker Heist
 
@@ -140,8 +138,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 
 - Tap 🎲 **Roll**, up to three times. Between rolls, tap dice to keep them; tap again to let them go.
 - Your open boxes show what the dice would score there: tap one to score. The game asks before scoring 0.
-- The scorecard fits on one screen and shows your column and the column of the player to play (with several seats, your seat that played last). If a name does not fit, only the player's icon is shown.
-- The table under it shows the round and each player's total (**Hide table** / **Show table**). Tap a player there to see their scorecard instead of the player to play's, until the turn passes.
+- The scorecard shows your column and the player to play's. Tap a player in the table under it to see their scorecard instead, until the turn passes.
 
 ### Final Card
 
