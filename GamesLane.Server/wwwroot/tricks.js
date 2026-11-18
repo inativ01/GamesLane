@@ -118,10 +118,10 @@ function trickTable(game, state, view, { turn = null, facts = () => [], arrived 
 }
 
 // The table (see styles.css) is as high as the room above the bottom of the user's first hand allows (for observers,
-// above the bottom of the screen), between one and 1.6 card heights; its cards are as large as that height allows, at
-// most half as wide as a quarter of the table, between 16 and 40 pixels (their font size). The left and right players'
-// names go above their cards when there is room, otherwise beside them; when a name does not fit, every name is left
-// out.
+// above the bottom of the screen), at least one card high and at most as high as it is wide; its cards are as large as
+// that height allows, at most half as wide as a quarter of the table, between 16 and 40 pixels (their font size). The
+// left and right players' names go above their cards when there is room, otherwise beside them; when a name does not
+// fit, every name is left out.
 const TRICK_CARD_HEIGHT = 3.9;
 
 function fitTrickTable() {
@@ -131,7 +131,7 @@ function fitTrickTable() {
     const below = document.querySelector("#game-screen .rp-hand") ?? table.closest(".rp-top");
     const room = table.offsetHeight + innerHeight - 4 - (below.getBoundingClientRect().bottom + scrollY);
     const size = Math.max(16, Math.min(40, room / TRICK_CARD_HEIGHT, table.clientWidth / 8 / 2.6));
-    const height = Math.max(TRICK_CARD_HEIGHT * size, Math.min(room, 1.6 * TRICK_CARD_HEIGHT * size));
+    const height = Math.max(TRICK_CARD_HEIGHT * size, Math.min(room, table.clientWidth));
     table.style.setProperty("--trick-card", `${size}px`);
     table.style.setProperty("--trick-height", `${height}px`);
     const names = [...table.querySelectorAll(".trick-player")];
