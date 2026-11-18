@@ -47,7 +47,7 @@ public class User
     public DateTimeOffset LastActiveAt { get; set; }
 
     /// <summary>
-    /// The order of the games on the user's main screen: game names separated by commas, e.g. <c>Backgammon,TheGang</c>,
+    /// The order of the games on the user's main screen: game names separated by commas, e.g. <c>Backgammon,PokerHeist</c>,
     /// or null for the usual order.
     /// </summary>
     public string? GameOrder { get; set; }
@@ -135,7 +135,7 @@ public class UserGameOptions
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The game, e.g. <c>TheGang</c>.
+    /// The game, e.g. <c>PokerHeist</c>.
     /// </summary>
     public required string GameType { get; set; }
 

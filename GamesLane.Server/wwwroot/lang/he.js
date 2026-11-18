@@ -167,6 +167,7 @@ TRANSLATIONS.he = {
     "Log in to chat.": "התחברו כדי לכתוב בצ'אט.",
     "Write a message of 1 to {n} characters.": "כתבו הודעה באורך 1 עד {n} תווים.",
     "Open the game to chat.": "פתחו את המשחק כדי לכתוב בצ'אט.",
+    "Public games have no chat.": "במשחקים ציבוריים אין צ'אט.",
 
     // Main screen
     "Public games": "משחקים ציבוריים",
@@ -189,7 +190,7 @@ TRANSLATIONS.he = {
     "You are no longer in this game.": "כבר אינך במשחק הזה.",
     "Drag a game by its ⋮⋮ handle to change the order.": "גררו משחק בידית ⋮⋮ כדי לשנות את הסדר.",
     "Drag to move": "גררו כדי להזיז",
-    "The Gang": "הכנופיה",
+    "Poker Heist": "שוד פוקר",
     "A team poker heist. Rank your hands in secret.": "שוד פוקר קבוצתי. דרגו את הידיים שלכם בסוד.",
     "3–8 players": "3–8 שחקנים",
     "2 players": "2 שחקנים",
@@ -801,8 +802,8 @@ TRANSLATIONS.he = {
     "{name} wins round {n}": "{name} זוכה בסיבוב {n}",
     "Cell {n}": "משבצת {n}",
 
-    // The Gang
-    "The Gang - GamesLane": "הכנופיה - GamesLane",
+    // Poker Heist
+    "Poker Heist - GamesLane": "שוד פוקר - GamesLane",
     "Next heist": "השוד הבא",
     "Reveal next hand": "חשיפת היד הבאה",
     "Heist": "שוד",
@@ -832,7 +833,7 @@ TRANSLATIONS.he = {
     "Agree on the guess before the strongest hand is revealed": "הסכימו על הניחוש לפני שהיד החזקה ביותר נחשפת",
     "Reveal the hands, lowest red chip first": "חשפו את הידיים, מהצ'יפ האדום הנמוך ביותר",
     "Revealing, lowest red chip first…": "חושפים, מהצ'יפ האדום הנמוך ביותר…",
-    "Three vaults: the gang wins!": "שלוש כספות: הכנופיה מנצחת!",
+    "Three vaults: the crew wins!": "שלוש כספות: הצוות מנצח!",
     "Three alarms: game over": "שלוש אזעקות: המשחק נגמר",
     "The vault is open!": "הכספת נפתחה!",
     "The alarm went off!": "האזעקה הופעלה!",
@@ -909,7 +910,7 @@ TRANSLATIONS.he = {
     "Swapped {n} jokers": "{n} ג'וקרים הוחלפו",
     "Weaker than the hand before": "חלשה מהיד שלפניה",
 
-    // The Gang: hand rankings, cards and options (from the server)
+    // Poker Heist: hand rankings, cards and options (from the server)
     "High card": "קלף גבוה",
     "Pair": "זוג",
     "Two pair": "שני זוגות",
@@ -988,7 +989,7 @@ TRANSLATIONS.he = {
     "Avoid": "להימנע",
     "Never draw them for the same heist.": "לעולם לא לשלוף אותם לאותו שוד.",
 
-    // The Gang: messages from the server
+    // Poker Heist: messages from the server
     "Chips are numbered 1 to {n}.": "הצ'יפים ממוספרים מ־1 עד {n}.",
     "You already have that chip.": "הצ'יפ הזה כבר אצלך.",
     "That chip is locked: whoever took it first keeps it.": "הצ'יפ הזה נעול: מי שלקח אותו ראשון שומר אותו.",

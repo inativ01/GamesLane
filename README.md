@@ -8,7 +8,7 @@ It is a complete reimplementation of the original [GamesLane](https://github.com
 
 ## Features
 
-- **Games:** Tic-tac-toe, Backgammon (matches with a doubling cube), The Gang (the cooperative poker game, 3–8 players, with its challenge and specialist cards), Rich man, poor man (a shedding card game, 4–12 players), Wazoo (the classic dice game, 1–8 players), Final Card (2–10 players, in US or Israeli Style, to a score target or as a pyramid), Yaniv (2–4 players, one round or to a score target), Hearts (4 players, passing cards, to 100 points), Spades (4 players in 2 teams, bidding with Nil and Blind Nil, to 500 points) and Dominoes (Block, Draw and All Fives for 2–4 players, with partners for 4; Mexican Train for 2–8).
+- **Games:** Tic-tac-toe, Backgammon (matches with a doubling cube), Poker Heist (the cooperative poker game, 3–8 players, with its challenge and specialist cards), Rich man, poor man (a shedding card game, 4–12 players), Wazoo (the classic dice game, 1–8 players), Final Card (2–10 players, in US or Israeli Style, to a score target or as a pyramid), Yaniv (2–4 players, one round or to a score target), Hearts (4 players, passing cards, to 100 points), Spades (4 players in 2 teams, bidding with Nil and Blind Nil, to 500 points) and Dominoes (Block, Draw and All Fives for 2–4 players, with partners for 4; Mexican Train for 2–8).
 - **Play together in real time:** a private game with family and friends has a code and a join link; a public game matches you with other people on GamesLane. A typical setup is a shared screen (a TV or laptop) showing the table, while each player plays on their own phone.
 - **Accounts:** everyone starts as a guest (a random name and icon). Signing in with a username and password, or with Apple, Google, Microsoft or Discord, keeps the profile, game order and game options on any device. Accounts unused for 30 days are deleted automatically.
 - **Never lose a game:** players who drop out get their seat back when they return; meanwhile the others can skip their turn (Rich man, poor man, Yaniv, Dominoes) or end the game, a newcomer can take over their seat, and sessions survive a server restart (they are kept for 6 hours after everyone has left).
@@ -19,6 +19,7 @@ It is a complete reimplementation of the original [GamesLane](https://github.com
 
 - [User manual](docs/user-manual.md): how to play, sessions and seats, and the rules of every game.
 - [Developer guide](docs/developer-guide.md): architecture, project structure, the hub API, database, setup, deployment and project status.
+- [App Store submission](docs/app-store.md): the iPhone app's listing, privacy answers, age rating and review notes.
 
 ## Tech stack
 
@@ -54,6 +55,6 @@ dotnet test
 GamesLane.Server/        ASP.NET Core backend: game rules, sessions, SignalR hub, auth, database, and the web pages (wwwroot/)
 GamesLane.Server.Tests/  Unit tests
 GamesLane.iOS/           iPhone app (Capacitor)
-docs/                    User manual, developer guide, and The Gang's card texts
+docs/                    User manual, developer guide and App Store submission
 Dockerfile               Build for Render
 ```

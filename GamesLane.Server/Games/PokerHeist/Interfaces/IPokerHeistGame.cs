@@ -1,11 +1,13 @@
-namespace GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PlayingCards;
+
+namespace GamesLane.Server.Games.PokerHeist;
 
 /// <summary>
-/// The Gang: a cooperative game of Texas Hold'em hands. Players (numbered from 0) try to rank their hands, from weakest
+/// Poker Heist: a cooperative game of Texas Hold'em hands. Players (numbered from 0) try to rank their hands, from weakest
 /// to strongest, by taking numbered chips over four betting stages, without telling each other their cards.
 /// Three successful heists win the game; three failed heists lose it.
 /// </summary>
-public interface ITheGangGame
+public interface IPokerHeistGame
 {
     /// <summary>
     /// The number of players (3 to 8). Chips are numbered 1 to this number.
@@ -15,13 +17,13 @@ public interface ITheGangGame
     /// <summary>
     /// Basic, or Advanced with challenge and specialist cards.
     /// </summary>
-    TheGangMode Mode { get; }
+    PokerHeistMode Mode { get; }
 
     /// <summary>
     /// The challenge and specialist cards in play, in the order they were added (none in Basic mode). Cards stay in play
     /// for the rest of the game.
     /// </summary>
-    IReadOnlyList<TheGangCard> Cards { get; }
+    IReadOnlyList<PokerHeistCard> Cards { get; }
 
     /// <summary>
     /// The keys of the cards added for the current heist.
@@ -29,7 +31,7 @@ public interface ITheGangGame
     IReadOnlyList<string> NewCards { get; }
 
     /// <summary>
-    /// The step every player must do before the betting: <see cref="TheGangGame.JokersStep"/> (swapping the jokers they
+    /// The step every player must do before the betting: <see cref="PokerHeistGame.JokersStep"/> (swapping the jokers they
     /// were dealt), or a specialist card's (Coordinator or Con Artist); or null.
     /// </summary>
     string? PreparingCard { get; }
@@ -74,7 +76,7 @@ public interface ITheGangGame
     /// <summary>
     /// The same as <see cref="Announcement"/>, one fact per card (Investor first, then Math Whiz). Empty if there are none.
     /// </summary>
-    IReadOnlyList<TheGangFact> Facts(int player);
+    IReadOnlyList<PokerHeistFact> Facts(int player);
 
     /// <summary>
     /// The current heist, starting at 1.
@@ -95,7 +97,7 @@ public interface ITheGangGame
     /// <summary>
     /// Betting, revealing hands, or the heist's result.
     /// </summary>
-    TheGangPhase Phase { get; }
+    PokerHeistPhase Phase { get; }
 
     /// <summary>
     /// Successful heists.
@@ -180,7 +182,7 @@ public interface ITheGangGame
     /// For the revealed hand at <paramref name="index"/> (in reveal order), the first reason it is weaker than the hand
     /// before it, or null if it is not.
     /// </summary>
-    TheGangWeakness? Weakness(int index);
+    PokerHeistWeakness? Weakness(int index);
 
     /// <summary>
     /// A player's best hand from their pocket cards and the five shared slots (one card from each).
@@ -205,7 +207,7 @@ public interface ITheGangGame
     bool TrySetReady(int player, bool ready, out string? error);
 
     /// <summary>
-    /// Whether a player has done the specialist card's step (<see cref="TheGangPhase.Preparing"/>).
+    /// Whether a player has done the specialist card's step (<see cref="PokerHeistPhase.Preparing"/>).
     /// </summary>
     bool IsPrepared(int player);
 
@@ -229,12 +231,12 @@ public interface ITheGangGame
     /// <summary>
     /// The group decisions of the heist's cards (Informant, Getaway Driver, Mastermind, Hacker, Jack, Muscle, and the scans).
     /// </summary>
-    IReadOnlyList<TheGangDecisionInfo> Decisions { get; }
+    IReadOnlyList<PokerHeistDecisionInfo> Decisions { get; }
 
     /// <summary>
     /// What the cards showed everyone so far (Getaway Driver, Mastermind, the scans' guesses).
     /// </summary>
-    IReadOnlyList<TheGangResult> Results { get; }
+    IReadOnlyList<PokerHeistResult> Results { get; }
 
     /// <summary>
     /// The player who must take a private step (show or discard a card) before the stage can end, or null.
@@ -244,7 +246,7 @@ public interface ITheGangGame
     /// <summary>
     /// The step <see cref="PendingPlayer"/> must take.
     /// </summary>
-    TheGangStep PendingStep { get; }
+    PokerHeistStep PendingStep { get; }
 
     /// <summary>
     /// Informant: who showed a card to whom, or null.

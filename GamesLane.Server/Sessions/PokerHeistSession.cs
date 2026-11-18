@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
+using GamesLane.Server.Games.PlayingCards;
 
 namespace GamesLane.Server.Sessions;
 
@@ -9,7 +10,7 @@ namespace GamesLane.Server.Sessions;
 /// If not, <see cref="WrongRanking"/> or <see cref="WrongValues"/> (positions in <see cref="Values"/>) give the first
 /// reason: a lower ranking, or with the same ranking, the first lower card values.
 /// </summary>
-public record TheGangRevealedHand(
+public record PokerHeistRevealedHand(
     int Seat,
     IReadOnlyList<string> Cards,
     string Name,
@@ -22,15 +23,15 @@ public record TheGangRevealedHand(
 /// <summary>
 /// What a specialist card (Investor or Math Whiz, by key) shows everyone about a seat's cards, e.g. "2 face cards".
 /// </summary>
-public record TheGangAnnouncement(int Seat, string Card, string Text);
+public record PokerHeistAnnouncement(int Seat, string Card, string Text);
 
 /// <summary>
 /// A card's group decision, by seat: the proposed seat and value, the seats that vote and those that agreed, whether it
 /// can be decided now, whether it was carried out, and for a scan, whether it was skipped (the heist fails anyway).
 /// </summary>
-public record TheGangDecisionState(
+public record PokerHeistDecisionState(
     string Card,
-    TheGangChoice Choice,
+    PokerHeistChoice Choice,
     int? Seat,
     string? Value,
     IReadOnlyList<int> Voters,
@@ -43,15 +44,15 @@ public record TheGangDecisionState(
 /// What a card showed everyone about a seat (Getaway Driver, Mastermind, the scans' guesses), e.g. "Pair". For a scan,
 /// <see cref="Passed"/> tells whether the guess was right.
 /// </summary>
-public record TheGangResultState(int Seat, string Card, string Text, bool? Passed);
+public record PokerHeistResultState(int Seat, string Card, string Text, bool? Passed);
 
 /// <summary>
 /// A card shown to this seat by another seat (Informant).
 /// </summary>
-public record TheGangShownCard(int FromSeat, string Card);
+public record PokerHeistShownCard(int FromSeat, string Card);
 
 /// <summary>
-/// Public state of The Gang. <see cref="Chips"/> has one list per stage (white, yellow, orange, red), each with one
+/// Public state of Poker Heist. <see cref="Chips"/> has one list per stage (white, yellow, orange, red), each with one
 /// entry per seat (null if the seat holds no chip in that stage, or does not play, or the stage's chips were removed by
 /// Blackout). Cards are short text such as "10♥". Pocket cards are not included until revealed.
 /// <see cref="Mode"/> is the mode this game is played in; <see cref="Cards"/> are the current heist's challenge or
@@ -65,26 +66,26 @@ public record TheGangShownCard(int FromSeat, string Card);
 /// seat for each joker swapped in this heist, and <see cref="JokerSeats"/> the seats choosing a card for a joker now.
 /// <see cref="Shuffles"/> counts the shuffles, so a page can show each one.
 /// </summary>
-public record TheGangState(
-    TheGangMode Mode,
-    IReadOnlyList<TheGangCard> Cards,
+public record PokerHeistState(
+    PokerHeistMode Mode,
+    IReadOnlyList<PokerHeistCard> Cards,
     IReadOnlyList<string> NewCards,
     string? PreparingCard,
     int? RedrawnSeat,
     bool RedrawConfirmed,
     IReadOnlyList<int> SkippedStages,
     IReadOnlyList<int> LockedChips,
-    IReadOnlyList<TheGangAnnouncement> Announcements,
-    IReadOnlyList<TheGangDecisionState> Decisions,
-    IReadOnlyList<TheGangResultState> Results,
+    IReadOnlyList<PokerHeistAnnouncement> Announcements,
+    IReadOnlyList<PokerHeistDecisionState> Decisions,
+    IReadOnlyList<PokerHeistResultState> Results,
     int? PendingSeat,
-    TheGangStep PendingStep,
+    PokerHeistStep PendingStep,
     int? ShownFromSeat,
     int? ShownToSeat,
     bool? Succeeded,
     int Heist,
     int Stage,
-    TheGangPhase Phase,
+    PokerHeistPhase Phase,
     int Vaults,
     int Alarms,
     IReadOnlyList<IReadOnlyList<string>> CommunityCards,
@@ -96,49 +97,49 @@ public record TheGangState(
     IReadOnlyList<int> PreparedSeats,
     IReadOnlyList<int> PlayingSeats,
     IReadOnlyList<int> RevealOrder,
-    IReadOnlyList<TheGangRevealedHand> Revealed,
+    IReadOnlyList<PokerHeistRevealedHand> Revealed,
     int Shuffles);
 
 /// <summary>
-/// A player's own cards in The Gang, with Coordinator, the card they picked to pass on, with Informant, a card another
+/// A player's own cards in Poker Heist, with Coordinator, the card they picked to pass on, with Informant, a card another
 /// seat showed them, and with jokers, the two cards offered for a joker in the hand. <see cref="Ranking"/> is the ranking
 /// the cards make with the shared cards so far (e.g. "Two pair"), only with the option that shows it; otherwise the
 /// hand's value is only shown when hands are revealed.
 /// </summary>
-public record TheGangHand(
+public record PokerHeistHand(
     int Seat,
     IReadOnlyList<string> Cards,
     string? PassingCard,
-    TheGangShownCard? ShownCard,
+    PokerHeistShownCard? ShownCard,
     IReadOnlyList<string>? JokerOffer,
     string? Ranking);
 
 /// <summary>
-/// Private state of The Gang, sent only to the user holding these seats.
+/// Private state of Poker Heist, sent only to the user holding these seats.
 /// </summary>
-public record TheGangPrivateState(IReadOnlyList<TheGangHand> Hands);
+public record PokerHeistPrivateState(IReadOnlyList<PokerHeistHand> Hands);
 
 /// <summary>
-/// A session of The Gang for 3 to 8 seats. Each player's cards are private and sent only to them.
+/// A session of Poker Heist for 3 to 8 seats. Each player's cards are private and sent only to them.
 /// Players in the game are numbered in seat order.
 /// </summary>
-public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null, Random? random = null)
-    : GameSession(id), ITheGangSession
+public class PokerHeistSession(string id, Func<IReadOnlyList<Card>>? newDeck = null, Random? random = null)
+    : GameSession(id), IPokerHeistSession
 {
     // Jokers are added by the game when its rules use them.
     private readonly Func<IReadOnlyList<Card>> _newDeck = newDeck ?? (() => Deck.Shuffled(Random.Shared));
     private readonly Random _random = random ?? Random.Shared;
-    private TheGangGame? _game;
-    private TheGangRules _rules = TheGangRules.Basic;
+    private PokerHeistGame? _game;
+    private PokerHeistRules _rules = PokerHeistRules.Basic;
 
     /// <inheritdoc />
-    public override GameType Type => GameType.TheGang;
+    public override GameType Type => GameType.PokerHeist;
 
     /// <inheritdoc />
-    protected override int MinSeats => TheGangGame.MinPlayers;
+    protected override int MinSeats => PokerHeistGame.MinPlayers;
 
     /// <inheritdoc />
-    protected override int MaxSeats => TheGangGame.MaxPlayers;
+    protected override int MaxSeats => PokerHeistGame.MaxPlayers;
 
     /// <inheritdoc />
     protected override bool IsGameOver => _game?.IsOver ?? false;
@@ -202,8 +203,8 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
     /// <inheritdoc />
     protected override void StartNewGame(IReadOnlyList<int> seats)
     {
-        _rules = TheGangRules.FromOptions(Options);
-        _game = new TheGangGame(seats.Count, _newDeck, _rules, _random, SameHolder);
+        _rules = PokerHeistRules.FromOptions(Options);
+        _game = new PokerHeistGame(seats.Count, _newDeck, _rules, _random, SameHolder);
     }
 
     /// <inheritdoc />
@@ -228,12 +229,12 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
             var jokers = players.Where(p => game.JokerOffer(p) is not null).ToArray();
             IEnumerable<int> awaited = game.Phase switch
             {
-                TheGangPhase.Preparing => players.Where(p => !game.IsPrepared(p)),
-                TheGangPhase.Betting when game.PendingPlayer is { } pending && game.PendingStep != TheGangStep.None => [pending],
-                TheGangPhase.Betting when game.RedrawnPlayer is { } redrawn && !game.IsRedrawConfirmed => [redrawn],
-                TheGangPhase.Betting when jokers.Length > 0 => jokers,
-                TheGangPhase.Betting => players.Where(p => !game.IsReady(p)),
-                TheGangPhase.Reveal => game.Decisions.Where(d => d.IsOpen).SelectMany(d => d.Voters.Except(d.Agreed)),
+                PokerHeistPhase.Preparing => players.Where(p => !game.IsPrepared(p)),
+                PokerHeistPhase.Betting when game.PendingPlayer is { } pending && game.PendingStep != PokerHeistStep.None => [pending],
+                PokerHeistPhase.Betting when game.RedrawnPlayer is { } redrawn && !game.IsRedrawConfirmed => [redrawn],
+                PokerHeistPhase.Betting when jokers.Length > 0 => jokers,
+                PokerHeistPhase.Betting => players.Where(p => !game.IsReady(p)),
+                PokerHeistPhase.Reveal => game.Decisions.Where(d => d.IsOpen).SelectMany(d => d.Voters.Except(d.Agreed)),
                 _ => [],
             };
             return awaited.Select(p => GameSeats[p]);
@@ -250,8 +251,8 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
     {
         var game = _game!;
         var bySeat = SeatOfPlayer();
-        var showsAllCards = game.Phase is TheGangPhase.Reveal or TheGangPhase.HeistOver;
-        return new TheGangState(
+        var showsAllCards = game.Phase is PokerHeistPhase.Reveal or PokerHeistPhase.HeistOver;
+        return new PokerHeistState(
             game.Mode,
             game.Cards,
             game.NewCards,
@@ -261,8 +262,8 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
             game.SkippedStages,
             game.LockedChips,
             [.. Enumerable.Range(0, game.PlayerCount)
-                .SelectMany(player => game.Facts(player).Select(f => new TheGangAnnouncement(bySeat[player], f.Card, f.Text)))],
-            [.. game.Decisions.Select(d => new TheGangDecisionState(
+                .SelectMany(player => game.Facts(player).Select(f => new PokerHeistAnnouncement(bySeat[player], f.Card, f.Text)))],
+            [.. game.Decisions.Select(d => new PokerHeistDecisionState(
                 d.Card,
                 d.Choice,
                 d.Player is { } p ? bySeat[p] : null,
@@ -272,7 +273,7 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
                 d.IsOpen,
                 d.IsDone,
                 d.IsSkipped))],
-            [.. game.Results.Select(r => new TheGangResultState(bySeat[r.Player], r.Card, r.Text, r.Passed))],
+            [.. game.Results.Select(r => new PokerHeistResultState(bySeat[r.Player], r.Card, r.Text, r.Passed))],
             game.PendingPlayer is { } pending ? bySeat[pending] : null,
             game.PendingStep,
             game.ShownBetween is { } shown ? bySeat[shown.From] : null,
@@ -286,7 +287,7 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
             [.. game.VisibleCommunity.Select(Text)],
             [.. Enumerable.Range(0, game.PlayerCount).SelectMany(p => Enumerable.Repeat(bySeat[p], game.JokerSwaps(p)))],
             [.. Enumerable.Range(0, game.PlayerCount).Where(p => game.JokerOffer(p) is not null).Select(p => bySeat[p])],
-            Enumerable.Range(0, TheGangGame.StageCount)
+            Enumerable.Range(0, PokerHeistGame.StageCount)
                 .Select(stage => (IReadOnlyList<int?>)Enumerable.Range(0, MaxSeats)
                     .Select(seat => PlayerAt(seat) is { } player && !game.AreChipsDiscarded(stage) ? game.Chip(stage, player) : null)
                     .ToArray())
@@ -301,7 +302,7 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
                 {
                     var hand = game.Hand(player);
                     var weakness = game.Weakness(i);
-                    return new TheGangRevealedHand(
+                    return new PokerHeistRevealedHand(
                         bySeat[player], Text(game.HoleCards(player)), hand.Summary, game.RevealedInOrder[i],
                         hand.Ranking, hand.Values, weakness?.Ranking ?? false, weakness?.Cards ?? []);
                 }).ToArray()
@@ -314,25 +315,25 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
     {
         var game = _game!;
         var bySeat = SeatOfPlayer();
-        return new TheGangPrivateState(seats.Select(seat =>
+        return new PokerHeistPrivateState(seats.Select(seat =>
         {
             var player = PlayerAt(seat)!.Value;
             var shown = game.ShownCardFor(player) is { } card && game.ShownBetween is { } between
-                ? new TheGangShownCard(bySeat[between.From], card.ToString())
+                ? new PokerHeistShownCard(bySeat[between.From], card.ToString())
                 : null;
             var offer = game.JokerOffer(player) is { } cards ? Text(cards) : null;
             var counting = game.HoleCards(player).Where(c => !c.IsJoker).ToArray();
             var ranking = _rules.ShowHandRanking && counting.Length > 0
                 ? HandRankings.OfCards(counting, game.VisibleCommunity)
                 : null;
-            return new TheGangHand(seat, Text(game.HoleCards(player)), game.PassingCard(player)?.ToString(), shown, offer, ranking);
+            return new PokerHeistHand(seat, Text(game.HoleCards(player)), game.PassingCard(player)?.ToString(), shown, offer, ranking);
         }).ToArray());
     }
 
     /// <summary>
     /// Runs a player's action, after checking that <paramref name="userKey"/> holds <paramref name="seat"/> in the game.
     /// </summary>
-    private bool WithPlayer(string userKey, int seat, Func<TheGangGame, int, (bool, string?)> action, out string? error)
+    private bool WithPlayer(string userKey, int seat, Func<PokerHeistGame, int, (bool, string?)> action, out string? error)
     {
         lock (Sync)
         {
@@ -349,7 +350,7 @@ public class TheGangSession(string id, Func<IReadOnlyList<Card>>? newDeck = null
     /// <summary>
     /// Runs an action any player in the game may take.
     /// </summary>
-    private bool WithGame(string userKey, Func<TheGangGame, (bool, string?)> action, out string? error)
+    private bool WithGame(string userKey, Func<PokerHeistGame, (bool, string?)> action, out string? error)
     {
         lock (Sync)
         {

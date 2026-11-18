@@ -255,7 +255,7 @@ public class GameSessionStoreTests
         [
             new() { Day = today, GameType = "Yaniv", Count = 3 },
             new() { Day = today.AddDays(-2), GameType = "Yaniv", Count = 2 },
-            new() { Day = today.AddDays(-2), GameType = "TheGang", Count = 1 },
+            new() { Day = today.AddDays(-2), GameType = "PokerHeist", Count = 1 },
             new() { Day = today.AddDays(-3), GameType = "Yaniv", Count = 9 },
             new() { Day = today, GameType = "Chess", Count = 5 },
         ];
@@ -267,8 +267,8 @@ public class GameSessionStoreTests
         var yaniv = report.Games.Single(g => g.GameType == GameType.Yaniv);
         Assert.Equal([2, 0, 3], yaniv.Counts);
         Assert.Equal(5, yaniv.Total);
-        Assert.Equal(1, report.Games.Single(g => g.GameType == GameType.TheGang).Total);
-        Assert.All(report.Games.Where(g => g.GameType is not (GameType.Yaniv or GameType.TheGang)), g => Assert.Equal([0, 0, 0], g.Counts));
+        Assert.Equal(1, report.Games.Single(g => g.GameType == GameType.PokerHeist).Total);
+        Assert.All(report.Games.Where(g => g.GameType is not (GameType.Yaniv or GameType.PokerHeist)), g => Assert.Equal([0, 0, 0], g.Counts));
         Assert.Equal(Enum.GetValues<GameType>().Order(), GamePlayStats.UsualOrder.Order());
     }
 
@@ -285,7 +285,7 @@ public class GameSessionStoreTests
         ];
 
         Assert.Equal(
-            [GameType.Yaniv, GameType.Wazoo, GameType.TicTacToe, GameType.TheGang, GameType.Backgammon, GameType.RichManPoorMan, GameType.FinalCard,
+            [GameType.Yaniv, GameType.Wazoo, GameType.TicTacToe, GameType.PokerHeist, GameType.Backgammon, GameType.RichManPoorMan, GameType.FinalCard,
                 GameType.Hearts, GameType.Spades, GameType.Dominoes],
             GamePlayStats.PopularOrder(kept));
         Assert.Equal(GamePlayStats.UsualOrder, GamePlayStats.PopularOrder([]));

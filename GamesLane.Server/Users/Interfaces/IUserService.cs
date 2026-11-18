@@ -87,7 +87,7 @@ public interface IUserService
     Task<IReadOnlyList<string>?> GetGameOrderAsync(Guid userId);
 
     /// <summary>
-    /// Saves the order of the games on the user's main screen (game names such as <c>TheGang</c>). Returns an error
+    /// Saves the order of the games on the user's main screen (game names such as <c>PokerHeist</c>). Returns an error
     /// message, or null on success.
     /// </summary>
     Task<string?> SetGameOrderAsync(Guid userId, IReadOnlyList<string>? games);

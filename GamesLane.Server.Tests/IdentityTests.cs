@@ -537,13 +537,13 @@ public class IdentityTests
     }
 
     [Theory]
-    [InlineData("Backgammon TheGang TicTacToe Wazoo", true)]
-    [InlineData("TheGang", true)]
+    [InlineData("Backgammon PokerHeist TicTacToe Wazoo", true)]
+    [InlineData("PokerHeist", true)]
     [InlineData("", true)]
-    [InlineData("TheGang Chess", false)]
-    [InlineData("thegang", false)]
+    [InlineData("PokerHeist Chess", false)]
+    [InlineData("pokerheist", false)]
     [InlineData("2", false)]
-    [InlineData("TheGang TheGang", false)]
+    [InlineData("PokerHeist PokerHeist", false)]
     public void A_game_order_lists_existing_games_once_each(string games, bool valid)
     {
         var list = games.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -556,7 +556,7 @@ public class IdentityTests
     [Fact]
     public void A_saved_game_order_keeps_only_games_that_still_exist()
     {
-        Assert.Equal(["Backgammon", "TheGang"], UserRules.ParseGameOrder("Backgammon,Chess,TheGang,Backgammon"));
+        Assert.Equal(["Backgammon", "PokerHeist"], UserRules.ParseGameOrder("Backgammon,Chess,PokerHeist,Backgammon"));
         Assert.Empty(UserRules.ParseGameOrder(null));
     }
 

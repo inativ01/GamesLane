@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using GamesLane.Server.Games.Backgammon;
 using GamesLane.Server.Games.Dominoes;
 using GamesLane.Server.Games.RichManPoorMan;
-using GamesLane.Server.Games.TheGang;
+using GamesLane.Server.Games.PokerHeist;
 using GamesLane.Server.Games.FinalCard;
 using GamesLane.Server.Games.Spades;
 using GamesLane.Server.Games.Yaniv;
@@ -76,7 +76,7 @@ public static class GameOptions
     /// </summary>
     public static IReadOnlyList<GameOption> For(GameType type) => type switch
     {
-        GameType.TheGang => TheGangOptions.All,
+        GameType.PokerHeist => PokerHeistOptions.All,
         GameType.Backgammon => BackgammonOptions.All,
         GameType.FinalCard => FinalCardOptions.All,
         GameType.RichManPoorMan => RichManPoorManOptions.All,

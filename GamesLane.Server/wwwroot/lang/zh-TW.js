@@ -167,6 +167,7 @@ TRANSLATIONS["zh-TW"] = {
     "Log in to chat.": "請登入後聊天。",
     "Write a message of 1 to {n} characters.": "請輸入 1 到 {n} 個字元的訊息。",
     "Open the game to chat.": "請開啟遊戲後聊天。",
+    "Public games have no chat.": "公開遊戲沒有聊天功能。",
 
     // Main screen
     "Public games": "公開遊戲",
@@ -189,7 +190,7 @@ TRANSLATIONS["zh-TW"] = {
     "You are no longer in this game.": "您已不在這局遊戲中。",
     "Drag a game by its ⋮⋮ handle to change the order.": "按住遊戲的 ⋮⋮ 握把拖曳即可變更順序。",
     "Drag to move": "拖曳以移動",
-    "The Gang": "The Gang",
+    "Poker Heist": "Poker Heist",
     "A team poker heist. Rank your hands in secret.": "團隊撲克大劫案。祕密地為你們的手牌排名。",
     "3–8 players": "3–8 位玩家",
     "2 players": "2 位玩家",
@@ -802,8 +803,8 @@ TRANSLATIONS["zh-TW"] = {
     "{name} wins round {n}": "{name} 贏得第 {n} 輪",
     "Cell {n}": "格子 {n}",
 
-    // The Gang
-    "The Gang - GamesLane": "The Gang - GamesLane",
+    // Poker Heist
+    "Poker Heist - GamesLane": "Poker Heist - GamesLane",
     "Next heist": "下一次搶案",
     "Reveal next hand": "亮出下一手牌",
     "Heist": "搶案",
@@ -833,7 +834,7 @@ TRANSLATIONS["zh-TW"] = {
     "Agree on the guess before the strongest hand is revealed": "請在最強手牌亮出前商定猜測",
     "Reveal the hands, lowest red chip first": "請亮出手牌，從最小的紅色籌碼開始",
     "Revealing, lowest red chip first…": "正在亮牌，從最小的紅色籌碼開始…",
-    "Three vaults: the gang wins!": "三個金庫：團夥獲勝！",
+    "Three vaults: the crew wins!": "三個金庫：團隊獲勝！",
     "Three alarms: game over": "三次警報：遊戲結束",
     "The vault is open!": "金庫打開了！",
     "The alarm went off!": "警報響了！",
@@ -910,7 +911,7 @@ TRANSLATIONS["zh-TW"] = {
     "Swapped {n} jokers": "已替換 {n} 張鬼牌",
     "Weaker than the hand before": "比上一手牌弱",
 
-    // The Gang: hand rankings, cards and options (from the server)
+    // Poker Heist: hand rankings, cards and options (from the server)
     "High card": "高牌",
     "Pair": "一對",
     "Two pair": "兩對",
@@ -989,7 +990,7 @@ TRANSLATIONS["zh-TW"] = {
     "Avoid": "避免",
     "Never draw them for the same heist.": "同一次搶案中絕不同時抽到它們。",
 
-    // The Gang: messages from the server
+    // Poker Heist: messages from the server
     "Chips are numbered 1 to {n}.": "籌碼編號為 1 到 {n}。",
     "You already have that chip.": "您已經有這個籌碼了。",
     "That chip is locked: whoever took it first keeps it.": "這個籌碼已鎖定：先拿到的人保留。",

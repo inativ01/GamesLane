@@ -9,7 +9,7 @@ namespace GamesLane.Server.Sessions;
 internal static class SnapshotConverters
 {
     /// <summary>
-    /// Two-dimensional arrays (e.g. The Gang's chips by stage and player), saved as a list of rows.
+    /// Two-dimensional arrays (e.g. Poker Heist's chips by stage and player), saved as a list of rows.
     /// </summary>
     internal sealed class TwoDimensional : JsonConverterFactory
     {
