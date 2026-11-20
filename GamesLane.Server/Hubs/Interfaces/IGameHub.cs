@@ -40,6 +40,22 @@ public interface IGameHub
     Task<IReadOnlyList<WaitingGame>> WaitingGames();
 
     /// <summary>
+    /// The caller's Saved games, most recently active first; none for guests.
+    /// </summary>
+    Task<IReadOnlyList<SavedGameInfo>> SavedGames();
+
+    /// <summary>
+    /// Saved users only. Adds a private game, in any state, to the caller's Saved games, whether or not they hold a seat
+    /// in it. Refused when they already have <see cref="SavedGameService.Limit"/> saved games.
+    /// </summary>
+    Task SaveGame(string sessionId);
+
+    /// <summary>
+    /// Removes a game from the caller's Saved games.
+    /// </summary>
+    Task RemoveSavedGame(string sessionId);
+
+    /// <summary>
     /// Takes the next available seat (in the lobby, the first empty one; during a game, for a user offered a seat, the
     /// first absent seat of the game) as the logged-in user, using their display name. Not in public games, which are
     /// joined from the main screen.

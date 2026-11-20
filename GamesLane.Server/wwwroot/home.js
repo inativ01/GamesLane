@@ -1,7 +1,8 @@
 "use strict";
 
-// Main screen: public games (create one, or join a random one waiting for players) and private games (create one, or
-// join one by its code), then go to that game's page. Choosing to create or join a game shows the list of games.
+// Main screen: a saved user's Saved games (when they have any), public games (create one, or join a random one waiting
+// for players) and private games (create one, or join one by its code), then go to that game's page. Choosing to create
+// or join a game shows the list of games.
 
 function goToSession(gameType, sessionId) {
     location.href = `${GAME_PAGES[gameType]}?session=${sessionId}`;
@@ -78,12 +79,14 @@ const PICKS = {
     "private-create": { title: "Create a private game", run: (gameType) => startGame(gameType, false) },
 };
 let pick = null;
+let hasSavedGames = false;
 
 // Shows the main menu, or the list of games for one of PICKS. The list is a step in the browser's history, so the
 // Back button returns to the menu.
 function showView(name) {
     pick = PICKS[name] ?? null;
     $("menu").hidden = Boolean(pick);
+    $("saved-games").hidden = Boolean(pick) || !hasSavedGames;
     $("picker").hidden = !pick;
     if (pick) {
         $("picker-title").textContent = t(pick.title);
@@ -225,19 +228,71 @@ document.querySelectorAll("[data-create]").forEach((button) => {
     button.addEventListener("click", () => pick?.run(button.dataset.create));
 });
 
-// A user coming back to the main screen returns at once to a public game in progress that waits for them. Games with
-// family and friends that wait for them are offered, with Return and Leave.
+// The most saved games a user can open (SavedGameService.Limit on the server).
+const SAVED_GAMES_LIMIT = 2;
+const SAVED_PHASES = { Lobby: "In the lobby", Playing: "Game in progress", Over: "Game over" };
+
+// The Saved games panel, first on the main screen when the user has saved games: how many of the limit they use, then
+// each game with its code, state ("Waiting for you" when it waits for them, see WaitingGames), players and, in its last
+// 30 days, when it will be deleted; with Open, and Remove. A game that can no longer be opened has only Remove.
+function showSavedGames(games, waitingIds) {
+    hasSavedGames = games.length > 0;
+    $("saved-games").hidden = Boolean(pick) || !hasSavedGames;
+    $("saved-count").textContent = t("{count} of {limit}", { count: games.filter((game) => game.canOpen).length, limit: SAVED_GAMES_LIMIT });
+    $("saved-list").replaceChildren(...games.map((game) => {
+        const details = game.canOpen
+            ? [t(waitingIds.has(game.sessionId) ? "Waiting for you" : SAVED_PHASES[game.phase]), game.players.join(", ")]
+            : [t("This game can no longer be opened (GamesLane was updated).")];
+        const info = el("span", "saved-info",
+            el("strong", null, `${game.gameType ? gameTitle(game.gameType) : ""} · ${game.sessionId}`),
+            el("span", "saved-details", details.filter(Boolean).join(" · ")));
+        if (game.daysLeft) {
+            info.append(el("span", "saved-expiry", game.daysLeft === 1
+                ? t("This game will be deleted in 1 day.")
+                : t("This game will be deleted in {days} days.", { days: game.daysLeft })));
+        }
+        const row = el("li", "saved-game", info);
+        if (game.canOpen) {
+            const open = el("button", "small", t("Open game"));
+            open.type = "button";
+            open.addEventListener("click", () => goToSession(game.gameType, game.sessionId));
+            row.append(open);
+        }
+        const remove = el("button", "secondary small", t("Remove"));
+        remove.type = "button";
+        remove.addEventListener("click", async () => {
+            try {
+                await call("RemoveSavedGame", game.sessionId);
+            } catch {
+                return;
+            }
+            showSavedGames(games.filter((other) => other !== game), waitingIds);
+        });
+        row.append(remove);
+        return row;
+    }));
+}
+
+// A user coming back to the main screen returns at once to a public game in progress that waits for them. Their saved
+// games are shown first (see showSavedGames); other games with family and friends that wait for them are offered, with
+// Return and Leave.
 ready.then(async (ok) => {
     if (!ok) return;
-    const games = await connection.invoke("WaitingGames").catch(() => []);
+    const [games, saved] = await Promise.all([
+        connection.invoke("WaitingGames").catch(() => []),
+        accountReady.then(() => (isSavedUser() ? connection.invoke("SavedGames").catch(() => []) : [])),
+    ]);
     const publicGame = games.find((game) => game.isPublic);
     if (publicGame) {
         showBusy(t("Returning to your game…"), 0);
         goToSession(publicGame.gameType, publicGame.sessionId);
         return;
     }
+    const savedIds = new Set(saved.map((game) => game.sessionId));
+    showSavedGames(saved, new Set(games.map((game) => game.sessionId)));
+    const others = games.filter((game) => !savedIds.has(game.sessionId));
     const box = $("waiting-games");
-    box.replaceChildren(...games.map((game) => {
+    box.replaceChildren(...others.map((game) => {
         const back = el("button", "small", t("Return"));
         back.type = "button";
         back.addEventListener("click", () => goToSession(game.gameType, game.sessionId));
@@ -251,7 +306,7 @@ ready.then(async (ok) => {
         });
         return row;
     }));
-    box.hidden = games.length === 0;
+    box.hidden = others.length === 0;
 });
 
 $("join-form").addEventListener("submit", async (event) => {

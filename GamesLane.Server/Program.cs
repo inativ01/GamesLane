@@ -28,6 +28,7 @@ builder.Services.AddSingleton(AdminUsers.From(builder.Configuration));
 builder.Services.AddHostedService<InactiveUserCleanup>();
 builder.Services.AddSingleton<ISessionRepository, SessionRepository>();
 builder.Services.AddSingleton<IGameSessionStore, GameSessionStore>();
+builder.Services.AddSingleton<SavedGameService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHostedService<DisconnectedSeatsMonitor>();
 builder.Services.AddHostedService<ExpiredSessionCleanup>();

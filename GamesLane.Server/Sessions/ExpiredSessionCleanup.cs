@@ -2,7 +2,8 @@ namespace GamesLane.Server.Sessions;
 
 /// <summary>
 /// Deletes saved sessions with no activity for <see cref="Expiry"/>, so a game survives a server restart while its
-/// players are around but is not kept long after. Sessions in memory are saved first, so a session someone has open is
+/// players are around but is not kept long after. A session a user saved in their Saved games is kept until it has had
+/// no activity for <see cref="SavedExpiry"/>. Sessions in memory are saved first, so a session someone has open is
 /// never deleted. Runs shortly after the server starts, then every hour while it runs (a server that is asleep cleans
 /// up after it wakes).
 /// </summary>
@@ -16,6 +17,11 @@ public class ExpiredSessionCleanup(
     /// How long a session is kept after its last activity.
     /// </summary>
     public static readonly TimeSpan Expiry = TimeSpan.FromHours(6);
+
+    /// <summary>
+    /// How long a session a user saved is kept after its last activity.
+    /// </summary>
+    public static readonly TimeSpan SavedExpiry = TimeSpan.FromDays(90);
 
     private static readonly TimeSpan FirstRunDelay = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan RunInterval = TimeSpan.FromHours(1);
@@ -42,7 +48,8 @@ public class ExpiredSessionCleanup(
     }
 
     /// <summary>
-    /// Saves the sessions in memory, then deletes the saved sessions with no activity for <see cref="Expiry"/>.
+    /// Saves the sessions in memory, then deletes the saved sessions with no activity for <see cref="Expiry"/>, or for
+    /// <see cref="SavedExpiry"/> if a user saved them.
     /// </summary>
     public async Task CleanUpAsync()
     {
@@ -51,7 +58,8 @@ public class ExpiredSessionCleanup(
             await store.SaveAsync(session);
         }
 
-        var deleted = await repository.DeleteOlderThanAsync(timeProvider.GetUtcNow() - Expiry);
+        var now = timeProvider.GetUtcNow();
+        var deleted = await repository.DeleteOlderThanAsync(now - Expiry, now - SavedExpiry);
         if (deleted > 0)
         {
             logger.LogInformation("Deleted {Count} expired sessions.", deleted);

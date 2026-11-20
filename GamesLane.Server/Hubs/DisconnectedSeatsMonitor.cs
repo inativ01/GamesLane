@@ -7,8 +7,9 @@ namespace GamesLane.Server.Hubs;
 /// <summary>
 /// Marks users disconnected for <see cref="GameSession.ReconnectWindow"/> as Away; during a game, they keep their seats
 /// (a newcomer can be offered their seats, see <see cref="GameSession"/>); outside a game, their seats are freed.
-/// Also removes the sessions nobody has open (see <see cref="IdleLimit"/>): a session whose game never started is deleted,
-/// others are removed from memory and stay saved. A public game with nobody seated is deleted at once.
+/// Also removes the sessions nobody has open (see <see cref="IdleLimit"/>): a session whose game never started is deleted
+/// (unless a user saved it), others are removed from memory and stay saved. A public game with nobody seated is deleted
+/// at once.
 /// </summary>
 public class DisconnectedSeatsMonitor(
     IGameSessionStore store,

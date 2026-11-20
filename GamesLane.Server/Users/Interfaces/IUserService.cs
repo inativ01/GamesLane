@@ -110,8 +110,8 @@ public interface IUserService
     Task<int> DeleteInactiveUsersAsync(DateTimeOffset cutoff, IReadOnlySet<Guid> kept);
 
     /// <summary>
-    /// Deletes the user with their external accounts, icons and saved game options, at their request. Returns false if
-    /// they no longer exist.
+    /// Deletes the user with their external accounts, icons, saved game options and saved games, at their request.
+    /// Returns false if they no longer exist.
     /// </summary>
     Task<bool> DeleteUserAsync(Guid userId);
 }
