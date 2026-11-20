@@ -452,6 +452,175 @@ public class GameSessionStoreTests
         Assert.Equal([new NamedCount("he-IL", 4)], report.Languages);
     }
 
+    [Fact]
+    public async Task A_saved_game_is_kept_until_90_days_without_activity_then_deleted_with_its_place_in_saved_games()
+    {
+        var repository = new MemoryRepository();
+        var clock = new Clock();
+        var store = new GameSessionStore(repository, clock);
+        var games = new SavedGameService(repository, store, clock);
+        var saved = await Started(store);
+        var other = await Started(store);
+        Assert.Null(await games.SaveAsync(AliceId, saved));
+        await store.UnloadAsync(saved);
+        await store.UnloadAsync(other);
+        var cleanup = new ExpiredSessionCleanup(repository, store, clock, NullLogger<ExpiredSessionCleanup>.Instance);
+
+        clock.Now += TimeSpan.FromDays(89);
+        await cleanup.CleanUpAsync();
+        Assert.True(await repository.ExistsAsync(saved.Id));
+        Assert.False(await repository.ExistsAsync(other.Id));
+
+        clock.Now += TimeSpan.FromDays(1.5);
+        await cleanup.CleanUpAsync();
+        Assert.False(await repository.ExistsAsync(saved.Id));
+        Assert.Empty((await games.GetAsync(AliceId)).Games);
+    }
+
+    [Fact]
+    public async Task A_game_removed_from_saved_games_is_deleted_as_usual()
+    {
+        var repository = new MemoryRepository();
+        var clock = new Clock();
+        var store = new GameSessionStore(repository, clock);
+        var games = new SavedGameService(repository, store, clock);
+        var session = await Started(store);
+        await games.SaveAsync(AliceId, session);
+        await games.SaveAsync(BobId, session);
+        await store.UnloadAsync(session);
+        clock.Now += TimeSpan.FromHours(7);
+        var cleanup = new ExpiredSessionCleanup(repository, store, clock, NullLogger<ExpiredSessionCleanup>.Instance);
+
+        await games.RemoveAsync(AliceId, session.Id.ToLowerInvariant());
+        await cleanup.CleanUpAsync();
+        Assert.True(await repository.ExistsAsync(session.Id));
+
+        await games.RemoveAsync(BobId, session.Id);
+        await cleanup.CleanUpAsync();
+        Assert.False(await repository.ExistsAsync(session.Id));
+    }
+
+    [Fact]
+    public async Task A_saved_lobby_is_kept_with_its_latest_state_when_removed_from_memory()
+    {
+        var repository = new MemoryRepository();
+        var store = new GameSessionStore(repository);
+        var games = new SavedGameService(repository, store, new Clock());
+        var session = await store.CreateAsync(GameType.TicTacToe);
+        session.TryTakeSeat("user:alice", Alice, "conn-a", 0, out _);
+        Assert.Null(await games.SaveAsync(AliceId, session));
+        session.TryTakeSeat("user:bob", Bob, "conn-b", 1, out _);
+        var unsaved = await store.CreateAsync(GameType.TicTacToe);
+
+        await store.UnloadAsync(session);
+        await store.UnloadAsync(unsaved);
+
+        Assert.False(await repository.ExistsAsync(unsaved.Id));
+        var reloaded = (await store.GetAsync(session.Id))!;
+        Assert.True(reloaded.IsSeated("user:bob"));
+    }
+
+    [Fact]
+    public async Task Only_private_games_can_be_saved_up_to_the_limit_and_saving_one_again_changes_nothing()
+    {
+        var repository = new MemoryRepository();
+        var store = new GameSessionStore(repository);
+        var games = new SavedGameService(repository, store, new Clock());
+        var publicGame = await store.CreateAsync(GameType.TicTacToe, s => s.MakePublic());
+        var first = await Started(store);
+        var second = await store.CreateAsync(GameType.Wazoo);
+
+        Assert.Equal("Only private games can be saved.", await games.SaveAsync(AliceId, publicGame));
+        Assert.Null(await games.SaveAsync(AliceId, first));
+        Assert.Null(await games.SaveAsync(AliceId, second));
+        Assert.Null(await games.SaveAsync(AliceId, first));
+        Assert.Equal(SavedGameService.LimitReached, await games.SaveAsync(AliceId, await Started(store)));
+        Assert.Null(await games.SaveAsync(BobId, first));
+
+        var saved = await games.GetAsync(AliceId);
+        Assert.Equal(User.DefaultSavedGameLimit, saved.Limit);
+        Assert.Equal(User.DefaultSavedGameLimit, saved.Games.Count);
+    }
+
+    [Fact]
+    public async Task Each_user_saves_up_to_their_own_limit()
+    {
+        var repository = new MemoryRepository();
+        var store = new GameSessionStore(repository);
+        var games = new SavedGameService(repository, store, new Clock());
+        repository.Limits[AliceId] = 1;
+        repository.Limits[BobId] = 3;
+        var sessions = new[] { await Started(store), await Started(store), await Started(store) };
+
+        Assert.Null(await games.SaveAsync(AliceId, sessions[0]));
+        Assert.Equal(SavedGameService.LimitReached, await games.SaveAsync(AliceId, sessions[1]));
+        foreach (var session in sessions)
+        {
+            Assert.Null(await games.SaveAsync(BobId, session));
+        }
+
+        Assert.Equal(1, (await games.GetAsync(AliceId)).Limit);
+        Assert.Equal(3, (await games.GetAsync(BobId)).Games.Count);
+    }
+
+    [Fact]
+    public async Task Saved_games_show_their_players_and_state_without_loading_them_or_counting_as_activity()
+    {
+        var repository = new MemoryRepository();
+        var clock = new Clock();
+        var store = new GameSessionStore(repository, clock);
+        var games = new SavedGameService(repository, store, clock);
+        var session = await Started(store);
+        await games.SaveAsync(AliceId, session);
+        await store.UnloadAsync(session);
+        var lastActivity = (await repository.FindAsync(session.Id))!.UpdatedAt;
+        clock.Now += TimeSpan.FromDays(70);
+
+        var game = Assert.Single((await games.GetAsync(AliceId)).Games);
+
+        Assert.Equal(new SavedGameInfo(session.Id, GameType.TicTacToe, true, SessionPhase.Playing, game.Players, 20), game);
+        Assert.Equal(["Alice", "Bob"], game.Players);
+        Assert.Empty(store.All);
+        Assert.Equal(lastActivity, (await repository.FindAsync(session.Id))!.UpdatedAt);
+    }
+
+    [Fact]
+    public async Task A_saved_game_that_can_no_longer_be_opened_is_listed_but_does_not_count_toward_the_limit()
+    {
+        var repository = new MemoryRepository();
+        var store = new GameSessionStore(repository);
+        var games = new SavedGameService(repository, store, new Clock());
+        var old = await Started(store);
+        await games.SaveAsync(AliceId, old);
+        await games.SaveAsync(AliceId, await Started(store));
+        await store.UnloadAsync(old);
+        var saved = (await repository.FindAsync(old.Id))!;
+        saved.Version = "OLD";
+        await repository.SaveAsync(saved);
+
+        Assert.Null(await games.SaveAsync(AliceId, await Started(store)));
+
+        var listed = (await games.GetAsync(AliceId)).Games.Single(g => g.SessionId == old.Id);
+        Assert.False(listed.CanOpen);
+        Assert.Equal(GameType.TicTacToe, listed.GameType);
+        Assert.Null(listed.Phase);
+    }
+
+    [Theory]
+    [InlineData(59, null)]
+    [InlineData(60, 30)]
+    [InlineData(80.2, 10)]
+    [InlineData(89.9, 1)]
+    [InlineData(91, 1)]
+    public void The_days_left_are_told_in_the_last_30_days(double daysSinceActivity, int? expected)
+    {
+        var last = new DateTimeOffset(2026, 11, 4, 12, 0, 0, TimeSpan.Zero);
+        Assert.Equal(expected, SavedGameService.DaysLeft(last, last + TimeSpan.FromDays(daysSinceActivity)));
+    }
+
+    private static readonly Guid AliceId = Guid.NewGuid();
+    private static readonly Guid BobId = Guid.NewGuid();
+
     // A Wazoo session with Alice alone seated and a game started.
     private static async Task<WazooSession> StartedWazoo(GameSessionStore store)
     {
@@ -547,10 +716,14 @@ public class GameSessionStoreTests
                 .Select(c => new ActivityCount { Day = c.Day, Event = c.Event, GameType = c.GameType, Detail = c.Detail, Count = c.Count })]);
     }
 
-    // The database, in memory.
+    // The database, in memory, with the same rules for saved games: a session a user saved is not deleted until it has
+    // had no activity since the saved cutoff. Users have the default saved games limit unless set in Limits.
     private sealed class MemoryRepository : ISessionRepository
     {
         private readonly Dictionary<string, SavedSession> _saved = [];
+        private readonly List<SavedGame> _games = [];
+
+        public Dictionary<Guid, int> Limits { get; } = [];
 
         public Task<SavedSession?> FindAsync(string id) => Task.FromResult(_saved.TryGetValue(id, out var s) ? Copy(s) : null);
 
@@ -562,17 +735,55 @@ public class GameSessionStoreTests
             return Task.CompletedTask;
         }
 
-        public Task DeleteAsync(string id)
+        public Task<bool> DeleteAsync(string id)
         {
+            if (_games.Any(g => g.SessionId == id))
+            {
+                return Task.FromResult(false);
+            }
+
             _saved.Remove(id);
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
-        public Task<int> DeleteOlderThanAsync(DateTimeOffset cutoff)
+        public Task<int> DeleteOlderThanAsync(DateTimeOffset cutoff, DateTimeOffset savedCutoff)
         {
-            var old = _saved.Values.Where(s => s.UpdatedAt < cutoff).Select(s => s.Id).ToList();
+            _games.RemoveAll(g => _saved[g.SessionId].UpdatedAt < savedCutoff);
+            var old = _saved.Values.Where(s => s.UpdatedAt < cutoff && _games.All(g => g.SessionId != s.Id)).Select(s => s.Id).ToList();
             old.ForEach(id => _saved.Remove(id));
             return Task.FromResult(old.Count);
+        }
+
+        public Task<IReadOnlyList<SavedGameRow>> GetSavedGamesAsync(Guid userId) =>
+            Task.FromResult<IReadOnlyList<SavedGameRow>>([.. _games
+                .Where(g => g.UserId == userId)
+                .Select(g => _saved[g.SessionId])
+                .OrderByDescending(s => s.UpdatedAt)
+                .Select(s => new SavedGameRow(s.Id, s.GameType, s.UpdatedAt))]);
+
+        public Task<int> GetSavedGameLimitAsync(Guid userId) =>
+            Task.FromResult(Limits.GetValueOrDefault(userId, User.DefaultSavedGameLimit));
+
+        public Task<bool> AddSavedGameAsync(Guid userId, string id, DateTimeOffset savedAt)
+        {
+            if (_games.Any(g => g.UserId == userId && g.SessionId == id))
+            {
+                return Task.FromResult(true);
+            }
+
+            if (!_saved.ContainsKey(id))
+            {
+                return Task.FromResult(false);
+            }
+
+            _games.Add(new SavedGame { UserId = userId, SessionId = id, SavedAt = savedAt });
+            return Task.FromResult(true);
+        }
+
+        public Task RemoveSavedGameAsync(Guid userId, string id)
+        {
+            _games.RemoveAll(g => g.UserId == userId && g.SessionId == id);
+            return Task.CompletedTask;
         }
 
         private static SavedSession Copy(SavedSession s) =>

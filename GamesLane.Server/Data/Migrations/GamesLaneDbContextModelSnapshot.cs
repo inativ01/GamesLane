@@ -123,6 +123,25 @@ namespace GamesLane.Server.Data.Migrations
                     b.ToTable("GamePlays");
                 });
 
+            modelBuilder.Entity("GamesLane.Server.Data.SavedGame", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SessionId")
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)");
+
+                    b.Property<DateTimeOffset>("SavedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("UserId", "SessionId");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("SavedGames");
+                });
+
             modelBuilder.Entity("GamesLane.Server.Data.SavedSession", b =>
                 {
                     b.Property<string>("Id")
@@ -193,6 +212,11 @@ namespace GamesLane.Server.Data.Migrations
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
+
+                    b.Property<int>("SavedGameLimit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2);
 
                     b.Property<bool>("SoundOn")
                         .HasColumnType("boolean");
@@ -284,6 +308,21 @@ namespace GamesLane.Server.Data.Migrations
                 {
                     b.HasOne("GamesLane.Server.Data.User", null)
                         .WithMany("ExternalLogins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GamesLane.Server.Data.SavedGame", b =>
+                {
+                    b.HasOne("GamesLane.Server.Data.SavedSession", null)
+                        .WithMany()
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GamesLane.Server.Data.User", null)
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -249,7 +249,8 @@ public class IdentityTests
         Assert.True(used.TryUse("code", time.Now.AddMinutes(5)));
     }
 
-    // Deleting a user (Delete account, and the 30-day cleanup) deletes their external accounts, icons and game options.
+    // Deleting a user (Delete account, and the 30-day cleanup) deletes their external accounts, icons, game options and
+    // saved games.
     [Fact]
     public void Everything_linked_to_a_user_is_deleted_with_them()
     {
@@ -259,9 +260,35 @@ public class IdentityTests
         var linked = db.Model.FindEntityType(typeof(User))!.GetReferencingForeignKeys().ToList();
 
         Assert.Equal(
-            new[] { typeof(ExternalLogin), typeof(UserGameOptions), typeof(UserIcon) }.Select(t => t.Name),
+            new[] { typeof(ExternalLogin), typeof(SavedGame), typeof(UserGameOptions), typeof(UserIcon) }.Select(t => t.Name),
             linked.Select(key => key.DeclaringEntityType.ClrType.Name).Order());
         Assert.All(linked, key => Assert.Equal(DeleteBehavior.Cascade, key.DeleteBehavior));
+    }
+
+    // The database refuses to delete a session that a user saved.
+    [Fact]
+    public void A_saved_game_keeps_its_session_from_being_deleted()
+    {
+        var options = new DbContextOptionsBuilder<GamesLaneDbContext>().UseNpgsql("Host=localhost").Options;
+        using var db = new GamesLaneDbContext(options);
+
+        var key = Assert.Single(db.Model.FindEntityType(typeof(SavedSession))!.GetReferencingForeignKeys());
+
+        Assert.Equal(typeof(SavedGame), key.DeclaringEntityType.ClrType);
+        Assert.Equal(DeleteBehavior.Restrict, key.DeleteBehavior);
+    }
+
+    // Every user, existing (the database's default for the column) and new, may keep 2 saved games.
+    [Fact]
+    public void Every_user_has_a_saved_games_limit_of_2()
+    {
+        var options = new DbContextOptionsBuilder<GamesLaneDbContext>().UseNpgsql("Host=localhost").Options;
+        using var db = new GamesLaneDbContext(options);
+
+        var limit = db.Model.FindEntityType(typeof(User))!.FindProperty(nameof(User.SavedGameLimit))!;
+
+        Assert.Equal(2, limit.GetDefaultValue());
+        Assert.Equal(2, new User { DisplayName = "Ada", Icon = "🦊" }.SavedGameLimit);
     }
 
     [Fact]

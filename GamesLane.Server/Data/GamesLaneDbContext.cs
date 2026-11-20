@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 namespace GamesLane.Server.Data;
 
 /// <summary>
-/// The GamesLane database: saved users, their external accounts, icons and game options, saved game sessions, the
-/// number of games started per day, the anonymous daily activity counts, the iPhones that get turn notifications, and
-/// the keys that sign login tokens.
+/// The GamesLane database: saved users, their external accounts, icons, game options and saved games, saved game
+/// sessions, the number of games started per day, the anonymous daily activity counts, the iPhones that get turn
+/// notifications, and the keys that sign login tokens.
 /// </summary>
 public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
@@ -36,6 +36,11 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
     public DbSet<SavedSession> Sessions => Set<SavedSession>();
 
     /// <summary>
+    /// The private games users keep in their Saved games.
+    /// </summary>
+    public DbSet<SavedGame> SavedGames => Set<SavedGame>();
+
+    /// <summary>
     /// The games started per day and game.
     /// </summary>
     public DbSet<GamePlay> GamePlays => Set<GamePlay>();
@@ -56,7 +61,8 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     /// <summary>
-    /// Sets keys, unique indexes, lengths, and deletes a user's external accounts, icons and game options with the user.
+    /// Sets keys, unique indexes, lengths, and deletes a user's external accounts, icons, game options and saved games
+    /// with the user. A session that a user saved cannot be deleted while it is saved.
     /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,6 +75,7 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
             user.Property(u => u.Icon).HasMaxLength(100);
             user.Property(u => u.GameOrder).HasMaxLength(200);
             user.Property(u => u.CardStyle).HasMaxLength(20);
+            user.Property(u => u.SavedGameLimit).HasDefaultValue(User.DefaultSavedGameLimit);
             user.HasIndex(u => u.LastActiveAt);
             user.HasMany(u => u.ExternalLogins).WithOne().HasForeignKey(l => l.UserId).OnDelete(DeleteBehavior.Cascade);
         });
@@ -102,6 +109,15 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
             session.Property(s => s.GameType).HasMaxLength(50);
             session.Property(s => s.Version).HasMaxLength(64);
             session.HasIndex(s => s.UpdatedAt);
+        });
+
+        modelBuilder.Entity<SavedGame>(saved =>
+        {
+            saved.HasKey(g => new { g.UserId, g.SessionId });
+            saved.Property(g => g.SessionId).HasMaxLength(6);
+            saved.HasIndex(g => g.SessionId);
+            saved.HasOne<User>().WithMany().HasForeignKey(g => g.UserId).OnDelete(DeleteBehavior.Cascade);
+            saved.HasOne<SavedSession>().WithMany().HasForeignKey(g => g.SessionId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<GamePlay>(play =>

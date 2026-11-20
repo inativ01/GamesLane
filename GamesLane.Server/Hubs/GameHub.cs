@@ -22,6 +22,7 @@ public class GameHub(
     IGameSessionStore store,
     TimeProvider timeProvider,
     IGameOptionsService savedOptions,
+    SavedGameService savedGames,
     ActivityCounter activity,
     ITurnNotifier notifier,
     ILogger<GameHub> logger) : Hub, IGameHub
@@ -170,6 +171,34 @@ public class GameHub(
             .Select(s => new WaitingGame(s.Id, s.Type, s.IsPublic))
             .ToList();
         return Task.FromResult(games);
+    }
+
+    /// <inheritdoc />
+    public async Task<SavedGameList> SavedGames() =>
+        AuthSetup.GetSavedUserId(Context.User) is { } userId ? await savedGames.GetAsync(userId) : new SavedGameList(0, []);
+
+    /// <inheritdoc />
+    public async Task SaveGame(string sessionId)
+    {
+        if (AuthSetup.GetSavedUserId(Context.User) is not { } userId)
+        {
+            throw new HubException("Create an account or sign in to save games.");
+        }
+
+        var session = await GetSession(sessionId);
+        if (await savedGames.SaveAsync(userId, session) is { } error)
+        {
+            throw new HubException(error);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task RemoveSavedGame(string sessionId)
+    {
+        if (AuthSetup.GetSavedUserId(Context.User) is { } userId)
+        {
+            await savedGames.RemoveAsync(userId, sessionId);
+        }
     }
 
     /// <inheritdoc />

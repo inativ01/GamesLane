@@ -44,7 +44,7 @@ Tap your icon and name in the top bar.
 ## Playing with family and friends
 
 - **Create:** under **Private games**, tap **Create a game** and choose a game. You are seated at once. To change the order of the list, drag a game by its ⋮⋮ handle.
-- **Invite:** the lobby shows the invite link with **Copy link** and **Share…**. The game code is in the bar under the top bar (🔑; tap it to copy it). On an iPhone with the GamesLane app, the link opens in the app.
+- **Invite:** the lobby's **Invite friends** box has **Copy link** and **Share…** for the invite link. The game code is in the bar under the top bar (🔑; tap it to copy it). On an iPhone with the GamesLane app, the link opens in the app.
 - **Join:** open the link, or enter the code on the main screen and tap **Join**. You are seated at once if a seat is free; otherwise you watch.
 - **Seats:** tap **Sit here** to take a seat, and tap your seat to leave it and watch. You can take more than one seat, to play for several players on one device.
 - **Start:** once enough players are seated, any player taps **Start**.
@@ -61,6 +61,13 @@ Tap your icon and name in the top bar.
   | Dominoes | 2–4 (2–8 in Mexican Train) |
 
 - **Coming back:** a game that has started is saved, and you can come back to it up to 6 hours after everyone has left. The main screen offers your games in progress, with **Return** and **Leave**.
+- <a id="saved-games"></a>**Saved games** (with an account): to keep a private game longer, tap **Save game** in its ☰ menu, in the lobby, during a game or after it, whether you have a seat or watch. It then appears first on the main screen, under **Saved games**, with its game, code, state (**In the lobby**, **Game in progress**, **Game over**, or **Waiting for you** when it is in progress and you still have a seat in it), players, **Open game** and **Remove**. A saved game in progress that waits for you appears only there, not among the games in progress.
+  - You can keep 2 saved games; the panel shows how many you use (for example "1 of 2"). Saving a third says "You reached your saved games limit. Please delete one of your existing saved games to save a new one."
+  - A saved game is kept until 90 days pass without play in it. In its last 30 days, the panel says in how many days it will be deleted.
+  - Saving keeps the game, not your seat: going back to the main screen still gives up your seats, as usual. Open the game to sit again or watch.
+  - **Remove** (or **Remove from saved games** in the game's ☰ menu) takes it off your list. Once nobody keeps it saved, it is deleted as usual, 6 hours after its last activity.
+  - Public games cannot be saved. After an update of GamesLane, a saved game may no longer open; it then says so, and can only be removed.
+  - Saved games is a premium feature, free for all registered users for now.
 
 ## Public games
 
@@ -79,7 +86,7 @@ Play with other people on GamesLane.
 - **The status bar** says what is happening. It turns gold when it is your turn or a button is waiting for you, with a chime, and the phone vibrates where it can.
 - **Notifications (iPhone app):** the first time you sit in a game, the app asks to send notifications. Allow them, and when your turn comes while the game is not on your screen (the phone is locked, another app is open, the app is closed or on another page), a notification says "Your turn" with the game's name. Tap it to go back to the game. To stop them, turn off notifications for GamesLane in the iPhone's Settings.
 - **Screen stays on (iPhone app):** while a game is being played, and for 5 minutes after it ends, the screen does not dim or lock, so a phone or iPad showing the table stays on. Elsewhere it dims as usual.
-- **The ☰ menu:** the invite link, how many play and watch, **Leave my seat (watch)**, **End game for everyone**, and **Send feedback**.
+- **The ☰ menu:** the invite link, how many play and watch, **Leave my seat (watch)**, **End game for everyone**, **Save game** or **Remove from saved games** (private games, with an account; see [Saved games](#saved-games)), and **Send feedback**.
 - <a id="chat"></a>**Chat:** 💬 opens the chat, for everyone in the game. Public games have no chat. New messages show on 💬 and in a short pop-up. In the chat, untick **Chat** to hide it, or **Sound** to turn off all sounds.
 - **Watching:** anyone without a seat watches. Watchers never see the players' hidden cards.
 - **The table:** in most card and tile games, **Hide table** hides the players' table (for example when a shared screen shows it), and **Show table** shows it again.

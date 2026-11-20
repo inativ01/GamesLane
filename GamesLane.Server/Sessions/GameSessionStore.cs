@@ -79,20 +79,17 @@ public class GameSessionStore(
             }
 
             var id = sessionId.ToUpperInvariant();
-            if (await repository.FindAsync(id) is not { } saved || !Enum.TryParse<GameType>(saved.GameType, out var type))
+            if (await repository.FindAsync(id) is not { } saved)
             {
                 return null;
             }
 
-            var loaded = New(type, id);
-            if (saved.Version != SessionSnapshot.Version(loaded.GetType()))
+            if (Load(saved) is not { } loaded)
             {
                 _logger.LogWarning("Session {SessionId} was saved by another version of the game and cannot be loaded.", id);
                 return null;
             }
 
-            loaded.Restore(saved.Data, saved.UpdatedAt);
-            loaded.UpdateAwaySeats(_time.GetUtcNow());
             _countedGames[id] = loaded.GamesStarted;
             _countedFinishes[id] = loaded.HasFinishedGame ? loaded.GamesStarted : 0;
             _savedData[id] = loaded.Save();
@@ -103,6 +100,38 @@ public class GameSessionStore(
         {
             _loading.Release();
         }
+    }
+
+    /// <inheritdoc />
+    public async Task<IGameSession?> PeekAsync(string sessionId)
+    {
+        if (_sessions.TryGetValue(sessionId, out var session))
+        {
+            return session;
+        }
+
+        return await repository.FindAsync(sessionId.ToUpperInvariant()) is { } saved ? Load(saved) : null;
+    }
+
+    /// <summary>
+    /// A new session restored from <paramref name="saved"/>, or null if this version of the code cannot load it.
+    /// </summary>
+    private GameSession? Load(SavedSession saved)
+    {
+        if (!Enum.TryParse<GameType>(saved.GameType, out var type))
+        {
+            return null;
+        }
+
+        var loaded = New(type, saved.Id);
+        if (saved.Version != SessionSnapshot.Version(loaded.GetType()))
+        {
+            return null;
+        }
+
+        loaded.Restore(saved.Data, saved.UpdatedAt);
+        loaded.UpdateAwaySeats(_time.GetUtcNow());
+        return loaded;
     }
 
     /// <inheritdoc />
@@ -143,11 +172,9 @@ public class GameSessionStore(
         await _loading.WaitAsync();
         try
         {
-            if (!session.HasStarted || (session.IsPublic && !session.HasSeatedPlayers))
-            {
-                await repository.DeleteAsync(session.Id.ToUpperInvariant());
-            }
-            else if (!_savedData.TryGetValue(session.Id, out var saved) || saved != session.Save())
+            var deleted = (!session.HasStarted || (session.IsPublic && !session.HasSeatedPlayers))
+                && await repository.DeleteAsync(session.Id.ToUpperInvariant());
+            if (!deleted && (!_savedData.TryGetValue(session.Id, out var saved) || saved != session.Save()))
             {
                 await SaveAsync(session);
             }

@@ -20,13 +20,19 @@ public interface IGameSessionStore
     Task<IGameSession?> GetAsync(string sessionId);
 
     /// <summary>
+    /// The session with the given code, to look at only: from memory, or else a copy loaded from the database that is
+    /// not kept in memory (so looking at it is not activity). Null as for <see cref="GetAsync"/>.
+    /// </summary>
+    Task<IGameSession?> PeekAsync(string sessionId);
+
+    /// <summary>
     /// Saves the session's current state in the database. Errors are logged, not thrown.
     /// </summary>
     Task SaveAsync(IGameSession session);
 
     /// <summary>
     /// Removes the session from memory: it is saved first if it changed since it was last saved or loaded, or deleted
-    /// if its game never started, or if it is a public game with nobody seated.
+    /// if its game never started, or if it is a public game with nobody seated (unless a user saved it).
     /// </summary>
     Task UnloadAsync(IGameSession session);
 
