@@ -1517,10 +1517,6 @@ button.session-menu-button[aria-expanded="true"] {
     .session-bar .code strong { font-size: 0.95rem; letter-spacing: 0.06em; }
 }
 
-.session-menu-value {
-    font-weight: 400;
-}
-
 .session-menu-actions {
     display: flex;
     flex-direction: column;

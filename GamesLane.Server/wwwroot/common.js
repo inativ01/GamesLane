@@ -2303,7 +2303,8 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
     share.type = "button";
     share.hidden = !navigator.share;
     share.addEventListener("click", () => navigator.share({ title: t("Join my GamesLane game"), url: joinUrl }).catch(() => {}));
-    const seatedCount = el("span", "session-menu-value");
+    const playerCount = el("span");
+    const observerCount = el("span");
     const standUp = menuAction(t("Leave my seat (watch)"), "secondary");
     const endGame = menuAction(t("End game for everyone"), "danger");
     const feedback = menuAction(t("Send feedback"), "secondary");
@@ -2329,11 +2330,11 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         showMenu(false);
         openFeedbackDialog();
     });
-    const inviteRow = el("div", "session-menu-row", el("span", null, t("Invite link")),
+    const inviteRow = el("div", "session-menu-row", el("span", null, t("Invite friends")),
         copyButton(joinUrl, t("Could not copy. Select the link and copy it manually.")), share);
     const menu = el("div", "session-menu",
         inviteRow,
-        el("div", "session-menu-row", el("span", null, t("Players:")), seatedCount),
+        el("div", "session-menu-row", playerCount, observerCount),
         el("div", "session-menu-actions", standUp, endGame, saveGame, feedback));
     menu.hidden = true;
     menu.setAttribute("role", "menu");
@@ -2378,8 +2379,8 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
             : `👁 ${t("Watching")}`;
         $("session-info").replaceChildren(el("span", "session-fact", role));
         fitSessionInfo();
-        seatedCount.textContent = t("{taken} players · {observers} watching",
-            { taken: state.seats.filter(Boolean).length, observers: state.observerCount });
+        playerCount.textContent = t("Players: {count}", { count: state.seats.filter(Boolean).length });
+        observerCount.textContent = t("Observers: {count}", { count: state.observerCount });
     }
 
     // The session bar is one line. The role is shown only when the game's name fits in full beside it: otherwise (e.g. on
