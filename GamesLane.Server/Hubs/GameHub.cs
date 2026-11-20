@@ -174,8 +174,8 @@ public class GameHub(
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<SavedGameInfo>> SavedGames() =>
-        AuthSetup.GetSavedUserId(Context.User) is { } userId ? await savedGames.GetAsync(userId) : [];
+    public async Task<SavedGameList> SavedGames() =>
+        AuthSetup.GetSavedUserId(Context.User) is { } userId ? await savedGames.GetAsync(userId) : new SavedGameList(0, []);
 
     /// <inheritdoc />
     public async Task SaveGame(string sessionId)

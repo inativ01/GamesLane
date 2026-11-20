@@ -48,6 +48,11 @@ public interface ISessionRepository
     Task<IReadOnlyList<SavedGameRow>> GetSavedGamesAsync(Guid userId);
 
     /// <summary>
+    /// How many saved games that can be opened the user may keep (<c>User.SavedGameLimit</c>); 0 if there is no such user.
+    /// </summary>
+    Task<int> GetSavedGameLimitAsync(Guid userId);
+
+    /// <summary>
     /// Adds the session to the user's saved games (nothing changes if it is there already). Returns false if there is
     /// no saved session with this code.
     /// </summary>

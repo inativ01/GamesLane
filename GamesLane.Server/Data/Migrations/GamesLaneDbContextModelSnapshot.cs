@@ -213,6 +213,11 @@ namespace GamesLane.Server.Data.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
+                    b.Property<int>("SavedGameLimit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2);
+
                     b.Property<bool>("SoundOn")
                         .HasColumnType("boolean");
 

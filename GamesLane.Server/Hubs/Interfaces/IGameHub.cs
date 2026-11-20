@@ -40,13 +40,13 @@ public interface IGameHub
     Task<IReadOnlyList<WaitingGame>> WaitingGames();
 
     /// <summary>
-    /// The caller's Saved games, most recently active first; none for guests.
+    /// The caller's Saved games, most recently active first, and their limit; none, with a limit of 0, for guests.
     /// </summary>
-    Task<IReadOnlyList<SavedGameInfo>> SavedGames();
+    Task<SavedGameList> SavedGames();
 
     /// <summary>
     /// Saved users only. Adds a private game, in any state, to the caller's Saved games, whether or not they hold a seat
-    /// in it. Refused when they already have <see cref="SavedGameService.Limit"/> saved games.
+    /// in it. Refused when they already have their limit (<c>User.SavedGameLimit</c>) of saved games that can be opened.
     /// </summary>
     Task SaveGame(string sessionId);
 

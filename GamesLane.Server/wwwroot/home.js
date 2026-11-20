@@ -228,17 +228,16 @@ document.querySelectorAll("[data-create]").forEach((button) => {
     button.addEventListener("click", () => pick?.run(button.dataset.create));
 });
 
-// The most saved games a user can open (SavedGameService.Limit on the server).
-const SAVED_GAMES_LIMIT = 2;
 const SAVED_PHASES = { Lobby: "In the lobby", Playing: "Game in progress", Over: "Game over" };
 
-// The Saved games panel, first on the main screen when the user has saved games: how many of the limit they use, then
-// each game with its code, state ("Waiting for you" when it waits for them, see WaitingGames), players and, in its last
-// 30 days, when it will be deleted; with Open, and Remove. A game that can no longer be opened has only Remove.
-function showSavedGames(games, waitingIds) {
+// The Saved games panel, first on the main screen when the user has saved games: how many of their limit (from the
+// server, the user's own) they use, then each game with its code, state ("Waiting for you" when it waits for them, see
+// WaitingGames), players and, in its last 30 days, when it will be deleted; with Open, and Remove. A game that can no
+// longer be opened has only Remove.
+function showSavedGames(games, limit, waitingIds) {
     hasSavedGames = games.length > 0;
     $("saved-games").hidden = Boolean(pick) || !hasSavedGames;
-    $("saved-count").textContent = t("{count} of {limit}", { count: games.filter((game) => game.canOpen).length, limit: SAVED_GAMES_LIMIT });
+    $("saved-count").textContent = t("{count} of {limit}", { count: games.filter((game) => game.canOpen).length, limit });
     $("saved-list").replaceChildren(...games.map((game) => {
         const details = game.canOpen
             ? [t(waitingIds.has(game.sessionId) ? "Waiting for you" : SAVED_PHASES[game.phase]), game.players.join(", ")]
@@ -266,7 +265,7 @@ function showSavedGames(games, waitingIds) {
             } catch {
                 return;
             }
-            showSavedGames(games.filter((other) => other !== game), waitingIds);
+            showSavedGames(games.filter((other) => other !== game), limit, waitingIds);
         });
         row.append(remove);
         return row;
@@ -280,7 +279,7 @@ ready.then(async (ok) => {
     if (!ok) return;
     const [games, saved] = await Promise.all([
         connection.invoke("WaitingGames").catch(() => []),
-        accountReady.then(() => (isSavedUser() ? connection.invoke("SavedGames").catch(() => []) : [])),
+        accountReady.then(() => (isSavedUser() ? connection.invoke("SavedGames").catch(() => null) : null)),
     ]);
     const publicGame = games.find((game) => game.isPublic);
     if (publicGame) {
@@ -288,8 +287,9 @@ ready.then(async (ok) => {
         goToSession(publicGame.gameType, publicGame.sessionId);
         return;
     }
-    const savedIds = new Set(saved.map((game) => game.sessionId));
-    showSavedGames(saved, new Set(games.map((game) => game.sessionId)));
+    const savedGames = saved?.games ?? [];
+    const savedIds = new Set(savedGames.map((game) => game.sessionId));
+    showSavedGames(savedGames, saved?.limit ?? 0, new Set(games.map((game) => game.sessionId)));
     const others = games.filter((game) => !savedIds.has(game.sessionId));
     const box = $("waiting-games");
     box.replaceChildren(...others.map((game) => {

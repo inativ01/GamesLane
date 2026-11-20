@@ -15,31 +15,33 @@ public record SavedGameInfo(
     int? DaysLeft);
 
 /// <summary>
+/// A user's Saved games, most recently active first, and how many that can be opened they may keep (their
+/// <c>User.SavedGameLimit</c>).
+/// </summary>
+public record SavedGameList(int Limit, IReadOnlyList<SavedGameInfo> Games);
+
+/// <summary>
 /// Saved users' Saved games: private games, in any state, kept until they have had no activity for
-/// <see cref="ExpiredSessionCleanup.SavedExpiry"/>. A user has at most <see cref="Limit"/> saved games that can be opened.
+/// <see cref="ExpiredSessionCleanup.SavedExpiry"/>. A user has at most their own limit (<c>User.SavedGameLimit</c>) of
+/// saved games that can be opened.
 /// </summary>
 public class SavedGameService(ISessionRepository repository, IGameSessionStore store, TimeProvider timeProvider)
 {
-    /// <summary>
-    /// How many saved games that can be opened a user may have.
-    /// </summary>
-    public const int Limit = 2;
-
     /// <summary>
     /// How long before a saved game is deleted the main screen tells how many days it has left.
     /// </summary>
     public static readonly TimeSpan NoticePeriod = TimeSpan.FromDays(30);
 
     /// <summary>
-    /// The error when the user already has <see cref="Limit"/> saved games that can be opened.
+    /// The error when the user already has their limit of saved games that can be opened.
     /// </summary>
     public const string LimitReached =
         "You reached your saved games limit. Please delete one of your existing saved games to save a new one.";
 
     /// <summary>
-    /// The user's saved games, most recently active first.
+    /// The user's saved games, most recently active first, and their limit.
     /// </summary>
-    public async Task<IReadOnlyList<SavedGameInfo>> GetAsync(Guid userId)
+    public async Task<SavedGameList> GetAsync(Guid userId)
     {
         var now = timeProvider.GetUtcNow();
         var games = new List<SavedGameInfo>();
@@ -58,12 +60,12 @@ public class SavedGameService(ISessionRepository repository, IGameSessionStore s
             games.Add(new SavedGameInfo(row.SessionId, session.Type, true, state.Phase, players, daysLeft));
         }
 
-        return games;
+        return new SavedGameList(await repository.GetSavedGameLimitAsync(userId), games);
     }
 
     /// <summary>
     /// Adds a private game to the user's saved games. Returns an error if it cannot be saved: a public game, or the user
-    /// already has <see cref="Limit"/> other saved games that can be opened.
+    /// already has their limit of other saved games that can be opened.
     /// </summary>
     public async Task<string?> SaveAsync(Guid userId, IGameSession session)
     {
@@ -74,12 +76,12 @@ public class SavedGameService(ISessionRepository repository, IGameSessionStore s
 
         var id = session.Id.ToUpperInvariant();
         var saved = await GetAsync(userId);
-        if (saved.Any(g => g.SessionId == id))
+        if (saved.Games.Any(g => g.SessionId == id))
         {
             return null;
         }
 
-        if (saved.Count(g => g.CanOpen) >= Limit)
+        if (saved.Games.Count(g => g.CanOpen) >= saved.Limit)
         {
             return LimitReached;
         }

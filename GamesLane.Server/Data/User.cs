@@ -7,6 +7,11 @@ namespace GamesLane.Server.Data;
 public class User
 {
     /// <summary>
+    /// The <see cref="SavedGameLimit"/> of every user, existing and new.
+    /// </summary>
+    public const int DefaultSavedGameLimit = 2;
+
+    /// <summary>
     /// The user's ID.
     /// </summary>
     public Guid Id { get; set; }
@@ -66,6 +71,12 @@ public class User
     /// How playing cards are drawn for the user: <see cref="UserSettings.NewCards"/> or <see cref="UserSettings.ClassicCards"/>.
     /// </summary>
     public string CardStyle { get; set; } = UserSettings.NewCards;
+
+    /// <summary>
+    /// How many saved games that can be opened the user may keep (see <see cref="SavedGame"/>). Changed only in the
+    /// database for now.
+    /// </summary>
+    public int SavedGameLimit { get; set; } = DefaultSavedGameLimit;
 
     /// <summary>
     /// The external accounts (e.g. Google) the user signs in with.

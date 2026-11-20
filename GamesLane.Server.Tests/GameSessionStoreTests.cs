@@ -474,7 +474,7 @@ public class GameSessionStoreTests
         clock.Now += TimeSpan.FromDays(1.5);
         await cleanup.CleanUpAsync();
         Assert.False(await repository.ExistsAsync(saved.Id));
-        Assert.Empty(await games.GetAsync(AliceId));
+        Assert.Empty((await games.GetAsync(AliceId)).Games);
     }
 
     [Fact]
@@ -537,7 +537,30 @@ public class GameSessionStoreTests
         Assert.Equal(SavedGameService.LimitReached, await games.SaveAsync(AliceId, await Started(store)));
         Assert.Null(await games.SaveAsync(BobId, first));
 
-        Assert.Equal(SavedGameService.Limit, (await games.GetAsync(AliceId)).Count);
+        var saved = await games.GetAsync(AliceId);
+        Assert.Equal(User.DefaultSavedGameLimit, saved.Limit);
+        Assert.Equal(User.DefaultSavedGameLimit, saved.Games.Count);
+    }
+
+    [Fact]
+    public async Task Each_user_saves_up_to_their_own_limit()
+    {
+        var repository = new MemoryRepository();
+        var store = new GameSessionStore(repository);
+        var games = new SavedGameService(repository, store, new Clock());
+        repository.Limits[AliceId] = 1;
+        repository.Limits[BobId] = 3;
+        var sessions = new[] { await Started(store), await Started(store), await Started(store) };
+
+        Assert.Null(await games.SaveAsync(AliceId, sessions[0]));
+        Assert.Equal(SavedGameService.LimitReached, await games.SaveAsync(AliceId, sessions[1]));
+        foreach (var session in sessions)
+        {
+            Assert.Null(await games.SaveAsync(BobId, session));
+        }
+
+        Assert.Equal(1, (await games.GetAsync(AliceId)).Limit);
+        Assert.Equal(3, (await games.GetAsync(BobId)).Games.Count);
     }
 
     [Fact]
@@ -553,7 +576,7 @@ public class GameSessionStoreTests
         var lastActivity = (await repository.FindAsync(session.Id))!.UpdatedAt;
         clock.Now += TimeSpan.FromDays(70);
 
-        var game = Assert.Single(await games.GetAsync(AliceId));
+        var game = Assert.Single((await games.GetAsync(AliceId)).Games);
 
         Assert.Equal(new SavedGameInfo(session.Id, GameType.TicTacToe, true, SessionPhase.Playing, game.Players, 20), game);
         Assert.Equal(["Alice", "Bob"], game.Players);
@@ -577,7 +600,7 @@ public class GameSessionStoreTests
 
         Assert.Null(await games.SaveAsync(AliceId, await Started(store)));
 
-        var listed = (await games.GetAsync(AliceId)).Single(g => g.SessionId == old.Id);
+        var listed = (await games.GetAsync(AliceId)).Games.Single(g => g.SessionId == old.Id);
         Assert.False(listed.CanOpen);
         Assert.Equal(GameType.TicTacToe, listed.GameType);
         Assert.Null(listed.Phase);
@@ -694,11 +717,13 @@ public class GameSessionStoreTests
     }
 
     // The database, in memory, with the same rules for saved games: a session a user saved is not deleted until it has
-    // had no activity since the saved cutoff.
+    // had no activity since the saved cutoff. Users have the default saved games limit unless set in Limits.
     private sealed class MemoryRepository : ISessionRepository
     {
         private readonly Dictionary<string, SavedSession> _saved = [];
         private readonly List<SavedGame> _games = [];
+
+        public Dictionary<Guid, int> Limits { get; } = [];
 
         public Task<SavedSession?> FindAsync(string id) => Task.FromResult(_saved.TryGetValue(id, out var s) ? Copy(s) : null);
 
@@ -735,6 +760,9 @@ public class GameSessionStoreTests
                 .Select(g => _saved[g.SessionId])
                 .OrderByDescending(s => s.UpdatedAt)
                 .Select(s => new SavedGameRow(s.Id, s.GameType, s.UpdatedAt))]);
+
+        public Task<int> GetSavedGameLimitAsync(Guid userId) =>
+            Task.FromResult(Limits.GetValueOrDefault(userId, User.DefaultSavedGameLimit));
 
         public Task<bool> AddSavedGameAsync(Guid userId, string id, DateTimeOffset savedAt)
         {

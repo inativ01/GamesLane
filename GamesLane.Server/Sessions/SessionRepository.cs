@@ -65,6 +65,10 @@ public class SessionRepository(IServiceScopeFactory scopeFactory) : ISessionRepo
             .ToListAsync());
 
     /// <inheritdoc />
+    public Task<int> GetSavedGameLimitAsync(Guid userId) => Use(async db =>
+        await db.Users.Where(u => u.Id == userId).Select(u => (int?)u.SavedGameLimit).FirstOrDefaultAsync() ?? 0);
+
+    /// <inheritdoc />
     public Task<bool> AddSavedGameAsync(Guid userId, string id, DateTimeOffset savedAt) => Use(async db =>
     {
         if (await db.SavedGames.AnyAsync(g => g.UserId == userId && g.SessionId == id))

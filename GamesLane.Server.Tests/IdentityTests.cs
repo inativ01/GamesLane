@@ -278,6 +278,19 @@ public class IdentityTests
         Assert.Equal(DeleteBehavior.Restrict, key.DeleteBehavior);
     }
 
+    // Every user, existing (the database's default for the column) and new, may keep 2 saved games.
+    [Fact]
+    public void Every_user_has_a_saved_games_limit_of_2()
+    {
+        var options = new DbContextOptionsBuilder<GamesLaneDbContext>().UseNpgsql("Host=localhost").Options;
+        using var db = new GamesLaneDbContext(options);
+
+        var limit = db.Model.FindEntityType(typeof(User))!.FindProperty(nameof(User.SavedGameLimit))!;
+
+        Assert.Equal(2, limit.GetDefaultValue());
+        Assert.Equal(2, new User { DisplayName = "Ada", Icon = "🦊" }.SavedGameLimit);
+    }
+
     [Fact]
     public void An_external_sign_in_returns_to_the_iPhone_app_with_its_code_or_an_error()
     {

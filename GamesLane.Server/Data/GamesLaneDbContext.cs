@@ -75,6 +75,7 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
             user.Property(u => u.Icon).HasMaxLength(100);
             user.Property(u => u.GameOrder).HasMaxLength(200);
             user.Property(u => u.CardStyle).HasMaxLength(20);
+            user.Property(u => u.SavedGameLimit).HasDefaultValue(User.DefaultSavedGameLimit);
             user.HasIndex(u => u.LastActiveAt);
             user.HasMany(u => u.ExternalLogins).WithOne().HasForeignKey(l => l.UserId).OnDelete(DeleteBehavior.Cascade);
         });

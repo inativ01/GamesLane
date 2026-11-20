@@ -2693,8 +2693,8 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
 
         await accountReady;
         if (account.signedIn && account.kind !== "Guest" && !entry.state.isPublic) {
-            const games = await connection.invoke("SavedGames").catch(() => null);
-            savedGame = games ? games.some((game) => game.sessionId === sessionId) : null;
+            const saved = await connection.invoke("SavedGames").catch(() => null);
+            savedGame = saved ? saved.games.some((game) => game.sessionId === sessionId) : null;
             updateSaveGame();
         }
     }
