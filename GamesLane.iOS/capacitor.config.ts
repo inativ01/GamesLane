@@ -26,8 +26,9 @@ const config: CapacitorConfig = {
         // Other sites open in Safari. Sign-in with a provider opens in Apple's sign-in window (ios/App/App/GamesLanePlugin.swift).
     },
     ios: {
-        // The site does not draw under the status bar or the home indicator.
-        contentInset: "always",
+        // The site fills the whole screen, so the splash screen reaches its edges; the pages keep clear of the status
+        // bar, the home indicator and the notch themselves (env(safe-area-inset-*) in styles.css).
+        contentInset: "never",
     },
 };
 

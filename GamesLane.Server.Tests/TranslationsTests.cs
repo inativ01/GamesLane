@@ -176,6 +176,25 @@ public partial class TranslationsTests
         Assert.Equal(LanguageCodes().Order(), offline.Order());
     }
 
+    // Every page draws to the screen's edges on a phone (under the status bar, the home indicator and the notch, in the
+    // installed app too), so the splash screen fills the screen; styles.css keeps the pages' content clear of them.
+    [Fact]
+    public void Every_page_draws_to_the_screen_edges()
+    {
+        foreach (var page in Directory.GetFiles(Wwwroot, "*.html"))
+        {
+            var html = File.ReadAllText(page);
+            Assert.Contains("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">", html);
+            Assert.Contains("<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\">", html);
+        }
+
+        var styles = File.ReadAllText(Path.Combine(Wwwroot, "styles.css"));
+        foreach (var side in new[] { "top", "right", "bottom", "left" })
+        {
+            Assert.Contains($"env(safe-area-inset-{side})", styles);
+        }
+    }
+
     // The main screen's pictures (the splash screens, the GamesLane name and the games) are all in wwwroot/images.
     [Fact]
     public void Every_picture_on_the_main_screen_exists()

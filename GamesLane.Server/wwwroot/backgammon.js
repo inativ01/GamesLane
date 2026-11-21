@@ -495,14 +495,14 @@ function fitBoard() {
         side.style.width = "max-content";
         const sideWidth = side.offsetWidth;
         side.style.width = "";
-        const height = Math.max(160, innerHeight - (board.getBoundingClientRect().top + scrollY) - 4);
+        const height = Math.max(160, screenBottom() - (board.getBoundingClientRect().top + scrollY) - 4);
         const room = $("game-screen").clientWidth - sideWidth - 8;
         board.style.maxHeight = `${height}px`;
         $("bg-board").style.width = `${Math.max(160, Math.min(room, height * WIDTH / HEIGHT))}px`;
         fitScores();
         return;
     }
-    const overflow = $("bg-side").getBoundingClientRect().bottom + scrollY + 12 - innerHeight;
+    const overflow = $("bg-side").getBoundingClientRect().bottom + scrollY + 12 - screenBottom();
     if (overflow > 0) {
         board.style.maxHeight = `${Math.max(160, board.getBoundingClientRect().height - overflow)}px`;
     }
