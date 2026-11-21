@@ -130,7 +130,7 @@ function fitTrickTable() {
     if (!table || $("game-screen").hidden) return;
     table.classList.remove("names-above", "roomy", "icons-only");
     const below = document.querySelector("#game-screen .rp-hand") ?? table.closest(".rp-top");
-    const room = table.offsetHeight + innerHeight - 4 - (below.getBoundingClientRect().bottom + scrollY);
+    const room = table.offsetHeight + screenBottom() - 4 - (below.getBoundingClientRect().bottom + scrollY);
     const size = Math.max(16, Math.min(40, room / TRICK_CARD_HEIGHT, table.clientWidth / 8 / 2.6));
     const height = Math.max(TRICK_CARD_HEIGHT * size, Math.min(room, table.clientWidth));
     table.style.setProperty("--trick-card", `${size}px`);

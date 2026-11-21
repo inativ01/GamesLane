@@ -53,7 +53,7 @@ function fitBoard() {
         part.style.width = "";
         return width;
     }));
-    const height = innerHeight - (board.getBoundingClientRect().top + scrollY) - 8;
+    const height = screenBottom() - (board.getBoundingClientRect().top + scrollY) - 8;
     const room = $("game-screen").clientWidth - columnWidth - 8;
     board.style.width = `${Math.max(160, Math.min(height, room))}px`;
     fitScores();

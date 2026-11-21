@@ -241,7 +241,7 @@ function renderTable(game, state, view, players) {
 function fitPlay() {
     if ($("game-screen").hidden) return;
     const play = $("yz-play");
-    const fits = () => play.getBoundingClientRect().bottom + scrollY <= innerHeight - 4;
+    const fits = () => play.getBoundingClientRect().bottom + scrollY <= screenBottom() - 4;
     let low = 9;
     let high = 18;
     play.style.fontSize = `${high}px`;

@@ -1841,13 +1841,19 @@ const landscapeScreen = matchMedia("(orientation: landscape)");
 // hands shrink together (--card-fit on the game screen, down to half their size) until it does.
 const shortLandscapeScreen = matchMedia("(orientation: landscape) and (max-height: 500px)");
 
+// The bottom of the room on the screen for the page's content: above the phone's home indicator (the body's bottom
+// padding in styles.css).
+function screenBottom() {
+    return innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom);
+}
+
 function fitHandPanel() {
     const screen = $("game-screen");
     if (!screen) return;
     screen.style.removeProperty("--card-fit");
     const panel = screen.querySelector(".rp-hand, .domino-hand");
     if (!shortLandscapeScreen.matches || screen.hidden || !panel) return;
-    const fits = () => panel.getBoundingClientRect().bottom + scrollY <= innerHeight - 4;
+    const fits = () => panel.getBoundingClientRect().bottom + scrollY <= screenBottom() - 4;
     if (fits()) return;
     let low = 0.5;
     let high = 1;
