@@ -34,8 +34,9 @@ html {
     touch-action: manipulation;
 }
 
-/* Pages draw under the phone's status bar, home indicator and notch (viewport-fit=cover), so only the splash screen
-   reaches the screen's edges: the page keeps clear of them at the sides and bottom, and the header at the top. */
+/* Pages draw under the phone's status bar (in the iPhone app; iOS keeps an installed web app below it), home indicator
+   and notch (viewport-fit=cover), so only the splash screen reaches the screen's edges: the page keeps clear of them at
+   the sides and bottom, and the header at the top. */
 body {
     margin: 0;
     padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
@@ -43,15 +44,6 @@ body {
     background: var(--bg);
     color: var(--ink);
     line-height: 1.4;
-}
-
-/* In the installed app on iPhone (black-translucent status bar), iOS makes the page shorter by the status bar's height
-   and leaves that band at the bottom of the screen, over the home indicator, painted in the page's background (a
-   WebKit bug), so the page needs less room of its own there. */
-@media (display-mode: standalone) {
-    body {
-        padding-bottom: max(0px, env(safe-area-inset-bottom) - env(safe-area-inset-top));
-    }
 }
 
 :lang(zh-CN) body {
@@ -190,16 +182,9 @@ html.splash-done .splash {
     opacity: 0;
 }
 
-/* The band iOS leaves at the bottom of the installed app (see body) is black under the splash screen, which reaches
-   into it where iOS draws it. */
+/* In an installed web app, iOS colors the status bar after the page, so it is black while the splash screen shows. */
 html.splashing {
     background: var(--black);
-}
-
-@media (display-mode: standalone) {
-    html.splashing .splash {
-        bottom: calc(-1 * env(safe-area-inset-top));
-    }
 }
 
 .splash picture {
