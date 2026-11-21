@@ -176,8 +176,9 @@ public partial class TranslationsTests
         Assert.Equal(LanguageCodes().Order(), offline.Order());
     }
 
-    // Every page draws to the screen's edges on a phone (under the status bar, the home indicator and the notch, in the
-    // installed app too), so the splash screen fills the screen; styles.css keeps the pages' content clear of them.
+    // Every page draws to the screen's edges on a phone (under the status bar in the iPhone app, the home indicator and
+    // the notch), so the splash screen fills the screen; styles.css keeps the pages' content clear of them. The
+    // black-translucent status bar is not used: iOS draws a blur over it in an installed web app.
     [Fact]
     public void Every_page_draws_to_the_screen_edges()
     {
@@ -185,7 +186,7 @@ public partial class TranslationsTests
         {
             var html = File.ReadAllText(page);
             Assert.Contains("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">", html);
-            Assert.Contains("<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\">", html);
+            Assert.DoesNotContain("apple-mobile-web-app-status-bar-style", html);
         }
 
         var styles = File.ReadAllText(Path.Combine(Wwwroot, "styles.css"));
