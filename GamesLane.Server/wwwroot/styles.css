@@ -174,7 +174,7 @@ html.splashing .splash {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--black);
+    background: var(--splash-top);
     transition: opacity 0.5s;
 }
 
@@ -182,9 +182,11 @@ html.splash-done .splash {
     opacity: 0;
 }
 
-/* In an installed web app, iOS colors the status bar after the page, so it is black while the splash screen shows. */
+/* In an installed web app, iOS keeps the page below the status bar and colors it after the page, so while the splash
+   screen shows it takes the color of the top of the portrait picture (--splash-top). */
 html.splashing {
-    background: var(--black);
+    --splash-top: #643d39;
+    background: var(--splash-top);
 }
 
 .splash picture {
