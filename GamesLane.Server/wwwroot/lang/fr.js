@@ -1097,4 +1097,32 @@ TRANSLATIONS.fr = {
     "Unknown game.": "Jeu inconnu.",
     "Each game can be listed only once.": "Chaque jeu ne peut apparaître qu'une fois.",
     "Choose a card style.": "Choisis un style de cartes.",
+
+    // TVs: pairing the Apple TV app, and Watch on TV
+    "TVs": "Téléviseurs",
+    "Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.":
+        "Ouvre GamesLane sur un téléviseur et associe-le avec le code qu'il affiche. Active ensuite Regarder sur la TV : les parties que tu ouvres dans cet onglet s'affichent aussi sur le téléviseur.",
+    "No TVs paired yet.": "Aucun téléviseur associé pour l'instant.",
+    "TV code": "Code du téléviseur",
+    "Pair TV": "Associer le téléviseur",
+    "Pairing…": "Association…",
+    "Not open": "Pas ouvert",
+    "Ready": "Prêt",
+    "Showing another player's games": "Affiche les parties d'un autre joueur",
+    "Showing your games": "Affiche tes parties",
+    "Watch on TV": "Regarder sur la TV",
+    "Unpair": "Dissocier",
+    "Unpair {name}?": "Dissocier {name} ?",
+    "Log in or create an account to pair the TV.": "Connecte-toi ou crée un compte pour associer le téléviseur.",
+    "No TV shows this code. Check the code on the TV.": "Aucun téléviseur n'affiche ce code. Vérifie le code sur le téléviseur.",
+    "This TV is not paired with your account.": "Ce téléviseur n'est pas associé à ton compte.",
+    "This TV is not open. Open GamesLane on the TV first.": "Ce téléviseur n'est pas ouvert. Ouvre d'abord GamesLane sur le téléviseur.",
+    "This TV is showing another player's games.": "Ce téléviseur affiche les parties d'un autre joueur.",
+    "Create an account or sign in to watch your games on a TV.": "Crée un compte ou connecte-toi pour regarder tes parties sur un téléviseur.",
+    // The Apple TV app
+    "Connecting…": "Connexion…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "Scanne le code QR avec ton téléphone, ou saisis ce code dans ton profil GamesLane.",
+    "Paired with {names}": "Associé à {names}",
+    "Waiting for {name} to open a game…": "En attente que {name} ouvre une partie…",
+    "This game cannot be shown on the TV yet.": "Ce jeu ne peut pas encore s'afficher sur la TV.",
 };

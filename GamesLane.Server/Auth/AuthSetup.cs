@@ -107,6 +107,12 @@ public static class AuthSetup
     public const string RegisteredKind = "Registered";
 
     /// <summary>
+    /// The kind of a TV running the Apple TV app (see <c>Tv/TvService</c>): it only watches games, so it has no profile.
+    /// Its token does not expire, like a guest's.
+    /// </summary>
+    public const string TvKind = "TV";
+
+    /// <summary>
     /// The rate-limiting policy for logging in and registering.
     /// </summary>
     public const string LoginRateLimit = "login";
@@ -415,10 +421,11 @@ public static class AuthSetup
         GetUserId(user) is null ? null : user!.FindFirstValue(KindClaim);
 
     /// <summary>
-    /// The logged-in user's display name and icon as other players see them, or null if no one is logged in.
+    /// The logged-in user's display name and icon as other players see them, or null if no one is logged in or it is a
+    /// TV, which only watches.
     /// </summary>
     public static PlayerProfile? GetProfile(ClaimsPrincipal? user) =>
-        user is null || GetUserId(user) is null
+        user is null || GetUserId(user) is null || GetKind(user) == TvKind
             ? null
             : new PlayerProfile(user.FindFirstValue(ClaimTypes.Name) ?? "Player", user.FindFirstValue(IconClaim) ?? UserRules.DefaultIcon);
 
@@ -437,13 +444,13 @@ public static class AuthSetup
 
     /// <summary>
     /// A new login token for <paramref name="user"/>: valid for 30 days for saved users, and without end for guests,
-    /// who exist only in their token.
+    /// who exist only in their token, and TVs.
     /// </summary>
     public static string IssueToken(HttpContext context, ClaimsPrincipal user)
     {
         var options = context.RequestServices.GetRequiredService<IOptionsMonitor<BearerTokenOptions>>().Get(TokenScheme);
         var now = context.RequestServices.GetRequiredService<TimeProvider>().GetUtcNow();
-        var expires = GetKind(user) == GuestKind ? DateTimeOffset.MaxValue : now + options.BearerTokenExpiration;
+        var expires = GetKind(user) is GuestKind or TvKind ? DateTimeOffset.MaxValue : now + options.BearerTokenExpiration;
         var properties = new AuthenticationProperties { IssuedUtc = now, ExpiresUtc = expires };
         return options.BearerTokenProtector.Protect(new AuthenticationTicket(user, properties, TokenScheme));
     }

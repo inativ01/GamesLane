@@ -795,6 +795,66 @@ label.card-style-choice input {
     margin-inline-end: auto;
 }
 
+/* The profile's TVs: each paired TV with its status, Watch on TV and Unpair, then the code field to pair one more. */
+.profile-tvs {
+    margin-top: 0.75rem;
+}
+
+.tv-list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tv-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.tv-info {
+    display: grid;
+    flex: 1;
+    min-width: 9rem;
+}
+
+.tv-status {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.tv-item label.switch {
+    border-bottom: none;
+}
+
+.tv-item label.switch:has(input:disabled) {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.tv-pair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.tv-pair label {
+    flex: 1;
+    min-width: 9rem;
+}
+
+.tv-pair input {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
 /* External sign-in buttons, in each provider's colors with its logo. */
 a.provider-button {
     display: flex;

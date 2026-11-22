@@ -1097,4 +1097,32 @@ TRANSLATIONS["zh-TW"] = {
     "Unknown game.": "未知的遊戲。",
     "Each game can be listed only once.": "每個遊戲只能列出一次。",
     "Choose a card style.": "請選擇紙牌樣式。",
+
+    // TVs: pairing the Apple TV app, and Watch on TV
+    "TVs": "電視",
+    "Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.":
+        "請在電視上開啟 GamesLane，並用電視上顯示的代碼配對。接著開啟「在電視上觀看」：您在此分頁中開啟的遊戲也會顯示在電視上。",
+    "No TVs paired yet.": "尚未配對任何電視。",
+    "TV code": "電視代碼",
+    "Pair TV": "配對電視",
+    "Pairing…": "正在配對…",
+    "Not open": "未開啟",
+    "Ready": "就緒",
+    "Showing another player's games": "正在顯示其他玩家的遊戲",
+    "Showing your games": "正在顯示您的遊戲",
+    "Watch on TV": "在電視上觀看",
+    "Unpair": "取消配對",
+    "Unpair {name}?": "要取消與 {name} 的配對嗎？",
+    "Log in or create an account to pair the TV.": "請登入或建立帳號以配對電視。",
+    "No TV shows this code. Check the code on the TV.": "沒有電視顯示此代碼。請核對電視上的代碼。",
+    "This TV is not paired with your account.": "此電視未與您的帳號配對。",
+    "This TV is not open. Open GamesLane on the TV first.": "此電視未開啟。請先在電視上開啟 GamesLane。",
+    "This TV is showing another player's games.": "此電視正在顯示其他玩家的遊戲。",
+    "Create an account or sign in to watch your games on a TV.": "請建立帳號或登入，以便在電視上觀看您的遊戲。",
+    // The Apple TV app
+    "Connecting…": "正在連線…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "請用手機掃描 QR 碼，或在您的 GamesLane 個人資料中輸入此代碼。",
+    "Paired with {names}": "已與 {names} 配對",
+    "Waiting for {name} to open a game…": "正在等待 {name} 開啟遊戲…",
+    "This game cannot be shown on the TV yet.": "此遊戲暫時還無法在電視上顯示。",
 };

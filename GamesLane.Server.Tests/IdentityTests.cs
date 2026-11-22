@@ -5,13 +5,16 @@ using System.Text.RegularExpressions;
 using GamesLane.Server.Auth;
 using GamesLane.Server.Data;
 using GamesLane.Server.Hubs;
+using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
+using GamesLane.Server.Tv;
 using GamesLane.Server.Users;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -249,8 +252,165 @@ public class IdentityTests
         Assert.True(used.TryUse("code", time.Now.AddMinutes(5)));
     }
 
-    // Deleting a user (Delete account, and the 30-day cleanup) deletes their external accounts, icons, game options and
-    // saved games.
+    // TVs (the Apple TV app): their login, pairing codes, and Watch on TV
+
+    private static readonly Guid OtherId = Guid.Parse("1c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f");
+    private static readonly DateTimeOffset TvStart = new(2026, 11, 22, 12, 0, 0, TimeSpan.Zero);
+
+    [Fact]
+    public void A_tvs_login_token_does_not_expire_and_has_no_profile_to_play_with()
+    {
+        var time = new TestTime { Now = TvStart };
+        var context = TokenContext(time);
+        var token = AuthSetup.IssueToken(context, AuthSetup.CreateUser("tv:0123", "Living Room", TvEndpoints.Icon, AuthSetup.TvKind));
+
+        time.Now = time.Now.AddYears(50);
+        var tv = AuthSetup.ReadToken(context, token);
+        Assert.Equal("tv:0123", AuthSetup.GetUserId(tv));
+        Assert.Equal(AuthSetup.TvKind, AuthSetup.GetKind(tv));
+        Assert.Null(AuthSetup.GetProfile(tv));
+        Assert.Null(AuthSetup.GetSavedUserId(tv));
+    }
+
+    [Theory]
+    [InlineData("  Living \n  Room ", "Living Room")]
+    [InlineData("", "Apple TV")]
+    [InlineData(null, "Apple TV")]
+    [InlineData("A very long name for the TV in the living room", "A very long name for the TV in")]
+    public void A_tv_is_named_on_one_short_line(string? name, string expected) =>
+        Assert.Equal(expected, TvEndpoints.TvName(name));
+
+    [Fact]
+    public void A_tv_pairing_code_works_once_while_the_tv_is_open_and_until_it_expires()
+    {
+        var time = new TestTime { Now = TvStart };
+        var links = new TvLinks(time);
+        var code = links.ConnectTv("tv:1", "Living Room", "tv-conn").Code;
+
+        Assert.Equal(TvLinks.CodeLength, code.Length);
+        Assert.Null(links.RedeemCode("WRONG1"));
+        Assert.Null(links.RedeemCode(null));
+        Assert.Equal(("tv:1", "Living Room"), links.RedeemCode($" {code[..3].ToLowerInvariant()}-{code[3..]} ")!.Value);
+        Assert.Null(links.RedeemCode(code));
+
+        var next = links.Find("tv:1")!.Code;
+        Assert.NotEqual(code, next);
+        time.Now += TvLinks.CodeLifetime;
+        Assert.Null(links.RedeemCode(next));
+        Assert.NotEqual(next, links.Find("tv:1")!.Code);
+
+        var shown = links.Find("tv:1")!.Code;
+        links.Disconnect("tv-conn", time.Now);
+        Assert.Null(links.RedeemCode(shown));
+        Assert.Null(links.Find("tv:1"));
+    }
+
+    [Fact]
+    public void A_tv_shows_one_users_games_at_a_time_and_a_users_games_show_on_one_tv_at_a_time()
+    {
+        var links = new TvLinks(new TestTime { Now = TvStart });
+        links.ConnectTv("tv:1", "Living Room", "tv1");
+        links.ConnectTv("tv:2", "Kitchen", "tv2");
+        Assert.Equal(TvAvailability.Offline, links.AvailabilityFor("tv:3", SavedId));
+        Assert.False(links.TryLink("tv:3", Viewer(SavedId), "ada", out _, out var error));
+        Assert.Equal("This TV is not open. Open GamesLane on the TV first.", error);
+
+        Assert.True(links.TryLink("tv:1", Viewer(SavedId, "ABC123"), "ada", out var change, out error), error);
+        Assert.Equal(["tv:1"], change.TvIds);
+        Assert.Equal("ABC123", links.Find("tv:1")!.Link!.SessionId);
+        Assert.Equal(TvAvailability.Watching, links.AvailabilityFor("tv:1", SavedId));
+        Assert.Equal(TvAvailability.InUse, links.AvailabilityFor("tv:1", OtherId));
+        Assert.Equal(TvAvailability.Available, links.AvailabilityFor("tv:2", OtherId));
+        Assert.False(links.TryLink("tv:1", Viewer(OtherId), "ben", out _, out error));
+        Assert.Equal("This TV is showing another player's games.", error);
+
+        Assert.True(links.TryLink("tv:2", Viewer(SavedId), "ada-tab2", out change, out error), error);
+        Assert.Equal(["tv:2", "tv:1"], change.TvIds);
+        Assert.Equal(["ada"], change.EndedConnections);
+        Assert.Null(links.Find("tv:1")!.Link);
+        Assert.Equal(TvAvailability.Available, links.AvailabilityFor("tv:1", OtherId));
+
+        change = links.Unlink(SavedId);
+        Assert.Equal(["tv:2"], change.TvIds);
+        Assert.Equal(["ada-tab2"], change.EndedConnections);
+        Assert.Same(TvChange.None, links.Unlink(SavedId));
+    }
+
+    [Fact]
+    public void Watch_on_tv_follows_the_user_from_page_to_page_and_ends_once_the_user_or_the_tv_is_gone()
+    {
+        var time = new TestTime { Now = TvStart };
+        var links = new TvLinks(time);
+        links.ConnectTv("tv:1", "Living Room", "tv1");
+        Assert.True(links.TryLink("tv:1", Viewer(SavedId), "page1", out _, out var error), error);
+
+        // Moving to another page: the old page's connection closes, and the new page links again with its game.
+        links.Disconnect("page1", time.Now);
+        time.Now += TvLinks.ReconnectWindow - TimeSpan.FromSeconds(1);
+        Assert.Empty(links.Expire(time.Now).TvIds);
+        Assert.True(links.TryLink("tv:1", Viewer(SavedId, "ABC123"), "page2", out _, out error), error);
+        time.Now += TvLinks.ReconnectWindow;
+        Assert.Empty(links.Expire(time.Now).TvIds);
+        Assert.Equal("ABC123", links.Find("tv:1")!.Link!.SessionId);
+
+        // All the user's pages closed: the TV goes back to waiting.
+        links.Disconnect("page2", time.Now);
+        time.Now += TvLinks.ReconnectWindow;
+        Assert.Equal(["tv:1"], links.Expire(time.Now).TvIds);
+        Assert.Null(links.Find("tv:1")!.Link);
+
+        // The TV closed: the user's pages are told, and the TV is forgotten.
+        Assert.True(links.TryLink("tv:1", Viewer(SavedId), "page3", out _, out error), error);
+        links.Disconnect("tv1", time.Now);
+        Assert.Equal(TvAvailability.Offline, links.AvailabilityFor("tv:1", SavedId));
+        time.Now += TvLinks.ReconnectWindow;
+        Assert.Equal(["page3"], links.Expire(time.Now).EndedConnections);
+        Assert.Null(links.Find("tv:1"));
+        Assert.False(links.TryLink("tv:1", Viewer(SavedId), "page3", out _, out _));
+    }
+
+    [Fact]
+    public async Task Pairing_and_watching_send_the_tv_its_status_and_unpairing_ends_watch_on_tv()
+    {
+        var time = new TestTime { Now = TvStart };
+        var pairings = new MemoryTvPairings { Names = { [SavedId] = "Ada" } };
+        var hub = new RecordingHub();
+        var texts = new NotificationTexts(new Dictionary<string, IReadOnlyDictionary<string, string>> { ["he"] = new Dictionary<string, string>() });
+        var tvs = new TvService(new TvLinks(time), pairings, new OneSessionStore(new TicTacToeSession("ABC123")), hub, texts, time);
+
+        var status = await tvs.ConnectAsync("tv:1", "Living Room", "tv1");
+        Assert.Empty(status.PairedWith);
+        Assert.Null(status.Viewer);
+        Assert.Null(await tvs.PairAsync(SavedId, "WRONG1"));
+        Assert.Equal("Living Room", await tvs.PairAsync(SavedId, status.Code));
+        var sent = Assert.Single(hub.Sent);
+        Assert.Equal((TvService.TvUpdated, "tv1"), (sent.Method, Assert.Single(sent.Connections)));
+        Assert.Equal(["Ada"], ((TvStatus)sent.Args[0]!).PairedWith);
+        Assert.Equal([new PairedTv("tv:1", "Living Room", TvAvailability.Available)], await tvs.ListAsync(SavedId));
+
+        var ada = new PlayerProfile("Ada", "🦊");
+        Assert.Equal("This TV is not paired with your account.", await tvs.WatchAsync(OtherId, new("Ben", "🐼"), "he", "tv:1", null, "ben"));
+        time.Now += TimeSpan.FromDays(1);
+        Assert.Null(await tvs.WatchAsync(SavedId, ada, "he", "tv:1", "abc123", "ada"));
+        Assert.Equal(new TvViewer("Ada", "🦊", "he", "ABC123", GameType.TicTacToe), ((TvStatus)hub.Sent[^1].Args[0]!).Viewer);
+        Assert.Equal(time.Now, pairings.Pairings.Single().LastActiveAt);
+        Assert.Equal(TvAvailability.Watching, (await tvs.ListAsync(SavedId)).Single().Status);
+        Assert.Null(await tvs.WatchAsync(SavedId, ada, "xx", "tv:1", null, "ada"));
+        Assert.Equal(new TvViewer("Ada", "🦊", "en", null, null), ((TvStatus)hub.Sent[^1].Args[0]!).Viewer);
+
+        await tvs.UnpairAsync(SavedId, "tv:1");
+        Assert.Empty(await tvs.ListAsync(SavedId));
+        Assert.Contains(hub.Sent, s => s.Method == TvService.WatchOnTvEnded && s.Connections.SequenceEqual(["ada"]));
+        var last = (TvStatus)hub.Sent[^1].Args[0]!;
+        Assert.Null(last.Viewer);
+        Assert.Empty(last.PairedWith);
+    }
+
+    private static TvLink Viewer(Guid userId, string? sessionId = null) =>
+        new(userId, "Ada", "🦊", "en", sessionId, sessionId is null ? null : GameType.TicTacToe);
+
+    // Deleting a user (Delete account, and the 30-day cleanup) deletes their external accounts, icons, game options,
+    // saved games and paired TVs.
     [Fact]
     public void Everything_linked_to_a_user_is_deleted_with_them()
     {
@@ -260,7 +420,7 @@ public class IdentityTests
         var linked = db.Model.FindEntityType(typeof(User))!.GetReferencingForeignKeys().ToList();
 
         Assert.Equal(
-            new[] { typeof(ExternalLogin), typeof(SavedGame), typeof(UserGameOptions), typeof(UserIcon) }.Select(t => t.Name),
+            new[] { typeof(ExternalLogin), typeof(SavedGame), typeof(TvPairing), typeof(UserGameOptions), typeof(UserIcon) }.Select(t => t.Name),
             linked.Select(key => key.DeclaringEntityType.ClrType.Name).Order());
         Assert.All(linked, key => Assert.Equal(DeleteBehavior.Cascade, key.DeleteBehavior));
     }
@@ -499,6 +659,101 @@ public class IdentityTests
         public DateTimeOffset Now { get; set; }
 
         public override DateTimeOffset GetUtcNow() => Now;
+    }
+
+    // The TV pairings, in memory, with the paired users' display names from Names.
+    private sealed class MemoryTvPairings : ITvPairingRepository
+    {
+        public List<TvPairing> Pairings { get; } = [];
+
+        public Dictionary<Guid, string> Names { get; } = [];
+
+        public Task SaveAsync(Guid userId, string tvId, string tvName, DateTimeOffset now)
+        {
+            Pairings.RemoveAll(p => p.UserId == userId && p.TvId == tvId);
+            Pairings.Add(new TvPairing { UserId = userId, TvId = tvId, TvName = tvName, PairedAt = now, LastActiveAt = now });
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> TouchAsync(Guid userId, string tvId, DateTimeOffset now)
+        {
+            var pairing = Pairings.Find(p => p.UserId == userId && p.TvId == tvId);
+            pairing?.LastActiveAt = now;
+            return Task.FromResult(pairing is not null);
+        }
+
+        public Task<IReadOnlyList<TvPairing>> GetForUserAsync(Guid userId) =>
+            Task.FromResult<IReadOnlyList<TvPairing>>([.. Pairings.Where(p => p.UserId == userId)]);
+
+        public Task<IReadOnlyList<string>> GetUserNamesAsync(string tvId) =>
+            Task.FromResult<IReadOnlyList<string>>([.. Pairings.Where(p => p.TvId == tvId).Select(p => Names[p.UserId]).Order()]);
+
+        public Task DeleteAsync(Guid userId, string tvId)
+        {
+            Pairings.RemoveAll(p => p.UserId == userId && p.TvId == tvId);
+            return Task.CompletedTask;
+        }
+
+        public Task<int> DeleteUnusedAsync(DateTimeOffset before) => Task.FromResult(Pairings.RemoveAll(p => p.LastActiveAt < before));
+    }
+
+    // A session store that only finds one session.
+    private sealed class OneSessionStore(IGameSession session) : IGameSessionStore
+    {
+        public Task<IGameSession?> GetAsync(string sessionId) =>
+            Task.FromResult(string.Equals(sessionId, session.Id, StringComparison.OrdinalIgnoreCase) ? session : null);
+
+        public Task<IGameSession> CreateAsync(GameType type, Action<IGameSession>? prepare = null) => throw new NotSupportedException();
+
+        public Task<IGameSession?> PeekAsync(string sessionId) => GetAsync(sessionId);
+
+        public Task SaveAsync(IGameSession session) => Task.CompletedTask;
+
+        public Task UnloadAsync(IGameSession session) => Task.CompletedTask;
+
+        public IEnumerable<IGameSession> All => [session];
+
+        public DateTimeOffset LastActivity(IGameSession session) => DateTimeOffset.MinValue;
+    }
+
+    // The hub's messages to connections, recorded in the order sent.
+    private sealed class RecordingHub : IHubContext<GameHub>
+    {
+        public List<(IReadOnlyList<string> Connections, string Method, object?[] Args)> Sent { get; } = [];
+
+        public IHubClients Clients => new RecordingClients(this);
+
+        public IGroupManager Groups => throw new NotSupportedException();
+
+        private sealed class RecordingClients(RecordingHub hub) : IHubClients
+        {
+            public IClientProxy Clients(IReadOnlyList<string> connectionIds) => new Proxy(hub, connectionIds);
+
+            public IClientProxy Client(string connectionId) => new Proxy(hub, [connectionId]);
+
+            public IClientProxy All => throw new NotSupportedException();
+
+            public IClientProxy AllExcept(IReadOnlyList<string> excludedConnectionIds) => throw new NotSupportedException();
+
+            public IClientProxy Group(string groupName) => throw new NotSupportedException();
+
+            public IClientProxy GroupExcept(string groupName, IReadOnlyList<string> excludedConnectionIds) => throw new NotSupportedException();
+
+            public IClientProxy Groups(IReadOnlyList<string> groupNames) => throw new NotSupportedException();
+
+            public IClientProxy User(string userId) => throw new NotSupportedException();
+
+            public IClientProxy Users(IReadOnlyList<string> userIds) => throw new NotSupportedException();
+        }
+
+        private sealed class Proxy(RecordingHub hub, IReadOnlyList<string> connections) : IClientProxy
+        {
+            public Task SendCoreAsync(string method, object?[] args, CancellationToken cancellationToken = default)
+            {
+                hub.Sent.Add((connections, method, args));
+                return Task.CompletedTask;
+            }
+        }
     }
 
     [Theory]

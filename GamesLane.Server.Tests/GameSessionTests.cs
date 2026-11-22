@@ -855,6 +855,25 @@ public class GameSessionTests
         Assert.Equal(3, session.GetPublicState().ObserverCount);
     }
 
+    // A TV (the Apple TV app) has no profile: it watches a public game like any observer, never taking a seat, and
+    // leaving the game stops it counting.
+    [Fact]
+    public void A_tv_watches_a_public_game_as_an_observer()
+    {
+        var session = new TicTacToeSession("ABC123");
+        session.MakePublic();
+        Assert.True(session.TryTakeNextSeat(Alice, AliceProfile, "conn-a", out var error), error);
+        Assert.True(session.TryTakeNextSeat(Bob, BobProfile, "conn-b", out error), error);
+
+        Assert.Null(session.Enter("user:tv:0123", null, "tv"));
+        Assert.False(session.IsSeated("user:tv:0123"));
+        Assert.Equal(1, session.GetPublicState().ObserverCount);
+        Assert.Equal(SessionPhase.Playing, session.GetPublicState().Phase);
+
+        Assert.True(session.Disconnect("tv", Now));
+        Assert.Equal(0, session.GetPublicState().ObserverCount);
+    }
+
     // Idle sessions (removed from memory, but saved)
 
     private static readonly TimeSpan Idle = TimeSpan.FromMinutes(5);

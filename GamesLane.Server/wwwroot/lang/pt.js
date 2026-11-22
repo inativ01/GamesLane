@@ -1098,4 +1098,32 @@ TRANSLATIONS.pt = {
     "Unknown game.": "Jogo desconhecido.",
     "Each game can be listed only once.": "Cada jogo só pode aparecer uma vez.",
     "Choose a card style.": "Escolha um estilo de cartas.",
+
+    // TVs: pairing the Apple TV app, and Watch on TV
+    "TVs": "TVs",
+    "Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.":
+        "Abra o GamesLane em uma TV e pareie-a com o código que ela mostra. Depois ative Assistir na TV: as partidas que você abrir nesta aba também aparecem na TV.",
+    "No TVs paired yet.": "Nenhuma TV pareada ainda.",
+    "TV code": "Código da TV",
+    "Pair TV": "Parear TV",
+    "Pairing…": "Pareando…",
+    "Not open": "Não está aberta",
+    "Ready": "Pronta",
+    "Showing another player's games": "Mostrando as partidas de outro jogador",
+    "Showing your games": "Mostrando suas partidas",
+    "Watch on TV": "Assistir na TV",
+    "Unpair": "Desparear",
+    "Unpair {name}?": "Desparear {name}?",
+    "Log in or create an account to pair the TV.": "Entre ou crie uma conta para parear a TV.",
+    "No TV shows this code. Check the code on the TV.": "Nenhuma TV mostra este código. Confira o código na TV.",
+    "This TV is not paired with your account.": "Esta TV não está pareada com sua conta.",
+    "This TV is not open. Open GamesLane on the TV first.": "Esta TV não está aberta. Abra o GamesLane na TV primeiro.",
+    "This TV is showing another player's games.": "Esta TV está mostrando as partidas de outro jogador.",
+    "Create an account or sign in to watch your games on a TV.": "Crie uma conta ou entre para assistir às suas partidas em uma TV.",
+    // The Apple TV app
+    "Connecting…": "Conectando…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "Escaneie o código QR com seu celular, ou digite este código no seu perfil do GamesLane.",
+    "Paired with {names}": "Pareada com {names}",
+    "Waiting for {name} to open a game…": "Esperando {name} abrir uma partida…",
+    "This game cannot be shown on the TV yet.": "Este jogo ainda não pode ser mostrado na TV.",
 };

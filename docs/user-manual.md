@@ -10,6 +10,7 @@ How to play on GamesLane. The rules of each game are in the [appendix](#appendix
 - [Game options](#game-options)
 - [Playing each game](#playing-each-game): [Tic-tac-toe](#tic-tac-toe), [Backgammon](#backgammon), [Poker Heist](#poker-heist), [Rich man, poor man](#rich-man-poor-man), [Wazoo](#wazoo), [Final Card](#final-card), [Yaniv](#yaniv), [Hearts](#hearts), [Spades](#spades), [Dominoes](#dominoes)
 - [Installing the app](#installing-the-app)
+- [Watching on a TV](#watching-on-a-tv)
 - [Languages](#languages)
 - [Help and feedback](#help-and-feedback)
 - [Appendix: game rules](#appendix-game-rules)
@@ -40,6 +41,7 @@ Tap your icon and name in the top bar.
   - **Sounds:** turn it off to silence GamesLane. Browsers play sounds only once you have tapped the page. On an iPhone, GamesLane's sounds play alongside your music or podcast without stopping it, and the silent switch mutes them.
   - <a id="card-style"></a>**Card style:** **GamesLane** (each suit in its own color) or **Classic cards**.
 - Tap **Save** to keep your changes, or **Cancel**.
+- **TVs** (with an account): pair a TV that has the Apple TV app, and watch your games on it; see [Watching on a TV](#watching-on-a-tv).
 - **Log out** and **Delete account** are at the bottom. Logging in or out during a game keeps your seats.
 - You stay logged in for 30 days after your last visit. An account not used for 30 days is deleted.
 
@@ -77,7 +79,7 @@ Play with other people on GamesLane.
 
 - **Create a game** under **Public games**, then choose a game. As its creator, you choose the [game options](#game-options) and tap **Start**.
 - **Join a game** seats you in a game of your choice that is waiting for players. If there is none, you can create one.
-- A public game has no code or invite link, no chat, and nobody can watch it.
+- A public game has no code or invite link and no chat, and nobody can watch it, except a TV one of its players watches their games on (see [Watching on a TV](#watching-on-a-tv)).
 - It starts by itself once all its seats are taken; the creator can also start it once enough players are seated. Until then, the lobby shows the players who have joined and says that it is waiting for more players.
 - **Leave game** (on your seat, or in the ☰ menu) gives up your seat. During a game, this ends the game for everyone and returns to the lobby, except in Rich man, poor man and Yaniv, which go on.
 - If your seat is freed while you are away, you cannot return to that game.
@@ -189,6 +191,16 @@ GamesLane can be added to your home screen, and then opens like an app. The main
 - **Computer (Chrome or Edge):** the install icon at the end of the address bar, then **Install GamesLane**.
 
 On iPhone and iPad, the installed app starts as a new guest: log in to your account there.
+
+## Watching on a TV
+
+With the GamesLane app on an Apple TV, the TV shows the games you open, as someone watching: the table and what every player sees, never your cards or anyone's hidden cards, with the game sounds and without the chat. The Apple TV app is not in the App Store yet. It shows every game's lobby (the players), and Poker Heist during the game: the shared cards, the chips, the chip table with what the heist's cards did, the hands as they are revealed, and the heist's cards with what each one does. Other games show "This game cannot be shown on the TV yet." until they are added.
+
+- **Pairing** (with an account): open GamesLane on the TV. It shows a QR code and a code (a new one every 10 minutes, and after each use), with the names of the accounts already paired with it. Scan the QR code with your phone, or open your profile and enter the code under **TVs**, then tap **Pair TV**. As a guest, you are first asked to log in or create an account. You can pair several TVs, and a TV can be paired with several accounts.
+- **Watch on TV:** in your profile, under **TVs**, turn on **Watch on TV** for a TV that is open (**Ready**). From then on, the games you open in this tab show on the TV too, in your language, until you close the tab or turn Watch on TV off. Between games, the TV says it is waiting for you.
+- A TV shows one person's games at a time: while it shows yours, the others who paired it see **Showing another player's games** and cannot turn it on. Your games show on one TV at a time: turning on another TV stops the first.
+- Watch on TV stops when the TV app, or all your GamesLane pages, have been closed for a minute.
+- **Unpair** removes a TV from your profile. A TV you have not paired again or watched on for 90 days is unpaired by itself.
 
 ## Languages
 
