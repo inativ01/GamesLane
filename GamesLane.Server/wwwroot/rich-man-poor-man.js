@@ -411,17 +411,9 @@ addEventListener(SETTINGS_EVENT, () => {
 // When the turn comes to this user: a rising three-note chime made by the browser (unless sound is off in their
 // profile) and, on phones that can (not iPhones), a short vibration. Browsers only allow sound after the user has
 // tapped the page, so the sound is set up on the first tap and resumed on every tap and whenever the page is shown
-// again (iPhones pause it in the background). On iPhones, the sound is played as media, so the silent switch does not
-// mute it.
+// again (iPhones pause it in the background).
 let audio = null;
 const resumeSound = () => {
-    if (navigator.audioSession) {
-        try {
-            navigator.audioSession.type = "playback";
-        } catch {
-            // Not supported on this browser.
-        }
-    }
     audio ??= new AudioContext();
     return audio.resume();
 };
