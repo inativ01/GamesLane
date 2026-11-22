@@ -1299,7 +1299,7 @@ function startHelp() {
             localStorage.setItem(tipKey, "1");
             tip.hidden = false;
             setTimeout(() => { tip.hidden = true; }, 10000);
-        }, splashing ? Number(root.dataset.splashLength ?? 5000) + 600 : 1000);
+        }, splashing ? Number(root.dataset.splashLength ?? 2000) + 600 : 1000);
     }
 
     return {
@@ -1316,18 +1316,20 @@ function startHelp() {
 // the page does not show it again. The confetti is not shown with reduced motion; the fanfare still plays.
 const CONFETTI_COLORS = ["#e6a93c", "#c2561a", "#2f7d45", "#3f6fd8", "#c0281b", "#8a4fd8", "#f4efe6"];
 
+// On iPhones, GamesLane's sounds play as background sounds (mixed with music or a podcast already playing, which goes
+// on), so the silent switch mutes them.
+if (navigator.audioSession) {
+    try {
+        navigator.audioSession.type = "ambient";
+    } catch {
+        // Not supported on this browser.
+    }
+}
+
 // The fanfare is made by the browser, so no sound file is needed. Browsers only allow sound after the user has tapped
-// the page, so it is set up on each tap and resumed when the page is shown again; on iPhones it is played as media, so
-// the silent switch does not mute it.
+// the page, so it is set up on each tap and resumed when the page is shown again.
 let celebrationAudio = null;
 addEventListener("pointerdown", () => {
-    if (navigator.audioSession) {
-        try {
-            navigator.audioSession.type = "playback";
-        } catch {
-            // Not supported on this browser.
-        }
-    }
     try {
         celebrationAudio ??= new AudioContext();
         celebrationAudio.resume().catch(() => {});
@@ -2540,7 +2542,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
     // A seat tile: a big icon, the name, and a note such as "Seat 2 · You". The user's own seat is a button to leave
     // it; the empty seat is a button to sit there (the server gives the next available seat, which is this one). A user
     // already seated is asked first, as they then hold one more seat. In a public game, leaving a seat leaves the game,
-    // and the empty seat waits for players joining from the main screen.
+    // and no empty seat is shown: players join from the main screen, which the lobby's status says it waits for.
     function takeSeat() {
         if (view.mySeats.length > 0 && !confirm(t("You already have a seat. Take this seat too, to play for one more player on this device?"))) {
             return;
@@ -2722,9 +2724,12 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         if (taken < state.minSeats) {
             return t("Waiting for players ({taken}/{needed} needed)…", { taken, needed: state.minSeats });
         }
-        if (state.isPublic && !isHost(state)) {
+        if (state.isPublic) {
             const host = state.seats.find((s) => s && s.playerId === state.hostPlayerId);
-            return t("Waiting for {name} to start the game.", { name: host?.name ?? "" });
+            const more = nextSeat(state) >= 0;
+            return isHost(state) ? t(more ? "Start now, or wait for more players to join." : "Ready to start.")
+                : more ? t("Waiting for more players to join, or for {name} to start the game.", { name: host?.name ?? "" })
+                    : t("Waiting for {name} to start the game.", { name: host?.name ?? "" });
         }
         return t("Ready to start.");
     }
@@ -2773,7 +2778,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         if (inLobby) {
             $("lobby-status").textContent = [translateServerText(state.notice), lobbyStatus(state, taken)].filter(Boolean).join(" ");
             $("seat-count").textContent = `${taken} / ${state.maxSeats}`;
-            const next = nextSeat(state);
+            const next = state.isPublic ? -1 : nextSeat(state);
             $("seats").replaceChildren(...state.seats.flatMap((info, seat) => (info || seat === next ? [seatItem(state, seat)] : [])));
             $("lobby-options").hidden = state.optionList.length === 0;
             $("options-summary").replaceChildren(...optionsList(state));

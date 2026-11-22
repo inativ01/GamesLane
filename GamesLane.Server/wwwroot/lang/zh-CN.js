@@ -125,6 +125,8 @@ TRANSLATIONS["zh-CN"] = {
     "Leave game": "离开游戏",
     "Creator": "创建者",
     "Waiting for {name} to start the game.": "正在等待 {name} 开始游戏。",
+    "Start now, or wait for more players to join.": "现在开始，或等待更多玩家加入。",
+    "Waiting for more players to join, or for {name} to start the game.": "正在等待更多玩家加入，或等待 {name} 开始游戏。",
     "The game's creator chooses the options.": "由游戏创建者选择选项。",
 
     // Shared: feedback

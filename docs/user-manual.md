@@ -26,6 +26,8 @@ To play with people you don't know, use [Public games](#public-games) instead.
 
 The top bar of every page has the GamesLane name (back to the main screen), **?** for help, the language flag, and your icon and name, which open your profile.
 
+GamesLane follows your device's light or dark mode setting. In dark mode, the game tables, boards, cards and scorecards keep their usual colors.
+
 **Tip:** open the game on a shared screen (a TV or laptop) to show the table, and let each player play on their own phone.
 
 ## Your profile
@@ -36,7 +38,7 @@ Tap your icon and name in the top bar.
 - **Name and icon:** ✎ changes your name; tap your icon to choose another. With an account, you can also upload a picture.
 - **Preferences:**
   - **Chat in games:** turn it off to hide the chat.
-  - **Sounds:** turn it off to silence GamesLane. Browsers play sounds only once you have tapped the page.
+  - **Sounds:** turn it off to silence GamesLane. Browsers play sounds only once you have tapped the page. On an iPhone, GamesLane's sounds play alongside your music or podcast without stopping it, and the silent switch mutes them.
   - <a id="card-style"></a>**Card style:** **GamesLane** (each suit in its own color) or **Classic cards**.
 - Tap **Save** to keep your changes, or **Cancel**.
 - **TVs** (with an account): pair a TV that has the Apple TV app, and watch your games on it; see [Watching on a TV](#watching-on-a-tv).
@@ -78,7 +80,7 @@ Play with other people on GamesLane.
 - **Create a game** under **Public games**, then choose a game. As its creator, you choose the [game options](#game-options) and tap **Start**.
 - **Join a game** seats you in a game of your choice that is waiting for players. If there is none, you can create one.
 - A public game has no code or invite link and no chat, and nobody can watch it, except a TV one of its players watches their games on (see [Watching on a TV](#watching-on-a-tv)).
-- It starts by itself once all its seats are taken; the creator can also start it once enough players are seated.
+- It starts by itself once all its seats are taken; the creator can also start it once enough players are seated. Until then, the lobby shows the players who have joined and says that it is waiting for more players.
 - **Leave game** (on your seat, or in the ☰ menu) gives up your seat. During a game, this ends the game for everyone and returns to the lobby, except in Rich man, poor man and Yaniv, which go on.
 - If your seat is freed while you are away, you cannot return to that game.
 

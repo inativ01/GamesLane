@@ -105,7 +105,10 @@ final class PokerHeistTextsTests: XCTestCase {
         XCTAssertEqual(try session(["phase": "Lobby"]).lobbyStatus(.english), "Ready to start.")
         XCTAssertEqual(try session(["phase": "Lobby", "minSeats": 4]).lobbyStatus(.english), "Waiting for players (3/4 needed)…")
         XCTAssertEqual(try session(["phase": "Lobby", "isPublic": true, "hostPlayerId": "p2", "notice": "Ada left the game."]).lobbyStatus(.english),
-                       "Ada left the game. Waiting for Ben to start the game.")
+                       "Ada left the game. Waiting for more players to join, or for Ben to start the game.")
+        XCTAssertEqual(try session(["phase": "Lobby", "isPublic": true, "hostPlayerId": "p2", "maxSeats": 3]).lobbyStatus(.english),
+                       "Waiting for Ben to start the game.")
         XCTAssertEqual(try session(["phase": "Lobby"]).lobbySeats, [0, 1, 2, 3])
+        XCTAssertEqual(try session(["phase": "Lobby", "isPublic": true]).lobbySeats, [0, 1, 2])
     }
 }

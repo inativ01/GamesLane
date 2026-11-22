@@ -8,17 +8,25 @@ extension SessionState {
         if taken < minSeats {
             status = texts.t("Waiting for players ({taken}/{needed} needed)…", ["taken": taken, "needed": minSeats])
         } else if isPublic {
-            let host = seats.compactMap { $0 }.first { $0.playerId == hostPlayerId }
-            status = texts.t("Waiting for {name} to start the game.", ["name": host?.name ?? ""])
+            let host = seats.compactMap { $0 }.first { $0.playerId == hostPlayerId }?.name ?? ""
+            status = nextSeat != nil
+                ? texts.t("Waiting for more players to join, or for {name} to start the game.", ["name": host])
+                : texts.t("Waiting for {name} to start the game.", ["name": host])
         } else {
             status = texts.t("Ready to start.")
         }
         return [notice.map(texts.server), status].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " ")
     }
 
-    /// The seats shown in the lobby: the taken ones, and the next empty one while there is room.
+    /// The next empty seat the chosen options allow, or nil.
+    var nextSeat: Int? {
+        seats.prefix(maxSeats).firstIndex { $0 == nil }
+    }
+
+    /// The seats shown in the lobby: the taken ones, and in a private game the next empty one while there is room
+    /// (players join a public game from the main screen).
     var lobbySeats: [Int] {
-        let next = seats.prefix(maxSeats).firstIndex { $0 == nil }
+        let next = isPublic ? nil : nextSeat
         return seats.indices.filter { seats[$0] != nil || $0 == next }
     }
 }

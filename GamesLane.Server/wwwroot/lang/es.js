@@ -125,6 +125,9 @@ TRANSLATIONS.es = {
     "Leave game": "Salir de la partida",
     "Creator": "Creador",
     "Waiting for {name} to start the game.": "Esperando a que {name} empiece la partida.",
+    "Start now, or wait for more players to join.": "Empieza ahora o espera a que se unan más jugadores.",
+    "Waiting for more players to join, or for {name} to start the game.":
+        "Esperando a que se unan más jugadores o a que {name} empiece la partida.",
     "The game's creator chooses the options.": "Quien creó la partida elige las opciones.",
 
     // Shared: feedback

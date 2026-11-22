@@ -125,6 +125,9 @@ TRANSLATIONS.he = {
     "Leave game": "יציאה מהמשחק",
     "Creator": "יוצר המשחק",
     "Waiting for {name} to start the game.": "ממתינים ש־{name} יתחיל את המשחק.",
+    "Start now, or wait for more players to join.": "אפשר להתחיל עכשיו, או לחכות שיצטרפו עוד שחקנים.",
+    "Waiting for more players to join, or for {name} to start the game.":
+        "ממתינים שיצטרפו עוד שחקנים, או ש־{name} יתחיל את המשחק.",
     "The game's creator chooses the options.": "יוצר המשחק בוחר את האפשרויות.",
 
     // Shared: feedback
