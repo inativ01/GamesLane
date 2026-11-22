@@ -1117,4 +1117,10 @@ TRANSLATIONS.pt = {
     "This TV is not open. Open GamesLane on the TV first.": "Esta TV não está aberta. Abra o GamesLane na TV primeiro.",
     "This TV is showing another player's games.": "Esta TV está mostrando as partidas de outro jogador.",
     "Create an account or sign in to watch your games on a TV.": "Crie uma conta ou entre para assistir às suas partidas em uma TV.",
+    // The Apple TV app
+    "Connecting…": "Conectando…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "Escaneie o código QR com seu celular, ou digite este código no seu perfil do GamesLane.",
+    "Paired with {names}": "Pareada com {names}",
+    "Waiting for {name} to open a game…": "Esperando {name} abrir uma partida…",
+    "This game cannot be shown on the TV yet.": "Este jogo ainda não pode ser mostrado na TV.",
 };

@@ -28,6 +28,7 @@ How GamesLane is built, and how to work on it. For what users see and the game r
 - **Database:** PostgreSQL (Neon), with EF Core
 - **Frontend:** plain HTML, CSS and JavaScript, served by the backend (no build step)
 - **Tests:** xUnit
+- **Apple TV app:** Swift and SwiftUI (`GamesLane.tvOS/`, tests with XCTest)
 - **Hosting:** Render, from the `Dockerfile` at the repo root
 
 ## Architecture
@@ -131,6 +132,15 @@ GamesLane.iOS/                 iPhone app (Capacitor, see iPhone app below)
   ios/App/App/AppDelegate.swift  Passes the device token for notifications to the plugin
   ios/App/App/PrivacyInfo.xcprivacy  The app's privacy manifest: the data it collects (matching the App Store privacy answers in docs/app-store.md), no tracking
   ios/App/App/App.entitlements Push notifications (aps-environment), Sign in with Apple, and the associated domains (applinks, webcredentials) of gameslane.onrender.com
+GamesLane.tvOS/                Apple TV app (native SwiftUI, see Apple TV app below)
+  GamesLane.xcodeproj          Xcode project (synchronized folders; the GamesLane scheme runs the app and its tests)
+  Info.plist                   The server (GAMESLANE_SERVER), languages, local networking
+  GamesLane/Core/              Server address, SignalR client, registering, texts, the server's JSON, Poker Heist's texts, the app's state (TvModel)
+  GamesLane/Sound/             The game sounds, built like common.js's
+  GamesLane/Views/             The screens, the GamesLane cards, the QR code, confetti and shuffle
+  GamesLane/Assets.xcassets    App icon and top shelf images, and copies of the site's pictures
+  GamesLaneTests/              Unit tests (XCTest)
+
 docs/                          This guide, the user manual and the App Store submission (app-store.md: the listing, privacy answers and review notes); original logo, name and splash pictures (kept out of git)
 ```
 
@@ -509,35 +519,41 @@ For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run i
 
 Watch on TV: a TV running the Apple TV app shows the games its linked user opens, as an observer (public information only, with sounds, without chat). See also the [user manual](user-manual.md#watching-on-a-tv).
 
-**Status:** the server (`Tv/`, the hub's `TvConnect`, `WatchOnTv` and `StopWatchOnTv`, `/api/tv/*`) and the website (the profile's TVs, `/?tv=CODE`, every page linking the TV) are done and tested. The tvOS app is still to be built, on the Mac; the rest of this section is its specification.
+**Status:** the server (`Tv/`, the hub's `TvConnect`, `WatchOnTv` and `StopWatchOnTv`, `/api/tv/*`), the website (the profile's TVs, `/?tv=CODE`, every page linking the TV) and the tvOS app (`GamesLane.tvOS/`: registering, pairing, following the user's games, the session lobby and Poker Heist) are done; the app was tried on the Simulator against a local server (pairing by code, the lobby, a whole heist, Hebrew, the server restarting). Still to do: see the list at the end of this section.
 
 **Why a native app:** tvOS has no web view (WebKit is not available to apps), so the iPhone app's approach (Capacitor showing the site) cannot work there. The TV app is a native SwiftUI app that talks to the same server (HTTP to register, the SignalR hub for everything else) and draws each game itself from the session's public state ([Session state](#session-state)). Poker Heist comes first; other games show the splash picture with "This game cannot be shown on the TV yet." until each is added.
 
-**Project** (to create on the Mac):
-- A separate Xcode project in `GamesLane.tvOS/` (File → New → Project → tvOS → App, SwiftUI), not a target in `GamesLane.iOS/ios/App/App.xcodeproj`, which Capacitor's `cap sync` rewrites.
-- Bundle ID `com.gameslane.app`, the iPhone app's, so the App Store offers both as one app (universal purchase, one listing); team `7Z69JFQYCV`.
-- SignalR: either the Swift package `SignalR-Client-Swift` (a new dependency: ask first) or a small client of SignalR's JSON protocol over `URLSessionWebSocketTask` (the handshake `{"protocol":"json","version":1}`, messages ending with the character 0x1E, invocations (type 1), completions (3), pings (6)). Keep-alive every 5 seconds and a 10-second server timeout, as in `common.js`.
-- The server address is chosen at build time, as for the iPhone app (production by default; a pull request preview or a local server for testing; plain `http` only with `NSAllowsLocalNetworking`).
+**Project:** `GamesLane.tvOS/GamesLane.xcodeproj` (tvOS 18 or later, SwiftUI; requires Xcode 26+), a separate project, not a target in `GamesLane.iOS/ios/App/App.xcodeproj`, which Capacitor's `cap sync` rewrites. Its folders are synchronized groups, so a file added to `GamesLane/` or `GamesLaneTests/` is in the app or the tests without editing the project.
+- Bundle ID `com.gameslane.app`, the iPhone app's, so the App Store offers both as one app (universal purchase, one listing); team `7Z69JFQYCV`. No third-party packages.
+- `GamesLane/Core/`: `ServerAddress` (the server, from the build), `SignalRProtocol` and `HubConnection` (a small client of SignalR's JSON protocol over `URLSessionWebSocketTask`: the handshake `{"protocol":"json","version":1}`, messages ending with the character 0x1E, invocations (type 1), completions (3), pings (6) every 5 seconds, a lost connection after 10 seconds without a message from the server, as in `common.js`, then connecting again after 0, 2, 5 and every 10 seconds; the token goes in the `Authorization` header), `TvAccount` (registering, the token in the Keychain, one per server), `Texts` (`t()` and `translateServerText()` of `i18n.js`), `Models` and `PokerHeistState` (the server's JSON), `PokerHeistTexts` and `PokerHeistFacts` (what `poker-heist.js` shows observers: the status, each player's facts, the notes, the chip table's cells, the cards not used), `ChangeTracker` (`view.changed`), and `TvModel` (the app's state, below).
+- `GamesLane/Sound/`: `SoundSynth` builds `tone()` and `noise()` of `common.js` as samples, and `GameSounds` plays the card, chip, shuffle and fanfare sounds on `AVAudioEngine` (always on; the TV cannot decode the site's Ogg recordings, so it uses the browser-made sounds, as a browser that cannot decode them does).
+- `GamesLane/Views/`: the screens (`RootView`: connecting, pairing, waiting, the game the TV cannot show yet; `LobbyView`; `PokerHeistView`, `PokerHeistParts`, `HeistCardsView`), the cards in the new GamesLane style (`CardView`, `CardShapes` with the suits and road ranks of `common.js`, drawn by `SVGPath`), the QR code (`QRCodeView`), and the confetti and shuffle (`Effects`). The Poker Heist screen is laid out for 1920 × 1080 and scaled down when it does not fit (`FitToScreen`).
+- `GamesLane/Assets.xcassets`: the tvOS app icon (two layers: the logo, `GamesLane.iOS/assets/logo.png`, on the splash picture) and top shelf images, made from the splash picture; and copies of the site's pictures: `Splash` (`images/splash-landscape.jpg`), `Logo` (`images/logo-512.png`, on the joker), `CardBack`, `Games/<page>` (`images/games/*.svg`) and `PokerHeist/<key>` (`images/poker-heist/*.svg`, kept as vectors). Copy them again when the site's pictures change.
+- `GamesLaneTests/`: unit tests of the protocol, the server address, the texts, the change tracker, the SVG paths, the sounds and the Poker Heist texts.
 
-**Flow:**
-1. **Registering** (first launch): `POST /api/tv/register` with `{ name }` (the TV's name, `UIDevice.current.name`, e.g. "Living Room"); keep `accessToken` in the Keychain. It never expires; a TV that loses it registers again and must be paired again.
-2. **Connecting:** the hub at `/hubs/game?access_token=<token>`; call `TvConnect()`, and again at `codeExpiresAt` and after every reconnection; listen for `TvUpdated` (a new `TvStatus`, see [Game Hub API](#game-hub-api)).
-3. **Not linked** (`viewer` null): the splash picture (`wwwroot/images/splash-landscape.jpg`) with a QR code of `https://<server>/?tv=<code>` (Core Image's `CIQRCodeGenerator`), the code in large letters, and "Paired with Ada, Ben" (`pairedWith`) when it is not empty, in the TV's language (when it is one of the site's).
+**Building:** open the project in Xcode and run the GamesLane scheme on an Apple TV Simulator or an Apple TV, or from a terminal:
+
+```
+cd GamesLane.tvOS
+xcodebuild -scheme GamesLane -destination 'platform=tvOS Simulator,name=Apple TV 4K (4th generation)' test
+```
+
+The server is chosen when the app is built, as for the iPhone app, by the `GAMESLANE_SERVER` build setting (`GamesLaneServer` in `Info.plist`, read by `ServerAddress`): empty for production, a pull request's number for its preview, or a full address for a local server, e.g. `xcodebuild … GAMESLANE_SERVER=http://localhost:5171 build` (or set it in the target's build settings in Xcode). On the Simulator, `http://localhost:5171` reaches the server started with `dotnet run`; on an Apple TV, run the server with `--urls http://0.0.0.0:5171` and use `http://<computer's IP address>:5171`. Plain `http` is allowed only for local addresses (`NSAllowsLocalNetworking`). `Info.plist` also lists the site's languages (`CFBundleLocalizations`) and declares no non-exempt encryption, as the iPhone app's does.
+
+**Flow** (`TvModel`):
+1. **Registering** (first launch): `POST /api/tv/register` with `{ name }` (the TV's name, `UIDevice.current.name`; without Apple's user-assigned device name entitlement, tvOS gives the model's name, e.g. "Apple TV"), trying again every 5 seconds until it works; the `accessToken` is kept in the Keychain. It never expires; when the hub refuses it (401), the app forgets it and registers again, and must be paired again.
+2. **Connecting:** the hub at `/hubs/game`; call `TvConnect()`, and again at `codeExpiresAt` and after every reconnection; listen for `TvUpdated` (a new `TvStatus`, see [Game Hub API](#game-hub-api)). While the connection is lost, "Reconnecting…" shows at the top.
+3. **Not linked** (`viewer` null): the splash picture with a QR code of `https://<server>/?tv=<code>` (Core Image's QR code generator), the code in large letters, the server's host, and "Paired with Ada, Ben" (`pairedWith`) when it is not empty, in the TV's language (the first of its languages that the site offers, otherwise English).
 4. **Linked, no game open** (`viewer.sessionId` null): the splash picture with "Waiting for {name} to open a game…" and the user's icon (an emoji, or a picture address such as `/api/icons/...` on the server).
-5. **Linked, in a game:** `EnterSession(sessionId)` returns `{ state, playerId: null, private: null, chat }`, then `StateUpdated` messages bring each new public state. When `sessionId` changes, call `LeaveSession(old)` first (the TV then no longer counts as an observer). In the session lobby: the game's name and the seats (names, icons). During a game: the game's screen (Poker Heist), or the splash picture for a game the TV cannot show yet. A hub error ("No game with code … was found.") shows the waiting screen. The TV ignores `ChatMessageReceived` and never calls game actions.
-6. **Texts:** in `viewer.language` (`en`, `he`, `es`, `fr`, `pt`, `zh-CN` or `zh-TW`), from `GET /api/tv/texts/{language}`, used like `t()` in `i18n.js` (English text as the key, `{name}` placeholders); Hebrew is right to left. Add the TV app's own texts to every file in `wwwroot/lang/` (as `TranslationsTests` requires), so all translations stay in one place.
-7. **Poker Heist:** drawn from `state.game` (the public state built in `Sessions/PokerHeistSession.cs`), with `poker-heist.js` as the reference for the layout and texts; cards in the new GamesLane style (`cardElement` in `common.js`), the challenge and specialist pictures from `wwwroot/images/poker-heist/`; confetti and the fanfare each time the crew opens a vault, as the page does for everyone.
-8. **Sounds:** always on (the TV has no profile). The recorded sounds in `wwwroot/sounds/` (with their `LICENSE.txt`) and equivalents of the browser-made ones in `GAME_SOUNDS` (`common.js`), played when the page would play them (`view.changed` in `common.js` tells when).
+5. **Linked, in a game:** `EnterSession(sessionId)` returns `{ state, playerId: null, private: null, chat }`, then `StateUpdated` messages bring each new public state (states of another session are ignored). When `sessionId` changes, the TV calls `LeaveSession(old)` first (it then no longer counts as an observer). After reconnecting, it enters the session again. In the session lobby: the game's picture and name, the seats (names, icons, the next empty seat) and the lobby's status (`lobbyStatus` in `common.js`, with the session's notice). During a game: the game's screen (Poker Heist), or the splash picture for a game the TV cannot show yet. A hub error ("No game with code … was found.") shows the waiting screen. The TV ignores `ChatMessageReceived` and `PrivateStateUpdated`, and never calls game actions. While the lobby or a game is on screen, the screen saver is kept away (`isIdleTimerDisabled`).
+6. **Texts:** in `viewer.language` (`en`, `he`, `es`, `fr`, `pt`, `zh-CN` or `zh-TW`), from `GET /api/tv/texts/{language}` (once per language), used like `t()` in `i18n.js` (English text as the key, `{name}` placeholders), and texts from the server through `Texts.server` (`translateServerText`); Hebrew is right to left (the cards, chips and the pairing code stay left to right). The TV app's own texts ("Connecting…", the pairing screen's, "Paired with {names}", "Waiting for {name} to open a game…", "This game cannot be shown on the TV yet.") are in every file in `wwwroot/lang/` (as `TranslationsTests` requires), so all translations stay in one place.
+7. **Poker Heist:** drawn from `state.game` (the public state built in `Sessions/PokerHeistSession.cs`), with `poker-heist.js` as the reference for the layout and texts, as observers see it: the heist, vaults and alarms; the status; the five shared slots (face down until turned; the cards that replaced a joker stacked in a gold frame); the chips in the middle while betting; the hands revealed so far (red chip, player, cards, ranking and values, the first reason a hand is weaker in red); the chip table (player numbers, joker marks, each player's facts with the scans' PASS or FAIL, 👍 for the players ready, skipped stages struck out, Blackout's "?", the crossed-out white chip) with the group decisions under way above it; and the heist's cards with what each does (the TV cannot be tapped, so the text is always shown; "New", faded when not used). Confetti and the fanfare each time the crew opens a vault (once per heist), as the page does for everyone.
+8. **Sounds:** always on (the TV has no profile), played when the page would play them (`ChangeTracker`, as `view.changed` in `common.js`): the shuffle with card backs riffling on screen (`shuffles`), a chip taken or returned, the shared cards turned, each hand revealed.
 
 **Still to do, in order:**
-1. Create the Xcode project as above, with the tvOS app icon (layered) and top shelf image made from `assets/logo.png` and the splash pictures.
-2. Registering, the hub connection, and the screens before a game (QR code, code, paired users, waiting).
-3. The texts and languages.
-4. Following the user's session, and the session lobby screen.
-5. The Poker Heist screen and its sounds.
-6. Testing with the website: pairing from a phone's browser (QR code and typed code), Watch on TV across several games, a second user seeing the TV as in use, and the link ending 60 seconds after the TV or the user's pages close.
-7. The App Store: the Apple TV screenshots (1920×1080), the privacy answers and manifest (the TV's name and its pairings), and review notes on pairing with the review account ([app-store.md](app-store.md)); TestFlight through Xcode Cloud.
-8. The other games, one at a time.
+1. Testing with the website: pairing from a phone's browser (QR code and typed code), Watch on TV across several games, a second user seeing the TV as in use, and the link ending 60 seconds after the TV or the user's pages close; on an Apple TV too (the layout, the sounds' volume).
+2. The App Store: the tvOS platform added to the app's App Store Connect record, the Apple TV screenshots (1920×1080), the privacy answers and manifest (the TV's name and its pairings), and review notes on pairing with the review account ([app-store.md](app-store.md)); TestFlight through Xcode Cloud (a workflow for `GamesLane.tvOS/GamesLane.xcodeproj`).
+3. The other games, one at a time.
 
 ## Project status and external services
 
@@ -586,7 +602,7 @@ _Last updated: 2026-11-22. Keep this section current; it is the hand-off point b
 6. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
 7. iPhone app: sign-in with Apple, Google, Microsoft and Discord checked on a phone, in the app and on the website. Still to check: join links opening the app, and turn notifications (allowing them when first seated, a notification with the phone locked, with another app in front and with the app closed, none while the game is on screen, and tapping one opening the game, also when the app was closed); check that the Apple key on Render has APNs enabled. Check on an iPad too (the app is offered on iPad). Then the App Store submission, following [app-store.md](app-store.md).
 8. iPhone app, more native features (Apple's App Store guideline 4.2 rejects apps that only show a website; turn notifications and keeping the screen on during a game are done). Possibly: the native share sheet for a private game's code and join link; an offline screen with Try again instead of `www/index.html`'s static text.
-9. Apple TV app: the server and the website are done (pairing, Watch on TV, public games open to observers); build the tvOS app on the Mac, following [Apple TV app](#apple-tv-app), starting with Poker Heist.
+9. Apple TV app: the server, the website and the tvOS app (with Poker Heist) are done; still to do: testing with the website and on an Apple TV, the App Store, and the other games (see [Apple TV app](#apple-tv-app)).
 
 ## Working conventions
 - Ask before adding or upgrading packages.

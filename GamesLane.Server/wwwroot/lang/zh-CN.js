@@ -1117,4 +1117,10 @@ TRANSLATIONS["zh-CN"] = {
     "This TV is not open. Open GamesLane on the TV first.": "此电视未打开。请先在电视上打开 GamesLane。",
     "This TV is showing another player's games.": "此电视正在显示其他玩家的游戏。",
     "Create an account or sign in to watch your games on a TV.": "请创建账户或登录，以便在电视上观看您的游戏。",
+    // The Apple TV app
+    "Connecting…": "正在连接…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "请用手机扫描二维码，或在您的 GamesLane 个人资料中输入此代码。",
+    "Paired with {names}": "已与 {names} 配对",
+    "Waiting for {name} to open a game…": "正在等待 {name} 打开游戏…",
+    "This game cannot be shown on the TV yet.": "此游戏暂时还不能在电视上显示。",
 };

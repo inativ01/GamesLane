@@ -1116,4 +1116,10 @@ TRANSLATIONS.he = {
     "This TV is not open. Open GamesLane on the TV first.": "הטלוויזיה הזו לא פתוחה. פתחו קודם את GamesLane בטלוויזיה.",
     "This TV is showing another player's games.": "הטלוויזיה הזו מציגה משחקים של מישהו אחר.",
     "Create an account or sign in to watch your games on a TV.": "צרו חשבון או התחברו כדי לצפות במשחקים שלכם בטלוויזיה.",
+    // The Apple TV app
+    "Connecting…": "מתחבר…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "סרקו את קוד ה־QR בטלפון, או הזינו את הקוד הזה בפרופיל שלכם ב־GamesLane.",
+    "Paired with {names}": "מוצמדת אל {names}",
+    "Waiting for {name} to open a game…": "ממתינים לפתיחת משחק על ידי {name}…",
+    "This game cannot be shown on the TV yet.": "עדיין אי אפשר להציג את המשחק הזה בטלוויזיה.",
 };
