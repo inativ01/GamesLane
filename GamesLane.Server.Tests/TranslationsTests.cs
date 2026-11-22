@@ -222,6 +222,20 @@ public partial class TranslationsTests
         }
     }
 
+    // A game page that gets no answer in time when the user leaves for the main screen passes the game's code as ?leave,
+    // and the main screen gives up the seats itself; on the main screen, the GamesLane name closes the list of games.
+    [Fact]
+    public void Leaving_for_the_main_screen_always_gets_there()
+    {
+        var common = File.ReadAllText(Path.Combine(Wwwroot, "common.js"));
+        var home = File.ReadAllText(Path.Combine(Wwwroot, "home.js"));
+        Assert.Matches(@"const LEAVE_WAIT_MS = \d+;", common);
+        Assert.Contains("url.searchParams.set(\"leave\", sessionId);", common);
+        Assert.Contains("params.get(\"leave\")", home);
+        Assert.Contains("connection.invoke(\"LeaveSession\", leftSessionId)", home);
+        Assert.Contains("document.querySelector(\".brand\").addEventListener(\"click\"", home);
+    }
+
     // On iPhones, the sounds play as background sounds: they do not stop music or a podcast that is playing.
     [Fact]
     public void Sounds_do_not_stop_other_audio()
