@@ -113,6 +113,14 @@ document.querySelectorAll("[data-pick]").forEach((button) => {
 });
 $("picker-back").addEventListener("click", backToMenu);
 
+// The GamesLane name in the top bar shows the main menu. Here it does not reload the page, since a reload keeps the
+// history step of the list of games, which would show the list again.
+document.querySelector(".brand").addEventListener("click", (event) => {
+    event.preventDefault();
+    backToMenu();
+    scrollTo(0, 0);
+});
+
 // The order of the games, the same whichever button opened the list. Users drag a game by its handle to move it. A
 // saved user's order is kept with their account; a guest's in this browser. It is applied whenever the main screen opens.
 // Games not in the order (all of them for users who never arranged them, and new ones) follow, most played in the last
@@ -272,11 +280,24 @@ function showSavedGames(games, limit, waitingIds) {
     }));
 }
 
+// A game page that could not give up the user's seats in time (see LEAVE_WAIT_MS in common.js) passes its code as
+// ?leave=<code>, and the main screen gives them up first. The ?leave is removed from the address, so reloading the page
+// does not do it again.
+const leftSessionId = params.get("leave");
+if (leftSessionId) {
+    const url = new URL(location.href);
+    url.searchParams.delete("leave");
+    history.replaceState(history.state, "", url.pathname + url.search);
+}
+
 // A user coming back to the main screen returns at once to a public game in progress that waits for them. Their saved
 // games are shown first (see showSavedGames); other games with family and friends that wait for them are offered, with
 // Return and Leave.
 ready.then(async (ok) => {
     if (!ok) return;
+    if (leftSessionId) {
+        await connection.invoke("LeaveSession", leftSessionId).catch(() => {});
+    }
     const [games, saved] = await Promise.all([
         connection.invoke("WaitingGames").catch(() => []),
         accountReady.then(() => (isSavedUser() ? connection.invoke("SavedGames").catch(() => null) : null)),

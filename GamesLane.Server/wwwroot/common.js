@@ -461,6 +461,9 @@ function errorText(err) {
     return match ? translateServerText(match[1]) : t("Something went wrong.");
 }
 
+// How long a game page waits for the server to give up the user's seats before going back to the main screen anyway.
+const LEAVE_WAIT_MS = 1500;
+
 async function call(method, ...args) {
     await ready;
     showError("");
@@ -2881,13 +2884,20 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         view.mySeats.forEach((seat) => act("LeaveSeat", seat));
     });
 
-    // Going back to the main screen gives up this user's seats.
+    // Going back to the main screen gives up this user's seats. The page waits for the server at most LEAVE_WAIT_MS (the
+    // connection may be broken without the page knowing yet, e.g. after the phone was locked); without an answer by then,
+    // the main screen gives them up instead (?leave=<code>, see home.js).
     document.querySelectorAll("[data-leave]").forEach((link) => {
         link.addEventListener("click", async (event) => {
             event.preventDefault();
+            if (leaving) return;
             leaving = true;
-            await call("LeaveSession", sessionId).catch(() => {});
-            location.href = link.href;
+            let left = false;
+            const leave = call("LeaveSession", sessionId).then(() => { left = true; }, () => {});
+            await Promise.race([leave, new Promise((resolve) => setTimeout(resolve, LEAVE_WAIT_MS))]);
+            const url = new URL(link.href);
+            if (!left) url.searchParams.set("leave", sessionId);
+            location.href = url.href;
         });
     });
 

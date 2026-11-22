@@ -286,5 +286,14 @@ public class GamesLanePlugin: CAPPlugin, CAPBridgedPlugin, ASWebAuthenticationPr
 class GamesLaneViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(GamesLanePlugin())
+        hideScrollEdgeEffects()
+    }
+
+    /// Since iOS 26, a scroll view fades its content under the status bar and the home indicator (a white haze over the
+    /// header in dark mode). The pages keep clear of them themselves, so the web view has no such fades.
+    private func hideScrollEdgeEffects() {
+        guard #available(iOS 26.0, *), let scrollView = webView?.scrollView else { return }
+        scrollView.topEdgeEffect.isHidden = true
+        scrollView.bottomEdgeEffect.isHidden = true
     }
 }
