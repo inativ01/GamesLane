@@ -1094,4 +1094,26 @@ TRANSLATIONS.es = {
     "Unknown game.": "Juego desconocido.",
     "Each game can be listed only once.": "Cada juego puede aparecer solo una vez.",
     "Choose a card style.": "Elige un estilo de cartas.",
+
+    // TVs: pairing the Apple TV app, and Watch on TV
+    "TVs": "Televisores",
+    "Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.":
+        "Abre GamesLane en un televisor y vincúlalo con el código que muestra. Luego activa Ver en la TV: las partidas que abras en esta pestaña también se verán en el televisor.",
+    "No TVs paired yet.": "Aún no hay televisores vinculados.",
+    "TV code": "Código del televisor",
+    "Pair TV": "Vincular televisor",
+    "Pairing…": "Vinculando…",
+    "Not open": "No está abierto",
+    "Ready": "Listo",
+    "Showing another player's games": "Muestra las partidas de otro jugador",
+    "Showing your games": "Muestra tus partidas",
+    "Watch on TV": "Ver en la TV",
+    "Unpair": "Desvincular",
+    "Unpair {name}?": "¿Desvincular {name}?",
+    "Log in or create an account to pair the TV.": "Inicia sesión o crea una cuenta para vincular el televisor.",
+    "No TV shows this code. Check the code on the TV.": "Ningún televisor muestra este código. Revisa el código en el televisor.",
+    "This TV is not paired with your account.": "Este televisor no está vinculado con tu cuenta.",
+    "This TV is not open. Open GamesLane on the TV first.": "Este televisor no está abierto. Primero abre GamesLane en el televisor.",
+    "This TV is showing another player's games.": "Este televisor muestra las partidas de otro jugador.",
+    "Create an account or sign in to watch your games on a TV.": "Crea una cuenta o inicia sesión para ver tus partidas en un televisor.",
 };

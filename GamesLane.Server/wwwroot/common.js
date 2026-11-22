@@ -92,6 +92,16 @@ const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
 const APP_SIGNIN_NAME_KEY = "appSignInName";
 const APP_SIGNIN_AUTHORIZATION_KEY = "appSignInAuthorization";
 
+// The code of a TV to pair, from the QR code the Apple TV app shows (/?tv=CODE). It is kept until the TV is paired, also
+// through logging in, and the profile dialog opens with it filled in (see setUpTvs).
+const PENDING_TV_KEY = "pendingTvCode";
+if (params.get("tv")) {
+    sessionStorage.setItem(PENDING_TV_KEY, params.get("tv"));
+    const url = new URL(location.href);
+    url.searchParams.delete("tv");
+    history.replaceState(null, "", url.pathname + url.search);
+}
+
 function loadToken() {
     let value = sessionStorage.getItem(TOKEN_KEY);
     if (value === null) {
@@ -225,7 +235,7 @@ const accountReady = (async () => {
     renderAccount();
     dispatchEvent(new Event(SETTINGS_EVENT));
     setUpFeedbackLink();
-    if (isNewExternalUser && account.signedIn) {
+    if (account.signedIn && (isNewExternalUser || sessionStorage.getItem(PENDING_TV_KEY))) {
         openProfileDialog();
     }
     return account;
@@ -318,6 +328,26 @@ const ready = accountReady.then(connect).then((ok) => {
     firstConnectDone = true;
     return ok;
 });
+
+// Watch on TV (see setUpTvs): the paired TV that shows the games this tab opens, for as long as the tab is open. Every
+// page links it again once connected, with the game it has open (a game page's session) or none, so the TV follows the
+// user from page to page. The TV is forgotten when the server refuses it or ends the link.
+const WATCH_TV_KEY = "watchOnTv";
+const pageSessionId = Object.values(GAME_PAGES).includes(location.pathname) ? params.get("session")?.toUpperCase() || null : null;
+
+async function linkTv() {
+    const tvId = sessionStorage.getItem(WATCH_TV_KEY);
+    if (!tvId || connection.state !== signalR.HubConnectionState.Connected) return;
+    try {
+        await connection.invoke("WatchOnTv", tvId, pageSessionId, language.code);
+    } catch {
+        sessionStorage.removeItem(WATCH_TV_KEY);
+    }
+}
+
+ready.then((ok) => ok && linkTv());
+addEventListener(RECONNECTED_EVENT, linkTv);
+connection.on("WatchOnTvEnded", () => sessionStorage.removeItem(WATCH_TV_KEY));
 
 // Anonymous visit counts (see the privacy policy, and VisitReport on the server), from the main screen and the games'
 // pages. Once a day (UTC) per browser: the visit, where it came from (a campaign's utm_source, another site, "invite"
@@ -654,17 +684,20 @@ function accountKindText(kind) {
 
 // The profile: the user's icon and display name (each changed with its own button), the chat and sound switches, and
 // the card style (see userSettings). Changes are kept only when saved. Saved users can also upload a picture as their
-// icon, and log out (to become a new guest, with a random name and icon); admins also get links to the admin and cards
-// pages. Guests see a button on top that opens logging in, creating an account (with the name and icon chosen below),
-// and signing in with an external provider. The new user keeps the seats the previous one held.
+// icon, pair TVs and watch their games on them (see setUpTvs), and log out (to become a new guest, with a random name
+// and icon); admins also get links to the admin and cards pages. Guests see a button on top that opens logging in,
+// creating an account (with the name and icon chosen below), and signing in with an external provider, already open
+// when they came to pair a TV. The new user keeps the seats the previous one held.
 function openProfileDialog() {
     const isGuest = account.kind === "Guest";
+    const pairingTv = Boolean(sessionStorage.getItem(PENDING_TV_KEY));
     const icons = account.uploadedIcon ? [account.uploadedIcon, ...account.icons] : account.icons;
     const dialog = createDialog(`
         <h2 class="profile-title">${t("Your profile")}</h2>
         ${isGuest ? `
         <section class="profile-guest">
             <p class="hint">${t("Playing as a guest. Log in or create an account to keep your profile, game order and game options on any device.")}</p>
+            ${pairingTv ? `<p class="hint">${t("Log in or create an account to pair the TV.")}</p>` : ""}
             <button type="button" class="secondary" data-show-login aria-expanded="false">${t("Log in or create account")}</button>
             <div class="profile-account" hidden>
                 <div class="tabs" role="tablist">
@@ -721,6 +754,17 @@ function openProfileDialog() {
             <div class="actions profile-actions"><button type="submit" disabled>${t("Save")}</button><button type="button" class="secondary" data-close>${t("Cancel")}</button></div>
         </form>
         ${isGuest ? "" : `
+        <section class="profile-section profile-tvs" data-tvs>
+            <h3>${t("TVs")}</h3>
+            <p class="hint">${t("Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.")}</p>
+            <ul class="tv-list" data-tv-list hidden></ul>
+            <p class="hint" data-tv-empty hidden>${t("No TVs paired yet.")}</p>
+            <form class="tv-pair" data-tv-pair>
+                <label>${t("TV code")} <input name="code" maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false" required></label>
+                <button type="submit" class="secondary">${t("Pair TV")}</button>
+            </form>
+            <p class="error" role="alert"></p>
+        </section>
         <div class="profile-footer">
             ${account.isAdmin ? '<span class="profile-admin"><a class="button secondary small" href="/admin.html">Admin page</a><a class="button secondary small" href="/cards.html">All cards</a></span>' : ""}
             <button type="button" class="secondary small" data-logout>${t("Log out")}</button>
@@ -796,7 +840,9 @@ function openProfileDialog() {
             showLogin.setAttribute("aria-expanded", String(!panel.hidden));
         });
         setUpLogin(dialog, () => ({ name: form.elements.name.value, icon: picker.value }));
+        if (pairingTv) showLogin.click();
     } else {
+        setUpTvs(dialog);
         dialog.querySelector("[data-logout]").addEventListener("click", () => {
             sessionStorage.setItem(PREVIOUS_TOKEN_KEY, token);
             saveToken("");
@@ -813,6 +859,98 @@ function openProfileDialog() {
     }
     dialog.addEventListener("close", () => dialog.remove());
     dialog.showModal();
+}
+
+// The profile's TVs: the TVs paired with the saved user, each with what it is for them now, Watch on TV (the games they
+// open in this tab show on it; one TV at a time, and a TV shows one user's games at a time) and Unpair; and pairing a TV
+// with the code it shows, filled in when the page was opened from the TV's QR code.
+function setUpTvs(dialog) {
+    const section = dialog.querySelector("[data-tvs]");
+    const list = section.querySelector("[data-tv-list]");
+    const empty = section.querySelector("[data-tv-empty]");
+    const form = section.querySelector("[data-tv-pair]");
+    const error = section.querySelector(".error");
+    const statusTexts = {
+        Offline: t("Not open"),
+        Available: t("Ready"),
+        InUse: t("Showing another player's games"),
+        Watching: t("Showing your games"),
+    };
+
+    async function show() {
+        const response = await authFetch("/api/tv").catch(() => null);
+        if (!response?.ok) {
+            error.textContent = t("Something went wrong.");
+            return;
+        }
+        const tvs = await response.json();
+        if (!tvs.some((tv) => tv.status === "Watching")) sessionStorage.removeItem(WATCH_TV_KEY);
+        list.replaceChildren(...tvs.map(tvItem));
+        list.hidden = tvs.length === 0;
+        empty.hidden = tvs.length > 0;
+    }
+
+    function tvItem(tv) {
+        const toggle = el("input");
+        toggle.type = "checkbox";
+        toggle.setAttribute("role", "switch");
+        toggle.checked = tv.status === "Watching";
+        toggle.disabled = tv.status === "Offline" || tv.status === "InUse";
+        toggle.addEventListener("change", () => watch(tv, toggle.checked));
+        const unpair = el("button", "secondary small", t("Unpair"));
+        unpair.type = "button";
+        unpair.addEventListener("click", () => remove(tv));
+        return el("li", "tv-item",
+            el("div", "tv-info", el("strong", null, `📺 ${tv.name}`), el("span", "tv-status", statusTexts[tv.status])),
+            el("label", "switch", el("span", null, t("Watch on TV")), toggle),
+            unpair);
+    }
+
+    async function watch(tv, on) {
+        error.textContent = "";
+        await ready;
+        try {
+            if (on) {
+                await connection.invoke("WatchOnTv", tv.tvId, pageSessionId, language.code);
+                sessionStorage.setItem(WATCH_TV_KEY, tv.tvId);
+            } else {
+                await connection.invoke("StopWatchOnTv");
+                sessionStorage.removeItem(WATCH_TV_KEY);
+            }
+        } catch (err) {
+            error.textContent = errorText(err);
+        }
+        await show();
+    }
+
+    async function remove(tv) {
+        if (!confirm(t("Unpair {name}?", { name: tv.name }))) return;
+        error.textContent = "";
+        const response = await authFetch(`/api/tv/${encodeURIComponent(tv.tvId)}`, { method: "DELETE" }).catch(() => null);
+        if (!response?.ok) error.textContent = t("Something went wrong.");
+        await show();
+    }
+
+    const pair = form.querySelector('[type="submit"]');
+    form.elements.code.value = sessionStorage.getItem(PENDING_TV_KEY) ?? "";
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        error.textContent = "";
+        withBusyButton(pair, t("Pairing…"), async () => {
+            const response = await postJson("/api/tv/pair", { code: form.elements.code.value }).catch(() => null);
+            if (!response?.ok) {
+                const body = await response?.json().catch(() => null);
+                error.textContent = body?.error ? translateServerText(body.error) : t("Something went wrong.");
+                return false;
+            }
+            sessionStorage.removeItem(PENDING_TV_KEY);
+            form.elements.code.value = "";
+            await show();
+            return false;
+        });
+    });
+    show();
+    if (form.elements.code.value) pair.focus();
 }
 
 // The feedback form: a problem, an idea or another comment, posted by the server as a public GitHub issue, with the
@@ -2677,10 +2815,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         showBusy(t("Opening the game…"));
         try {
             entry = await call("EnterSession", sessionId);
-        } catch (err) {
-            if (/You are no longer in this game\./.test(err?.message ?? "")) {
-                location.replace("/?left=1");
-            }
+        } catch {
             $("session").hidden = true;
             return;
         } finally {

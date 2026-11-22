@@ -5,6 +5,7 @@ using GamesLane.Server.Games.Wazoo;
 using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
 using GamesLane.Server.Stats;
+using GamesLane.Server.Tv;
 using GamesLane.Server.Users;
 using Microsoft.AspNetCore.SignalR;
 
@@ -16,7 +17,8 @@ namespace GamesLane.Server.Hubs;
 /// <see cref="StateUpdated"/> messages. Private, per-player information is returned only to the calling connection.
 /// Players are logged-in users, identified by their user ID, so they keep their seats after a refresh or reconnect.
 /// Games created and players joining someone else's game are counted in <see cref="ActivityCounter"/>. After every
-/// change, <see cref="ITurnNotifier"/> notifies the iPhone app's users whose turn it has become.
+/// change, <see cref="ITurnNotifier"/> notifies the iPhone app's users whose turn it has become. TVs (the Apple TV app)
+/// connect here too, and show the games of the user who links them (<see cref="TvService"/>).
 /// </summary>
 public class GameHub(
     IGameSessionStore store,
@@ -25,6 +27,7 @@ public class GameHub(
     SavedGameService savedGames,
     ActivityCounter activity,
     ITurnNotifier notifier,
+    TvService tvs,
     ILogger<GameHub> logger) : Hub, IGameHub
 {
     /// <summary>
@@ -62,11 +65,6 @@ public class GameHub(
     public async Task<SessionEntry> EnterSession(string sessionId)
     {
         var session = await GetSession(sessionId);
-        if (session.IsPublic && !session.IsSeated(UserKey))
-        {
-            throw new HubException("You are no longer in this game.");
-        }
-
         await Groups.AddToGroupAsync(Context.ConnectionId, SessionGroup(session.Id));
         var joinsOthers = !session.IsPublic && session.HasSeatedPlayers && !session.IsSeated(UserKey);
         var playerId = session.Enter(UserKey, AuthSetup.GetProfile(Context.User), Context.ConnectionId);
@@ -86,6 +84,42 @@ public class GameHub(
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
+    public Task<TvStatus> TvConnect()
+    {
+        if (AuthSetup.GetKind(Context.User) != AuthSetup.TvKind)
+        {
+            throw new HubException("Only a TV can do this.");
+        }
+
+        var name = Context.User!.FindFirstValue(ClaimTypes.Name) ?? TvEndpoints.DefaultName;
+        return tvs.ConnectAsync(AuthSetup.GetUserId(Context.User)!, name, Context.ConnectionId);
+    }
+
+    /// <inheritdoc />
+    public async Task WatchOnTv(string tvId, string? sessionId, string? language)
+    {
+        if (AuthSetup.GetSavedUserId(Context.User) is not { } userId)
+        {
+            throw new HubException("Create an account or sign in to watch your games on a TV.");
+        }
+
+        var profile = RequireProfile("Create an account or sign in to watch your games on a TV.");
+        if (await tvs.WatchAsync(userId, profile, language, tvId, sessionId, Context.ConnectionId) is { } error)
+        {
+            throw new HubException(error);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task StopWatchOnTv()
+    {
+        if (AuthSetup.GetSavedUserId(Context.User) is { } userId)
+        {
+            await tvs.StopAsync(userId);
+        }
+    }
+
     /// <summary>
     /// Marks the connection's user as disconnected in every session where they hold a seat, and updates the observer
     /// count of the sessions they were watching.
@@ -94,6 +128,7 @@ public class GameHub(
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         notifier.ConnectionClosed(Context.ConnectionId);
+        tvs.Disconnected(Context.ConnectionId);
         foreach (var session in store.All)
         {
             if (session.Disconnect(Context.ConnectionId, timeProvider.GetUtcNow()))
@@ -250,9 +285,15 @@ public class GameHub(
     {
         var session = await GetSession(sessionId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, SessionGroup(session.Id));
-        if (session.LeaveAllSeats(UserKey))
+        var leftSeats = session.LeaveAllSeats(UserKey);
+        var closed = session.Disconnect(Context.ConnectionId, timeProvider.GetUtcNow());
+        if (leftSeats)
         {
             await BroadcastState(session);
+        }
+        else if (closed)
+        {
+            await SendPublicState(session);
         }
     }
 

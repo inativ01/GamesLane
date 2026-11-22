@@ -172,6 +172,35 @@ namespace GamesLane.Server.Data.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("GamesLane.Server.Data.TvPairing", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TvId")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTimeOffset>("LastActiveAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("PairedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TvName")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("UserId", "TvId");
+
+                    b.HasIndex("LastActiveAt");
+
+                    b.HasIndex("TvId");
+
+                    b.ToTable("TvPairings");
+                });
+
             modelBuilder.Entity("GamesLane.Server.Data.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -321,6 +350,15 @@ namespace GamesLane.Server.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GamesLane.Server.Data.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GamesLane.Server.Data.TvPairing", b =>
+                {
                     b.HasOne("GamesLane.Server.Data.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")

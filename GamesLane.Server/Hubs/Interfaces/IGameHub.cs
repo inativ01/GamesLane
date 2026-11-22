@@ -1,6 +1,7 @@
 using GamesLane.Server.Games.FinalCard;
 using GamesLane.Server.Games.Wazoo;
 using GamesLane.Server.Sessions;
+using GamesLane.Server.Tv;
 
 namespace GamesLane.Server.Hubs;
 
@@ -12,7 +13,7 @@ public interface IGameHub
     /// <summary>
     /// Opens a session page: subscribes to updates and, for a logged-in user, reconnects them to their seats. A logged-in
     /// user opening a private game for the first time while it is in the lobby takes the next empty seat, if there is
-    /// one. A public game can be opened only by its seated players.
+    /// one. Anyone with its code can watch a game, public or private.
     /// </summary>
     Task<SessionEntry> EnterSession(string sessionId);
 
@@ -21,6 +22,26 @@ public interface IGameHub
     /// is notified when their turn comes (see <see cref="Notifications.ITurnNotifier"/>).
     /// </summary>
     Task SetPageHidden(bool hidden);
+
+    /// <summary>
+    /// TVs only (the Apple TV app). Marks the TV open and returns its status: its pairing code, the users paired with it,
+    /// and the user whose games it shows. Later changes arrive as <see cref="TvService.TvUpdated"/>; the TV calls this
+    /// again when its code expires.
+    /// </summary>
+    Task<TvStatus> TvConnect();
+
+    /// <summary>
+    /// Saved users only. Shows the caller's games on their paired TV <paramref name="tvId"/> (Watch on TV), in
+    /// <paramref name="language"/>, starting with the session <paramref name="sessionId"/> that the page has open (null
+    /// on the site's other pages). Each page calls it when it connects, so the TV follows the user from page to page.
+    /// Refused when the TV is not open or shows another user's games.
+    /// </summary>
+    Task WatchOnTv(string tvId, string? sessionId, string? language);
+
+    /// <summary>
+    /// Stops showing the caller's games on a TV.
+    /// </summary>
+    Task StopWatchOnTv();
 
     /// <summary>
     /// Logged-in users only. Creates a session and returns its code. The session starts with the creator's saved options
@@ -85,7 +106,8 @@ public interface IGameHub
     Task LeaveSeat(string sessionId, int seat);
 
     /// <summary>
-    /// Stops receiving updates and gives up all the caller's seats (used when going back to the main screen).
+    /// Stops receiving updates and gives up all the caller's seats (used when going back to the main screen, and by a
+    /// TV moving to another game). The connection no longer counts as an observer.
     /// </summary>
     Task LeaveSession(string sessionId);
 

@@ -6,6 +6,7 @@ using GamesLane.Server.Hubs;
 using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
 using GamesLane.Server.Stats;
+using GamesLane.Server.Tv;
 using GamesLane.Server.Users;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,7 @@ builder.AddGamesLaneAuth();
 builder.AddGamesLaneFeedback();
 builder.AddGamesLaneStats();
 builder.AddGamesLaneNotifications();
+builder.AddGamesLaneTv();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGameOptionsService, GameOptionsService>();
@@ -60,6 +62,7 @@ app.MapExternalSignInEndpoints();
 app.MapFeedbackEndpoints();
 app.MapStatsEndpoints();
 app.MapNotificationEndpoints();
+app.MapTvEndpoints();
 
 // Public games cannot be joined by code, so they are not found here.
 app.MapGet("/api/sessions/{code}", async (string code, IGameSessionStore store) =>
