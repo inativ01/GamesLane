@@ -2290,7 +2290,7 @@ svg.card-suit {
 }
 
 /* The rank as a script road, as in the logo's L: a thick rim in the suit's color (in place of the logo's gold), black
-   asphalt with a dashed yellow centre line, and curled ends. */
+   asphalt with a dashed yellow centre line, and round ends. */
 .card-road {
     position: relative;
     width: 1.8em;
