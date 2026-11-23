@@ -6,7 +6,7 @@ namespace GamesLane.Server.Data;
 /// <summary>
 /// The GamesLane database: saved users, their external accounts, icons, game options and saved games, saved game
 /// sessions, the number of games started per day, the anonymous daily activity counts, the iPhones that get turn
-/// notifications, and the keys that sign login tokens.
+/// notifications, the TVs paired with users, and the keys that sign login tokens.
 /// </summary>
 public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
@@ -56,13 +56,18 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
     public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
 
     /// <summary>
+    /// The TVs (the Apple TV app) paired with users.
+    /// </summary>
+    public DbSet<TvPairing> TvPairings => Set<TvPairing>();
+
+    /// <summary>
     /// The keys ASP.NET Core uses to encrypt and sign login tokens, so tokens stay valid after a restart.
     /// </summary>
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     /// <summary>
-    /// Sets keys, unique indexes, lengths, and deletes a user's external accounts, icons, game options and saved games
-    /// with the user. A session that a user saved cannot be deleted while it is saved.
+    /// Sets keys, unique indexes, lengths, and deletes a user's external accounts, icons, game options, saved games and
+    /// paired TVs with the user. A session that a user saved cannot be deleted while it is saved.
     /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -143,6 +148,16 @@ public class GamesLaneDbContext(DbContextOptions<GamesLaneDbContext> options) : 
             device.Property(d => d.Language).HasMaxLength(10);
             device.HasIndex(d => d.UserKey);
             device.HasIndex(d => d.UpdatedAt);
+        });
+
+        modelBuilder.Entity<TvPairing>(pairing =>
+        {
+            pairing.HasKey(p => new { p.UserId, p.TvId });
+            pairing.Property(p => p.TvId).HasMaxLength(40);
+            pairing.Property(p => p.TvName).HasMaxLength(30);
+            pairing.HasIndex(p => p.TvId);
+            pairing.HasIndex(p => p.LastActiveAt);
+            pairing.HasOne<User>().WithMany().HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

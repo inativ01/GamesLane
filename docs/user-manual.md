@@ -10,6 +10,7 @@ How to play on GamesLane. The rules of each game are in the [appendix](#appendix
 - [Game options](#game-options)
 - [Playing each game](#playing-each-game): [Tic-tac-toe](#tic-tac-toe), [Backgammon](#backgammon), [Poker Heist](#poker-heist), [Rich man, poor man](#rich-man-poor-man), [Wazoo](#wazoo), [Final Card](#final-card), [Yaniv](#yaniv), [Hearts](#hearts), [Spades](#spades), [Dominoes](#dominoes)
 - [Installing the app](#installing-the-app)
+- [Watching on a TV](#watching-on-a-tv)
 - [Languages](#languages)
 - [Help and feedback](#help-and-feedback)
 - [Appendix: game rules](#appendix-game-rules)
@@ -25,6 +26,8 @@ To play with people you don't know, use [Public games](#public-games) instead.
 
 The top bar of every page has the GamesLane name (back to the main screen), **?** for help, the language flag, and your icon and name, which open your profile.
 
+GamesLane follows your device's light or dark mode setting. In dark mode, the game tables, boards, cards and scorecards keep their usual colors.
+
 **Tip:** open the game on a shared screen (a TV or laptop) to show the table, and let each player play on their own phone.
 
 ## Your profile
@@ -35,9 +38,10 @@ Tap your icon and name in the top bar.
 - **Name and icon:** ✎ changes your name; tap your icon to choose another. With an account, you can also upload a picture.
 - **Preferences:**
   - **Chat in games:** turn it off to hide the chat.
-  - **Sounds:** turn it off to silence GamesLane. Browsers play sounds only once you have tapped the page.
+  - **Sounds:** turn it off to silence GamesLane. Browsers play sounds only once you have tapped the page. On an iPhone, GamesLane's sounds play alongside your music or podcast without stopping it, and the silent switch mutes them.
   - <a id="card-style"></a>**Card style:** **GamesLane** (each suit in its own color) or **Classic cards**.
 - Tap **Save** to keep your changes, or **Cancel**.
+- **TVs** (with an account): pair a TV that has the Apple TV app, and watch your games on it; see [Watching on a TV](#watching-on-a-tv).
 - **Log out** and **Delete account** are at the bottom. Logging in or out during a game keeps your seats.
 - You stay logged in for 30 days after your last visit. An account not used for 30 days is deleted.
 
@@ -75,8 +79,8 @@ Play with other people on GamesLane.
 
 - **Create a game** under **Public games**, then choose a game. As its creator, you choose the [game options](#game-options) and tap **Start**.
 - **Join a game** seats you in a game of your choice that is waiting for players. If there is none, you can create one.
-- A public game has no code or invite link, no chat, and nobody can watch it.
-- It starts by itself once all its seats are taken; the creator can also start it once enough players are seated.
+- A public game has no code or invite link and no chat, and nobody can watch it, except a TV one of its players watches their games on (see [Watching on a TV](#watching-on-a-tv)).
+- It starts by itself once all its seats are taken; the creator can also start it once enough players are seated. Until then, the lobby shows the players who have joined and says that it is waiting for more players.
 - **Leave game** (on your seat, or in the ☰ menu) gives up your seat. During a game, this ends the game for everyone and returns to the lobby, except in Rich man, poor man and Yaniv, which go on.
 - If your seat is freed while you are away, you cannot return to that game.
 
@@ -136,7 +140,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 ### Rich man, poor man
 
 - Tap cards of one number, then **Select** to throw them, or **Pass**. When you start a round, tapping a card picks all your cards of that number (tap a picked card to throw fewer); otherwise it picks as many as are needed.
-- When it is your turn, your hand glows and the status bar says what to do.
+- When it is your turn, your hand's box turns light gold with a glowing border, and the status bar says what to do.
 - In the exchange, the poorer player confirms with **Give these cards**; the richer player taps the cards to give, then **Give**.
 - During the exchange, a watcher can **Ask to join**; any player can **Accept** (choosing the newcomer's place) or **Decline**.
 - **Read throws aloud**, on a screen without a seat such as a TV, says each throw out loud.
@@ -149,11 +153,12 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 
 ### Final Card
 
-- On your turn, tap a card to play it; the cards you cannot play are greyed. A Change Color asks for the color.
-- To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw). If the card can be played, play it or tap **Keep the card**.
+- On your turn, your hand's box turns light gold with a glowing border. Tap a card to play it; the cards you cannot play are greyed, with only the large suit shape in the middle keeping its color. A Change Color asks for the color.
+- To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw), orange whenever you can draw. If the card can be played, play it or tap **Keep the card**.
 - **Final Card!** is always under your cards: one tap protects you and catches the others, when either applies.
+- Beside the piles: the other players and the cards each one holds (🛡 when protected), the player to play outlined. Up to 5 are on the right; with more, they are split between the right and the left. When a name does not fit, only the icons show.
 - **Challenge!** appears when you can challenge a Change Color +4, and **Close TAKI** during your TAKI.
-- The status bar shows the color to play and the direction (↻ or ↺).
+- The status bar shows the color to play, with its suit, and the direction (↻ or ↺). Wherever a color or a card is named, it shows with its suit, in that color (e.g. Red ♥ 7).
 
 ### Yaniv
 
@@ -187,6 +192,16 @@ GamesLane can be added to your home screen, and then opens like an app. The main
 - **Computer (Chrome or Edge):** the install icon at the end of the address bar, then **Install GamesLane**.
 
 On iPhone and iPad, the installed app starts as a new guest: log in to your account there.
+
+## Watching on a TV
+
+With the GamesLane app on an Apple TV, the TV shows the games you open, as someone watching: the table and what every player sees, never your cards or anyone's hidden cards, with the game sounds and without the chat. The Apple TV app is not in the App Store yet. It shows every game's lobby (the players), and Poker Heist during the game: the shared cards, the chips, the chip table with what the heist's cards did, the hands as they are revealed, and the heist's cards with what each one does. Other games show "This game cannot be shown on the TV yet." until they are added.
+
+- **Pairing** (with an account): open GamesLane on the TV. It shows a QR code and a code (a new one every 10 minutes, and after each use), with the names of the accounts already paired with it. Scan the QR code with your phone, or open your profile and enter the code under **TVs**, then tap **Pair TV**. As a guest, you are first asked to log in or create an account. You can pair several TVs, and a TV can be paired with several accounts.
+- **Watch on TV:** in your profile, under **TVs**, turn on **Watch on TV** for a TV that is open (**Ready**). From then on, the games you open in this tab show on the TV too, in your language, until you close the tab or turn Watch on TV off. Between games, the TV says it is waiting for you.
+- A TV shows one person's games at a time: while it shows yours, the others who paired it see **Showing another player's games** and cannot turn it on. Your games show on one TV at a time: turning on another TV stops the first.
+- Watch on TV stops when the TV app, or all your GamesLane pages, have been closed for a minute.
+- **Unpair** removes a TV from your profile. A TV you have not paired again or watched on for 90 days is unpaired by itself.
 
 ## Languages
 
@@ -277,7 +292,7 @@ The rules of each game, with its options, for reference.
 
 **Common rules (both styles)**
 
-- **The cards** come in four colors (red, yellow, green, blue), plus cards without a color. One card is turned up to start the discard pile; each hand is started by the next seat.
+- **The cards** come in four colors, each drawn with its suit (red ♥, yellow ♦, green ♣, blue ♠), plus cards without a color. One card is turned up to start the discard pile; each hand is started by the next seat.
 - **A turn:** play a card that matches the top of the discard pile by color, or by number or symbol, or a card without a color; or draw. You may draw even when you could play. When the draw pile runs out, the discard pile (except its top card) is shuffled into a new one.
 - **Action cards:**
   - **Stop:** the next player misses their turn.

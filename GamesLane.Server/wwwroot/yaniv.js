@@ -225,8 +225,7 @@ function handPanel(game, state, view, hand) {
         button.addEventListener("click", () => pickCard(hand, index));
         return el("span", "rp-slot", button);
     });
-    const foot = el("div", "yaniv-hand-foot", ...(myTurn ? [yourTurnTag()] : []),
-        el("p", "yaniv-score", t("Hand score: {n}", { n: hand.handScore })));
+    const foot = el("div", "yaniv-hand-foot", el("p", "yaniv-score", t("Hand score: {n}", { n: hand.handScore })));
     if (myTurn && hand.canCallYaniv) {
         const call = el("button", "yaniv-call", t("Yaniv!"));
         call.type = "button";

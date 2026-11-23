@@ -57,6 +57,16 @@ public partial class NotificationTexts
     public static NotificationTexts Load(string webRoot)
     {
         var keys = GameNames.Values.Append(YourTurn).ToHashSet();
+        return new NotificationTexts(ReadTranslations(webRoot).ToDictionary(language => language.Key,
+            language => (IReadOnlyDictionary<string, string>)language.Value.Where(text => keys.Contains(text.Key)).ToDictionary()));
+    }
+
+    /// <summary>
+    /// Every translation in the site's <c>lang</c> folder in <paramref name="webRoot"/>: per language code, each English
+    /// text's translation.
+    /// </summary>
+    public static IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> ReadTranslations(string webRoot)
+    {
         var translations = new Dictionary<string, IReadOnlyDictionary<string, string>>();
         var folder = Path.Combine(webRoot, "lang");
         foreach (var file in Directory.Exists(folder) ? Directory.GetFiles(folder, "*.js") : [])
@@ -64,17 +74,13 @@ public partial class NotificationTexts
             var texts = new Dictionary<string, string>();
             foreach (Match match in Entry().Matches(File.ReadAllText(file)))
             {
-                var key = Unescape(match.Groups[1].Value);
-                if (keys.Contains(key))
-                {
-                    texts[key] = Unescape(match.Groups[2].Value);
-                }
+                texts[Unescape(match.Groups[1].Value)] = Unescape(match.Groups[2].Value);
             }
 
             translations[Path.GetFileNameWithoutExtension(file)] = texts;
         }
 
-        return new NotificationTexts(translations);
+        return translations;
     }
 
     /// <summary>

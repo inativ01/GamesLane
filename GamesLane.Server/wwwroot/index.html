@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>GamesLane</title>
     <link rel="icon" href="images/logo-32.png">
     <link rel="apple-touch-icon" href="images/logo-180.png">
@@ -11,20 +11,15 @@
     <meta name="theme-color" content="#19285d">
     <link rel="stylesheet" href="styles.css">
     <script>
-        // The splash screen shows for 5 seconds when the app is first opened in this tab, and for 1 second when the
-        // GamesLane name is used later (/?splash). It runs on its own, so it ends even if the page's other scripts are
-        // slow or fail to load. The ?splash is removed from the address, so reloading the page does not show it again.
-        if (!sessionStorage.getItem("splashShown") || new URLSearchParams(location.search).has("splash")) {
+        // The splash screen shows for 2 seconds when the app is first opened in this tab, and not again (the GamesLane
+        // name goes straight to the main screen). It runs on its own, so it ends even if the page's other scripts are
+        // slow or fail to load.
+        if (!sessionStorage.getItem("splashShown")) {
             const root = document.documentElement;
-            const length = sessionStorage.getItem("splashShown") ? 1000 : 5000;
+            const length = 2000;
             root.classList.add("splashing");
             root.dataset.splashLength = String(length);
             sessionStorage.setItem("splashShown", "1");
-            const url = new URL(location.href);
-            if (url.searchParams.has("splash")) {
-                url.searchParams.delete("splash");
-                history.replaceState(null, "", url.pathname + url.search);
-            }
             setTimeout(() => root.classList.add("splash-done"), length);
             setTimeout(() => root.classList.remove("splashing", "splash-done"), length + 500);
         }
@@ -47,7 +42,7 @@
     </picture>
 </div>
 <header class="top">
-    <a href="/?splash" class="brand" title="Main screen" data-i18n-attr="title"><img class="brand-name" src="images/name.png" alt="GamesLane"></a>
+    <a href="/" class="brand" title="Main screen" data-i18n-attr="title"><img class="brand-name" src="images/name.png" alt="GamesLane"></a>
     <div id="account" class="account"></div>
 </header>
 <main class="home">
@@ -151,7 +146,7 @@
                     </span>
                     <span class="game-go" aria-hidden="true">›</span>
                 </button>
-                <button type="button" class="game-tile" data-create="Spades">
+                <button type="button" class="game-tile" data-create="Spades" hidden>
                     <img src="images/games/spades.svg" alt="">
                     <span class="game-text">
                         <span class="game-title" data-i18n>Spades</span>
@@ -160,7 +155,7 @@
                     </span>
                     <span class="game-go" aria-hidden="true">›</span>
                 </button>
-                <button type="button" class="game-tile" data-create="Dominoes">
+                <button type="button" class="game-tile" data-create="Dominoes" hidden>
                     <img src="images/games/dominoes.svg" alt="">
                     <span class="game-text">
                         <span class="game-title" data-i18n>Dominoes</span>

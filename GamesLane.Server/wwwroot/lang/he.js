@@ -125,6 +125,9 @@ TRANSLATIONS.he = {
     "Leave game": "יציאה מהמשחק",
     "Creator": "יוצר המשחק",
     "Waiting for {name} to start the game.": "ממתינים ש־{name} יתחיל את המשחק.",
+    "Start now, or wait for more players to join.": "אפשר להתחיל עכשיו, או לחכות שיצטרפו עוד שחקנים.",
+    "Waiting for more players to join, or for {name} to start the game.":
+        "ממתינים שיצטרפו עוד שחקנים, או ש־{name} יתחיל את המשחק.",
     "The game's creator chooses the options.": "יוצר המשחק בוחר את האפשרויות.",
 
     // Shared: feedback
@@ -1094,4 +1097,32 @@ TRANSLATIONS.he = {
     "Unknown game.": "משחק לא מוכר.",
     "Each game can be listed only once.": "כל משחק יכול להופיע פעם אחת בלבד.",
     "Choose a card style.": "בחרו עיצוב קלפים.",
+
+    // TVs: pairing the Apple TV app, and Watch on TV
+    "TVs": "טלוויזיות",
+    "Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.":
+        "פתחו את GamesLane בטלוויזיה והצמידו אותה עם הקוד שמוצג בה. אחר כך הפעילו את צפייה בטלוויזיה: המשחקים שתפתחו בכרטיסייה הזו יוצגו גם בטלוויזיה.",
+    "No TVs paired yet.": "עדיין לא הוצמדו טלוויזיות.",
+    "TV code": "קוד הטלוויזיה",
+    "Pair TV": "הצמדת טלוויזיה",
+    "Pairing…": "מצמידים…",
+    "Not open": "לא פתוחה",
+    "Ready": "מוכנה",
+    "Showing another player's games": "מציגה משחקים של מישהו אחר",
+    "Showing your games": "מציגה את המשחקים שלכם",
+    "Watch on TV": "צפייה בטלוויזיה",
+    "Unpair": "ביטול הצמדה",
+    "Unpair {name}?": "לבטל את ההצמדה של {name}?",
+    "Log in or create an account to pair the TV.": "התחברו או צרו חשבון כדי להצמיד את הטלוויזיה.",
+    "No TV shows this code. Check the code on the TV.": "אף טלוויזיה לא מציגה את הקוד הזה. בדקו את הקוד בטלוויזיה.",
+    "This TV is not paired with your account.": "הטלוויזיה הזו לא מוצמדת לחשבון שלכם.",
+    "This TV is not open. Open GamesLane on the TV first.": "הטלוויזיה הזו לא פתוחה. פתחו קודם את GamesLane בטלוויזיה.",
+    "This TV is showing another player's games.": "הטלוויזיה הזו מציגה משחקים של מישהו אחר.",
+    "Create an account or sign in to watch your games on a TV.": "צרו חשבון או התחברו כדי לצפות במשחקים שלכם בטלוויזיה.",
+    // The Apple TV app
+    "Connecting…": "מתחבר…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "סרקו את קוד ה־QR בטלפון, או הזינו את הקוד הזה בפרופיל שלכם ב־GamesLane.",
+    "Paired with {names}": "מוצמדת אל {names}",
+    "Waiting for {name} to open a game…": "ממתינים לפתיחת משחק על ידי {name}…",
+    "This game cannot be shown on the TV yet.": "עדיין אי אפשר להציג את המשחק הזה בטלוויזיה.",
 };

@@ -5,6 +5,7 @@ using GamesLane.Server.Games;
 using GamesLane.Server.Hubs;
 using GamesLane.Server.Notifications;
 using GamesLane.Server.Sessions;
+using GamesLane.Server.Tv;
 using GamesLane.Server.Users;
 using Microsoft.AspNetCore.SignalR;
 
@@ -89,12 +90,12 @@ public static class AccountEndpoints
             return Results.NoContent();
         });
 
-        // Deletes the logged-in saved user (with their external accounts, icons, game options, saved games and the phones
-        // that get their turn notifications) and logs in a new guest, who gets their seats in every session in memory, as after
-        // logging out. Sign in with Apple's tokens are revoked first, as Apple requires.
+        // Deletes the logged-in saved user (with their external accounts, icons, game options, saved games, paired TVs and
+        // the phones that get their turn notifications) and logs in a new guest, who gets their seats in every session in
+        // memory, as after logging out. Sign in with Apple's tokens are revoked first, as Apple requires.
         app.MapPost("/auth/delete", async (HttpContext context, IUserService users, IGameSessionStore store,
             IHubContext<GameHub> hub, ITurnNotifier notifier, IDeviceTokenRepository devices, TimeProvider timeProvider,
-            AppleAccountTokens appleTokens) =>
+            AppleAccountTokens appleTokens, TvService tvs) =>
         {
             if (AuthSetup.GetSavedUserId(context.User) is not { } id)
             {
@@ -108,6 +109,7 @@ public static class AccountEndpoints
 
             await users.DeleteUserAsync(id);
             await devices.DeleteForUserAsync(GameHub.GetUserKey(context.User, ""));
+            await tvs.StopAsync(id);
             var guest = NewGuest();
             await TransferSeatsAsync(store, hub, notifier, context.User, guest, timeProvider.GetUtcNow());
             return Token(context, guest);

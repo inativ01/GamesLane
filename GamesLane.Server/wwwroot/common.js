@@ -95,6 +95,16 @@ const APP_SIGNIN_VERIFIER_KEY = "appSignInVerifier";
 const APP_SIGNIN_NAME_KEY = "appSignInName";
 const APP_SIGNIN_AUTHORIZATION_KEY = "appSignInAuthorization";
 
+// The code of a TV to pair, from the QR code the Apple TV app shows (/?tv=CODE). It is kept until the TV is paired, also
+// through logging in, and the profile dialog opens with it filled in (see setUpTvs).
+const PENDING_TV_KEY = "pendingTvCode";
+if (params.get("tv")) {
+    sessionStorage.setItem(PENDING_TV_KEY, params.get("tv"));
+    const url = new URL(location.href);
+    url.searchParams.delete("tv");
+    history.replaceState(null, "", url.pathname + url.search);
+}
+
 function loadToken() {
     let value = sessionStorage.getItem(TOKEN_KEY);
     if (value === null) {
@@ -228,7 +238,7 @@ const accountReady = (async () => {
     renderAccount();
     dispatchEvent(new Event(SETTINGS_EVENT));
     setUpFeedbackLink();
-    if (isNewExternalUser && account.signedIn) {
+    if (account.signedIn && (isNewExternalUser || sessionStorage.getItem(PENDING_TV_KEY))) {
         openProfileDialog();
     }
     return account;
@@ -321,6 +331,26 @@ const ready = accountReady.then(connect).then((ok) => {
     firstConnectDone = true;
     return ok;
 });
+
+// Watch on TV (see setUpTvs): the paired TV that shows the games this tab opens, for as long as the tab is open. Every
+// page links it again once connected, with the game it has open (a game page's session) or none, so the TV follows the
+// user from page to page. The TV is forgotten when the server refuses it or ends the link.
+const WATCH_TV_KEY = "watchOnTv";
+const pageSessionId = Object.values(GAME_PAGES).includes(location.pathname) ? params.get("session")?.toUpperCase() || null : null;
+
+async function linkTv() {
+    const tvId = sessionStorage.getItem(WATCH_TV_KEY);
+    if (!tvId || connection.state !== signalR.HubConnectionState.Connected) return;
+    try {
+        await connection.invoke("WatchOnTv", tvId, pageSessionId, language.code);
+    } catch {
+        sessionStorage.removeItem(WATCH_TV_KEY);
+    }
+}
+
+ready.then((ok) => ok && linkTv());
+addEventListener(RECONNECTED_EVENT, linkTv);
+connection.on("WatchOnTvEnded", () => sessionStorage.removeItem(WATCH_TV_KEY));
 
 // Anonymous visit counts (see the privacy policy, and VisitReport on the server), from the main screen and the games'
 // pages. Once a day (UTC) per browser: the visit, where it came from (a campaign's utm_source, another site, "invite"
@@ -433,6 +463,9 @@ function errorText(err) {
     const match = /HubException: (.*)$/.exec(err?.message ?? "");
     return match ? translateServerText(match[1]) : t("Something went wrong.");
 }
+
+// How long a game page waits for the server to give up the user's seats before going back to the main screen anyway.
+const LEAVE_WAIT_MS = 1500;
 
 async function call(method, ...args) {
     await ready;
@@ -658,17 +691,20 @@ function accountKindText(kind) {
 
 // The profile: the user's icon and display name (each changed with its own button), the chat and sound switches, and
 // the card style (see userSettings). Changes are kept only when saved. Saved users can also upload a picture as their
-// icon, and log out (to become a new guest, with a random name and icon); admins also get links to the admin and cards
-// pages. Guests see a button on top that opens logging in, creating an account (with the name and icon chosen below),
-// and signing in with an external provider. The new user keeps the seats the previous one held.
+// icon, pair TVs and watch their games on them (see setUpTvs), and log out (to become a new guest, with a random name
+// and icon); admins also get links to the admin and cards pages. Guests see a button on top that opens logging in,
+// creating an account (with the name and icon chosen below), and signing in with an external provider, already open
+// when they came to pair a TV. The new user keeps the seats the previous one held.
 function openProfileDialog() {
     const isGuest = account.kind === "Guest";
+    const pairingTv = Boolean(sessionStorage.getItem(PENDING_TV_KEY));
     const icons = account.uploadedIcon ? [account.uploadedIcon, ...account.icons] : account.icons;
     const dialog = createDialog(`
         <h2 class="profile-title">${t("Your profile")}</h2>
         ${isGuest ? `
         <section class="profile-guest">
             <p class="hint">${t("Playing as a guest. Log in or create an account to keep your profile, game order and game options on any device.")}</p>
+            ${pairingTv ? `<p class="hint">${t("Log in or create an account to pair the TV.")}</p>` : ""}
             <button type="button" class="secondary" data-show-login aria-expanded="false">${t("Log in or create account")}</button>
             <div class="profile-account" hidden>
                 <div class="tabs" role="tablist">
@@ -725,6 +761,17 @@ function openProfileDialog() {
             <div class="actions profile-actions"><button type="submit" disabled>${t("Save")}</button><button type="button" class="secondary" data-close>${t("Cancel")}</button></div>
         </form>
         ${isGuest ? "" : `
+        <section class="profile-section profile-tvs" data-tvs>
+            <h3>${t("TVs")}</h3>
+            <p class="hint">${t("Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.")}</p>
+            <ul class="tv-list" data-tv-list hidden></ul>
+            <p class="hint" data-tv-empty hidden>${t("No TVs paired yet.")}</p>
+            <form class="tv-pair" data-tv-pair>
+                <label>${t("TV code")} <input name="code" maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false" required></label>
+                <button type="submit" class="secondary">${t("Pair TV")}</button>
+            </form>
+            <p class="error" role="alert"></p>
+        </section>
         <div class="profile-footer">
             ${account.isAdmin ? '<span class="profile-admin"><a class="button secondary small" href="/admin.html">Admin page</a><a class="button secondary small" href="/cards.html">All cards</a></span>' : ""}
             <button type="button" class="secondary small" data-logout>${t("Log out")}</button>
@@ -800,7 +847,9 @@ function openProfileDialog() {
             showLogin.setAttribute("aria-expanded", String(!panel.hidden));
         });
         setUpLogin(dialog, () => ({ name: form.elements.name.value, icon: picker.value }));
+        if (pairingTv) showLogin.click();
     } else {
+        setUpTvs(dialog);
         dialog.querySelector("[data-logout]").addEventListener("click", () => {
             sessionStorage.setItem(PREVIOUS_TOKEN_KEY, token);
             saveToken("");
@@ -817,6 +866,98 @@ function openProfileDialog() {
     }
     dialog.addEventListener("close", () => dialog.remove());
     dialog.showModal();
+}
+
+// The profile's TVs: the TVs paired with the saved user, each with what it is for them now, Watch on TV (the games they
+// open in this tab show on it; one TV at a time, and a TV shows one user's games at a time) and Unpair; and pairing a TV
+// with the code it shows, filled in when the page was opened from the TV's QR code.
+function setUpTvs(dialog) {
+    const section = dialog.querySelector("[data-tvs]");
+    const list = section.querySelector("[data-tv-list]");
+    const empty = section.querySelector("[data-tv-empty]");
+    const form = section.querySelector("[data-tv-pair]");
+    const error = section.querySelector(".error");
+    const statusTexts = {
+        Offline: t("Not open"),
+        Available: t("Ready"),
+        InUse: t("Showing another player's games"),
+        Watching: t("Showing your games"),
+    };
+
+    async function show() {
+        const response = await authFetch("/api/tv").catch(() => null);
+        if (!response?.ok) {
+            error.textContent = t("Something went wrong.");
+            return;
+        }
+        const tvs = await response.json();
+        if (!tvs.some((tv) => tv.status === "Watching")) sessionStorage.removeItem(WATCH_TV_KEY);
+        list.replaceChildren(...tvs.map(tvItem));
+        list.hidden = tvs.length === 0;
+        empty.hidden = tvs.length > 0;
+    }
+
+    function tvItem(tv) {
+        const toggle = el("input");
+        toggle.type = "checkbox";
+        toggle.setAttribute("role", "switch");
+        toggle.checked = tv.status === "Watching";
+        toggle.disabled = tv.status === "Offline" || tv.status === "InUse";
+        toggle.addEventListener("change", () => watch(tv, toggle.checked));
+        const unpair = el("button", "secondary small", t("Unpair"));
+        unpair.type = "button";
+        unpair.addEventListener("click", () => remove(tv));
+        return el("li", "tv-item",
+            el("div", "tv-info", el("strong", null, `📺 ${tv.name}`), el("span", "tv-status", statusTexts[tv.status])),
+            el("label", "switch", el("span", null, t("Watch on TV")), toggle),
+            unpair);
+    }
+
+    async function watch(tv, on) {
+        error.textContent = "";
+        await ready;
+        try {
+            if (on) {
+                await connection.invoke("WatchOnTv", tv.tvId, pageSessionId, language.code);
+                sessionStorage.setItem(WATCH_TV_KEY, tv.tvId);
+            } else {
+                await connection.invoke("StopWatchOnTv");
+                sessionStorage.removeItem(WATCH_TV_KEY);
+            }
+        } catch (err) {
+            error.textContent = errorText(err);
+        }
+        await show();
+    }
+
+    async function remove(tv) {
+        if (!confirm(t("Unpair {name}?", { name: tv.name }))) return;
+        error.textContent = "";
+        const response = await authFetch(`/api/tv/${encodeURIComponent(tv.tvId)}`, { method: "DELETE" }).catch(() => null);
+        if (!response?.ok) error.textContent = t("Something went wrong.");
+        await show();
+    }
+
+    const pair = form.querySelector('[type="submit"]');
+    form.elements.code.value = sessionStorage.getItem(PENDING_TV_KEY) ?? "";
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        error.textContent = "";
+        withBusyButton(pair, t("Pairing…"), async () => {
+            const response = await postJson("/api/tv/pair", { code: form.elements.code.value }).catch(() => null);
+            if (!response?.ok) {
+                const body = await response?.json().catch(() => null);
+                error.textContent = body?.error ? translateServerText(body.error) : t("Something went wrong.");
+                return false;
+            }
+            sessionStorage.removeItem(PENDING_TV_KEY);
+            form.elements.code.value = "";
+            await show();
+            return false;
+        });
+    });
+    show();
+    if (form.elements.code.value) pair.focus();
 }
 
 // The feedback form: a problem, an idea or another comment, posted by the server as a public GitHub issue, with the
@@ -1166,7 +1307,7 @@ function startHelp() {
             localStorage.setItem(tipKey, "1");
             tip.hidden = false;
             setTimeout(() => { tip.hidden = true; }, 10000);
-        }, splashing ? Number(root.dataset.splashLength ?? 5000) + 600 : 1000);
+        }, splashing ? Number(root.dataset.splashLength ?? 2000) + 600 : 1000);
     }
 
     return {
@@ -1183,18 +1324,20 @@ function startHelp() {
 // the page does not show it again. The confetti is not shown with reduced motion; the fanfare still plays.
 const CONFETTI_COLORS = ["#e6a93c", "#c2561a", "#2f7d45", "#3f6fd8", "#c0281b", "#8a4fd8", "#f4efe6"];
 
+// On iPhones, GamesLane's sounds play as background sounds (mixed with music or a podcast already playing, which goes
+// on), so the silent switch mutes them.
+if (navigator.audioSession) {
+    try {
+        navigator.audioSession.type = "ambient";
+    } catch {
+        // Not supported on this browser.
+    }
+}
+
 // The fanfare is made by the browser, so no sound file is needed. Browsers only allow sound after the user has tapped
-// the page, so it is set up on each tap and resumed when the page is shown again; on iPhones it is played as media, so
-// the silent switch does not mute it.
+// the page, so it is set up on each tap and resumed when the page is shown again.
 let celebrationAudio = null;
 addEventListener("pointerdown", () => {
-    if (navigator.audioSession) {
-        try {
-            navigator.audioSession.type = "playback";
-        } catch {
-            // Not supported on this browser.
-        }
-    }
     try {
         celebrationAudio ??= new AudioContext();
         celebrationAudio.resume().catch(() => {});
@@ -1523,26 +1666,26 @@ const SUIT_SHAPES = {
     "♠": [["path", { d: "M50 3C34 28 6 42 6 64C6 78 17 86 29 86C37 86 44 82 47 75L40 97H60L53 75C56 82 63 86 71 86C83 86 94 78 94 64C94 42 66 28 50 3Z" }]],
 };
 
-// The ranks in the middle of a card as script letters, like the L in the logo: the centre line of each letter in a
-// 60 × 80 box, with swashes and curled ends, drawn as a road (a rim in the suit's color, black asphalt, a dashed
-// yellow centre line).
+// The ranks in the middle of a card as script letters in the style of French Script, slanted to the right, without
+// swashes: the centre line of each letter in a 60 × 80 box, drawn as a road (a rim in the suit's color, black asphalt,
+// a dashed yellow centre line).
 const ROAD_RANKS = {
-    A: "M3 64C-1 74 10 80 16 70C24 54 26 26 34 10C38 2 44 4 44 14C44 32 44 58 50 70C54 78 62 74 58 66M10 44C20 36 36 50 52 40C56 38 56 34 52 34",
-    2: "M14 24C6 22 8 6 24 4C40 2 52 14 42 30C34 42 16 52 10 70C22 62 34 76 50 68C58 64 56 56 50 58",
-    3: "M14 18C6 16 10 4 26 4C42 4 48 18 40 28C36 32 30 34 24 34C40 34 52 44 48 58C44 74 20 78 10 68C4 62 10 54 16 60",
-    4: "M52 76C44 76 42 68 42 60C42 42 44 22 46 6C34 18 20 34 6 50C18 46 38 50 54 44C60 42 60 36 54 36",
-    5: "M58 8C54 2 46 6 40 8C32 10 24 8 18 8C16 18 14 28 12 36C26 28 50 34 48 54C46 74 20 78 10 68C4 62 10 54 16 60",
-    6: "M50 12C54 6 46 0 36 2C18 6 10 26 10 44C10 64 22 76 34 74C48 72 50 54 40 46C30 38 16 44 14 54",
-    7: "M4 16C0 8 10 2 16 8C24 14 38 8 54 6C42 24 30 46 26 70C24 78 16 78 16 72C16 68 20 66 22 68",
-    8: "M34 40C14 34 10 8 28 4C44 0 50 24 30 40C12 52 12 76 30 74C50 72 52 48 34 40C46 36 58 38 58 46",
-    9: "M46 28C40 42 12 44 12 24C12 6 44 0 46 22C48 46 42 70 22 74C10 76 6 66 14 64",
-    10: "M2 20C6 14 12 10 16 4C14 28 14 54 12 70C10 78 2 76 4 70M42 6C24 8 24 72 40 74C58 76 58 4 42 6C50 4 58 6 60 12",
-    J: "M12 14C6 8 14 2 22 6C32 10 46 12 58 6M42 10C44 32 44 56 32 70C22 80 4 74 8 62C10 56 18 56 18 62",
-    Q: "M30 6C10 8 6 44 14 60C24 78 50 72 52 44C54 18 42 4 30 6ZM24 56C36 58 40 72 54 76C58 77 60 72 56 70",
-    K: "M18 6C16 26 16 52 14 72C12 80 4 76 6 70M54 6C58 2 52 0 48 6C38 18 28 34 18 44C30 46 34 60 42 72C46 78 56 78 58 70",
+    A: "M4 74C19 50 33 22 42 6C41 28 43 52 46 74M17 48C28 44 40 46 49 42",
+    2: "M16 22C20 10 31 4 41 6C52 8 54 22 43 34C33 46 16 58 4 72C19 66 28 71 39 68",
+    3: "M17 16C25 6 42 2 48 12C52 22 39 34 27 36C41 36 51 46 44 60C37 74 14 78 4 68",
+    4: "M33 76C37 56 43 30 51 6C36 22 18 38 4 52C18 50 36 50 52 48",
+    5: "M57 6C46 8 34 8 26 8C22 18 18 28 14 38C30 30 49 34 46 52C42 70 20 78 6 70",
+    6: "M52 10C46 2 29 4 20 18C12 32 8 52 11 64C15 76 35 76 42 62C48 48 38 40 28 42C17 44 12 52 10 58",
+    7: "M14 10C26 8 46 8 61 6C45 24 28 48 17 74",
+    8: "M34 40C15 34 16 8 35 4C52 0 53 24 30 40C10 52 5 76 23 74C44 72 50 48 34 40",
+    9: "M48 22C48 8 29 4 21 16C12 28 18 40 30 38C41 36 46 28 48 22C45 44 35 66 15 74",
+    10: "M11 26C16 20 21 12 24 6C18 30 12 54 7 76M48 6C40 6 32 28 30 42C26 60 27 76 34 76C41 76 47 58 51 40C55 22 55 6 48 6Z",
+    J: "M32 10C41 4 53 4 54 8C48 32 38 58 26 70C16 80 3 76 3 64",
+    Q: "M37 6C21 6 10 28 8 42C4 60 12 72 24 72C38 72 49 56 52 40C56 22 51 6 37 6ZM20 60C27 64 34 72 45 76",
+    K: "M25 6C20 28 14 52 5 74M57 6C44 20 29 34 15 44C27 44 33 56 39 74",
     // More ranks: 0 and 1, S (Skip, a circle crossed out) and R (Reverse, two curved arrows).
-    0: "M30 6C10 6 8 40 10 56C12 72 22 76 30 76C42 76 50 66 51 48C52 26 46 6 30 6C38 4 46 8 48 14",
-    1: "M12 22C22 18 30 12 38 4C36 28 36 52 34 72C32 80 22 78 24 72",
+    0: "M37 6C23 6 12 28 9 44C6 62 11 76 23 76C35 76 46 58 50 40C54 22 51 6 37 6Z",
+    1: "M22 20C29 16 36 10 43 4C36 28 30 52 23 76",
     S: "M30 12C14 12 6 26 6 40C6 56 18 68 30 68C46 68 54 54 54 40C54 24 44 12 30 12ZM13 58L47 22",
     R: "M10 36C10 18 24 10 42 12M34 3L43 12L34 21M50 44C50 62 36 70 18 68M26 59L17 68L26 77",
     // A big plus sign, in straight lines.
@@ -1833,11 +1976,6 @@ function fitScores() {
 
 addEventListener("resize", fitScores);
 
-// "👉 Your turn", in the line under the cards of the user's hand panel on its turn (the card games and Dominoes).
-function yourTurnTag() {
-    return el("span", "rp-your-turn", `👉 ${t("Your turn")}`);
-}
-
 // A landscape screen (as in styles.css), where the score row is in the game screen, at the top of the screen's end side.
 const landscapeScreen = matchMedia("(orientation: landscape)");
 
@@ -1846,13 +1984,19 @@ const landscapeScreen = matchMedia("(orientation: landscape)");
 // hands shrink together (--card-fit on the game screen, down to half their size) until it does.
 const shortLandscapeScreen = matchMedia("(orientation: landscape) and (max-height: 500px)");
 
+// The bottom of the room on the screen for the page's content: above the phone's home indicator (the body's bottom
+// padding in styles.css).
+function screenBottom() {
+    return innerHeight - parseFloat(getComputedStyle(document.body).paddingBottom);
+}
+
 function fitHandPanel() {
     const screen = $("game-screen");
     if (!screen) return;
     screen.style.removeProperty("--card-fit");
     const panel = screen.querySelector(".rp-hand, .domino-hand");
     if (!shortLandscapeScreen.matches || screen.hidden || !panel) return;
-    const fits = () => panel.getBoundingClientRect().bottom + scrollY <= innerHeight - 4;
+    const fits = () => panel.getBoundingClientRect().bottom + scrollY <= screenBottom() - 4;
     if (fits()) return;
     let low = 0.5;
     let high = 1;
@@ -2401,7 +2545,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
     // A seat tile: a big icon, the name, and a note such as "Seat 2 · You". The user's own seat is a button to leave
     // it; the empty seat is a button to sit there (the server gives the next available seat, which is this one). A user
     // already seated is asked first, as they then hold one more seat. In a public game, leaving a seat leaves the game,
-    // and the empty seat waits for players joining from the main screen.
+    // and no empty seat is shown: players join from the main screen, which the lobby's status says it waits for.
     function takeSeat() {
         if (view.mySeats.length > 0 && !confirm(t("You already have a seat. Take this seat too, to play for one more player on this device?"))) {
             return;
@@ -2583,9 +2727,12 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         if (taken < state.minSeats) {
             return t("Waiting for players ({taken}/{needed} needed)…", { taken, needed: state.minSeats });
         }
-        if (state.isPublic && !isHost(state)) {
+        if (state.isPublic) {
             const host = state.seats.find((s) => s && s.playerId === state.hostPlayerId);
-            return t("Waiting for {name} to start the game.", { name: host?.name ?? "" });
+            const more = nextSeat(state) >= 0;
+            return isHost(state) ? t(more ? "Start now, or wait for more players to join." : "Ready to start.")
+                : more ? t("Waiting for more players to join, or for {name} to start the game.", { name: host?.name ?? "" })
+                    : t("Waiting for {name} to start the game.", { name: host?.name ?? "" });
         }
         return t("Ready to start.");
     }
@@ -2634,7 +2781,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         if (inLobby) {
             $("lobby-status").textContent = [translateServerText(state.notice), lobbyStatus(state, taken)].filter(Boolean).join(" ");
             $("seat-count").textContent = `${taken} / ${state.maxSeats}`;
-            const next = nextSeat(state);
+            const next = state.isPublic ? -1 : nextSeat(state);
             $("seats").replaceChildren(...state.seats.flatMap((info, seat) => (info || seat === next ? [seatItem(state, seat)] : [])));
             $("lobby-options").hidden = state.optionList.length === 0;
             $("options-summary").replaceChildren(...optionsList(state));
@@ -2656,12 +2803,16 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         afterLobby = false;
         // Games mark their status with 👉 (the user has to act) or ⏳ (waiting for others). The marks only choose the
         // bar's color (gold or grey) and are not shown. A primary button shown in the game's .game-actions also turns the
-        // bar gold. When 👉 comes, the turn chime plays.
+        // bar gold. When 👉 comes, the turn chime plays. Only the status's text is changed, so elements in it (e.g. Final
+        // Card's colors) stay.
         const status = $("status");
         const myTurn = status.textContent.includes("👉");
         const mustAct = myTurn
             || [...$("game-screen").querySelectorAll(".game-actions button")].some((b) => !b.hidden && !b.classList.contains("secondary"));
-        status.textContent = status.textContent.replace(/[👉⏳]\uFE0F?\s*/gu, "").trim();
+        [...status.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE)
+            .forEach((node) => { node.textContent = node.textContent.replace(/[👉⏳]\uFE0F?\s*/gu, ""); });
+        if (status.firstChild?.nodeType === Node.TEXT_NODE) status.firstChild.textContent = status.firstChild.textContent.trimStart();
+        if (status.lastChild?.nodeType === Node.TEXT_NODE) status.lastChild.textContent = status.lastChild.textContent.trimEnd();
         $("status-bar").classList.toggle("act", mustAct);
         if (myTurn && wasActing === false && view.turnSound) {
             vibrateForTurn();
@@ -2676,10 +2827,7 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         showBusy(t("Opening the game…"));
         try {
             entry = await call("EnterSession", sessionId);
-        } catch (err) {
-            if (/You are no longer in this game\./.test(err?.message ?? "")) {
-                location.replace("/?left=1");
-            }
+        } catch {
             $("session").hidden = true;
             return;
         } finally {
@@ -2740,13 +2888,20 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         view.mySeats.forEach((seat) => act("LeaveSeat", seat));
     });
 
-    // Going back to the main screen gives up this user's seats.
+    // Going back to the main screen gives up this user's seats. The page waits for the server at most LEAVE_WAIT_MS (the
+    // connection may be broken without the page knowing yet, e.g. after the phone was locked); without an answer by then,
+    // the main screen gives them up instead (?leave=<code>, see home.js).
     document.querySelectorAll("[data-leave]").forEach((link) => {
         link.addEventListener("click", async (event) => {
             event.preventDefault();
+            if (leaving) return;
             leaving = true;
-            await call("LeaveSession", sessionId).catch(() => {});
-            location.href = link.href;
+            let left = false;
+            const leave = call("LeaveSession", sessionId).then(() => { left = true; }, () => {});
+            await Promise.race([leave, new Promise((resolve) => setTimeout(resolve, LEAVE_WAIT_MS))]);
+            const url = new URL(link.href);
+            if (!left) url.searchParams.set("leave", sessionId);
+            location.href = url.href;
         });
     });
 

@@ -125,6 +125,8 @@ TRANSLATIONS["zh-CN"] = {
     "Leave game": "离开游戏",
     "Creator": "创建者",
     "Waiting for {name} to start the game.": "正在等待 {name} 开始游戏。",
+    "Start now, or wait for more players to join.": "现在开始，或等待更多玩家加入。",
+    "Waiting for more players to join, or for {name} to start the game.": "正在等待更多玩家加入，或等待 {name} 开始游戏。",
     "The game's creator chooses the options.": "由游戏创建者选择选项。",
 
     // Shared: feedback
@@ -1095,4 +1097,32 @@ TRANSLATIONS["zh-CN"] = {
     "Unknown game.": "未知的游戏。",
     "Each game can be listed only once.": "每个游戏只能列出一次。",
     "Choose a card style.": "请选择纸牌样式。",
+
+    // TVs: pairing the Apple TV app, and Watch on TV
+    "TVs": "电视",
+    "Open GamesLane on a TV and pair it with the code it shows. Then turn on Watch on TV: the games you open in this tab also show on the TV.":
+        "请在电视上打开 GamesLane，并用电视上显示的代码配对。然后打开“在电视上观看”：您在此标签页中打开的游戏也会显示在电视上。",
+    "No TVs paired yet.": "尚未配对任何电视。",
+    "TV code": "电视代码",
+    "Pair TV": "配对电视",
+    "Pairing…": "正在配对…",
+    "Not open": "未打开",
+    "Ready": "就绪",
+    "Showing another player's games": "正在显示其他玩家的游戏",
+    "Showing your games": "正在显示您的游戏",
+    "Watch on TV": "在电视上观看",
+    "Unpair": "取消配对",
+    "Unpair {name}?": "要取消与 {name} 的配对吗？",
+    "Log in or create an account to pair the TV.": "请登录或创建账户以配对电视。",
+    "No TV shows this code. Check the code on the TV.": "没有电视显示此代码。请核对电视上的代码。",
+    "This TV is not paired with your account.": "此电视未与您的账户配对。",
+    "This TV is not open. Open GamesLane on the TV first.": "此电视未打开。请先在电视上打开 GamesLane。",
+    "This TV is showing another player's games.": "此电视正在显示其他玩家的游戏。",
+    "Create an account or sign in to watch your games on a TV.": "请创建账户或登录，以便在电视上观看您的游戏。",
+    // The Apple TV app
+    "Connecting…": "正在连接…",
+    "Scan the QR code with your phone, or enter this code in your GamesLane profile.": "请用手机扫描二维码，或在您的 GamesLane 个人资料中输入此代码。",
+    "Paired with {names}": "已与 {names} 配对",
+    "Waiting for {name} to open a game…": "正在等待 {name} 打开游戏…",
+    "This game cannot be shown on the TV yet.": "此游戏暂时还不能在电视上显示。",
 };

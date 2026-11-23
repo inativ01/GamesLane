@@ -130,7 +130,7 @@ function fitTrickTable() {
     if (!table || $("game-screen").hidden) return;
     table.classList.remove("names-above", "roomy", "icons-only");
     const below = document.querySelector("#game-screen .rp-hand") ?? table.closest(".rp-top");
-    const room = table.offsetHeight + innerHeight - 4 - (below.getBoundingClientRect().bottom + scrollY);
+    const room = table.offsetHeight + screenBottom() - 4 - (below.getBoundingClientRect().bottom + scrollY);
     const size = Math.max(16, Math.min(40, room / TRICK_CARD_HEIGHT, table.clientWidth / 8 / 2.6));
     const height = Math.max(TRICK_CARD_HEIGHT * size, Math.min(room, table.clientWidth));
     table.style.setProperty("--trick-card", `${size}px`);
@@ -149,7 +149,7 @@ addFitter(fitTrickTable);
 
 // One of the user's hands, in a box as in Rich man, poor man that glows while `myTurn`: its cards (sorted by the server;
 // while `active`, those `canPick(card)` allows are buttons calling `onPick(card)`, and the others are greyed; the
-// `chosen` ones are raised), and under them "Your turn" while `myTurn` and `foot` (e.g. buttons).
+// `chosen` ones are raised), and under them `foot` (e.g. buttons).
 function trickHand(state, view, hand, { myTurn = false, active = false, canPick = () => false, chosen = [], onPick = () => {}, foot = [] }) {
     const slots = hand.cards.map((card) => {
         const face = cardElement(card);
@@ -168,9 +168,8 @@ function trickHand(state, view, hand, { myTurn = false, active = false, canPick 
         return el("span", "rp-slot", button);
     });
     const panel = el("div", `my-hand rp-hand trick-hand${myTurn ? " my-turn" : ""}`, el("div", "card-row rp-cards", ...slots));
-    const bottom = [...(myTurn ? [yourTurnTag()] : []), ...foot];
-    if (bottom.length > 0) {
-        panel.append(el("div", "trick-hand-foot", ...bottom));
+    if (foot.length > 0) {
+        panel.append(el("div", "trick-hand-foot", ...foot));
     }
     return panel;
 }

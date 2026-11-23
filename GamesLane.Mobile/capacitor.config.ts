@@ -31,8 +31,9 @@ const config: CapacitorConfig = {
         // (ios/App/App/GamesLanePlugin.swift) or a Chrome Auth Tab (android/app/src/main/java/com/gameslane/app/GamesLanePlugin.java).
     },
     ios: {
-        // The site does not draw under the status bar or the home indicator.
-        contentInset: "always",
+        // The site fills the whole screen, so the splash screen reaches its edges; the pages keep clear of the status
+        // bar, the home indicator and the notch themselves (env(safe-area-inset-*) in styles.css).
+        contentInset: "never",
     },
 };
 

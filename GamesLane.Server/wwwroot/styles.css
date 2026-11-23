@@ -1,11 +1,5 @@
 /* Colors taken from the GamesLane logo: gold, orange and dark red on black. */
 :root {
-    --bg: #f5f1ea;
-    --surface: #ffffff;
-    --surface-soft: #efe7db;
-    --ink: #1f1a15;
-    --muted: #6b6258;
-    --line: #e3d9cb;
     --black: #0d0c0b;
     --blue: #19285d;
     --gold: #e6a93c;
@@ -15,9 +9,100 @@
     --primary-dark: #9f4413;
     --focus: #e6a93c;
     --radius: 12px;
-    --shadow: 0 1px 2px rgba(31, 26, 21, 0.08), 0 4px 14px rgba(31, 26, 21, 0.06);
     /* The bars' side padding: their content keeps to the screen's edges, on every page. */
     --bar-inset: 0.75rem;
+    color-scheme: light dark;
+}
+
+/* The page's colors, light unless the device is set to dark mode (below). The game pieces, boards and scorecards keep
+   these light colors in dark mode too. */
+:root,
+.cell,
+.table-top,
+.heist-card,
+.chip,
+.joker-panel,
+.redraw-panel,
+.rp-ranking,
+.rp-players li,
+.yz-die,
+.yz-card,
+.final-card-color,
+.final-card-color-choice,
+.final-card-named,
+.final-card-challenge,
+.final-card-close-taki,
+.yaniv-result-hand,
+button.yaniv-pass,
+.trick-player,
+.trick-claim-hand,
+.trick-result-row,
+.domino-train,
+.game-banner {
+    --bg: #f5f1ea;
+    --surface: #ffffff;
+    --surface-soft: #efe7db;
+    --ink: #1f1a15;
+    --muted: #6b6258;
+    --line: #e3d9cb;
+    --shadow: 0 1px 2px rgba(31, 26, 21, 0.08), 0 4px 14px rgba(31, 26, 21, 0.06);
+    /* A soft button's hover, a highlighted (chosen or the user's own) item, and its lighter version. */
+    --hover: #e5dacb;
+    --accent-soft: #fbe7d6;
+    --accent-softer: #fbe9d8;
+    --warm-soft: #fbf3e8;
+    /* Text boxes, an off switch, and a faint shade over the page. */
+    --field: #fff;
+    --track: #cfc5b7;
+    --tint: rgba(0, 0, 0, 0.06);
+    /* Links and the orange text on highlighted items; error texts. */
+    --link: var(--primary-dark);
+    --error-ink: var(--red);
+    /* Raised tiles (games, seats, the invite box), and the user's own. */
+    --raised: linear-gradient(180deg, #fff, #fbf6ee);
+    --raised-accent: linear-gradient(180deg, #fff, #fbe9d8);
+    --raised-warm: linear-gradient(180deg, #fff, #fbf1e4);
+    --chat-mine: #fbe9c6;
+    /* The status bar: grey while the user waits, gold when they have to act. */
+    --status-bg: linear-gradient(180deg, #e4e2df, #d6d3cf);
+    --status-line: #c4c0ba;
+    --status-ink: #4a4540;
+    --score-chip: rgba(255, 255, 255, 0.55);
+    --act-bg: linear-gradient(180deg, #fff1cc, #ffe2a1);
+    --act-ink: var(--primary-dark);
+    --act-flash: #ffc94d;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #15120f;
+        --surface: #221d19;
+        --surface-soft: #2d2722;
+        --ink: #ede7de;
+        --muted: #a99f93;
+        --line: #3b342d;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.3);
+        --hover: #3a322b;
+        --accent-soft: #43291a;
+        --accent-softer: #3a2619;
+        --warm-soft: #2a221b;
+        --field: #1a1613;
+        --track: #4d453e;
+        --tint: rgba(255, 255, 255, 0.08);
+        --link: #f2a66e;
+        --error-ink: #ff8a75;
+        --raised: linear-gradient(180deg, #2a241f, #221d19);
+        --raised-accent: linear-gradient(180deg, #2f241b, #3a2619);
+        --raised-warm: linear-gradient(180deg, #2a241f, #261f19);
+        --chat-mine: #4a3a1c;
+        --status-bg: linear-gradient(180deg, #2b2724, #221f1c);
+        --status-line: #3b342d;
+        --status-ink: #d6cec4;
+        --score-chip: rgba(255, 255, 255, 0.08);
+        --act-bg: linear-gradient(180deg, #4d3a12, #3e2d0b);
+        --act-ink: #ffd27a;
+        --act-flash: #7a5a14;
+    }
 }
 
 * {
@@ -34,8 +119,12 @@ html {
     touch-action: manipulation;
 }
 
+/* Pages draw under the phone's status bar (in the iPhone app; iOS keeps an installed web app below it), home indicator
+   and notch (viewport-fit=cover), so only the splash screen reaches the screen's edges: the page keeps clear of them at
+   the sides and bottom, and the header at the top. */
 body {
     margin: 0;
+    padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--ink);
@@ -64,7 +153,7 @@ h3 {
 }
 
 a {
-    color: var(--primary-dark);
+    color: var(--link);
 }
 
 button {
@@ -114,7 +203,7 @@ a.button.secondary {
 
 button.secondary:not(:disabled):hover,
 a.button.secondary:hover {
-    background: #e5dacb;
+    background: var(--hover);
 }
 
 button.small,
@@ -134,7 +223,7 @@ a.button.small {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 0.4rem var(--bar-inset);
+    padding: calc(0.4rem + env(safe-area-inset-top)) var(--bar-inset) 0.4rem;
     background: var(--blue);
     color: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
@@ -170,12 +259,19 @@ html.splashing .splash {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--black);
+    background: var(--splash-top);
     transition: opacity 0.5s;
 }
 
 html.splash-done .splash {
     opacity: 0;
+}
+
+/* In an installed web app, iOS keeps the page below the status bar and colors it after the page, so while the splash
+   screen shows it takes the color of the top of the portrait picture (--splash-top). */
+html.splashing {
+    --splash-top: #643d39;
+    background: var(--splash-top);
 }
 
 .splash picture {
@@ -320,7 +416,7 @@ button.help-tip:not(:disabled):hover {
 
 .language-menu button:not(:disabled):hover,
 .language-menu button[aria-pressed="true"] {
-    background: #fbe7d6;
+    background: var(--accent-soft);
 }
 
 .account {
@@ -420,7 +516,7 @@ button:not(.cell):disabled {
     margin-bottom: 1rem;
     padding: 0.75rem;
     border-radius: var(--radius);
-    background: #fbf3e8;
+    background: var(--warm-soft);
     box-shadow: inset 0 0 0 1px var(--line);
 }
 
@@ -532,7 +628,7 @@ button.profile-edit {
 }
 
 button.profile-edit:not(:disabled):hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--tint);
     color: var(--ink);
 }
 
@@ -595,7 +691,7 @@ label.switch input {
     padding: 0;
     border: none;
     border-radius: 999px;
-    background: #cfc5b7;
+    background: var(--track);
     appearance: none;
     cursor: pointer;
     transition: background-color 0.15s;
@@ -651,7 +747,7 @@ label.card-style-choice {
 
 label.card-style-choice:has(input:checked) {
     border-color: var(--primary);
-    background: #fbe7d6;
+    background: var(--accent-soft);
 }
 
 label.card-style-choice:has(input:focus-visible) {
@@ -697,6 +793,66 @@ label.card-style-choice input {
     flex-wrap: wrap;
     gap: 0.4rem;
     margin-inline-end: auto;
+}
+
+/* The profile's TVs: each paired TV with its status, Watch on TV and Unpair, then the code field to pair one more. */
+.profile-tvs {
+    margin-top: 0.75rem;
+}
+
+.tv-list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tv-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius);
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.tv-info {
+    display: grid;
+    flex: 1;
+    min-width: 9rem;
+}
+
+.tv-status {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.tv-item label.switch {
+    border-bottom: none;
+}
+
+.tv-item label.switch:has(input:disabled) {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.tv-pair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.tv-pair label {
+    flex: 1;
+    min-width: 9rem;
+}
+
+.tv-pair input {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 /* External sign-in buttons, in each provider's colors with its logo. */
@@ -773,7 +929,7 @@ a.provider-button:not(.provider-discord, .provider-apple).is-busy::before {
 }
 
 .tabs button:not(:disabled):hover {
-    background: rgba(0, 0, 0, 0.05);
+    background: var(--tint);
 }
 
 .tabs button[aria-selected="true"] {
@@ -822,12 +978,12 @@ a.provider-button:not(.provider-discord, .provider-apple).is-busy::before {
 }
 
 .icon-choice:not(:disabled):hover {
-    background: #e5dacb;
+    background: var(--hover);
 }
 
 .icon-choice[aria-pressed="true"] {
     border-color: var(--primary);
-    background: #fbe7d6;
+    background: var(--accent-soft);
 }
 
 .upload input {
@@ -856,7 +1012,7 @@ input {
     padding: 0.6rem 0.75rem;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: #fff;
+    background: var(--field);
     color: var(--ink);
 }
 
@@ -911,7 +1067,7 @@ main.home {
     flex-direction: column;
     width: 100%;
     max-width: 960px;
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    padding-bottom: 0.75rem;
 }
 
 #home {
@@ -990,7 +1146,7 @@ main.home > footer {
 /* Short screens, such as a phone on its side: a slimmer top bar and tighter panels, so the menu fits. */
 @media (orientation: landscape) and (max-height: 500px) {
     body:has(> main.home) .top {
-        padding-top: 0.2rem;
+        padding-top: calc(0.2rem + env(safe-area-inset-top));
         padding-bottom: 0.2rem;
     }
 
@@ -1045,7 +1201,7 @@ main.home > footer {
     gap: 0.5rem;
     padding: 0.6rem 0.9rem;
     border-radius: var(--radius);
-    background: #fbe7d6;
+    background: var(--accent-soft);
     box-shadow: var(--shadow);
 }
 
@@ -1105,7 +1261,7 @@ main.home > footer {
 }
 
 .saved-expiry {
-    color: var(--red);
+    color: var(--error-ink);
     font-size: 0.92rem;
     font-weight: 700;
 }
@@ -1228,7 +1384,7 @@ main.home > footer {
     padding-block: 0.6rem;
     padding-inline: 0.6rem 0.9rem;
     border-radius: 18px;
-    background: linear-gradient(180deg, #fff, #fbf6ee);
+    background: var(--raised);
     color: var(--ink);
     font-weight: 400;
     text-align: start;
@@ -1236,7 +1392,7 @@ main.home > footer {
 }
 
 .game-tile:not(:disabled):hover {
-    background: linear-gradient(180deg, #fff, #fbe9d8);
+    background: var(--raised-accent);
     box-shadow: inset 0 0 0 2px var(--primary), var(--shadow);
 }
 
@@ -1277,8 +1433,8 @@ main.home > footer {
     justify-self: end;
     padding: 0.1rem 0.55rem;
     border-radius: 999px;
-    background: #fbe7d6;
-    color: var(--primary-dark);
+    background: var(--accent-soft);
+    color: var(--link);
     font-size: 0.8rem;
     font-weight: 700;
 }
@@ -1310,7 +1466,7 @@ textarea {
     padding: 0.6rem 0.75rem;
     border: 1px solid var(--line);
     border-radius: 10px;
-    background: #fff;
+    background: var(--field);
     color: var(--ink);
     resize: vertical;
 }
@@ -1584,6 +1740,12 @@ button.chat-button.flash {
     color: var(--ink);
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.35);
     text-align: start;
+    padding-right: env(safe-area-inset-right);
+}
+
+[dir="rtl"] .chat-panel {
+    padding-right: 0;
+    padding-left: env(safe-area-inset-left);
 }
 
 .chat-head {
@@ -1591,7 +1753,7 @@ button.chat-button.flash {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
-    padding: 0.6rem 0.8rem;
+    padding: calc(0.6rem + env(safe-area-inset-top)) 0.8rem 0.6rem;
     background: linear-gradient(135deg, var(--black), #3a1a10);
     color: #fff;
 }
@@ -1678,7 +1840,7 @@ button.chat-close:not(:disabled):hover {
 }
 
 .chat-message.mine .chat-text {
-    background: #fbe9c6;
+    background: var(--chat-mine);
 }
 
 .chat-meta {
@@ -1709,7 +1871,7 @@ button.chat-close:not(:disabled):hover {
 
 button.chat-toast {
     position: fixed;
-    top: 5.5rem;
+    top: calc(5.5rem + env(safe-area-inset-top));
     left: 50%;
     z-index: 19;
     display: flex;
@@ -1757,7 +1919,7 @@ button.chat-toast:not(:disabled):hover {
 }
 
 .help-section[open] > summary {
-    color: var(--primary-dark);
+    color: var(--link);
 }
 
 .help-section h4 {
@@ -1782,7 +1944,7 @@ button.chat-toast:not(:disabled):hover {
 }
 
 .help-more > summary {
-    color: var(--primary-dark);
+    color: var(--link);
     font-weight: 600;
     cursor: pointer;
 }
@@ -1805,14 +1967,14 @@ button.chat-toast span {
     justify-content: center;
     gap: 0.2rem 0.5rem;
     padding: 0.2rem var(--bar-inset);
-    background: linear-gradient(180deg, #e4e2df, #d6d3cf);
-    border-bottom: 1px solid #c4c0ba;
+    background: var(--status-bg);
+    border-bottom: 1px solid var(--status-line);
     text-align: center;
 }
 
 .status-bar .status {
     margin: 0;
-    color: #4a4540;
+    color: var(--status-ink);
     font-size: 1rem;
 }
 
@@ -1930,7 +2092,7 @@ main .score-chip .seat-label {
     gap: 0.35rem;
     padding: 0.1rem 0.6rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.55);
+    background: var(--score-chip);
 }
 
 .score-chip.acting {
@@ -1952,21 +2114,21 @@ main .score-chip .seat-label {
 
 /* When the user has to act (the status shows 👉): a gold bar with a larger text that pulses once. */
 .status-bar.act {
-    background: linear-gradient(180deg, #fff1cc, #ffe2a1);
+    background: var(--act-bg);
     border-bottom-color: var(--gold);
     box-shadow: inset 4px 0 0 var(--orange), inset -4px 0 0 var(--orange);
     animation: act-pulse 1.2s ease-out;
 }
 
 .status-bar.act .status {
-    color: var(--primary-dark);
+    color: var(--act-ink);
     font-size: 1.15rem;
     font-weight: 800;
 }
 
 @keyframes act-pulse {
     from {
-        background: #ffc94d;
+        background: var(--act-flash);
     }
 }
 
@@ -1986,7 +2148,7 @@ main .score-chip .seat-label {
     margin: 0.5rem 0;
     padding: 0.4rem 0.75rem;
     border-radius: var(--radius);
-    background: linear-gradient(180deg, #fff, #fbf1e4);
+    background: var(--raised-warm);
     box-shadow: inset 0 0 0 1px var(--line), var(--shadow);
 }
 
@@ -2128,7 +2290,7 @@ svg.card-suit {
 }
 
 /* The rank as a script road, as in the logo's L: a thick rim in the suit's color (in place of the logo's gold), black
-   asphalt with a dashed yellow centre line, and curled ends. */
+   asphalt with a dashed yellow centre line, and round ends. */
 .card-road {
     position: relative;
     width: 1.8em;
@@ -2154,6 +2316,30 @@ svg.card-suit {
 .card-road-text {
     position: relative;
     font-size: 1.4em;
+}
+
+/* A card in a hand that cannot be played (Final Card, Hearts, Spades): greyed and darker, but solid so the overlapping
+   cards do not show through it. On the GamesLane cards, the suit's large silhouette keeps its color, so the suit still
+   shows. */
+.card.unplayable.classic {
+    filter: grayscale(0.7) brightness(0.85);
+}
+
+.card.unplayable:not(.classic) {
+    background: linear-gradient(160deg, #d9d9d9 60%, #cfcac2);
+}
+
+.card.unplayable:not(.classic) > :not(.card-face),
+.card.unplayable:not(.classic) .card-face > :not(.card-silhouette) {
+    filter: grayscale(1) brightness(0.85);
+}
+
+.card.unplayable:not(.classic) .card-face > .card-road {
+    filter: grayscale(1) brightness(0.85) drop-shadow(0 0.03em 0.04em rgba(0, 0, 0, 0.4));
+}
+
+.card.unplayable .card-silhouette {
+    opacity: 0.35;
 }
 
 /* The back: the GamesLane card back picture. */
@@ -2677,7 +2863,7 @@ svg.card-suit {
 }
 
 .chip-button:not(:disabled):hover {
-    background: #e5dacb;
+    background: var(--hover);
 }
 
 /* Who holds the chip: their icon (and 🔒 for a locked chip). */
@@ -2707,7 +2893,7 @@ svg.card-suit {
 .chip-button.mine:disabled,
 .chip-button.mine:not(:disabled):hover {
     opacity: 1;
-    background: #fbe7d6;
+    background: var(--accent-soft);
     box-shadow: inset 0 0 0 2px var(--primary);
 }
 
@@ -2763,7 +2949,7 @@ button.ready-thumb {
 }
 
 button.ready-thumb:not(:disabled):hover {
-    background: #e5dacb;
+    background: var(--hover);
     filter: grayscale(0.4);
 }
 
@@ -2983,7 +3169,7 @@ button.ready-thumb.is-ready:not(:disabled):hover {
 }
 
 .decision-players .picked {
-    background: #fbe9d8;
+    background: var(--accent-softer);
     box-shadow: inset 0 0 0 2px var(--primary);
 }
 
@@ -2991,7 +3177,7 @@ button.ready-thumb.is-ready:not(:disabled):hover {
     padding: 0.35rem 0.5rem;
     border: 1px solid var(--line);
     border-radius: 8px;
-    background: #fff;
+    background: var(--field);
     font: inherit;
 }
 
@@ -3021,7 +3207,7 @@ button.ready-thumb.is-ready:not(:disabled):hover {
 }
 
 .hint.step {
-    color: var(--primary-dark);
+    color: var(--link);
     font-weight: 600;
 }
 
@@ -3286,8 +3472,8 @@ body:not(.observer) main.poker-heist .table-body .heist-card-new {
 .seat-count {
     padding: 0.1rem 0.6rem;
     border-radius: 999px;
-    background: #fbe7d6;
-    color: var(--primary-dark);
+    background: var(--accent-soft);
+    color: var(--link);
     font-size: 0.85rem;
     font-weight: 700;
 }
@@ -3311,7 +3497,7 @@ button.lobby-options {
 }
 
 button.lobby-options:not(:disabled):hover {
-    background: #e5dacb;
+    background: var(--hover);
     box-shadow: inset 0 0 0 2px var(--primary);
 }
 
@@ -3398,7 +3584,7 @@ button.lobby-options::after {
 }
 
 .option-choice:has(input:checked) {
-    background: #fbe9d8;
+    background: var(--accent-softer);
     box-shadow: inset 0 0 0 2px var(--primary);
 }
 
@@ -3535,7 +3721,7 @@ button.lobby-options::after {
     min-width: 0;
     padding: 0.8rem 0.5rem;
     border-radius: var(--radius);
-    background: linear-gradient(180deg, #fff, #fbf6ee);
+    background: var(--raised);
     color: var(--ink);
     font-weight: 400;
     text-align: center;
@@ -3543,7 +3729,7 @@ button.lobby-options::after {
 }
 
 button.seat:not(:disabled):hover {
-    background: linear-gradient(180deg, #fff, #fbe9d8);
+    background: var(--raised-accent);
     box-shadow: inset 0 0 0 2px var(--primary), var(--shadow);
 }
 
@@ -3552,7 +3738,7 @@ button.seat.empty:not(:disabled):hover {
 }
 
 .seat.mine {
-    background: linear-gradient(180deg, #fff, #fbe9d8);
+    background: var(--raised-accent);
     box-shadow: inset 0 0 0 2px var(--primary);
 }
 
@@ -3810,7 +3996,7 @@ button.danger:not(:disabled):hover {
 }
 
 .error {
-    color: var(--red);
+    color: var(--error-ink);
     min-height: 1.5em;
 }
 
@@ -4009,7 +4195,7 @@ a.button.is-busy {
 }
 
 .game-banner.small {
-    top: 5.5rem;
+    top: calc(5.5rem + env(safe-area-inset-top));
     padding: 0.5rem 1.4rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.95);
@@ -4291,7 +4477,7 @@ body.observer main.poker-heist .heist-card-name { font-size: 1em; }
 
 /* Short screens, such as a phone on its side: a slimmer header. */
 @media (max-height: 500px) {
-    .masthead .top { padding-top: 0.2rem; padding-bottom: 0.2rem; }
+    .masthead .top { padding-top: calc(0.2rem + env(safe-area-inset-top)); padding-bottom: 0.2rem; }
     .masthead .brand-name { height: 30px; }
     .masthead .language-button, .masthead button.help-button { width: 32px; height: 32px; }
     .session-bar { min-height: calc(30px + 0.4rem); padding-top: 0.1rem; padding-bottom: 0.1rem; }
@@ -4522,13 +4708,23 @@ main.rich-poor .my-hand .actions .rp-select {
     margin-inline-start: auto;
 }
 
-/* The user's turn: the hand's border glows and pulses, and the line under its cards says "Your turn". */
+/* The user's turn: the hand's background turns light gold, and its border glows and pulses. */
 main.rich-poor .my-hand.my-turn,
 main.yaniv .my-hand.my-turn,
 main.final-card .my-hand.my-turn,
 main.tricks .my-hand.my-turn {
+    background: #fdf0cf;
     box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(230, 169, 60, 0.75);
     animation: rp-turn-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@media (prefers-color-scheme: dark) {
+    main.rich-poor .my-hand.my-turn,
+    main.yaniv .my-hand.my-turn,
+    main.final-card .my-hand.my-turn,
+    main.tricks .my-hand.my-turn {
+        background: #47391a;
+    }
 }
 
 @keyframes rp-turn-pulse {
@@ -4544,21 +4740,6 @@ main.tricks .my-hand.my-turn {
     main.tricks .my-hand.my-turn {
         animation: none;
     }
-}
-
-.rp-your-turn {
-    padding: 0.1rem 0.6rem;
-    border-radius: 999px;
-    background: var(--gold);
-    color: var(--ink);
-    font-size: 1rem;
-    font-weight: 800;
-}
-
-/* "Your turn" starts the line under the cards, at its start, with the rest after it. */
-.trick-hand-foot:has(> .rp-your-turn),
-.yaniv-hand-foot:has(> .rp-your-turn) {
-    justify-content: flex-start;
 }
 
 /* The hand, from low to high left to right in every language. The cards overlap, each showing its top-left corner,
@@ -4917,7 +5098,7 @@ button.yz-roll span {
     position: absolute;
     inset-inline: 0;
     bottom: -1.35em;
-    color: var(--primary-dark);
+    color: var(--link);
     font-size: 0.75em;
     font-weight: 700;
 }
@@ -4991,6 +5172,7 @@ button.yz-roll span {
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: var(--shadow);
+    color: var(--ink);
     font-variant-numeric: tabular-nums;
 }
 
@@ -5139,11 +5321,75 @@ main.final-card {
     display: none;
 }
 
+/* The piles in the middle, and the other players on their right and left (see pileSides in final-card.js), in that
+   order in every language. */
 .final-card-piles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.6rem;
+    direction: ltr;
+}
+
+/* The lists of players fill the room beside the piles without taking any, so the table keeps its size. */
+.final-card-side {
+    position: relative;
+    align-self: stretch;
+}
+
+.final-card-side ol {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
+    font-size: 0.85rem;
+}
+
+.final-card-side.right ol {
+    align-items: flex-end;
+}
+
+.final-card-side li {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.6rem 1rem;
+    gap: 0.35rem;
+    max-width: 100%;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    color: #e9f2ea;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.final-card-side li.turn {
+    background: rgba(230, 169, 60, 0.35);
+    box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.final-card-piles.icons-only .final-card-side .seat-label-name {
+    display: none;
+}
+
+.final-card-piles.compact .final-card-side ol {
+    gap: 0.1rem;
+    font-size: 0.7rem;
+}
+
+.final-card-piles.compact .final-card-side li {
+    gap: 0.2rem;
+    padding: 0 0.35rem;
+}
+
+.final-card-piles.tight .final-card-side-mark {
+    display: none;
 }
 
 .final-card-pile-cards {
@@ -5211,10 +5457,26 @@ button.final-card-pile:disabled {
     color: var(--ink);
 }
 
-.final-card-color.red, .final-card-color-choice.red { background: #d62828; color: #fff; }
-.final-card-color.yellow, .final-card-color-choice.yellow { background: #e5a400; color: var(--ink); }
-.final-card-color.green, .final-card-color-choice.green { background: #23913a; color: #fff; }
-.final-card-color.blue, .final-card-color-choice.blue { background: #1d5bd6; color: #fff; }
+/* A color named in a sentence, with its suit (or a card's name): a label in that color. */
+.final-card-named {
+    padding: 0 0.35em;
+    border-radius: 0.4em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.final-card-color.red, .final-card-color-choice.red, .final-card-named.red { background: #d62828; color: #fff; }
+.final-card-color.yellow, .final-card-color-choice.yellow, .final-card-named.yellow { background: #e5a400; color: var(--ink); }
+.final-card-color.green, .final-card-color-choice.green, .final-card-named.green { background: #23913a; color: #fff; }
+.final-card-color.blue, .final-card-color-choice.blue, .final-card-named.blue { background: #1d5bd6; color: #fff; }
+
+/* The suit after a color's name, drawn as on the cards, in the text's color. */
+svg.final-card-suit {
+    width: 0.85em;
+    height: 0.85em;
+    fill: currentColor;
+    vertical-align: -0.1em;
+}
 
 .final-card-direction {
     font-size: 1.6rem;
@@ -5233,14 +5495,10 @@ button.final-card-pile:disabled {
     white-space: nowrap;
 }
 
-/* The hand: on the user's turn, the card drawn is outlined and the cards that cannot be played are greyed, but stay
-   solid so the overlapping cards do not show through them. */
+/* The hand: on the user's turn, the card drawn is outlined and the cards that cannot be played are greyed (see
+   .card.unplayable). */
 .final-card-hand .card.drawn {
     box-shadow: 0 0 0 3px var(--gold), 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.final-card-hand .card.unplayable {
-    filter: grayscale(0.7) brightness(0.85);
 }
 
 .final-card-colors {
@@ -5795,9 +6053,6 @@ button.domino-button {
     font-size: 0.75rem;
 }
 
-.trick-hand .card.unplayable {
-    filter: grayscale(0.7) brightness(0.85);
-}
 
 /* Spades: the bid under the hand, a number of tricks (or Nil) to choose and Bid. */
 .spades-bid {

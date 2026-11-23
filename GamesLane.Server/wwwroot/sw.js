@@ -29,7 +29,7 @@ function offlineTexts() {
 function offlinePage() {
     const { title, text, retry, rtl } = offlineTexts();
     const html = `<!DOCTYPE html>
-<html dir="${rtl ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html dir="${rtl ? "rtl" : "ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#19285d"><title>GamesLane</title>
 <style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f1ea;
 color:#222;font-family:system-ui,sans-serif;text-align:center}main{padding:1.5rem}h1{font-size:1.4rem;color:#9f4413}

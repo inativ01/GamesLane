@@ -8,7 +8,8 @@ using GamesLane.Server.Sessions;
 namespace GamesLane.Server.Tests;
 
 // Checks the translation files in wwwroot/lang against each other, the languages in i18n.js, the pages, the
-// translated privacy policies and help, the app manifest, the main screen's pictures, and the iPhone app's notifications.
+// translated privacy policies and help, the app manifest, the main screen's pictures and splash screen, the sounds, dark
+// mode, and the iPhone app's notifications.
 public partial class TranslationsTests
 {
     private static readonly string Wwwroot = FindWwwroot();
@@ -176,6 +177,26 @@ public partial class TranslationsTests
         Assert.Equal(LanguageCodes().Order(), offline.Order());
     }
 
+    // Every page draws to the screen's edges on a phone (under the status bar in the iPhone app, the home indicator and
+    // the notch), so the splash screen fills the screen; styles.css keeps the pages' content clear of them. The
+    // black-translucent status bar is not used: iOS draws a blur over it in an installed web app.
+    [Fact]
+    public void Every_page_draws_to_the_screen_edges()
+    {
+        foreach (var page in Directory.GetFiles(Wwwroot, "*.html"))
+        {
+            var html = File.ReadAllText(page);
+            Assert.Contains("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">", html);
+            Assert.DoesNotContain("apple-mobile-web-app-status-bar-style", html);
+        }
+
+        var styles = File.ReadAllText(Path.Combine(Wwwroot, "styles.css"));
+        foreach (var side in new[] { "top", "right", "bottom", "left" })
+        {
+            Assert.Contains($"env(safe-area-inset-{side})", styles);
+        }
+    }
+
     // The main screen's pictures (the splash screens, the GamesLane name and the games) are all in wwwroot/images.
     [Fact]
     public void Every_picture_on_the_main_screen_exists()
@@ -184,6 +205,62 @@ public partial class TranslationsTests
         Assert.Contains("images/splash-landscape.jpg", sources);
         Assert.Contains("images/splash-portrait.jpg", sources);
         Assert.All(sources, source => Assert.True(File.Exists(Path.Combine(Wwwroot, source)), $"{source} is missing."));
+    }
+
+    // The splash screen shows for 2 seconds when the app opens, and the GamesLane name in the top bar of every page goes
+    // straight to the main screen, without it.
+    [Fact]
+    public void The_splash_screen_is_short_and_the_gameslane_name_skips_it()
+    {
+        Assert.Contains("const length = 2000;", File.ReadAllText(Path.Combine(Wwwroot, "index.html")));
+        foreach (var page in Directory.GetFiles(Wwwroot, "*.html"))
+        {
+            var html = File.ReadAllText(page);
+            Assert.DoesNotContain("?splash", html);
+            Assert.All(Regex.Matches(html, @"<a href=""([^""]*)"" class=""brand""").Select(match => match.Groups[1].Value),
+                href => Assert.Equal("/", href));
+        }
+    }
+
+    // A game page that gets no answer in time when the user leaves for the main screen passes the game's code as ?leave,
+    // and the main screen gives up the seats itself; on the main screen, the GamesLane name closes the list of games.
+    [Fact]
+    public void Leaving_for_the_main_screen_always_gets_there()
+    {
+        var common = File.ReadAllText(Path.Combine(Wwwroot, "common.js"));
+        var home = File.ReadAllText(Path.Combine(Wwwroot, "home.js"));
+        Assert.Matches(@"const LEAVE_WAIT_MS = \d+;", common);
+        Assert.Contains("url.searchParams.set(\"leave\", sessionId);", common);
+        Assert.Contains("params.get(\"leave\")", home);
+        Assert.Contains("connection.invoke(\"LeaveSession\", leftSessionId)", home);
+        Assert.Contains("document.querySelector(\".brand\").addEventListener(\"click\"", home);
+    }
+
+    // On iPhones, the sounds play as background sounds: they do not stop music or a podcast that is playing.
+    [Fact]
+    public void Sounds_do_not_stop_other_audio()
+    {
+        Assert.Contains("navigator.audioSession.type = \"ambient\";", File.ReadAllText(Path.Combine(Wwwroot, "common.js")));
+        foreach (var script in Directory.GetFiles(Wwwroot, "*.js"))
+        {
+            Assert.DoesNotContain("\"playback\"", File.ReadAllText(script));
+        }
+    }
+
+    // Dark mode follows the device. The game pieces, boards and scorecards that keep the light colors are listed with
+    // :root in the palette's rule, and each of them is styled elsewhere in styles.css (so a renamed class is noticed).
+    [Fact]
+    public void Dark_mode_keeps_the_light_colors_only_for_existing_game_pieces()
+    {
+        var styles = File.ReadAllText(Path.Combine(Wwwroot, "styles.css"));
+        Assert.Contains("@media (prefers-color-scheme: dark) {", styles);
+
+        var palette = Regex.Match(styles, @"\n:root,\r?\n(.*?)\s*\{\r?\n\s*--bg:", RegexOptions.Singleline);
+        Assert.True(palette.Success, "The light palette's rule is missing.");
+        var selectors = palette.Groups[1].Value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        Assert.NotEmpty(selectors);
+        var rest = styles.Remove(palette.Index, palette.Length);
+        Assert.All(selectors, selector => Assert.Contains(selector, rest));
     }
 
     // The iPhone app's turn notifications take the game's name and "Your turn" from the site's translations.
