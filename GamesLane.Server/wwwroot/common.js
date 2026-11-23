@@ -2803,12 +2803,16 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         afterLobby = false;
         // Games mark their status with 👉 (the user has to act) or ⏳ (waiting for others). The marks only choose the
         // bar's color (gold or grey) and are not shown. A primary button shown in the game's .game-actions also turns the
-        // bar gold. When 👉 comes, the turn chime plays.
+        // bar gold. When 👉 comes, the turn chime plays. Only the status's text is changed, so elements in it (e.g. Final
+        // Card's colors) stay.
         const status = $("status");
         const myTurn = status.textContent.includes("👉");
         const mustAct = myTurn
             || [...$("game-screen").querySelectorAll(".game-actions button")].some((b) => !b.hidden && !b.classList.contains("secondary"));
-        status.textContent = status.textContent.replace(/[👉⏳]\uFE0F?\s*/gu, "").trim();
+        [...status.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE)
+            .forEach((node) => { node.textContent = node.textContent.replace(/[👉⏳]\uFE0F?\s*/gu, ""); });
+        if (status.firstChild?.nodeType === Node.TEXT_NODE) status.firstChild.textContent = status.firstChild.textContent.trimStart();
+        if (status.lastChild?.nodeType === Node.TEXT_NODE) status.lastChild.textContent = status.lastChild.textContent.trimEnd();
         $("status-bar").classList.toggle("act", mustAct);
         if (myTurn && wasActing === false && view.turnSound) {
             vibrateForTurn();

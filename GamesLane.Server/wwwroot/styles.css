@@ -30,6 +30,7 @@
 .yz-card,
 .final-card-color,
 .final-card-color-choice,
+.final-card-named,
 .final-card-challenge,
 .final-card-close-taki,
 .yaniv-result-hand,
@@ -5373,10 +5374,26 @@ button.final-card-pile:disabled {
     color: var(--ink);
 }
 
-.final-card-color.red, .final-card-color-choice.red { background: #d62828; color: #fff; }
-.final-card-color.yellow, .final-card-color-choice.yellow { background: #e5a400; color: var(--ink); }
-.final-card-color.green, .final-card-color-choice.green { background: #23913a; color: #fff; }
-.final-card-color.blue, .final-card-color-choice.blue { background: #1d5bd6; color: #fff; }
+/* A color named in a sentence, with its suit (or a card's name): a label in that color. */
+.final-card-named {
+    padding: 0 0.35em;
+    border-radius: 0.4em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.final-card-color.red, .final-card-color-choice.red, .final-card-named.red { background: #d62828; color: #fff; }
+.final-card-color.yellow, .final-card-color-choice.yellow, .final-card-named.yellow { background: #e5a400; color: var(--ink); }
+.final-card-color.green, .final-card-color-choice.green, .final-card-named.green { background: #23913a; color: #fff; }
+.final-card-color.blue, .final-card-color-choice.blue, .final-card-named.blue { background: #1d5bd6; color: #fff; }
+
+/* The suit after a color's name, drawn as on the cards, in the text's color. */
+svg.final-card-suit {
+    width: 0.85em;
+    height: 0.85em;
+    fill: currentColor;
+    vertical-align: -0.1em;
+}
 
 .final-card-direction {
     font-size: 1.6rem;

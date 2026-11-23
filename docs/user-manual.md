@@ -157,7 +157,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 - To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw). If the card can be played, play it or tap **Keep the card**.
 - **Final Card!** is always under your cards: one tap protects you and catches the others, when either applies.
 - **Challenge!** appears when you can challenge a Change Color +4, and **Close TAKI** during your TAKI.
-- The status bar shows the color to play and the direction (↻ or ↺).
+- The status bar shows the color to play, with its suit, and the direction (↻ or ↺). Wherever a color or a card is named, it shows with its suit, in that color (e.g. Red ♥ 7).
 
 ### Yaniv
 
@@ -291,7 +291,7 @@ The rules of each game, with its options, for reference.
 
 **Common rules (both styles)**
 
-- **The cards** come in four colors (red, yellow, green, blue), plus cards without a color. One card is turned up to start the discard pile; each hand is started by the next seat.
+- **The cards** come in four colors, each drawn with its suit (red ♥, yellow ♦, green ♣, blue ♠), plus cards without a color. One card is turned up to start the discard pile; each hand is started by the next seat.
 - **A turn:** play a card that matches the top of the discard pile by color, or by number or symbol, or a card without a color; or draw. You may draw even when you could play. When the draw pile runs out, the discard pile (except its top card) is shuffled into a new one.
 - **Action cards:**
   - **Stop:** the next player misses their turn.

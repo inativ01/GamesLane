@@ -34,13 +34,38 @@ function parseCard(text) {
     return { color: COLOR_LETTERS[text[0]], value: text.slice(1) };
 }
 
+// A color's name with its suit, e.g. "Red ♥" (the suit as text, not as an emoji).
+const colorText = (color) => `${t(color)} ${COLOR_SUITS[color[0]]}\uFE0E`;
+
+// A card's name, e.g. "Red ♥ 7" or "Change Color".
 function cardName(text) {
     const { color, value } = parseCard(text);
     if (color === "Wild") {
         return t(COLORLESS_NAMES[value]);
     }
-    return t("{color} {value}", { color: t(color), value: VALUE_NAMES[value] ? t(VALUE_NAMES[value]) : value });
+    return t("{color} {value}", { color: colorText(color), value: VALUE_NAMES[value] ? t(VALUE_NAMES[value]) : value });
 }
+
+// A text marked to be shown in a color (see showRichText): a color with its suit, or a card's name in its color.
+const marked = (color, text) => `\u0001${color}\u0002${text}\u0003`;
+const markedColor = (color) => marked(color, colorText(color));
+const markedCardName = (text) => (text[0] === "W" ? cardName(text) : marked(parseCard(text).color, cardName(text)));
+
+// Shows a text in an element, each marked part as a label in its color, with the suit drawn as on the cards.
+function showRichText(element, text) {
+    const parts = text.split(/\u0001(\w+)\u0002([^\u0003]*)\u0003/);
+    element.replaceChildren(...parts.flatMap((part, i) => {
+        if (i % 3 === 1) return [];
+        if (i % 3 === 0) return part ? [part] : [];
+        const color = parts[i - 1];
+        const suit = COLOR_SUITS[color[0]];
+        const [before, after] = part.split(`${suit}\uFE0E`);
+        return [el("span", `final-card-named ${color.toLowerCase()}`, before, suitShape(suit, "final-card-suit"), after)];
+    }));
+}
+
+// A color's name with its suit drawn as on the cards, for the color to play and the color choices.
+const colorLabel = (color) => [t(color), " ", suitShape(COLOR_SUITS[color[0]], "final-card-suit")];
 
 // Whether playing a card needs a color chosen: a Change Color, a Change Color +4, or a Rainbow TAKI after a Crown.
 function choosesColor(game, text) {
@@ -98,7 +123,7 @@ function statusText(game, state, view) {
     }
     const action = game.canChallenge ? t("Challenge the Change Color +4, or draw {n} cards", { n: game.pendingDraw })
         : game.threeBy !== null ? t("Answer the +3 with a +3 Breaker or a Crown, or draw 3 cards")
-        : game.takiColor ? t("Play more {color} cards, or close the TAKI", { color: t(game.takiColor) })
+        : game.takiColor ? t("Play more {color} cards, or close the TAKI", { color: markedColor(game.takiColor) })
         : game.pendingDraw > 0 && game.style === "Israeli" ? t("Stack a +2 or play a Crown, or draw {n} cards", { n: game.pendingDraw })
         : game.pendingDraw > 0 ? t("Stack a draw card, or draw {n} cards", { n: game.pendingDraw })
         : game.hasDrawn ? t("Play the card you drew, or keep it")
@@ -112,11 +137,11 @@ function eventText(game, state, view, e) {
     const say = (you, other, values = {}) => about(state, view, e.seat, you, other, values);
     switch (e.kind) {
         case "TurnedUp":
-            return t("{card} is turned up.", { card: cardName(e.card) });
+            return t("{card} is turned up.", { card: markedCardName(e.card) });
         case "Played":
             return e.color
-                ? say("You played {card} and chose {color}.", "{name} played {card} and chose {color}.", { card: cardName(e.card), color: t(e.color) })
-                : say("You played {card}.", "{name} played {card}.", { card: cardName(e.card) });
+                ? say("You played {card} and chose {color}.", "{name} played {card} and chose {color}.", { card: markedCardName(e.card), color: markedColor(e.color) })
+                : say("You played {card}.", "{name} played {card}.", { card: markedCardName(e.card) });
         case "Drew":
             return e.count === 0 ? t("There are no cards left to draw.")
                 : e.count === 1 ? say("You drew a card.", "{name} drew a card.")
@@ -217,9 +242,9 @@ function showDraw(view) {
     drawnBy = null;
 }
 
-// In the status bar, on the right: the color to play (any card after a Crown) and the direction of play.
+// In the status bar, on the right: the color to play with its suit (any card after a Crown) and the direction of play.
 function renderPlay(game) {
-    const color = el("span", `final-card-color ${game.anyCard ? "any" : game.color.toLowerCase()}`, game.anyCard ? t("Any card") : t(game.color));
+    const color = el("span", `final-card-color ${game.anyCard ? "any" : game.color.toLowerCase()}`, ...(game.anyCard ? [t("Any card")] : colorLabel(game.color)));
     color.title = t("Color to play");
     const direction = el("span", "final-card-direction", game.direction === 1 ? "↻" : "↺");
     direction.title = t(game.direction === 1 ? "Play goes in seat order" : "Play goes in reverse seat order");
@@ -309,7 +334,7 @@ function handPanel(game, state, view, hand) {
     if (choosing) {
         panel.append(el("p", "hint", t("Choose the color to play:")));
         const colors = el("div", "actions final-card-colors", ...COLORS.map((color) => {
-            const b = el("button", `final-card-color-choice ${color.toLowerCase()}`, t(color));
+            const b = el("button", `final-card-color-choice ${color.toLowerCase()}`, ...colorLabel(color));
             b.type = "button";
             b.addEventListener("click", () => {
                 picking = null;
@@ -328,7 +353,9 @@ function handPanel(game, state, view, hand) {
     }
 
     if (drawn) {
-        panel.append(el("p", "hint", t("You drew {card}. Play it, or keep it.", { card: cardName(drawn) })));
+        const hint = el("p", "hint");
+        showRichText(hint, t("You drew {card}. Play it, or keep it.", { card: markedCardName(drawn) }));
+        panel.append(hint);
     }
     if (breaking) {
         panel.append(el("p", "hint", t("You can answer the +3 with your +3 Breaker.")));
@@ -373,13 +400,13 @@ const page = startSessionPage("FinalCard", (game, state, view) => {
     if (game.phase !== "Playing") {
         picking = null;
     }
-    $("status").textContent = statusText(game, state, view);
+    showRichText($("status"), statusText(game, state, view));
     renderPlay(game);
     noticeSuccess(game, state, view);
     noticeShuffles(view, state, game.shuffles);
     noticeEvents(game, state, view);
     const message = game.events.map((e) => eventText(game, state, view, e)).filter(Boolean).join(" ");
-    $("final-card-message").textContent = message;
+    showRichText($("final-card-message"), message);
     $("final-card-message").hidden = !message;
     renderPiles(game, view);
     $("final-card-hands").replaceChildren(...(view.private?.hands ?? []).filter((h) => playerOf(game, h.seat))
