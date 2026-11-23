@@ -2318,6 +2318,30 @@ svg.card-suit {
     font-size: 1.4em;
 }
 
+/* A card in a hand that cannot be played (Final Card, Hearts, Spades): greyed and darker, but solid so the overlapping
+   cards do not show through it. On the GamesLane cards, the suit's large silhouette keeps its color, so the suit still
+   shows. */
+.card.unplayable.classic {
+    filter: grayscale(0.7) brightness(0.85);
+}
+
+.card.unplayable:not(.classic) {
+    background: linear-gradient(160deg, #d9d9d9 60%, #cfcac2);
+}
+
+.card.unplayable:not(.classic) > :not(.card-face),
+.card.unplayable:not(.classic) .card-face > :not(.card-silhouette) {
+    filter: grayscale(1) brightness(0.85);
+}
+
+.card.unplayable:not(.classic) .card-face > .card-road {
+    filter: grayscale(1) brightness(0.85) drop-shadow(0 0.03em 0.04em rgba(0, 0, 0, 0.4));
+}
+
+.card.unplayable .card-silhouette {
+    opacity: 0.35;
+}
+
 /* The back: the GamesLane card back picture. */
 .card.empty {
     background: url("images/card-back.png") center / cover no-repeat;
@@ -5406,14 +5430,10 @@ svg.final-card-suit {
     white-space: nowrap;
 }
 
-/* The hand: on the user's turn, the card drawn is outlined and the cards that cannot be played are greyed, but stay
-   solid so the overlapping cards do not show through them. */
+/* The hand: on the user's turn, the card drawn is outlined and the cards that cannot be played are greyed (see
+   .card.unplayable). */
 .final-card-hand .card.drawn {
     box-shadow: 0 0 0 3px var(--gold), 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.final-card-hand .card.unplayable {
-    filter: grayscale(0.7) brightness(0.85);
 }
 
 .final-card-colors {
@@ -5968,9 +5988,6 @@ button.domino-button {
     font-size: 0.75rem;
 }
 
-.trick-hand .card.unplayable {
-    filter: grayscale(0.7) brightness(0.85);
-}
 
 /* Spades: the bid under the hand, a number of tricks (or Nil) to choose and Bid. */
 .spades-bid {

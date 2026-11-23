@@ -153,7 +153,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 
 ### Final Card
 
-- On your turn, your hand's box turns light gold with a glowing border. Tap a card to play it; the cards you cannot play are greyed. A Change Color asks for the color.
+- On your turn, your hand's box turns light gold with a glowing border. Tap a card to play it; the cards you cannot play are greyed, with only the large suit shape in the middle keeping its color. A Change Color asks for the color.
 - To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw), orange whenever you can draw. If the card can be played, play it or tap **Keep the card**.
 - **Final Card!** is always under your cards: one tap protects you and catches the others, when either applies.
 - **Challenge!** appears when you can challenge a Change Color +4, and **Close TAKI** during your TAKI.
