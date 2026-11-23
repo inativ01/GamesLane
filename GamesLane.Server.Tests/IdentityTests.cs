@@ -862,6 +862,26 @@ public class IdentityTests
         Assert.Empty(AdminUsers.From(new ConfigurationBuilder().Build()).Ids);
     }
 
+    [Fact]
+    public void Only_admins_can_start_Spades_and_Dominoes()
+    {
+        var admins = new AdminUsers([SavedId]);
+        var admin = AuthSetup.CreateUser(SavedId.ToString(), "Ada", "🦊", AuthSetup.RegisteredKind);
+        var other = AuthSetup.CreateUser(Guid.Parse("1f2e3d4c-5b6a-4978-8a9b-0c1d2e3f4a5b").ToString(), "Bob", "🐼", AuthSetup.Google);
+        var guest = AuthSetup.CreateUser($"guest:{SavedId:N}", "Guest", "🐼", AuthSetup.GuestKind);
+
+        Assert.Equal([GameType.Spades, GameType.Dominoes], AdminUsers.AdminOnlyGames.Order());
+        foreach (var gameType in AdminUsers.AdminOnlyGames)
+        {
+            Assert.True(admins.CanStart(admin, gameType));
+            Assert.False(admins.CanStart(other, gameType));
+            Assert.False(admins.CanStart(guest, gameType));
+        }
+
+        Assert.True(admins.CanStart(other, GameType.FinalCard));
+        Assert.True(admins.CanStart(guest, GameType.Hearts));
+    }
+
     // accountReady runs completeExternalSignIn as common.js loads; until its first await, it may read only constants
     // declared before accountReady (others are not initialized yet, and reading them throws).
     [Fact]
