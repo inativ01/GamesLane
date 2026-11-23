@@ -25,7 +25,6 @@
 .redraw-panel,
 .rp-ranking,
 .rp-players li,
-.rp-your-turn,
 .yz-die,
 .yz-card,
 .final-card-color,
@@ -4685,13 +4684,23 @@ main.rich-poor .my-hand .actions .rp-select {
     margin-inline-start: auto;
 }
 
-/* The user's turn: the hand's border glows and pulses, and the line under its cards says "Your turn". */
+/* The user's turn: the hand's background turns light gold, and its border glows and pulses. */
 main.rich-poor .my-hand.my-turn,
 main.yaniv .my-hand.my-turn,
 main.final-card .my-hand.my-turn,
 main.tricks .my-hand.my-turn {
+    background: #fdf0cf;
     box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(230, 169, 60, 0.75);
     animation: rp-turn-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@media (prefers-color-scheme: dark) {
+    main.rich-poor .my-hand.my-turn,
+    main.yaniv .my-hand.my-turn,
+    main.final-card .my-hand.my-turn,
+    main.tricks .my-hand.my-turn {
+        background: #47391a;
+    }
 }
 
 @keyframes rp-turn-pulse {
@@ -4707,21 +4716,6 @@ main.tricks .my-hand.my-turn {
     main.tricks .my-hand.my-turn {
         animation: none;
     }
-}
-
-.rp-your-turn {
-    padding: 0.1rem 0.6rem;
-    border-radius: 999px;
-    background: var(--gold);
-    color: var(--ink);
-    font-size: 1rem;
-    font-weight: 800;
-}
-
-/* "Your turn" starts the line under the cards, at its start, with the rest after it. */
-.trick-hand-foot:has(> .rp-your-turn),
-.yaniv-hand-foot:has(> .rp-your-turn) {
-    justify-content: flex-start;
 }
 
 /* The hand, from low to high left to right in every language. The cards overlap, each showing its top-left corner,

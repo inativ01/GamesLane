@@ -1971,11 +1971,6 @@ function fitScores() {
 
 addEventListener("resize", fitScores);
 
-// "👉 Your turn", in the line under the cards of the user's hand panel on its turn (the card games and Dominoes).
-function yourTurnTag() {
-    return el("span", "rp-your-turn", `👉 ${t("Your turn")}`);
-}
-
 // A landscape screen (as in styles.css), where the score row is in the game screen, at the top of the screen's end side.
 const landscapeScreen = matchMedia("(orientation: landscape)");
 

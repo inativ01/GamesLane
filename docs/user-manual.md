@@ -140,7 +140,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 ### Rich man, poor man
 
 - Tap cards of one number, then **Select** to throw them, or **Pass**. When you start a round, tapping a card picks all your cards of that number (tap a picked card to throw fewer); otherwise it picks as many as are needed.
-- When it is your turn, your hand glows and the status bar says what to do.
+- When it is your turn, your hand's box turns light gold with a glowing border, and the status bar says what to do.
 - In the exchange, the poorer player confirms with **Give these cards**; the richer player taps the cards to give, then **Give**.
 - During the exchange, a watcher can **Ask to join**; any player can **Accept** (choosing the newcomer's place) or **Decline**.
 - **Read throws aloud**, on a screen without a seat such as a TV, says each throw out loud.
@@ -153,8 +153,8 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 
 ### Final Card
 
-- On your turn, tap a card to play it; the cards you cannot play are greyed. A Change Color asks for the color.
-- To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw). If the card can be played, play it or tap **Keep the card**.
+- On your turn, your hand's box turns light gold with a glowing border. Tap a card to play it; the cards you cannot play are greyed. A Change Color asks for the color.
+- To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw), orange whenever you can draw. If the card can be played, play it or tap **Keep the card**.
 - **Final Card!** is always under your cards: one tap protects you and catches the others, when either applies.
 - **Challenge!** appears when you can challenge a Change Color +4, and **Close TAKI** during your TAKI.
 - The status bar shows the color to play, with its suit, and the direction (↻ or ↺). Wherever a color or a card is named, it shows with its suit, in that color (e.g. Red ♥ 7).

@@ -363,12 +363,10 @@ function handPanel(game, state, view, hand) {
     if (me.finished !== null) {
         panel.append(el("p", "hint", t("You finished in place {n}!", { n: me.finished })));
     }
-    if (myTurn) {
-        buttons.append(yourTurnTag());
-    }
     const toDraw = me.penaltyCards > 0 ? me.penaltyCards : !myTurn ? 1 : game.threeBy !== null ? 3 : game.pendingDraw;
-    const draw = button(drawText(toDraw), () => send("DrawCard", hand.seat), me.penaltyCards > 0 ? "" : "secondary");
-    draw.disabled = !canDraw(game, hand.seat);
+    const drawable = canDraw(game, hand.seat);
+    const draw = button(drawText(toDraw), () => send("DrawCard", hand.seat), drawable ? "" : "secondary");
+    draw.disabled = !drawable;
     if (drawn) {
         button(t("Keep the card"), () => send("PassAfterDraw", hand.seat), "secondary");
     }

@@ -195,7 +195,7 @@ function renderResult(game, state, view) {
 }
 
 // One of the user's hands: its tiles (on its turn, those it can play are buttons; the chosen one is raised), and under
-// them "Your turn" on its turn, with Draw or Pass when it cannot play.
+// them Draw or Pass on its turn when it cannot play.
 function handPanel(game, state, view, hand) {
     const myTurn = game.phase === "Playing" && game.turn === hand.seat;
     const playable = new Set(hand.moves.map((m) => m.tile));
@@ -214,7 +214,7 @@ function handPanel(game, state, view, hand) {
         return button;
     });
     const panel = el("div", `my-hand domino-hand${myTurn ? " my-turn" : ""}`, el("div", "domino-row", ...tiles));
-    const foot = myTurn ? [yourTurnTag()] : [];
+    const foot = [];
     if (myTurn && hand.canDraw) foot.push(trickButton(t("Draw a tile"), () => send("DrawTile", hand.seat)));
     if (myTurn && hand.canPass) foot.push(trickButton(t("Pass"), () => send("PassTurn", hand.seat), "secondary"));
     if (foot.length > 0) panel.append(el("div", "trick-hand-foot", ...foot));
