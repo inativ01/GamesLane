@@ -156,6 +156,7 @@ How to play each game on GamesLane. For the rules, see the [appendix](#appendix-
 - On your turn, your hand's box turns light gold with a glowing border. Tap a card to play it; the cards you cannot play are greyed, with only the large suit shape in the middle keeping its color. A Change Color asks for the color.
 - To draw, tap the draw pile or **Draw a card** (**Draw N cards** for cards you must draw), orange whenever you can draw. If the card can be played, play it or tap **Keep the card**.
 - **Final Card!** is always under your cards: one tap protects you and catches the others, when either applies.
+- Beside the piles: the other players and the cards each one holds (🛡 when protected), the player to play outlined. Up to 5 are on the right; with more, they are split between the right and the left. When a name does not fit, only the icons show.
 - **Challenge!** appears when you can challenge a Change Color +4, and **Close TAKI** during your TAKI.
 - The status bar shows the color to play, with its suit, and the direction (↻ or ↺). Wherever a color or a card is named, it shows with its suit, in that color (e.g. Red ♥ 7).
 

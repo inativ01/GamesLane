@@ -187,9 +187,51 @@ function canDraw(game, seat) {
         || (game.turn === seat && !game.hasDrawn && !game.waitingForPenalty && !game.takiColor));
 }
 
+// Beside the piles, the other players (not the user's own seats): each one's icon and name, 🛡 while protected and the
+// cards they hold (their place once finished in a pyramid), the player to play outlined. Up to 5 go on the right; with
+// more, they are split evenly between the right and the left.
+const SIDE_PLAYERS = 5;
+
+function pileSides(game, state, view) {
+    const items = game.players.filter((p) => !view.isMe(p.seat)).map((p) => {
+        const item = el("li", null, seatLabel(state, p.seat, view));
+        item.dir = "auto";
+        item.classList.toggle("turn", game.phase === "Playing" && game.turn === p.seat);
+        if (p.protected) item.append(el("span", null, "🛡"));
+        item.append(el("strong", null, el("span", "final-card-side-mark", p.finished !== null ? "🏁 " : "🂠 "),
+            String(p.finished ?? p.cardCount)));
+        return item;
+    });
+    const right = items.length > SIDE_PLAYERS ? Math.ceil(items.length / 2) : items.length;
+    const side = (className, list) => el("div", `final-card-side ${className}`, el("ol", null, ...list));
+    return [side("left", items.slice(right)), side("right", items.slice(0, right))];
+}
+
+// The lists beside the piles take no room of their own, so the table keeps its size: when a name does not fit, every
+// line shows only the icon; when the lines still do not fit, they are smaller; and on the narrowest screens, without the
+// 🂠 before the number.
+function fitPileSides() {
+    const piles = $("final-card-piles");
+    piles.classList.remove("icons-only", "compact", "tight");
+    const lists = [...piles.querySelectorAll(".final-card-side ol")];
+    const cut = (selector) => lists.some((list) => [...list.querySelectorAll(selector)]
+        .some((element) => element.scrollWidth > element.clientWidth + 1));
+    if (cut("li, .seat-label-name")) {
+        piles.classList.add("icons-only");
+    }
+    if (cut("li") || lists.some((list) => list.scrollHeight > list.clientHeight + 1)) {
+        piles.classList.add("compact");
+    }
+    if (cut("li")) {
+        piles.classList.add("tight");
+    }
+}
+
+new ResizeObserver(fitPileSides).observe($("final-card-piles"));
+
 // The top of the table, for everyone, centered: the closed pile (face down, with its count; tap it to draw) and the open
-// pile.
-function renderPiles(game, view) {
+// pile, with the other players beside them (see pileSides).
+function renderPiles(game, state, view) {
     const pile = (face, label, title) => {
         const button = el("button", "final-card-pile", face, el("span", "final-card-pile-label", label));
         button.type = "button";
@@ -205,7 +247,9 @@ function renderPiles(game, view) {
     const open = pile(top, t("Open pile"), cardName(game.topCard));
     open.disabled = true;
     const from = played.at > -Infinity ? seatSpot(view, played.seat, "final-card-hands", "final-card-players") : null;
-    $("final-card-piles").replaceChildren(el("div", "final-card-pile-cards", closed, open));
+    const [left, right] = pileSides(game, state, view);
+    $("final-card-piles").replaceChildren(left, el("div", "final-card-pile-cards", closed, open), right);
+    fitPileSides();
     const age = animationAge(played.at, 450);
     if (age !== null) flyFrom(top, from, age);
 }
@@ -406,7 +450,7 @@ const page = startSessionPage("FinalCard", (game, state, view) => {
     const message = game.events.map((e) => eventText(game, state, view, e)).filter(Boolean).join(" ");
     showRichText($("final-card-message"), message);
     $("final-card-message").hidden = !message;
-    renderPiles(game, view);
+    renderPiles(game, state, view);
     $("final-card-hands").replaceChildren(...(view.private?.hands ?? []).filter((h) => playerOf(game, h.seat))
         .map((hand) => handPanel(game, state, view, hand)));
     const shown = !view.isPlayer || tableShown();

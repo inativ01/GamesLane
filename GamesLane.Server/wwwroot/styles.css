@@ -5320,11 +5320,75 @@ main.final-card {
     display: none;
 }
 
+/* The piles in the middle, and the other players on their right and left (see pileSides in final-card.js), in that
+   order in every language. */
 .final-card-piles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.6rem;
+    direction: ltr;
+}
+
+/* The lists of players fill the room beside the piles without taking any, so the table keeps its size. */
+.final-card-side {
+    position: relative;
+    align-self: stretch;
+}
+
+.final-card-side ol {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
+    font-size: 0.85rem;
+}
+
+.final-card-side.right ol {
+    align-items: flex-end;
+}
+
+.final-card-side li {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.6rem 1rem;
+    gap: 0.35rem;
+    max-width: 100%;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    color: #e9f2ea;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.final-card-side li.turn {
+    background: rgba(230, 169, 60, 0.35);
+    box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.final-card-piles.icons-only .final-card-side .seat-label-name {
+    display: none;
+}
+
+.final-card-piles.compact .final-card-side ol {
+    gap: 0.1rem;
+    font-size: 0.7rem;
+}
+
+.final-card-piles.compact .final-card-side li {
+    gap: 0.2rem;
+    padding: 0 0.35rem;
+}
+
+.final-card-piles.tight .final-card-side-mark {
+    display: none;
 }
 
 .final-card-pile-cards {
