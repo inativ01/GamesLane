@@ -20,7 +20,7 @@ It is a complete reimplementation of the original [GamesLane](https://github.com
 
 - [User manual](docs/user-manual.md): how to play, sessions and seats, and the rules of every game.
 - [Developer guide](docs/developer-guide.md): architecture, project structure, the hub API, database, setup, deployment and project status.
-- [App Store submission](docs/app-store.md): the iPhone app's listing, privacy answers, age rating and review notes.
+- [App Store submission](docs/app-store.md): the iPhone and Apple TV apps' listings, privacy answers, age rating and review notes.
 - [Google Play submission](docs/play-store.md): setting up Google Play and Firebase, and the Android app's listing, Data safety answers, content rating and review notes.
 
 ## Tech stack
