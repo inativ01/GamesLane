@@ -34,7 +34,7 @@ Apple TV (see [Apple TV](#apple-tv)):
 
 - [ ] The Apple TV checks in the developer guide's [Apple TV app](developer-guide.md#apple-tv-app) (pairing from a phone, Watch on TV, on a real Apple TV).
 - [ ] The Apple TV app's privacy manifest added (it has none yet).
-- [ ] The tvOS platform added to the app, a TestFlight build from Xcode Cloud (its own workflow), tested on an Apple TV.
+- [ ] The tvOS platform added to the app, and a TestFlight build from the Apple TV's Xcode Cloud workflow (already created) tested on an Apple TV.
 - [ ] The App Privacy answers updated with the TV's data, before the first tvOS review (they apply to both platforms).
 - [ ] A review account created and filled in under App Review Information (pairing a TV needs an account).
 - [ ] Apple TV screenshots, then the tvOS version page filled in, then **Add for Review**.
@@ -112,7 +112,7 @@ board games,card games,backgammon,hearts,spades,dominoes,yaniv,family,multiplaye
 
 The Apple TV app shows the games its paired user opens, as someone watching (the table, never anyone's hidden cards); it is played from phones and computers, not on the TV. See the developer guide's [Apple TV app](developer-guide.md#apple-tv-app).
 
-**Adding the platform:** App Store Connect → the GamesLane app → the **+** next to the platforms in the sidebar → **tvOS**, which creates the tvOS version page (1.0). Builds come from `GamesLane.tvOS/GamesLane.xcodeproj` (`MARKETING_VERSION` 1.0, its own version, raised for each Apple TV release): in Xcode, **Integrate → Create Workflow** for that project (archive for tvOS, TestFlight internal testing), built for production (`GAMESLANE_SERVER` not set). The app's `Info.plist` already declares no non-exempt encryption.
+**Adding the platform:** App Store Connect → the GamesLane app → the **+** next to the platforms in the sidebar → **tvOS**, which creates the tvOS version page (1.0). Builds come from `GamesLane.tvOS/GamesLane.xcodeproj` (`MARKETING_VERSION` 1.0, its own version, raised for each Apple TV release), through the Xcode Cloud workflow for that project, which exists (archive for tvOS, TestFlight internal testing), built for production (`GAMESLANE_SERVER` not set). The app's `Info.plist` already declares no non-exempt encryption.
 
 **In the build already:** the layered app icon (400 × 240 and the App Store's 1280 × 768) and the top shelf images (1920 × 720 and wide 2320 × 720), in `GamesLane/Assets.xcassets/App Icon & Top Shelf Image.brandassets`. App Store Connect takes the App Store icon from the build.
 

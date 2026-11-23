@@ -593,7 +593,7 @@ The server is chosen when the app is built, as for the iPhone app, by `GAMESLANE
 
 **Still to do, in order:**
 1. Testing with the website: pairing from a phone's browser (QR code and typed code), Watch on TV across several games, a second user seeing the TV as in use, and the link ending 60 seconds after the TV or the user's pages close; on an Apple TV too (the layout, the sounds' volume).
-2. The App Store: the tvOS platform added to the app's App Store Connect record, the Apple TV screenshots (1920×1080), the privacy answers and manifest (the TV's name and its pairings), and review notes on pairing with the review account (all in [app-store.md](app-store.md#apple-tv), with the checklist under [Before submitting](app-store.md#before-submitting)); TestFlight through Xcode Cloud (a workflow for `GamesLane.tvOS/GamesLane.xcodeproj`).
+2. The App Store: the tvOS platform added to the app's App Store Connect record, the Apple TV screenshots (1920×1080), the privacy answers and manifest (the TV's name and its pairings), and review notes on pairing with the review account (all in [app-store.md](app-store.md#apple-tv), with the checklist under [Before submitting](app-store.md#before-submitting)); TestFlight through Xcode Cloud (the workflow for `GamesLane.tvOS/GamesLane.xcodeproj` is created).
 3. The other games, one at a time.
 
 ## Project status and external services
