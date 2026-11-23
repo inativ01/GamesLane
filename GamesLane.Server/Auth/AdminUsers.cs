@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using GamesLane.Server.Sessions;
 
 namespace GamesLane.Server.Auth;
 
@@ -25,4 +26,15 @@ public class AdminUsers(IEnumerable<Guid> ids)
     /// Whether the logged-in user is an admin.
     /// </summary>
     public bool IsAdmin(ClaimsPrincipal? user) => AuthSetup.GetSavedUserId(user) is { } id && Ids.Contains(id);
+
+    /// <summary>
+    /// The games only admins can find: they are not in the others' list of games, and only admins can start one or join
+    /// one as a public game. Anyone can join one by its code or invite link.
+    /// </summary>
+    public static IReadOnlySet<GameType> AdminOnlyGames { get; } = new HashSet<GameType> { GameType.Spades, GameType.Dominoes };
+
+    /// <summary>
+    /// Whether the logged-in user can start a game of this type, or join one as a public game.
+    /// </summary>
+    public bool CanStart(ClaimsPrincipal? user, GameType gameType) => !AdminOnlyGames.Contains(gameType) || IsAdmin(user);
 }

@@ -34,13 +34,38 @@ function parseCard(text) {
     return { color: COLOR_LETTERS[text[0]], value: text.slice(1) };
 }
 
+// A color's name with its suit, e.g. "Red ♥" (the suit as text, not as an emoji).
+const colorText = (color) => `${t(color)} ${COLOR_SUITS[color[0]]}\uFE0E`;
+
+// A card's name, e.g. "Red ♥ 7" or "Change Color".
 function cardName(text) {
     const { color, value } = parseCard(text);
     if (color === "Wild") {
         return t(COLORLESS_NAMES[value]);
     }
-    return t("{color} {value}", { color: t(color), value: VALUE_NAMES[value] ? t(VALUE_NAMES[value]) : value });
+    return t("{color} {value}", { color: colorText(color), value: VALUE_NAMES[value] ? t(VALUE_NAMES[value]) : value });
 }
+
+// A text marked to be shown in a color (see showRichText): a color with its suit, or a card's name in its color.
+const marked = (color, text) => `\u0001${color}\u0002${text}\u0003`;
+const markedColor = (color) => marked(color, colorText(color));
+const markedCardName = (text) => (text[0] === "W" ? cardName(text) : marked(parseCard(text).color, cardName(text)));
+
+// Shows a text in an element, each marked part as a label in its color, with the suit drawn as on the cards.
+function showRichText(element, text) {
+    const parts = text.split(/\u0001(\w+)\u0002([^\u0003]*)\u0003/);
+    element.replaceChildren(...parts.flatMap((part, i) => {
+        if (i % 3 === 1) return [];
+        if (i % 3 === 0) return part ? [part] : [];
+        const color = parts[i - 1];
+        const suit = COLOR_SUITS[color[0]];
+        const [before, after] = part.split(`${suit}\uFE0E`);
+        return [el("span", `final-card-named ${color.toLowerCase()}`, before, suitShape(suit, "final-card-suit"), after)];
+    }));
+}
+
+// A color's name with its suit drawn as on the cards, for the color to play and the color choices.
+const colorLabel = (color) => [t(color), " ", suitShape(COLOR_SUITS[color[0]], "final-card-suit")];
 
 // Whether playing a card needs a color chosen: a Change Color, a Change Color +4, or a Rainbow TAKI after a Crown.
 function choosesColor(game, text) {
@@ -98,7 +123,7 @@ function statusText(game, state, view) {
     }
     const action = game.canChallenge ? t("Challenge the Change Color +4, or draw {n} cards", { n: game.pendingDraw })
         : game.threeBy !== null ? t("Answer the +3 with a +3 Breaker or a Crown, or draw 3 cards")
-        : game.takiColor ? t("Play more {color} cards, or close the TAKI", { color: t(game.takiColor) })
+        : game.takiColor ? t("Play more {color} cards, or close the TAKI", { color: markedColor(game.takiColor) })
         : game.pendingDraw > 0 && game.style === "Israeli" ? t("Stack a +2 or play a Crown, or draw {n} cards", { n: game.pendingDraw })
         : game.pendingDraw > 0 ? t("Stack a draw card, or draw {n} cards", { n: game.pendingDraw })
         : game.hasDrawn ? t("Play the card you drew, or keep it")
@@ -112,11 +137,11 @@ function eventText(game, state, view, e) {
     const say = (you, other, values = {}) => about(state, view, e.seat, you, other, values);
     switch (e.kind) {
         case "TurnedUp":
-            return t("{card} is turned up.", { card: cardName(e.card) });
+            return t("{card} is turned up.", { card: markedCardName(e.card) });
         case "Played":
             return e.color
-                ? say("You played {card} and chose {color}.", "{name} played {card} and chose {color}.", { card: cardName(e.card), color: t(e.color) })
-                : say("You played {card}.", "{name} played {card}.", { card: cardName(e.card) });
+                ? say("You played {card} and chose {color}.", "{name} played {card} and chose {color}.", { card: markedCardName(e.card), color: markedColor(e.color) })
+                : say("You played {card}.", "{name} played {card}.", { card: markedCardName(e.card) });
         case "Drew":
             return e.count === 0 ? t("There are no cards left to draw.")
                 : e.count === 1 ? say("You drew a card.", "{name} drew a card.")
@@ -162,9 +187,51 @@ function canDraw(game, seat) {
         || (game.turn === seat && !game.hasDrawn && !game.waitingForPenalty && !game.takiColor));
 }
 
+// Beside the piles, the other players (not the user's own seats): each one's icon and name, 🛡 while protected and the
+// cards they hold (their place once finished in a pyramid), the player to play outlined. Up to 5 go on the right; with
+// more, they are split evenly between the right and the left.
+const SIDE_PLAYERS = 5;
+
+function pileSides(game, state, view) {
+    const items = game.players.filter((p) => !view.isMe(p.seat)).map((p) => {
+        const item = el("li", null, seatLabel(state, p.seat, view));
+        item.dir = "auto";
+        item.classList.toggle("turn", game.phase === "Playing" && game.turn === p.seat);
+        if (p.protected) item.append(el("span", null, "🛡"));
+        item.append(el("strong", null, el("span", "final-card-side-mark", p.finished !== null ? "🏁 " : "🂠 "),
+            String(p.finished ?? p.cardCount)));
+        return item;
+    });
+    const right = items.length > SIDE_PLAYERS ? Math.ceil(items.length / 2) : items.length;
+    const side = (className, list) => el("div", `final-card-side ${className}`, el("ol", null, ...list));
+    return [side("left", items.slice(right)), side("right", items.slice(0, right))];
+}
+
+// The lists beside the piles take no room of their own, so the table keeps its size: when a name does not fit, every
+// line shows only the icon; when the lines still do not fit, they are smaller; and on the narrowest screens, without the
+// 🂠 before the number.
+function fitPileSides() {
+    const piles = $("final-card-piles");
+    piles.classList.remove("icons-only", "compact", "tight");
+    const lists = [...piles.querySelectorAll(".final-card-side ol")];
+    const cut = (selector) => lists.some((list) => [...list.querySelectorAll(selector)]
+        .some((element) => element.scrollWidth > element.clientWidth + 1));
+    if (cut("li, .seat-label-name")) {
+        piles.classList.add("icons-only");
+    }
+    if (cut("li") || lists.some((list) => list.scrollHeight > list.clientHeight + 1)) {
+        piles.classList.add("compact");
+    }
+    if (cut("li")) {
+        piles.classList.add("tight");
+    }
+}
+
+new ResizeObserver(fitPileSides).observe($("final-card-piles"));
+
 // The top of the table, for everyone, centered: the closed pile (face down, with its count; tap it to draw) and the open
-// pile.
-function renderPiles(game, view) {
+// pile, with the other players beside them (see pileSides).
+function renderPiles(game, state, view) {
     const pile = (face, label, title) => {
         const button = el("button", "final-card-pile", face, el("span", "final-card-pile-label", label));
         button.type = "button";
@@ -180,7 +247,9 @@ function renderPiles(game, view) {
     const open = pile(top, t("Open pile"), cardName(game.topCard));
     open.disabled = true;
     const from = played.at > -Infinity ? seatSpot(view, played.seat, "final-card-hands", "final-card-players") : null;
-    $("final-card-piles").replaceChildren(el("div", "final-card-pile-cards", closed, open));
+    const [left, right] = pileSides(game, state, view);
+    $("final-card-piles").replaceChildren(left, el("div", "final-card-pile-cards", closed, open), right);
+    fitPileSides();
     const age = animationAge(played.at, 450);
     if (age !== null) flyFrom(top, from, age);
 }
@@ -217,9 +286,9 @@ function showDraw(view) {
     drawnBy = null;
 }
 
-// In the status bar, on the right: the color to play (any card after a Crown) and the direction of play.
+// In the status bar, on the right: the color to play with its suit (any card after a Crown) and the direction of play.
 function renderPlay(game) {
-    const color = el("span", `final-card-color ${game.anyCard ? "any" : game.color.toLowerCase()}`, game.anyCard ? t("Any card") : t(game.color));
+    const color = el("span", `final-card-color ${game.anyCard ? "any" : game.color.toLowerCase()}`, ...(game.anyCard ? [t("Any card")] : colorLabel(game.color)));
     color.title = t("Color to play");
     const direction = el("span", "final-card-direction", game.direction === 1 ? "↻" : "↺");
     direction.title = t(game.direction === 1 ? "Play goes in seat order" : "Play goes in reverse seat order");
@@ -309,7 +378,7 @@ function handPanel(game, state, view, hand) {
     if (choosing) {
         panel.append(el("p", "hint", t("Choose the color to play:")));
         const colors = el("div", "actions final-card-colors", ...COLORS.map((color) => {
-            const b = el("button", `final-card-color-choice ${color.toLowerCase()}`, t(color));
+            const b = el("button", `final-card-color-choice ${color.toLowerCase()}`, ...colorLabel(color));
             b.type = "button";
             b.addEventListener("click", () => {
                 picking = null;
@@ -328,7 +397,9 @@ function handPanel(game, state, view, hand) {
     }
 
     if (drawn) {
-        panel.append(el("p", "hint", t("You drew {card}. Play it, or keep it.", { card: cardName(drawn) })));
+        const hint = el("p", "hint");
+        showRichText(hint, t("You drew {card}. Play it, or keep it.", { card: markedCardName(drawn) }));
+        panel.append(hint);
     }
     if (breaking) {
         panel.append(el("p", "hint", t("You can answer the +3 with your +3 Breaker.")));
@@ -336,12 +407,10 @@ function handPanel(game, state, view, hand) {
     if (me.finished !== null) {
         panel.append(el("p", "hint", t("You finished in place {n}!", { n: me.finished })));
     }
-    if (myTurn) {
-        buttons.append(yourTurnTag());
-    }
     const toDraw = me.penaltyCards > 0 ? me.penaltyCards : !myTurn ? 1 : game.threeBy !== null ? 3 : game.pendingDraw;
-    const draw = button(drawText(toDraw), () => send("DrawCard", hand.seat), me.penaltyCards > 0 ? "" : "secondary");
-    draw.disabled = !canDraw(game, hand.seat);
+    const drawable = canDraw(game, hand.seat);
+    const draw = button(drawText(toDraw), () => send("DrawCard", hand.seat), drawable ? "" : "secondary");
+    draw.disabled = !drawable;
     if (drawn) {
         button(t("Keep the card"), () => send("PassAfterDraw", hand.seat), "secondary");
     }
@@ -373,15 +442,15 @@ const page = startSessionPage("FinalCard", (game, state, view) => {
     if (game.phase !== "Playing") {
         picking = null;
     }
-    $("status").textContent = statusText(game, state, view);
+    showRichText($("status"), statusText(game, state, view));
     renderPlay(game);
     noticeSuccess(game, state, view);
     noticeShuffles(view, state, game.shuffles);
     noticeEvents(game, state, view);
     const message = game.events.map((e) => eventText(game, state, view, e)).filter(Boolean).join(" ");
-    $("final-card-message").textContent = message;
+    showRichText($("final-card-message"), message);
     $("final-card-message").hidden = !message;
-    renderPiles(game, view);
+    renderPiles(game, state, view);
     $("final-card-hands").replaceChildren(...(view.private?.hands ?? []).filter((h) => playerOf(game, h.seat))
         .map((hand) => handPanel(game, state, view, hand)));
     const shown = !view.isPlayer || tableShown();

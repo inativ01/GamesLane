@@ -25,11 +25,11 @@
 .redraw-panel,
 .rp-ranking,
 .rp-players li,
-.rp-your-turn,
 .yz-die,
 .yz-card,
 .final-card-color,
 .final-card-color-choice,
+.final-card-named,
 .final-card-challenge,
 .final-card-close-taki,
 .yaniv-result-hand,
@@ -2290,7 +2290,7 @@ svg.card-suit {
 }
 
 /* The rank as a script road, as in the logo's L: a thick rim in the suit's color (in place of the logo's gold), black
-   asphalt with a dashed yellow centre line, and curled ends. */
+   asphalt with a dashed yellow centre line, and round ends. */
 .card-road {
     position: relative;
     width: 1.8em;
@@ -2316,6 +2316,30 @@ svg.card-suit {
 .card-road-text {
     position: relative;
     font-size: 1.4em;
+}
+
+/* A card in a hand that cannot be played (Final Card, Hearts, Spades): greyed and darker, but solid so the overlapping
+   cards do not show through it. On the GamesLane cards, the suit's large silhouette keeps its color, so the suit still
+   shows. */
+.card.unplayable.classic {
+    filter: grayscale(0.7) brightness(0.85);
+}
+
+.card.unplayable:not(.classic) {
+    background: linear-gradient(160deg, #d9d9d9 60%, #cfcac2);
+}
+
+.card.unplayable:not(.classic) > :not(.card-face),
+.card.unplayable:not(.classic) .card-face > :not(.card-silhouette) {
+    filter: grayscale(1) brightness(0.85);
+}
+
+.card.unplayable:not(.classic) .card-face > .card-road {
+    filter: grayscale(1) brightness(0.85) drop-shadow(0 0.03em 0.04em rgba(0, 0, 0, 0.4));
+}
+
+.card.unplayable .card-silhouette {
+    opacity: 0.35;
 }
 
 /* The back: the GamesLane card back picture. */
@@ -4684,13 +4708,23 @@ main.rich-poor .my-hand .actions .rp-select {
     margin-inline-start: auto;
 }
 
-/* The user's turn: the hand's border glows and pulses, and the line under its cards says "Your turn". */
+/* The user's turn: the hand's background turns light gold, and its border glows and pulses. */
 main.rich-poor .my-hand.my-turn,
 main.yaniv .my-hand.my-turn,
 main.final-card .my-hand.my-turn,
 main.tricks .my-hand.my-turn {
+    background: #fdf0cf;
     box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(230, 169, 60, 0.75);
     animation: rp-turn-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@media (prefers-color-scheme: dark) {
+    main.rich-poor .my-hand.my-turn,
+    main.yaniv .my-hand.my-turn,
+    main.final-card .my-hand.my-turn,
+    main.tricks .my-hand.my-turn {
+        background: #47391a;
+    }
 }
 
 @keyframes rp-turn-pulse {
@@ -4706,21 +4740,6 @@ main.tricks .my-hand.my-turn {
     main.tricks .my-hand.my-turn {
         animation: none;
     }
-}
-
-.rp-your-turn {
-    padding: 0.1rem 0.6rem;
-    border-radius: 999px;
-    background: var(--gold);
-    color: var(--ink);
-    font-size: 1rem;
-    font-weight: 800;
-}
-
-/* "Your turn" starts the line under the cards, at its start, with the rest after it. */
-.trick-hand-foot:has(> .rp-your-turn),
-.yaniv-hand-foot:has(> .rp-your-turn) {
-    justify-content: flex-start;
 }
 
 /* The hand, from low to high left to right in every language. The cards overlap, each showing its top-left corner,
@@ -5153,6 +5172,7 @@ button.yz-roll span {
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: var(--shadow);
+    color: var(--ink);
     font-variant-numeric: tabular-nums;
 }
 
@@ -5301,11 +5321,75 @@ main.final-card {
     display: none;
 }
 
+/* The piles in the middle, and the other players on their right and left (see pileSides in final-card.js), in that
+   order in every language. */
 .final-card-piles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.6rem;
+    direction: ltr;
+}
+
+/* The lists of players fill the room beside the piles without taking any, so the table keeps its size. */
+.final-card-side {
+    position: relative;
+    align-self: stretch;
+}
+
+.final-card-side ol {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
+    font-size: 0.85rem;
+}
+
+.final-card-side.right ol {
+    align-items: flex-end;
+}
+
+.final-card-side li {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.6rem 1rem;
+    gap: 0.35rem;
+    max-width: 100%;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.25);
+    color: #e9f2ea;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.final-card-side li.turn {
+    background: rgba(230, 169, 60, 0.35);
+    box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.final-card-piles.icons-only .final-card-side .seat-label-name {
+    display: none;
+}
+
+.final-card-piles.compact .final-card-side ol {
+    gap: 0.1rem;
+    font-size: 0.7rem;
+}
+
+.final-card-piles.compact .final-card-side li {
+    gap: 0.2rem;
+    padding: 0 0.35rem;
+}
+
+.final-card-piles.tight .final-card-side-mark {
+    display: none;
 }
 
 .final-card-pile-cards {
@@ -5373,10 +5457,26 @@ button.final-card-pile:disabled {
     color: var(--ink);
 }
 
-.final-card-color.red, .final-card-color-choice.red { background: #d62828; color: #fff; }
-.final-card-color.yellow, .final-card-color-choice.yellow { background: #e5a400; color: var(--ink); }
-.final-card-color.green, .final-card-color-choice.green { background: #23913a; color: #fff; }
-.final-card-color.blue, .final-card-color-choice.blue { background: #1d5bd6; color: #fff; }
+/* A color named in a sentence, with its suit (or a card's name): a label in that color. */
+.final-card-named {
+    padding: 0 0.35em;
+    border-radius: 0.4em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.final-card-color.red, .final-card-color-choice.red, .final-card-named.red { background: #d62828; color: #fff; }
+.final-card-color.yellow, .final-card-color-choice.yellow, .final-card-named.yellow { background: #e5a400; color: var(--ink); }
+.final-card-color.green, .final-card-color-choice.green, .final-card-named.green { background: #23913a; color: #fff; }
+.final-card-color.blue, .final-card-color-choice.blue, .final-card-named.blue { background: #1d5bd6; color: #fff; }
+
+/* The suit after a color's name, drawn as on the cards, in the text's color. */
+svg.final-card-suit {
+    width: 0.85em;
+    height: 0.85em;
+    fill: currentColor;
+    vertical-align: -0.1em;
+}
 
 .final-card-direction {
     font-size: 1.6rem;
@@ -5395,14 +5495,10 @@ button.final-card-pile:disabled {
     white-space: nowrap;
 }
 
-/* The hand: on the user's turn, the card drawn is outlined and the cards that cannot be played are greyed, but stay
-   solid so the overlapping cards do not show through them. */
+/* The hand: on the user's turn, the card drawn is outlined and the cards that cannot be played are greyed (see
+   .card.unplayable). */
 .final-card-hand .card.drawn {
     box-shadow: 0 0 0 3px var(--gold), 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.final-card-hand .card.unplayable {
-    filter: grayscale(0.7) brightness(0.85);
 }
 
 .final-card-colors {
@@ -5957,9 +6053,6 @@ button.domino-button {
     font-size: 0.75rem;
 }
 
-.trick-hand .card.unplayable {
-    filter: grayscale(0.7) brightness(0.85);
-}
 
 /* Spades: the bid under the hand, a number of tricks (or Nil) to choose and Bid. */
 .spades-bid {

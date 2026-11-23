@@ -18,7 +18,8 @@ namespace GamesLane.Server.Hubs;
 /// Players are logged-in users, identified by their user ID, so they keep their seats after a refresh or reconnect.
 /// Games created and players joining someone else's game are counted in <see cref="ActivityCounter"/>. After every
 /// change, <see cref="ITurnNotifier"/> notifies the iPhone app's users whose turn it has become. TVs (the Apple TV app)
-/// connect here too, and show the games of the user who links them (<see cref="TvService"/>).
+/// connect here too, and show the games of the user who links them (<see cref="TvService"/>). Only admins can start, or
+/// join as a public game, the <see cref="AdminUsers.AdminOnlyGames"/>.
 /// </summary>
 public class GameHub(
     IGameSessionStore store,
@@ -28,6 +29,7 @@ public class GameHub(
     ActivityCounter activity,
     ITurnNotifier notifier,
     TvService tvs,
+    AdminUsers admins,
     ILogger<GameHub> logger) : Hub, IGameHub
 {
     /// <summary>
@@ -144,7 +146,7 @@ public class GameHub(
     public async Task<string> CreateSession(GameType gameType, bool isPublic)
     {
         var profile = RequireProfile("Log in to start a game.");
-        if (!Enum.IsDefined(gameType))
+        if (!Enum.IsDefined(gameType) || !admins.CanStart(Context.User, gameType))
         {
             throw new HubException("Unknown game type.");
         }
@@ -181,6 +183,11 @@ public class GameHub(
     public async Task<string?> JoinPublicGame(GameType gameType)
     {
         var profile = RequireProfile("Log in to join a game.");
+        if (!admins.CanStart(Context.User, gameType))
+        {
+            throw new HubException("Unknown game type.");
+        }
+
         var candidates = store.All.Where(s => s.Type == gameType && s.IsOpenToJoin).ToList();
         while (candidates.Count > 0)
         {

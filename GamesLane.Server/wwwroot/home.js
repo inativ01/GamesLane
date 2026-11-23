@@ -217,7 +217,14 @@ function makeDraggable(tile) {
     });
 }
 
+// Games only admins see in the list (hidden in index.html until the user is known); others can still join one by its
+// code or invite link. The server refuses to start them for anyone else (AdminUsers.AdminOnlyGames).
+const ADMIN_ONLY_GAMES = ["Spades", "Dominoes"];
+
 accountReady.then(async () => {
+    ADMIN_ONLY_GAMES.forEach((gameType) => {
+        gameList.querySelector(`[data-create="${gameType}"]`).hidden = !account.isAdmin;
+    });
     const saved = isSavedUser() ? account.gameOrder : JSON.parse(localStorage.getItem(GAME_ORDER_KEY) ?? "null");
     const order = Array.isArray(saved) ? saved : [];
     if (order.length < usualOrder.length) {

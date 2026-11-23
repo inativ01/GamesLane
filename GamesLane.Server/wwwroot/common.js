@@ -1661,26 +1661,26 @@ const SUIT_SHAPES = {
     "♠": [["path", { d: "M50 3C34 28 6 42 6 64C6 78 17 86 29 86C37 86 44 82 47 75L40 97H60L53 75C56 82 63 86 71 86C83 86 94 78 94 64C94 42 66 28 50 3Z" }]],
 };
 
-// The ranks in the middle of a card as script letters, like the L in the logo: the centre line of each letter in a
-// 60 × 80 box, with swashes and curled ends, drawn as a road (a rim in the suit's color, black asphalt, a dashed
-// yellow centre line).
+// The ranks in the middle of a card as script letters in the style of French Script, slanted to the right, without
+// swashes: the centre line of each letter in a 60 × 80 box, drawn as a road (a rim in the suit's color, black asphalt,
+// a dashed yellow centre line).
 const ROAD_RANKS = {
-    A: "M3 64C-1 74 10 80 16 70C24 54 26 26 34 10C38 2 44 4 44 14C44 32 44 58 50 70C54 78 62 74 58 66M10 44C20 36 36 50 52 40C56 38 56 34 52 34",
-    2: "M14 24C6 22 8 6 24 4C40 2 52 14 42 30C34 42 16 52 10 70C22 62 34 76 50 68C58 64 56 56 50 58",
-    3: "M14 18C6 16 10 4 26 4C42 4 48 18 40 28C36 32 30 34 24 34C40 34 52 44 48 58C44 74 20 78 10 68C4 62 10 54 16 60",
-    4: "M52 76C44 76 42 68 42 60C42 42 44 22 46 6C34 18 20 34 6 50C18 46 38 50 54 44C60 42 60 36 54 36",
-    5: "M58 8C54 2 46 6 40 8C32 10 24 8 18 8C16 18 14 28 12 36C26 28 50 34 48 54C46 74 20 78 10 68C4 62 10 54 16 60",
-    6: "M50 12C54 6 46 0 36 2C18 6 10 26 10 44C10 64 22 76 34 74C48 72 50 54 40 46C30 38 16 44 14 54",
-    7: "M4 16C0 8 10 2 16 8C24 14 38 8 54 6C42 24 30 46 26 70C24 78 16 78 16 72C16 68 20 66 22 68",
-    8: "M34 40C14 34 10 8 28 4C44 0 50 24 30 40C12 52 12 76 30 74C50 72 52 48 34 40C46 36 58 38 58 46",
-    9: "M46 28C40 42 12 44 12 24C12 6 44 0 46 22C48 46 42 70 22 74C10 76 6 66 14 64",
-    10: "M2 20C6 14 12 10 16 4C14 28 14 54 12 70C10 78 2 76 4 70M42 6C24 8 24 72 40 74C58 76 58 4 42 6C50 4 58 6 60 12",
-    J: "M12 14C6 8 14 2 22 6C32 10 46 12 58 6M42 10C44 32 44 56 32 70C22 80 4 74 8 62C10 56 18 56 18 62",
-    Q: "M30 6C10 8 6 44 14 60C24 78 50 72 52 44C54 18 42 4 30 6ZM24 56C36 58 40 72 54 76C58 77 60 72 56 70",
-    K: "M18 6C16 26 16 52 14 72C12 80 4 76 6 70M54 6C58 2 52 0 48 6C38 18 28 34 18 44C30 46 34 60 42 72C46 78 56 78 58 70",
+    A: "M4 74C19 50 33 22 42 6C41 28 43 52 46 74M17 48C28 44 40 46 49 42",
+    2: "M16 22C20 10 31 4 41 6C52 8 54 22 43 34C33 46 16 58 4 72C19 66 28 71 39 68",
+    3: "M17 16C25 6 42 2 48 12C52 22 39 34 27 36C41 36 51 46 44 60C37 74 14 78 4 68",
+    4: "M33 76C37 56 43 30 51 6C36 22 18 38 4 52C18 50 36 50 52 48",
+    5: "M57 6C46 8 34 8 26 8C22 18 18 28 14 38C30 30 49 34 46 52C42 70 20 78 6 70",
+    6: "M52 10C46 2 29 4 20 18C12 32 8 52 11 64C15 76 35 76 42 62C48 48 38 40 28 42C17 44 12 52 10 58",
+    7: "M14 10C26 8 46 8 61 6C45 24 28 48 17 74",
+    8: "M34 40C15 34 16 8 35 4C52 0 53 24 30 40C10 52 5 76 23 74C44 72 50 48 34 40",
+    9: "M48 22C48 8 29 4 21 16C12 28 18 40 30 38C41 36 46 28 48 22C45 44 35 66 15 74",
+    10: "M11 26C16 20 21 12 24 6C18 30 12 54 7 76M48 6C40 6 32 28 30 42C26 60 27 76 34 76C41 76 47 58 51 40C55 22 55 6 48 6Z",
+    J: "M32 10C41 4 53 4 54 8C48 32 38 58 26 70C16 80 3 76 3 64",
+    Q: "M37 6C21 6 10 28 8 42C4 60 12 72 24 72C38 72 49 56 52 40C56 22 51 6 37 6ZM20 60C27 64 34 72 45 76",
+    K: "M25 6C20 28 14 52 5 74M57 6C44 20 29 34 15 44C27 44 33 56 39 74",
     // More ranks: 0 and 1, S (Skip, a circle crossed out) and R (Reverse, two curved arrows).
-    0: "M30 6C10 6 8 40 10 56C12 72 22 76 30 76C42 76 50 66 51 48C52 26 46 6 30 6C38 4 46 8 48 14",
-    1: "M12 22C22 18 30 12 38 4C36 28 36 52 34 72C32 80 22 78 24 72",
+    0: "M37 6C23 6 12 28 9 44C6 62 11 76 23 76C35 76 46 58 50 40C54 22 51 6 37 6Z",
+    1: "M22 20C29 16 36 10 43 4C36 28 30 52 23 76",
     S: "M30 12C14 12 6 26 6 40C6 56 18 68 30 68C46 68 54 54 54 40C54 24 44 12 30 12ZM13 58L47 22",
     R: "M10 36C10 18 24 10 42 12M34 3L43 12L34 21M50 44C50 62 36 70 18 68M26 59L17 68L26 77",
     // A big plus sign, in straight lines.
@@ -1970,11 +1970,6 @@ function fitScores() {
 }
 
 addEventListener("resize", fitScores);
-
-// "👉 Your turn", in the line under the cards of the user's hand panel on its turn (the card games and Dominoes).
-function yourTurnTag() {
-    return el("span", "rp-your-turn", `👉 ${t("Your turn")}`);
-}
 
 // A landscape screen (as in styles.css), where the score row is in the game screen, at the top of the screen's end side.
 const landscapeScreen = matchMedia("(orientation: landscape)");
@@ -2803,12 +2798,16 @@ function startSessionPage(gameType, render, seatRole = (seat) => t("Seat {n}", {
         afterLobby = false;
         // Games mark their status with 👉 (the user has to act) or ⏳ (waiting for others). The marks only choose the
         // bar's color (gold or grey) and are not shown. A primary button shown in the game's .game-actions also turns the
-        // bar gold. When 👉 comes, the turn chime plays.
+        // bar gold. When 👉 comes, the turn chime plays. Only the status's text is changed, so elements in it (e.g. Final
+        // Card's colors) stay.
         const status = $("status");
         const myTurn = status.textContent.includes("👉");
         const mustAct = myTurn
             || [...$("game-screen").querySelectorAll(".game-actions button")].some((b) => !b.hidden && !b.classList.contains("secondary"));
-        status.textContent = status.textContent.replace(/[👉⏳]\uFE0F?\s*/gu, "").trim();
+        [...status.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE)
+            .forEach((node) => { node.textContent = node.textContent.replace(/[👉⏳]\uFE0F?\s*/gu, ""); });
+        if (status.firstChild?.nodeType === Node.TEXT_NODE) status.firstChild.textContent = status.firstChild.textContent.trimStart();
+        if (status.lastChild?.nodeType === Node.TEXT_NODE) status.lastChild.textContent = status.lastChild.textContent.trimEnd();
         $("status-bar").classList.toggle("act", mustAct);
         if (myTurn && wasActing === false && view.turnSound) {
             vibrateForTurn();
