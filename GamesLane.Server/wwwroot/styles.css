@@ -5172,6 +5172,7 @@ button.yz-roll span {
     border-radius: var(--radius);
     background: var(--surface);
     box-shadow: var(--shadow);
+    color: var(--ink);
     font-variant-numeric: tabular-nums;
 }
 
