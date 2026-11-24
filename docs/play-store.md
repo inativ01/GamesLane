@@ -16,15 +16,39 @@ Setting up Google Play and Firebase for the GamesLane Android app (`GamesLane.Mo
 
 Once, in this order. Nothing here is a secret except the keystore, its passwords and the Firebase service account key: keep those out of the repository, chat and command lines.
 
+### Which Google account owns what
+
+GamesLane uses two Google accounts:
+
+| Account | Owns |
+| --- | --- |
+| **The Android account** (new, made for Google Play) | The Google Play Console developer account and the app `com.gameslane.app`; the Firebase project for the Android app's notifications |
+| **The original account** | The Google Cloud project "GamesLane" with the OAuth client for **Sign in with Google** on the website and in the apps |
+
+They do not need to be the same account: the Android app finds its Firebase project through `google-services.json`, the server through `firebase-key.json`, and Google sign-in through the OAuth client's ID and secret on Render. Leave Google sign-in where it is; moving it would mean a new OAuth client, new `Authentication__Google__*` values on Render and its redirect URIs registered again, for no gain.
+
+### Keeping access
+
+A Google Play developer account closed for being unused cannot be reopened, and an app cannot leave the developer account that published it without a transfer request to Google. So:
+
+1. **Give each account access to the other's services**, so losing one account (forgotten password, lost phone, account closed) does not lose the service:
+   - **Play Console** (Android account): **Users and permissions → Invite new users** → the original account, with **Admin (all permissions)**. Accept the invitation from the original account. Only the Android account stays the owner (the account holder), but the admin can do everything else, including releases.
+   - **Firebase** (Android account): **Project settings → Users and permissions → Add member** → the original account, role **Owner**.
+   - **Google Cloud project "GamesLane"** (original account): https://console.cloud.google.com/iam-admin/iam, with the project chosen → **Grant access** → the Android account, role **Owner**.
+2. **Secure both accounts:** 2-Step Verification on, with a recovery email and phone that you keep, and the backup codes stored in a password manager. Keep each account's password there too.
+3. **Keep the accounts in use:** sign in to each at least every few months. Google may delete a personal Google account unused for 2 years, and Google Play may close a developer account that has published no app and not signed in for a long time. Publishing the app, and an update now and then, keeps the developer account active.
+4. **Keep Play Console's contact details current** (Play Console → **Settings → Developer account → Account details**): Google sends warnings about closing an account, policy problems and verification there. Use an email you read, and check it.
+5. **Keep the upload key's backup** (step 3 below) with the passwords; the app signing key is kept by Google (Play App Signing), so it cannot be lost.
+
 ### 1. Google Play Console account
 
-1. https://play.google.com/console/signup, signed in with the Google account that will own the app. Choose **Yourself** (a personal account) or **An organization** (needs a D-U-N-S number), pay the one-time fee ($25) and verify your identity and contact details. Verification can take a few days.
+1. https://play.google.com/console/signup, signed in with the Android account. Choose **Yourself** (a personal account) or **An organization** (needs a D-U-N-S number), pay the one-time fee ($25) and verify your identity and contact details. Verification can take a few days.
 2. A new personal account must run a **closed test** with at least 12 testers for 14 days in a row before it can publish to production (see [Releases and testing](#releases-and-testing)). Check the current rule in Play Console.
 3. **Create app**: name `GamesLane`, default language English (United States), **Game**, **Free**; accept the declarations. The package name `com.gameslane.app` is set by the first upload and cannot change.
 
 ### 2. Firebase (turn notifications)
 
-1. https://console.firebase.google.com → **Create a project** → choose the existing Google Cloud project **GamesLane** (the one with the Google sign-in client). Turn **Google Analytics off**.
+1. https://console.firebase.google.com, signed in with the Android account → **Create a project** → a new project, e.g. `GamesLane Android` (not the original account's "GamesLane" Cloud project). Turn **Google Analytics off** (the app does not use it, and the Data safety answers assume it is off). Then add the original account as Owner ([Keeping access](#keeping-access)).
 2. **Add app → Android**: package `com.gameslane.app`, nickname `GamesLane Android` (the SHA-1 can be left out). Download `google-services.json` and save it as `GamesLane.Mobile/android/app/google-services.json` (ignored by Git). Skip the SDK steps; the app already has them.
 3. **Project settings → Cloud Messaging**: check that **Firebase Cloud Messaging API (V1)** is enabled.
 4. **Project settings → Service accounts → Generate new private key**. On Render: the service's **Environment** tab → **Secret Files** → add `firebase-key.json` with the file's content, and save (the service restarts). Then delete the downloaded file.

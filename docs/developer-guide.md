@@ -638,7 +638,8 @@ _Last updated: 2026-11-23. Keep this section current; it is the hand-off point b
 - **Apple:** Apple Developer Program (team `7Z69JFQYCV`). App ID `com.gameslane.app` with Push Notifications, Sign in with Apple and Associated Domains; Services ID `com.gameslane.web` (domain `gameslane.onrender.com`, return URL `https://gameslane.onrender.com/signin-apple`); one key for APNs and Sign in with Apple, on Render as the secret file `apple-key.p8` with `Apple__KeyId` (see [Sign-in setup](#sign-in-setup)).
 
 ### Google Play and Firebase (Android app)
-- Not set up yet; the steps are in [play-store.md](play-store.md#setup): a Google Play Console developer account, the app `com.gameslane.app`, the upload key, a Firebase project (on the Google Cloud project "GamesLane", Analytics off) with the Android app, and its service account key on Render.
+- Not set up yet; the steps are in [play-store.md](play-store.md#setup): a Google Play Console developer account, the app `com.gameslane.app`, the upload key, a Firebase project (Analytics off) with the Android app, and its service account key on Render.
+- Two Google accounts: a new one owns Play Console and the Firebase project (the earlier Play Console account was closed for being unused); the original one keeps the Google Cloud project "GamesLane" with the Google sign-in client. Each account has access to the other's services, so neither service depends on one account ([Keeping access](play-store.md#keeping-access)).
 
 ### Next steps
 1. Linking a Google account to a registered user (deferred).
