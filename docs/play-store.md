@@ -49,7 +49,11 @@ A Google Play developer account closed for being unused cannot be reopened, and 
 ### 2. Firebase (turn notifications)
 
 1. https://console.firebase.google.com, signed in with the Android account → **Create a project** → a new project, e.g. `GamesLane Android` (not the original account's "GamesLane" Cloud project). Turn **Google Analytics off** (the app does not use it, and the Data safety answers assume it is off). Then add the original account as Owner ([Keeping access](#keeping-access)).
-2. **Add app → Android**: package `com.gameslane.app`, nickname `GamesLane Android` (the SHA-1 can be left out). Download `google-services.json` and save it as `GamesLane.Mobile/android/app/google-services.json` (ignored by Git). Skip the SDK steps; the app already has them.
+2. **Add app → Android**: package `com.gameslane.app`, nickname `GamesLane Android` (the SHA-1 can be left out). Download `google-services.json` and save it as `GamesLane.Mobile/android/app/google-services.json` (ignored by Git). Skip the SDK steps; the app already has them. Then give it to the GitHub Actions build, in PowerShell in the repository folder:
+
+   ```
+   Get-Content -Raw GamesLane.Mobile\android\app\google-services.json | gh secret set ANDROID_GOOGLE_SERVICES_JSON
+   ```
 3. **Project settings → Cloud Messaging**: check that **Firebase Cloud Messaging API (V1)** is enabled.
 4. **Project settings → Service accounts → Generate new private key**. On Render: the service's **Environment** tab → **Secret Files** → add `firebase-key.json` with the file's content, and save (the service restarts). Then delete the downloaded file.
 
@@ -65,14 +69,13 @@ Keep `gameslane-upload.jks` and its password safe, outside the repository (e.g. 
 
 ### 4. GitHub Actions secrets
 
-The Android build (`.github/workflows/android.yml`) signs the app bundle with the upload key. In PowerShell, in the repository folder; each value goes straight to GitHub without being shown, and the passwords are typed at `gh`'s prompt:
+The Android build (`.github/workflows/android.yml`) signs the app bundle with the upload key (`ANDROID_GOOGLE_SERVICES_JSON` was set in [step 2](#2-firebase-turn-notifications)). In PowerShell, in the repository folder; each value goes straight to GitHub without being shown, and the passwords are typed at `gh`'s prompt:
 
 ```
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\gameslane-upload.jks")) | gh secret set ANDROID_UPLOAD_KEYSTORE_BASE64
 gh secret set ANDROID_UPLOAD_KEYSTORE_PASSWORD
 gh secret set ANDROID_UPLOAD_KEY_PASSWORD
 "upload" | gh secret set ANDROID_UPLOAD_KEY_ALIAS
-Get-Content -Raw GamesLane.Mobile\android\app\google-services.json | gh secret set ANDROID_GOOGLE_SERVICES_JSON
 ```
 
 `keytool` uses the keystore's password for the key too unless you chose another, so both password secrets are usually the same.
