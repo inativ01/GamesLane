@@ -455,7 +455,7 @@ The feedback form (**Send feedback** on the main screen and in the game menu) po
 
 1. On GitHub: **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**. Give it a name (e.g. "GamesLane feedback") and an expiry date, choose **Only select repositories** and pick this repository, and under **Repository permissions** set **Issues** to **Read and write** (nothing else). Copy the token.
 2. On Render: **Environment** tab of the service → add `Feedback__GitHubToken` with the token, and save (the service restarts). Never commit the token to the repo.
-3. Optional: `Feedback__GitHubRepository` (`owner/name`) sends the issues to another repository; by default they go to `inativ01/GamesLane2.0`.
+3. Optional: `Feedback__GitHubRepository` (`owner/name`) sends the issues to another repository; by default they go to `inativ01/GamesLane`.
 4. When the token expires, create a new one and replace the variable; until then, sending fails with "Your comment could not be sent. Try again later."
 
 Each issue's title is the kind and the start of the comment (e.g. "[Idea] Add chess"); its text is the comment, then the kind, page, language and the sender's display name (or "name not shared"). Issues get the label `feedback`, plus `bug` for a problem or `enhancement` for an idea. Mentions (@name) in comments are broken up so they notify nobody. The repository is public, so the issues are public; the form says so. For local testing, use `dotnet user-secrets set 'Feedback:GitHubToken' '<token>'` (better with a test repository in `Feedback:GitHubRepository`).
@@ -601,15 +601,15 @@ The server is chosen when the app is built, as for the iPhone app, by `GAMESLANE
 _Last updated: 2026-11-23. Keep this section current; it is the hand-off point between work sessions._
 
 ### Local machine
-- Repo folder: `C:\Users\inati\source\GamesLane2.0`, moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
+- Repo folder: `C:\Users\inati\source\GamesLane2.0` (the folder keeps the repository's former name; renaming it locally is optional), moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
 - Installed: Git (user Isaac Nativ), GitHub CLI (`gh`, signed in), .NET 10 SDK, Node.js (useful for `node --check` on the scripts in `wwwroot`), and for the Android app JDK 21 and the Android SDK (see [Android app](#android-app)). Not installed: Docker, Android Studio (needed for the emulator).
 - Mac (for the iPhone app): Xcode, and Node.js LTS through nvm (`~/.nvm`, loaded by `~/.bash_profile`). No Homebrew or CocoaPods (not needed).
-- The original JavaScript/Firebase app is at github.com/inativ01/GamesLane. It is separate; do not modify it.
+- The original JavaScript/Firebase app is at github.com/inativ01/GamesLane-old (renamed from GamesLane, a name this repository took over). It is separate; do not modify it.
 
 ### GitHub
-- Repo: https://github.com/inativ01/GamesLane2.0 (public), branch `main`.
+- Repo: https://github.com/inativ01/GamesLane (public), branch `main`. Renamed from `GamesLane2.0` on 2026-11-25; GitHub redirects the old address, but links and services should use the new one.
+- Actions secrets for the Android build (set): `ANDROID_GOOGLE_SERVICES_JSON`, `ANDROID_UPLOAD_KEYSTORE_BASE64`, `ANDROID_UPLOAD_KEYSTORE_PASSWORD`, `ANDROID_UPLOAD_KEY_ALIAS`, `ANDROID_UPLOAD_KEY_PASSWORD`. They moved with the rename.
 - Every push to `main` triggers a Render deploy, and, when it changes `GamesLane.Mobile/`, the Android app's build (GitHub Actions, see [Android app](#android-app)).
-- Actions secrets for the Android build (to set): `ANDROID_GOOGLE_SERVICES_JSON`, `ANDROID_UPLOAD_KEYSTORE_BASE64`, `ANDROID_UPLOAD_KEYSTORE_PASSWORD`, `ANDROID_UPLOAD_KEY_ALIAS`, `ANDROID_UPLOAD_KEY_PASSWORD`.
 
 ### Render (hosting)
 - Live site: https://gameslane.onrender.com

@@ -101,7 +101,7 @@ board games,card games,backgammon,hearts,spades,dominoes,yaniv,family,multiplaye
 
 | Field | Value |
 | --- | --- |
-| Support URL | https://github.com/inativ01/GamesLane2.0/issues |
+| Support URL | https://github.com/inativ01/GamesLane/issues |
 | Marketing URL (optional) | https://gameslane.onrender.com |
 | Version | 1.0 |
 | What's New | Not shown for the first version |
