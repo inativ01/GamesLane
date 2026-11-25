@@ -2,8 +2,6 @@
 
 GamesLane is an online platform for playing classic board and card games with friends and family, wherever they are.
 
-It is a complete reimplementation of the original [GamesLane](https://github.com/inativ01/GamesLane-old), with a new backend built on .NET and written in C#.
-
 **Play now:** https://gameslane.onrender.com
 
 ## Features

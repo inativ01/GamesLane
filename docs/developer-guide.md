@@ -604,7 +604,6 @@ _Last updated: 2026-11-23. Keep this section current; it is the hand-off point b
 - Repo folder: `C:\Users\inati\source\GamesLane2.0` (the folder keeps the repository's former name; renaming it locally is optional), moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
 - Installed: Git (user Isaac Nativ), GitHub CLI (`gh`, signed in), .NET 10 SDK, Node.js (useful for `node --check` on the scripts in `wwwroot`), and for the Android app JDK 21 and the Android SDK (see [Android app](#android-app)). Not installed: Docker, Android Studio (needed for the emulator).
 - Mac (for the iPhone app): Xcode, and Node.js LTS through nvm (`~/.nvm`, loaded by `~/.bash_profile`). No Homebrew or CocoaPods (not needed).
-- The original JavaScript/Firebase app is at github.com/inativ01/GamesLane-old (renamed from GamesLane, a name this repository took over). It is separate; do not modify it.
 
 ### GitHub
 - Repo: https://github.com/inativ01/GamesLane (public), branch `main`. Renamed from `GamesLane2.0` on 2026-11-25; GitHub redirects the old address, but links and services should use the new one.
