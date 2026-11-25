@@ -14,10 +14,13 @@ How GamesLane is built, and how to work on it. For what users see and the game r
 - [Game options](#game-options)
 - [HTTP endpoints](#http-endpoints)
 - [Sign-in setup](#sign-in-setup)
+- [Feedback setup](#feedback-setup)
 - [Running locally](#running-locally)
 - [Running tests](#running-tests)
+- [iPhone app](#iphone-app)
+- [Android app](#android-app)
 - [Apple TV app](#apple-tv-app)
-- [Project status and external services](#project-status-and-external-services)
+- [External services](#external-services)
 - [Working conventions](#working-conventions)
 - [Known limitations](#known-limitations)
 
@@ -201,24 +204,23 @@ The texts in the pages and scripts are in English, and they are also the keys of
 - Spoken texts (Rich man, poor man's **Read throws aloud**): a single card is read as a whole text per value (`SPOKEN_SINGLES` in `rich-man-poor-man.js`: `"A single nine"`, `"A single queen"`, …), so translations can match the value's gender (`"חמש יחיד"`, `"מלכה יחידה"`). 2 to 12 cards are read as their group (`SPOKEN_GROUPS`: `"Pair of {card}"`, `"Triplet of {card}"`, …), with `{card}` the card's value in the singular (`SPOKEN_VALUES`: `"nine"`, `"jack"`, `"ace"`, …), e.g. `"Triplet of {card}": "שלישיית {card}"` and `"jack": "נסיך"`. All are translated in every language. Without a voice for the language on the device, the English text is spoken.
 - Spanish, French and Portuguese style: the informal "you" (tú, tu, você). Colors stand alone or in brackets (e.g. "Ficha 3 (Rojo)"), since one color text serves Backgammon, Poker Heist and Final Card, and the nouns they go with differ in gender.
 - Chinese style: the polite 您, and instructions start with 请 (Simplified) or 請 (Traditional). Traditional Chinese uses Taiwan's words, not a character conversion of the Simplified text (e.g. 登入 / 登录 for log in, 帳號 / 账户 for account, 設定 / 设置 for settings, 抽牌 / 摸牌 for draw). Quotation marks are “…” in Simplified and 「…」 in Traditional. Spoken throws use Chinese numbers and the letters J, Q, K and A (e.g. "一对K", "三张九").
-- Hebrew terms: reviewed by the user, including the help pages; gammon / backgammon are מארס / מארס טורקי.
-- Spanish, French and Portuguese terms still to be confirmed by native speakers (Spanish / French / Portuguese):
+- Hebrew terms: gammon / backgammon are מארס / מארס טורקי.
+- Spanish, French and Portuguese terms (Spanish / French / Portuguese):
   - Game names: Gato / Morpion / Jogo da Velha (Tic-tac-toe), Backgammon / Backgammon / Gamão, Rico o pobretón / Riche ou fauché / Do luxo ao lixo (Rich man, poor man); Poker Heist, Wazoo and Yaniv keep their names; Final Card is Última carta / Dernière carte / Última carta.
   - Shared: partida / partie / partida (a game), lugar / place / lugar (seat), sala / salon / sala (lobby), nombre visible / pseudo / nome de exibição (display name).
   - Backgammon: casillas / pips / casas (pips), serie / match / partida (match), cubo doblador / videau / dado de dobra (doubling cube), Blanco / Blanc / Branco and Negro / Noir / Preto.
   - Rich man, poor man: Rico / Riche / Rico and Pobretón / Fauché / Pobre, Paso / Passer / Passo (Pass), puesto / place / posição (place), tirar / poser / jogar (throw), and the spoken throws (e.g. "3 doses", "3 deux", "três dois").
   - Wazoo: the boxes (Unos … Seises, Tercia, Póker, Full, Escalera corta / larga, Libre; As … Six, Brelan, Carré, Full, Petite / Grande suite, Chance; Uns … Seis, Trinca, Quadra, Full house, Sequência baixa / alta, Chance), casilla / case / categoria (box), hoja de puntos / feuille de score / cartela (scorecard).
   - Poker Heist: golpe / casse / assalto (heist), ficha / jeton / ficha (chip), cartas de mano / cartes en main / cartas na mão (pocket cards), cartas comunitarias / cartes communes / cartas comunitárias (shared cards), jugada / combinaison / combinação (hand ranking), reto / défi / desafio (challenge), the card names (e.g. Apagón / Coupure de courant / Apagão for Blackout, Matón / Gros bras / Brutamontes for Muscle) and the hand rankings (e.g. Escalera / Quinte / Sequência for Straight, Color / Couleur / Flush for Flush).
-  - The help (`help.es.html`, `help.fr.html`, `help.pt.html`).
   - Final Card: Alto / Stop / Pare (Stop), Cambio de sentido / Changement de sens / Mudar sentido (Change Direction), Cambio de color / Changement de couleur / Mudar cor (Change Color), Más / Plus / Mais (Plus), Corona / Couronne / Coroa (Crown), Rompe +3 / Casse +3 / Quebra +3 (+3 Breaker), Estilo estadounidense / israelí, Style américain / israélien, Estilo americano / israelense (US / Israeli Style), mano / donne / mão (hand), tomar / piocher / comprar (draw). TAKI keeps its name; Rainbow TAKI is TAKI arcoíris / TAKI arc-en-ciel / TAKI arco-íris / 彩虹 TAKI / טאקי קשת.
   - Yaniv: montón cerrado / abierto, tas fermé / ouvert, monte fechado / aberto (closed / open pile), cantar / annoncer / chamar Yaniv (call Yaniv), ronda / manche / rodada (round), Fuera / Éliminé / Fora (out), bono / bonus / bônus.
   - Trick-taking games: baza / pli / vaza (trick), seguir el palo / fournir / seguir o naipe (follow suit).
   - Hearts: the names Corazones / Dame de pique / Copas, pasar / passer / passar (pass cards), Se llevó todo / Grand chelem / Levou tudo (shooting the moon).
   - Spades: the names Picas / Pique / Espadas, apostar / annoncer / apostar (bid), Nil a ciegas / Nil aveugle / Nil às cegas (Blind Nil), bazas de más / plis en trop / vazas a mais (bags).
   - Dominoes: Dominó / Dominos / Dominó, ficha / domino / pedra (tile), pozo / pioche / monte (boneyard), Bloqueo / Bloqué / Bloqueio, Robo / Pioche / Compra, Todos cincos / Tous cinq / Todos os cincos, Tren mexicano / Train mexicain / Trem mexicano, locomotora / locomotive / locomotiva (engine), mula / double / bucha (a double).
-- Spades terms still to be confirmed: in Chinese the name 黑桃王, 叫墩 (bid), 零墩 / 盲零墩 (Nil / Blind Nil), 超墩 (bags).
-- Dominoes terms still to be confirmed: in Chinese the names 多米诺骨牌 / 骨牌, 牌堆 (boneyard), 牌龙 / 牌龍 (line), 封锁 / 封鎖, 摸牌 / 抽牌, 五的倍数 / 五的倍數, 墨西哥火车 / 墨西哥火車, 火车头 / 火車頭 (engine).
-- Chinese terms still to be confirmed by native speakers (Simplified / Traditional): the game names 双陆棋 / 雙陸棋, 井字棋 / 井字遊戲, 富翁与穷人 / 富翁與窮人 and 最后一张 / 最後一張; 王牌 / 鬼牌 (joker); in Backgammon: 克劳福德局 / 克勞福德局 (Crawford game), 全胜 / 全勝 and 完胜 / 完勝 (gammon / backgammon), 加倍骰 (doubling cube); in Wazoo: the boxes (一点 … 六点 / 一點 … 六點, 三条 / 三條, 四条 / 四條, 葫芦 / 葫蘆, 小顺 / 小順, 大顺 / 大順, 机会 / 機會); in Poker Heist: 劫案 / 搶案 (heist), 底牌 (pocket cards), 人头牌 / 人頭牌 (face cards) and the card names (e.g. 停电 / 停電, 线人 / 線人, 打手); in Final Card: 停止, 转向 / 迴轉, 变色 / 變色, 加号 / 加號, 王冠, +3 破解; in Yaniv: 暗牌堆 / 明牌堆 (closed / open pile); 墩 (trick); in Hearts: the names 红心大战 / 傷心小棧, 传牌 / 傳牌 (pass cards), 全收 (shooting the moon); and the help pages (`help.zh-CN.html`, `help.zh-TW.html`).
+- Spades terms in Chinese: the name 黑桃王, 叫墩 (bid), 零墩 / 盲零墩 (Nil / Blind Nil), 超墩 (bags).
+- Dominoes terms in Chinese: the names 多米诺骨牌 / 骨牌, 牌堆 (boneyard), 牌龙 / 牌龍 (line), 封锁 / 封鎖, 摸牌 / 抽牌, 五的倍数 / 五的倍數, 墨西哥火车 / 墨西哥火車, 火车头 / 火車頭 (engine).
+- Chinese terms (Simplified / Traditional): the game names 双陆棋 / 雙陸棋, 井字棋 / 井字遊戲, 富翁与穷人 / 富翁與窮人 and 最后一张 / 最後一張; 王牌 / 鬼牌 (joker); in Backgammon: 克劳福德局 / 克勞福德局 (Crawford game), 全胜 / 全勝 and 完胜 / 完勝 (gammon / backgammon), 加倍骰 (doubling cube); in Wazoo: the boxes (一点 … 六点 / 一點 … 六點, 三条 / 三條, 四条 / 四條, 葫芦 / 葫蘆, 小顺 / 小順, 大顺 / 大順, 机会 / 機會); in Poker Heist: 劫案 / 搶案 (heist), 底牌 (pocket cards), 人头牌 / 人頭牌 (face cards) and the card names (e.g. 停电 / 停電, 线人 / 線人, 打手); in Final Card: 停止, 转向 / 迴轉, 变色 / 變色, 加号 / 加號, 王冠, +3 破解; in Yaniv: 暗牌堆 / 明牌堆 (closed / open pile); 墩 (trick); in Hearts: the names 红心大战 / 傷心小棧, 传牌 / 傳牌 (pass cards), 全收 (shooting the moon).
 
 ## Game Hub API
 
@@ -377,7 +379,7 @@ PostgreSQL on Neon, accessed with EF Core. Tables (created and updated automatic
 | `TvPairings` | TVs paired with saved users: `UserId` + `TvId` (key; e.g. `tv:0123…`), `TvName` (the TV's name when paired), `PairedAt`, `LastActiveAt` (the last pairing or Watch on TV; deleted 90 days after it). See **TVs** above |
 | `DataProtectionKeys` | The keys that encrypt and sign login tokens |
 
-Deleting a user also deletes their external logins, icons, saved game options, Saved games (`SavedGames`, whose foreign key to `Sessions` is `Restrict`) and paired TVs (`TvPairings`). To change the tables, edit the classes in `Data/` and run `dotnet ef migrations add <Name> --project GamesLane.Server --output-dir Data/Migrations` (first `dotnet tool restore`, and set `$env:ASPNETCORE_ENVIRONMENT = "Development"` so the connection string is read from user secrets). The earlier migrations were merged into one, `InitialCreate`, which creates every table; it keeps the first migration's ID, so databases created before the merge treat it as already applied. New migrations go on top of it.
+Deleting a user also deletes their external logins, icons, saved game options, Saved games (`SavedGames`, whose foreign key to `Sessions` is `Restrict`) and paired TVs (`TvPairings`). To change the tables, edit the classes in `Data/` and run `dotnet ef migrations add <Name> --project GamesLane.Server --output-dir Data/Migrations` (first `dotnet tool restore`, and set `$env:ASPNETCORE_ENVIRONMENT = "Development"` so the connection string is read from user secrets). The migrations in `Data/Migrations` start with `InitialCreate`, which creates the tables, and each later one changes them; the server applies the missing ones at startup.
 
 To browse the database, use the Neon console's SQL Editor, pgAdmin, DBeaver, or the PostgreSQL extension for VS Code (not SSMS, which is for SQL Server only). Table and column names are case-sensitive, e.g. `select * from "Users"`.
 
@@ -414,7 +416,7 @@ Each option has a key, a label and a list of choices with a default; `Games/Game
 | `GET /api/admin/stats?days=N` | Admins only (others: 404). N from 1 to 365 (30 by default; otherwise `{ error }`, 400). `{ days, games: [{ gameType, counts, total }] }`: the last N days (UTC, today last) and, per game, its count each day and its total |
 | `GET /api/admin/activity?days=N` | Admins only (others: 404). N as for `/api/admin/stats`. `{ days, visits, games: [{ gameType, opened, created, joined, started, finished, invitesOpened, invitedJoins }], returning, sources, languages }`: the visits each day, each game's totals (in the usual order), and `[{ name, count }]` visits by return bucket (in order), source and language (most first) |
 | `POST /api/visits` | Logged-in users (guests too; others: 401). Body `{ game, firstToday, source, language, daysSinceLastVisit }` (see **Activity** above). Adds the counts (204). Rate-limited (30 per hour per user) |
-| `POST /api/notifications/device` | Logged-in users (guests too; others: 401). Body `{ token, sandbox, language, platform }`: the token from the app's `registerForNotifications`, whether it is for Apple's development servers, the page's language (an unknown one counts as English), and `platform`, `ios` (also when missing, as in the iPhone app's first versions) or `android`. An iPhone's token is 64 to 200 hexadecimal digits, an Android one 100 to 1000 letters, digits, `_`, `-` and `:`; otherwise, or with another platform, `{ error }`, 400. Saves the device for the user, replacing whoever had it, and marks it used now (204). Rate-limited (60 per hour per address), since anyone can become a guest |
+| `POST /api/notifications/device` | Logged-in users (guests too; others: 401). Body `{ token, sandbox, language, platform }`: the token from the app's `registerForNotifications`, whether it is for Apple's development servers, the page's language (an unknown one counts as English), and `platform`, `ios` (also when missing) or `android`. An iPhone's token is 64 to 200 hexadecimal digits, an Android one 100 to 1000 letters, digits, `_`, `-` and `:`; otherwise, or with another platform, `{ error }`, 400. Saves the device for the user, replacing whoever had it, and marks it used now (204). Rate-limited (60 per hour per address), since anyone can become a guest |
 | `POST /api/tv/register` | Anyone (the Apple TV app, once). Body `{ name }`: the TV's name, kept on one line and cut to 30 characters (`"Apple TV"` when empty). Returns `{ tvId, accessToken }`: the TV's ID and its login token, which does not expire. Rate-limited (20 per hour per address) |
 | `GET /api/tv/texts/{language}` | Anyone. Every translation of the site in `language` (from `wwwroot/lang/<code>.js`), English text → translation; `{}` for English or an unknown language. For the Apple TV app's texts |
 | `POST /api/tv/pair` | Saved users only (others: 401). Body `{ code }`: the code an open TV shows (case, spaces and dashes do not matter). Pairs the TV with the user and returns `{ name }`, the TV's name, or `{ error }` (400) "No TV shows this code. Check the code on the TV." Each code works once. Rate-limited like logging in |
@@ -462,7 +464,17 @@ Each issue's title is the kind and the start of the comment (e.g. "[Idea] Add ch
 
 ## Running locally
 
-Requires the [.NET 10 SDK](https://dotnet.microsoft.com/download) and a PostgreSQL connection string (the Neon `dev` branch), set once with:
+Development tools:
+
+| Part | Tools |
+| --- | --- |
+| Server and website | [.NET 10 SDK](https://dotnet.microsoft.com/download); Node.js (for `node --check` on the scripts) |
+| iPhone app | macOS with Xcode 26+, and Node.js 22.18+ (see [iPhone app](#iphone-app)) |
+| Android app | Node.js 22.18+, JDK 21 and the Android SDK, or Android Studio (see [Android app](#android-app)) |
+| Apple TV app | macOS with Xcode 26+ (see [Apple TV app](#apple-tv-app)) |
+| All | Git, and the GitHub CLI (`gh`) for pull requests and Actions secrets |
+
+The server needs a PostgreSQL connection string (the Neon `dev` branch), set once with:
 
 ```
 cd GamesLane.Server
@@ -489,7 +501,7 @@ The scripts in `wwwroot` have no build step; `node --check <file>.js` checks a s
 
 ## iPhone app
 
-`GamesLane.Mobile/` is a [Capacitor](https://capacitorjs.com) 8 project with the iPhone app (`ios/`) and the Android app (`android/`, see [Android app](#android-app)), sharing `capacitor.config.ts`, `www/` and `assets/`. The iPhone app is a native shell whose web view shows the live site, so every deploy reaches the app without a new release. Its own features are in `GamesLanePlugin` (see below). It needs iOS 17.4 or later (for the sign-in window's https callback). Requires macOS, Xcode 26+ and Node.js 22.18+ (the Capacitor CLI reads `capacitor.config.ts` with Node's built-in TypeScript support, since TypeScript 7 no longer offers the compiler API it used).
+`GamesLane.Mobile/` is a [Capacitor](https://capacitorjs.com) 8 project with the iPhone app (`ios/`) and the Android app (`android/`, see [Android app](#android-app)), sharing `capacitor.config.ts`, `www/` and `assets/`. The iPhone app is a native shell whose web view shows the live site, so every deploy reaches the app without a new release. Its own features are in `GamesLanePlugin` (see below). It needs iOS 17.4 or later (for the sign-in window's https callback). Requires macOS, Xcode 26+ and Node.js 22.18+ (the Capacitor CLI reads `capacitor.config.ts` with Node's built-in TypeScript support, as TypeScript 7 has no compiler API for it).
 
 ```
 cd GamesLane.Mobile
@@ -526,11 +538,11 @@ For example `GAMESLANE_SERVER=42 npm run ios`. Run `npm run sync` (or `npm run i
 - **Privacy manifest:** `ios/App/App/PrivacyInfo.xcprivacy` (in the app's resources) declares the data the app collects, the same as the App Privacy answers in [app-store.md](app-store.md#app-privacy); change both together. The app's own code uses none of Apple's "required reason" APIs; Capacitor brings its own manifest.
 - **Versions:** the version (`MARKETING_VERSION`, 1.0) is the number the App Store shows; raise it for each new App Store release (1.0.1, 1.1 …). Xcode Cloud sets the build number of every build itself.
 - **App Store submission:** see [app-store.md](app-store.md): the listing, screenshots, privacy answers, age rating and review notes.
-- **The folder was renamed** from `GamesLane.iOS` to `GamesLane.Mobile`. The Xcode Cloud workflow keeps the project's path: after the rename, set it to `GamesLane.Mobile/ios/App/App.xcodeproj` (Xcode → Integrate → Manage Workflows → Default → General), or create the workflow again.
+- **Xcode Cloud workflow:** the project `GamesLane.Mobile/ios/App/App.xcodeproj` (Xcode → Integrate → Manage Workflows → Default → General).
 
 ## Android app
 
-`GamesLane.Mobile/android/` is the Android app, from the same Capacitor project as the iPhone app: a native shell whose web view shows the live site. Its own features are in `GamesLanePlugin.java` (see below), with the same JavaScript names as the iPhone app's, so `common.js` calls both alike. Package `com.gameslane.app`, Android 7.0 (API 24) or later, built for API 36. Requires JDK 21 and the Android SDK (platform 36); Android Studio has both. On the Windows machine they are installed per user: JDK 21 in `%LOCALAPPDATA%\Programs\jdk-21` (`JAVA_HOME`), the SDK in `%LOCALAPPDATA%\Android\Sdk` (`ANDROID_HOME`). The SDK's command-line tools no longer download the emulator; install Android Studio for it (Device Manager → a Pixel with API 36), or use a phone with USB debugging.
+`GamesLane.Mobile/android/` is the Android app, from the same Capacitor project as the iPhone app: a native shell whose web view shows the live site. Its own features are in `GamesLanePlugin.java` (see below), with the same JavaScript names as the iPhone app's, so `common.js` calls both alike. Package `com.gameslane.app`, Android 7.0 (API 24) or later, built for API 36. Requires JDK 21 (`JAVA_HOME`) and the Android SDK with platform 36 (`ANDROID_HOME`); Android Studio has both. The emulator comes with Android Studio (Device Manager → a Pixel with API 36), not with the SDK's command-line tools; a phone with USB debugging works too.
 
 ```
 cd GamesLane.Mobile
@@ -560,9 +572,9 @@ Or without Android Studio: `npm run sync:android`, then in `android/`, `gradlew 
 
 Watch on TV: a TV running the Apple TV app shows the games its linked user opens, as an observer (public information only, with sounds, without chat). See also the [user manual](user-manual.md#watching-on-a-tv).
 
-**Status:** the server (`Tv/`, the hub's `TvConnect`, `WatchOnTv` and `StopWatchOnTv`, `/api/tv/*`), the website (the profile's TVs, `/?tv=CODE`, every page linking the TV) and the tvOS app (`GamesLane.tvOS/`: registering, pairing, following the user's games, the session lobby and Poker Heist) are done; the app was tried on the Simulator against a local server (pairing by code, the lobby, a whole heist, Hebrew, the server restarting). Still to do: see the list at the end of this section.
+**Parts:** the server (`Tv/`, the hub's `TvConnect`, `WatchOnTv` and `StopWatchOnTv`, `/api/tv/*`), the website (the profile's TVs, `/?tv=CODE`, every page linking the TV) and the tvOS app (`GamesLane.tvOS/`: registering, pairing, following the user's games, the session lobby and Poker Heist).
 
-**Why a native app:** tvOS has no web view (WebKit is not available to apps), so the iPhone app's approach (Capacitor showing the site) cannot work there. The TV app is a native SwiftUI app that talks to the same server (HTTP to register, the SignalR hub for everything else) and draws each game itself from the session's public state ([Session state](#session-state)). Poker Heist comes first; other games show the splash picture with "This game cannot be shown on the TV yet." until each is added.
+**Why a native app:** tvOS has no web view (WebKit is not available to apps), so the iPhone app's approach (Capacitor showing the site) cannot work there. The TV app is a native SwiftUI app that talks to the same server (HTTP to register, the SignalR hub for everything else) and draws each game itself from the session's public state ([Session state](#session-state)). It draws every game's lobby, and Poker Heist during a game; during the other games it shows the splash picture with "This game cannot be shown on the TV yet."
 
 **Project:** `GamesLane.tvOS/GamesLane.xcodeproj` (tvOS 18 or later, SwiftUI; requires Xcode 26+), a separate project, not a target in `GamesLane.Mobile/ios/App/App.xcodeproj`, which Capacitor's `cap sync` rewrites. Its folders are synchronized groups, so a file added to `GamesLane/` or `GamesLaneTests/` is in the app or the tests without editing the project.
 - Bundle ID `com.gameslane.app`, the iPhone app's, so the App Store offers both as one app (universal purchase, one listing); team `7Z69JFQYCV`. No third-party packages.
@@ -591,38 +603,25 @@ The server is chosen when the app is built, as for the iPhone app, by `GAMESLANE
 7. **Poker Heist:** drawn from `state.game` (the public state built in `Sessions/PokerHeistSession.cs`), with `poker-heist.js` as the reference for the layout and texts, as observers see it: the heist, vaults and alarms; the status; the five shared slots (face down until turned; the cards that replaced a joker stacked in a gold frame); the chips in the middle while betting; the hands revealed so far (red chip, player, cards, ranking and values, the first reason a hand is weaker in red); the chip table (player numbers, joker marks, each player's facts with the scans' PASS or FAIL, 👍 for the players ready, skipped stages struck out, Blackout's "?", the crossed-out white chip) with the group decisions under way above it; and the heist's cards with what each does (the TV cannot be tapped, so the text is always shown; "New", faded when not used). Confetti and the fanfare each time the crew opens a vault (once per heist), as the page does for everyone.
 8. **Sounds:** always on (the TV has no profile), played when the page would play them (`ChangeTracker`, as `view.changed` in `common.js`): the shuffle with card backs riffling on screen (`shuffles`), a chip taken or returned, the shared cards turned, each hand revealed.
 
-**Still to do, in order:**
-1. Testing with the website: pairing from a phone's browser (QR code and typed code), Watch on TV across several games, a second user seeing the TV as in use, and the link ending 60 seconds after the TV or the user's pages close; on an Apple TV too (the layout, the sounds' volume).
-2. The App Store: the tvOS platform added to the app's App Store Connect record, the Apple TV screenshots (1920×1080), the privacy answers and manifest (the TV's name and its pairings), and review notes on pairing with the review account (all in [app-store.md](app-store.md#apple-tv), with the checklist under [Before submitting](app-store.md#before-submitting)); TestFlight through Xcode Cloud (the workflow for `GamesLane.tvOS/GamesLane.xcodeproj` is created).
-3. The other games, one at a time.
-
-## Project status and external services
-
-_Last updated: 2026-11-23. Keep this section current; it is the hand-off point between work sessions._
-
-### Local machine
-- Repo folder: `C:\Users\inati\source\GamesLane2.0` (the folder keeps the repository's former name; renaming it locally is optional), moved out of iCloud Drive (it was `C:\Users\inati\iCloudDrive\Programming\GamesLane2.0`). In iCloud, sync locked files during moves, and once Git's index lost most of the tracked files, so a commit deleted them (fixed in `f82caee`). Before every push, check the full file list of the commit (`git show --stat HEAD`).
-- Installed: Git (user Isaac Nativ), GitHub CLI (`gh`, signed in), .NET 10 SDK, Node.js (useful for `node --check` on the scripts in `wwwroot`), and for the Android app JDK 21 and the Android SDK (see [Android app](#android-app)). Not installed: Docker, Android Studio (needed for the emulator).
-- Mac (for the iPhone app): Xcode, and Node.js LTS through nvm (`~/.nvm`, loaded by `~/.bash_profile`). No Homebrew or CocoaPods (not needed).
+## External services
 
 ### GitHub
-- Repo: https://github.com/inativ01/GamesLane (public), branch `main`. Renamed from `GamesLane2.0` on 2026-11-25; GitHub redirects the old address, but links and services should use the new one.
-- Actions secrets for the Android build (set): `ANDROID_GOOGLE_SERVICES_JSON`, `ANDROID_UPLOAD_KEYSTORE_BASE64`, `ANDROID_UPLOAD_KEYSTORE_PASSWORD`, `ANDROID_UPLOAD_KEY_ALIAS`, `ANDROID_UPLOAD_KEY_PASSWORD`. They moved with the rename.
+- Repository: https://github.com/inativ01/GamesLane (public), branch `main`. Feedback comments become its issues (see [Feedback setup](#feedback-setup)).
 - Every push to `main` triggers a Render deploy, and, when it changes `GamesLane.Mobile/`, the Android app's build (GitHub Actions, see [Android app](#android-app)).
+- Actions secrets for the Android build: `ANDROID_GOOGLE_SERVICES_JSON`, `ANDROID_UPLOAD_KEYSTORE_BASE64`, `ANDROID_UPLOAD_KEYSTORE_PASSWORD`, `ANDROID_UPLOAD_KEY_ALIAS`, `ANDROID_UPLOAD_KEY_PASSWORD`.
 
 ### Render (hosting)
 - Live site: https://gameslane.onrender.com
 - Paid web service (it does not sleep), built from the `Dockerfile` at the repo root; auto-deploys from `main`. The image adds the Kerberos library (`libgssapi-krb5-2`), which the .NET image leaves out; without it, .NET logs "Cannot load library libgssapi_krb5.so.2" at startup.
 - Server reads the `PORT` setting; health check at `/health`.
 - Sessions are saved in the database, so games survive restarts and deploys (unless a deploy changes a game's saved fields, see [Sessions and seats](#sessions-and-seats)); logins survive too.
-- Environment variables (values only in Render, never in the repo):
-  - `ConnectionStrings__GamesLane`: Neon `production` branch (set; required — the server does not start without it). Either the .NET (`Host=...;`) or the URL (`postgresql://...`) format works.
-  - `Authentication__Google__ClientId` / `__ClientSecret`: set, working
-  - `Apple__KeyId`, with the secret file `apple-key.p8` (Sign in with Apple on the website, and the iPhone app's turn notifications)
-  - `Authentication__Microsoft__ClientId` / `__ClientSecret`: set, working
-  - `Authentication__Discord__ClientId` / `__ClientSecret`: set, working
-  - The secret file `firebase-key.json` (the Android app's turn notifications): to set, see [Sign-in setup](#sign-in-setup)
-  - `Android__CertificateFingerprints` (the Android app's join links and sign-in): to set once Play Console shows the app signing and upload keys
+- Environment variables and secret files (values only in Render, never in the repo):
+  - `ConnectionStrings__GamesLane`: the Neon `production` branch (required; the server does not start without it). Either the .NET (`Host=...;`) or the URL (`postgresql://...`) format works.
+  - `Authentication__Google__ClientId` / `__ClientSecret`, `Authentication__Microsoft__ClientId` / `__ClientSecret`, `Authentication__Discord__ClientId` / `__ClientSecret`: the sign-in providers (see [Sign-in setup](#sign-in-setup)).
+  - `Apple__KeyId`, with the secret file `apple-key.p8`: Sign in with Apple on the website, and the iPhone app's turn notifications.
+  - The secret file `firebase-key.json`: the Android app's turn notifications.
+  - `Android__CertificateFingerprints`: the SHA-256 fingerprints of the Android app's app signing and upload keys, for `assetlinks.json` (the Android app's join links and sign-in).
+  - `Feedback__GitHubToken` (optional): the feedback form's GitHub token (see [Feedback setup](#feedback-setup)).
 
 ### Neon (PostgreSQL database)
 - Project `GamesLane` (ID `gentle-cherry-51286211`), region AWS US East 2 (Ohio).
@@ -631,33 +630,25 @@ _Last updated: 2026-11-23. Keep this section current; it is the hand-off point b
 - Tables are created by EF Core migrations when the server starts (see [Database](#database)).
 
 ### Sign-in providers
-- **Google:** working on the live site. OAuth client in Google Cloud Console (project "GamesLane"); redirect URI `https://gameslane.onrender.com/signin-google`; privacy policy at `/privacy.html`.
-- **Microsoft:** working on the live site. App registration in the Entra admin center; redirect URI `https://gameslane.onrender.com/signin-microsoft`.
-- **Discord:** working on the live site. Application in the Discord Developer Portal; redirect URI `https://gameslane.onrender.com/signin-discord`.
+- **Google:** OAuth client in Google Cloud Console (project "GamesLane"); redirect URI `https://gameslane.onrender.com/signin-google`; privacy policy at `/privacy.html`.
+- **Microsoft:** app registration in the Entra admin center; redirect URI `https://gameslane.onrender.com/signin-microsoft`.
+- **Discord:** application in the Discord Developer Portal; redirect URI `https://gameslane.onrender.com/signin-discord`.
 - **Apple:** Apple Developer Program (team `7Z69JFQYCV`). App ID `com.gameslane.app` with Push Notifications, Sign in with Apple and Associated Domains; Services ID `com.gameslane.web` (domain `gameslane.onrender.com`, return URL `https://gameslane.onrender.com/signin-apple`); one key for APNs and Sign in with Apple, on Render as the secret file `apple-key.p8` with `Apple__KeyId` (see [Sign-in setup](#sign-in-setup)).
 
-### Google Play and Firebase (Android app)
-- Not set up yet; the steps are in [play-store.md](play-store.md#setup): a Google Play Console developer account, the app `com.gameslane.app`, the upload key, a Firebase project (Analytics off) with the Android app, and its service account key on Render.
-- Two Google accounts: a new one owns Play Console and the Firebase project (the earlier Play Console account was closed for being unused); the original one keeps the Google Cloud project "GamesLane" with the Google sign-in client. Each account has access to the other's services, so neither service depends on one account ([Keeping access](play-store.md#keeping-access)).
+### App Store Connect and Xcode Cloud (iPhone, iPad and Apple TV)
+- One app, `com.gameslane.app`, with two platforms: iOS (the iPhone and iPad app) and tvOS (the Apple TV app), one listing and universal purchase. The listing, privacy answers and review notes are in [app-store.md](app-store.md).
+- Xcode Cloud has a workflow per app, each building `main` for TestFlight: `GamesLane.Mobile/ios/App/App.xcodeproj` (see [iPhone app](#iphone-app)) and `GamesLane.tvOS/GamesLane.xcodeproj` (see [Apple TV app](#apple-tv-app)).
 
-### Next steps
-1. Linking a Google account to a registered user (deferred).
-2. Game history (deferred). Visitor countries need a location lookup (e.g. MaxMind GeoLite2) or Cloudflare in front of Render; until then the browser language stands in.
-3. Backgammon: possible extras (a move list, variants such as Nackgammon or Acey-deucey).
-4. Spanish, French and Portuguese: every page is translated; first check on Render (including long texts on phones), and native speakers to review the terms listed under [Translations](#translations).
-5. Feedback: create the GitHub token and set `Feedback__GitHubToken` on Render (see [Feedback setup](#feedback-setup)), then send a first comment.
-6. Simplified and Traditional Chinese: every page is translated; first check on Render (including the fonts on phones and reading aloud), and native speakers to review the terms listed under [Translations](#translations).
-7. iPhone app: sign-in with Apple, Google, Microsoft and Discord checked on a phone, in the app and on the website. Still to check: join links opening the app, and turn notifications (allowing them when first seated, a notification with the phone locked, with another app in front and with the app closed, none while the game is on screen, and tapping one opening the game, also when the app was closed); check that the Apple key on Render has APNs enabled. Check on an iPad too (the app is offered on iPad). Then the App Store submission, following [app-store.md](app-store.md).
-8. Android app: set up Google Play and Firebase ([play-store.md](play-store.md#setup)), then check on a phone: sign-in with Apple, Google, Microsoft and Discord, join links opening the app, turn notifications (allowing them when first seated, with the phone locked, another app in front and the app closed, none while the game is on screen, a tap opening the game), the back button, and the screen staying on during a game. Then the closed test and the Google Play submission.
-9. iPhone app, more native features (Apple's App Store guideline 4.2 rejects apps that only show a website; turn notifications and keeping the screen on during a game are done). Possibly: the native share sheet for a private game's code and join link; an offline screen with Try again instead of `www/index.html`'s static text.
-10. Apple TV app: the server, the website and the tvOS app (with Poker Heist) are done; still to do: testing with the website and on an Apple TV, the App Store, and the other games (see [Apple TV app](#apple-tv-app)).
+### Google Play and Firebase (Android app)
+- **Google Play Console:** the app `com.gameslane.app`, with Play App Signing (Google keeps the app signing key; builds are signed with the upload key), released to internal testing. The setup, listing and Data safety answers are in [play-store.md](play-store.md).
+- **Firebase:** the project "GamesLane Android" (Spark plan, Analytics off), with the Android app `com.gameslane.app`; only Cloud Messaging is used, for turn notifications. Its `google-services.json` is in the Actions secret `ANDROID_GOOGLE_SERVICES_JSON`, and its service account key is `firebase-key.json` on Render.
+- **Google accounts:** Play Console and the Firebase project belong to one Google account; the Google Cloud project "GamesLane" with the Google sign-in client belongs to another. Each account has access to the other's services ([Keeping access](play-store.md#keeping-access)).
 
 ## Working conventions
 - Ask before adding or upgrading packages.
 - Interfaces go in an `Interfaces/` subfolder of each folder, in the parent folder's namespace.
-- When asked to "not commit", leave changes uncommitted for review. For larger features done unattended, commit and push each completed step.
 - Never put secrets in the repo, chat or commands; they live only in Render's Environment tab (or `dotnet user-secrets` locally).
-- Keep the documentation current: user-visible behaviour and game rules in the [user manual](user-manual.md), design, APIs and setup in this guide, and only the overview in the [README](../README.md).
+- Keep the documentation current: user-visible behaviour and game rules in the [user manual](user-manual.md), design, APIs and setup in this guide, and only the overview in the [README](../README.md). This guide describes the project as it is now, not its history or changes.
 
 ## Known limitations
 - Sessions are kept in memory by one server, and saved in the database; running more than one server instance would need a shared store (no scale-out).

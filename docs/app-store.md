@@ -24,7 +24,7 @@ Decided:
 
 Checklist:
 
-- [ ] The checks on a phone in the developer guide's [Next steps](developer-guide.md#next-steps) (sign-in, join links, notifications), also on an iPad.
+- [ ] Checked on an iPhone and an iPad, in the app: sign-in with Apple, Google, Microsoft and Discord; a join link opened from another app opens the game in the app; turn notifications (allowed when first seated; shown with the phone locked, with another app in front and with the app closed; none while the game is on screen; a tap opens the game, also when the app was closed); the screen staying on during a game. The Apple key on Render has APNs enabled.
 - [ ] A TestFlight build from Xcode Cloud, tested: it uses Apple's production push service, like the App Store version.
 - [ ] The version is right (`MARKETING_VERSION`, 1.0 for the first release; see the developer guide's [iPhone app](developer-guide.md#iphone-app)).
 - [ ] Screenshots for iPhone and iPad.
@@ -32,7 +32,7 @@ Checklist:
 
 Apple TV (see [Apple TV](#apple-tv)):
 
-- [ ] The Apple TV checks in the developer guide's [Apple TV app](developer-guide.md#apple-tv-app) (pairing from a phone, Watch on TV, on a real Apple TV).
+- [ ] Checked with the website and on an Apple TV: pairing from a phone's browser (QR code and typed code), Watch on TV across several games, a second user seeing the TV as in use, the link ending 60 seconds after the TV or the user's pages close, the layout and the sounds' volume.
 - [ ] The Apple TV app's privacy manifest added (it has none yet).
 - [ ] The tvOS platform added to the app, and a TestFlight build from the Apple TV's Xcode Cloud workflow (already created) tested on an Apple TV.
 - [ ] The App Privacy answers updated with the TV's data, before the first tvOS review (they apply to both platforms).
