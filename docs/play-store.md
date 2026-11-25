@@ -82,12 +82,12 @@ gh secret set ANDROID_UPLOAD_KEY_PASSWORD
 
 ### 5. First upload and the certificates' fingerprints
 
-1. GitHub → **Actions → Android app → Run workflow** (or push a change to `GamesLane.Mobile/`). Download the run's artifact, `app-release.aab`.
-2. Play Console → **Test and release → Testing → Internal testing → Create new release**. Accept **Play App Signing** (Google keeps the app signing key), upload the `.aab`, and add yourself as a tester.
-3. **Test and release → App integrity → App signing**: copy the **SHA-256 certificate fingerprint** of the **app signing key** and of the **upload key**.
-4. On Render, set the environment variable `Android__CertificateFingerprints` to both, separated by a comma. To try a debug build from Android Studio too, add the debug key's (see the developer guide's [Sign-in setup](developer-guide.md#sign-in-setup)). Then https://gameslane.onrender.com/.well-known/assetlinks.json lists them.
-5. In Firebase → **Project settings → Your apps → the Android app → Add fingerprint**: the same SHA-256 fingerprints.
-6. Install the app from the internal testing link and check it (the developer guide's [Next steps](developer-guide.md#next-steps)).
+1. GitHub → **Actions → Android app → Run workflow** (or push a change to `GamesLane.Mobile/`; before the workflow is on `main`, re-run a pull request's **Android app** check). Download the run's artifact, `app-release.aab`.
+2. Play Console → **Test and release → Testing → Internal testing → Create new release**: upload the `.aab` (Play App Signing is on by default for new apps: Google keeps the app signing key and signs what users install), write the release notes between the `<en-US>` tags, then **Next** and **Save and publish**.
+3. **Testers** tab of Internal testing → **Create email list** with the Google account on your phone, saved and ticked → **Copy link** under "How testers join your test". Open the link in a browser signed in with that account (the phone or the computer), **Accept invitation**, then **Download it on Google Play** (from a computer: **Install** and choose the phone). A new release can take up to an hour to appear.
+4. **Protected with Play → Play Store protection → Protect app signing key → Manage Play app signing**: copy the **SHA-256 certificate fingerprint** of the **app signing key certificate** and of the **upload key certificate** (the upload key's matches `keytool -list -v` on `gameslane-upload.jks`). They are public, not secrets.
+5. On Render, set the environment variable `Android__CertificateFingerprints` to both, separated by a comma. To try a debug build from Android Studio too, add the debug key's (see the developer guide's [Sign-in setup](developer-guide.md#sign-in-setup)). Then https://gameslane.onrender.com/.well-known/assetlinks.json lists them. Android checks the site when the app is installed or updated, so if the app was installed before they were listed, reinstall it, or turn on `gameslane.onrender.com` under **Settings → Apps → GamesLane → Open by default → Add link**.
+6. Check the app (the developer guide's [Next steps](developer-guide.md#next-steps)). Firebase needs no fingerprints: turn notifications work without them.
 
 ## Before submitting
 
