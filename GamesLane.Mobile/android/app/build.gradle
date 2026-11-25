@@ -5,6 +5,9 @@ apply plugin: 'com.android.application'
 // GAMESLANE_KEY_PASSWORD. GAMESLANE_VERSION_CODE is the build number Google Play needs to grow with every upload.
 def env = System.getenv()
 def releaseKeystore = env['GAMESLANE_KEYSTORE']
+// The site whose join links and sign-in end open the app (see AndroidManifest.xml and the site's assetlinks.json). The
+// manifest gets it as text (${appLinkHost}): Android ignores a resource reference in an App Link's host.
+def appLinkHost = "gameslane.onrender.com"
 
 android {
     namespace = "com.gameslane.app"
@@ -15,6 +18,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode((env['GAMESLANE_VERSION_CODE'] ?: '1') as int)
         versionName "1.0"
+        manifestPlaceholders = [appLinkHost: appLinkHost]
+        resValue "string", "app_link_host", appLinkHost
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
