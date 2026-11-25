@@ -91,7 +91,7 @@ public static class AccountEndpoints
         });
 
         // Deletes the logged-in saved user (with their external accounts, icons, game options, saved games, paired TVs and
-        // the iPhones that get their turn notifications) and logs in a new guest, who gets their seats in every session in
+        // the phones that get their turn notifications) and logs in a new guest, who gets their seats in every session in
         // memory, as after logging out. Sign in with Apple's tokens are revoked first, as Apple requires.
         app.MapPost("/auth/delete", async (HttpContext context, IUserService users, IGameSessionStore store,
             IHubContext<GameHub> hub, ITurnNotifier notifier, IDeviceTokenRepository devices, TimeProvider timeProvider,

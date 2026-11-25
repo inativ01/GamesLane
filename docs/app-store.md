@@ -1,10 +1,13 @@
 # App Store submission
 
-Everything App Store Connect asks for when submitting the GamesLane iPhone app (`GamesLane.iOS`), ready to copy. Keep it in step with the app: the privacy answers must match the app's privacy manifest (`ios/App/App/PrivacyInfo.xcprivacy`) and the [privacy policy](../GamesLane.Server/wwwroot/privacy.html).
+Everything App Store Connect asks for when submitting the GamesLane iPhone and iPad app (`GamesLane.Mobile/ios`) and the Apple TV app (`GamesLane.tvOS`), ready to copy. The Android app's submission is in [play-store.md](play-store.md). Keep it in step with the apps: the privacy answers must match the apps' privacy manifests (`GamesLane.Mobile/ios/App/App/PrivacyInfo.xcprivacy`, and the Apple TV app's, see [Apple TV](#apple-tv)) and the [privacy policy](../GamesLane.Server/wwwroot/privacy.html).
+
+Both apps have the bundle ID `com.gameslane.app`, so they are **one app** in App Store Connect with two platforms, iOS and tvOS (universal purchase): one name, privacy answers, age rating and price; each platform has its own version page (description, keywords, screenshots, build, review notes) and is reviewed and released on its own.
 
 - [Before submitting](#before-submitting)
 - [App information](#app-information)
 - [Version page: the listing](#version-page-the-listing)
+- [Apple TV](#apple-tv)
 - [Screenshots](#screenshots)
 - [App Privacy](#app-privacy)
 - [Age rating](#age-rating)
@@ -27,6 +30,15 @@ Checklist:
 - [ ] Screenshots for iPhone and iPad.
 - [ ] Everything below filled in, then **Add for Review**.
 
+Apple TV (see [Apple TV](#apple-tv)):
+
+- [ ] The Apple TV checks in the developer guide's [Apple TV app](developer-guide.md#apple-tv-app) (pairing from a phone, Watch on TV, on a real Apple TV).
+- [ ] The Apple TV app's privacy manifest added (it has none yet).
+- [ ] The tvOS platform added to the app, and a TestFlight build from the Apple TV's Xcode Cloud workflow (already created) tested on an Apple TV.
+- [ ] The App Privacy answers updated with the TV's data, before the first tvOS review (they apply to both platforms).
+- [ ] A review account created and filled in under App Review Information (pairing a TV needs an account).
+- [ ] Apple TV screenshots, then the tvOS version page filled in, then **Add for Review**.
+
 ## App information
 
 | Field | Value |
@@ -42,7 +54,7 @@ Checklist:
 | Privacy policy URL | https://gameslane.onrender.com/privacy.html |
 | Copyright | `2026 Isaac Nativ` |
 
-**Languages:** the app declares the site's seven languages (`CFBundleLocalizations` in `Info.plist`: `en`, `he`, `es`, `fr`, `pt-BR`, `zh-Hans`, `zh-Hant`), so the App Store can list them. After uploading a build, check that the version page shows them. The listing itself can also be translated in App Store Connect (each language's name, subtitle, description and keywords).
+**Languages:** the app declares the site's seven languages (`CFBundleLocalizations` in `Info.plist`: `en`, `he`, `es`, `fr`, `pt-BR`, `zh-Hans`, `zh-Hant`; the Apple TV app's `GamesLane.tvOS/Info.plist` lists the same), so the App Store can list them. After uploading a build, check that the version page shows them. The listing itself can also be translated in App Store Connect (each language's name, subtitle, description and keywords).
 
 ## Version page: the listing
 
@@ -96,14 +108,59 @@ board games,card games,backgammon,hearts,spades,dominoes,yaniv,family,multiplaye
 | Build | The TestFlight build to release, chosen from the list |
 | Release | Manually release this version (to choose the day), or automatically after approval |
 
+## Apple TV
+
+The Apple TV app shows the games its paired user opens, as someone watching (the table, never anyone's hidden cards); it is played from phones and computers, not on the TV. See the developer guide's [Apple TV app](developer-guide.md#apple-tv-app).
+
+**Adding the platform:** App Store Connect → the GamesLane app → the **+** next to the platforms in the sidebar → **tvOS**, which creates the tvOS version page (1.0). Builds come from `GamesLane.tvOS/GamesLane.xcodeproj` (`MARKETING_VERSION` 1.0, its own version, raised for each Apple TV release), through the Xcode Cloud workflow for that project, which exists (archive for tvOS, TestFlight internal testing), built for production (`GAMESLANE_SERVER` not set). The app's `Info.plist` already declares no non-exempt encryption.
+
+**In the build already:** the layered app icon (400 × 240 and the App Store's 1280 × 768) and the top shelf images (1920 × 720 and wide 2320 × 720), in `GamesLane/Assets.xcassets/App Icon & Top Shelf Image.brandassets`. App Store Connect takes the App Store icon from the build.
+
+**Privacy manifest:** the Apple TV app needs its own `PrivacyInfo.xcprivacy` in the GamesLane target: no tracking, no required-reason APIs (it uses the Keychain, which needs none; if `UserDefaults` is added, declare `NSPrivacyAccessedAPICategoryUserDefaults` with reason `CA92.1`), and the data it collects: **Device ID** (the TV's ID) and **Other Data Types** (the TV's name), linked to the user, for App Functionality.
+
+**Version page (tvOS)**, its own texts:
+
+**Promotional text** (170):
+
+> Show your GamesLane games on the big screen: the whole table for everyone in the room, while each player plays on their phone.
+
+**Description** (4000):
+
+> GamesLane on Apple TV shows your games on the big screen, for everyone in the room to follow, while each player plays on their own phone, tablet or computer.
+>
+> Pair the TV with your GamesLane account in a few seconds: scan the QR code on the TV with your phone, or type the code shown in your profile at gameslane.onrender.com. Turn on Watch on TV, and every game you open appears on the TV.
+>
+> WHAT THE TV SHOWS
+> • The lobby: the game and the players seated
+> • Poker Heist: the shared cards, the chips, the chip table, the hands as they are revealed, and the heist's cards with what each one does
+> • The game sounds, and confetti when the crew opens a vault
+> • Never anyone's hidden cards: the TV sees what someone watching sees
+>
+> More games are coming to the TV. GamesLane itself has ten games to play together: Backgammon, Hearts, Spades, Dominoes, Yaniv, Final Card, Rich man, poor man, Poker Heist, Wazoo and Tic-tac-toe.
+>
+> Free, with no ads, no in-app purchases and no tracking. In English, Hebrew, Spanish, French, Portuguese and Chinese.
+
+Update the last part of the description (which games the TV shows) as games are added.
+
+**Keywords** (100):
+
+```
+board games,card games,poker heist,family,party,multiplayer,big screen,watch,friends,tv
+```
+
+The other fields (support URL, marketing URL, release) are as on the iOS version page. **Requires:** a GamesLane account (free) and a phone, tablet or computer to play on; say so in the description, as above, so the listing does not suggest the games are played with the remote.
+
 ## Screenshots
 
-Up to 10 per device size; the first three show in search results. Take them in the Simulator (**File → Save Screen**, or ⌘S) on the largest iPhone and the 13-inch iPad Pro, with the app built for the production site.
+Up to 10 per device size; the first three show in search results. Take them in the Simulator (**File → Save Screen**, or ⌘S) on the largest iPhone, the 13-inch iPad Pro and Apple TV 4K, with the app built for the production site.
 
-| Device | Size (portrait) |
+| Device | Size |
 | --- | --- |
-| iPhone 6.9" | 1320 × 2868 (or 1290 × 2796) |
-| iPad 13" | 2064 × 2752 (or 2048 × 2732) |
+| iPhone 6.9" | 1320 × 2868 (or 1290 × 2796), portrait |
+| iPad 13" | 2064 × 2752 (or 2048 × 2732), portrait |
+| Apple TV | 3840 × 2160 or 1920 × 1080, landscape only (required for the tvOS version; no alpha channel) |
+
+Apple TV screens (pair the Simulator's TV with an account and open the games in a browser): the pairing screen with the QR code; a lobby with players seated; Poker Heist with the shared cards and the chip table; hands being revealed; a vault opened (confetti); the waiting screen in Hebrew or Chinese.
 
 Suggested screens, each in a game in progress with a few players seated (several seats on one device work):
 
@@ -121,17 +178,18 @@ An optional app preview video (15–30 seconds) can be recorded in the Simulator
 
 **Data used to track you:** none. **Tracking:** No (no advertising, no third-party analytics, no data brokers).
 
-Data collected (the same as `PrivacyInfo.xcprivacy`):
+Data collected (the same as the apps' `PrivacyInfo.xcprivacy`; one set of answers covers the iPhone and Apple TV apps):
 
 | Apple's data type | What it is in GamesLane | Linked to the user | Purpose |
 | --- | --- | --- | --- |
 | Contact Info → Name | The display name; with Apple, Google, Microsoft or Discord, the name given by the service as the first display name | Yes | App Functionality |
 | Identifiers → User ID | The account ID, and the account ID at Apple, Google, Microsoft or Discord | Yes | App Functionality |
-| Identifiers → Device ID | The device token for turn notifications, if allowed | Yes | App Functionality |
+| Identifiers → Device ID | The device token for turn notifications, if allowed; on Apple TV, the TV's ID, saved with the accounts paired with it | Yes | App Functionality |
 | User Content → Photos or Videos | An uploaded profile picture (optional) | Yes | App Functionality |
 | User Content → Gameplay Content | The games created or joined and the moves made | Yes | App Functionality |
 | User Content → Other User Content | Chat messages in a game | Yes | App Functionality |
 | Usage Data → Product Interaction | Anonymous daily counts (visits, games opened, created, joined, finished) | No | Analytics |
+| Other Data → Other Data Types | Apple TV: the TV's name (e.g. "Living Room"), saved with the accounts paired with it and shown to them | Yes | App Functionality |
 
 Not collected: email address, phone number, location, contacts, payment information, browsing history, diagnostics. Passwords are kept only as a salted hash.
 
@@ -151,23 +209,23 @@ Answer the questionnaire as follows; App Store Connect then computes the rating.
 | Parental controls, age assurance | No |
 | Medical or wellness topics | No |
 
-The questionnaire decides the rating; with chat limited to invited players, expect a low one (likely 9+).
+The questionnaire decides the rating; with chat limited to invited players, expect a low one (likely 9+). The rating is the app's, for both platforms; the Apple TV app adds nothing to it (it shows no chat and opens no web pages).
 
 ## Pricing and availability
 
 - Price: **Free**. No in-app purchases, no subscriptions.
 - Availability: all countries and regions (or a chosen list).
-- iPhone and iPad. Not offered on Mac with Apple silicon or on Apple Vision Pro, unless tested there.
+- iPhone, iPad and Apple TV (tvOS 18 or later); one free download covers all of them (universal purchase). Not offered on Mac with Apple silicon or on Apple Vision Pro, unless tested there.
 
 ## App Review information
 
 | Field | Value |
 | --- | --- |
-| Sign-in required | No. Everyone plays as a guest; no account is needed |
-| Demo account | None needed |
+| Sign-in required | iOS: No. Everyone plays as a guest; no account is needed. tvOS: **Yes**, pairing a TV needs a GamesLane account |
+| Demo account | iOS: none needed. tvOS: a username and password account made for the review (e.g. `applereview`, created on the website with **Create account**; its password only in App Store Connect, never in the repository). Keep it used, or it is deleted after 30 days unused |
 | Contact | Isaac Nativ, gameslane@yahoo.com, and a phone number (App Store Connect requires all four fields: first name, last name, phone and email; Apple uses them only during the review) |
-| Notes | The text under [Review notes](#review-notes) |
-| Attachment (optional) | A short screen recording of a game with turn notifications helps |
+| Notes | iOS: the text under [Review notes](#review-notes); tvOS: the text under [Review notes for Apple TV](#review-notes-for-apple-tv) |
+| Attachment (optional) | iOS: a short screen recording of a game with turn notifications. tvOS: a recording of pairing a TV from a phone and a game showing on it helps, since the reviewer needs a second device |
 
 ## Review notes
 
@@ -197,6 +255,31 @@ Profile (your name at the top right) > Delete account deletes the account and it
 
 CONTENT
 Players choose a display name. Chat is available only in private games, which are played with people one invites by link or code; public games, which match people who do not know each other, have no chat. Each player can also hide the chat in their profile. Comments and reports can be sent from the Send feedback link at the bottom of the main screen and the menu of every game.
+
+The server is always on; games are played live over the internet.
+
+CONTACT
+gameslane@yahoo.com
+```
+
+## Review notes for Apple TV
+
+Paste into the tvOS version page's **Notes** (4000 characters), with the review account under **Sign-in information**:
+
+```
+GamesLane on Apple TV shows a player's GamesLane games on the TV, as someone watching them sees them, for a family or group playing together in one room. The games are played on phones, tablets or computers (the GamesLane app for iPhone and iPad, or the website); the TV only shows them, so it needs nothing but the Siri Remote to open it. No ads, no purchases, no tracking.
+
+TRYING IT (needs a second device: an iPhone, iPad or computer)
+1. Open GamesLane on the Apple TV. It shows a QR code and a pairing code.
+2. On the second device, open https://gameslane.onrender.com (or the GamesLane iPhone app), tap the name at the top right, and log in with the review account above.
+3. In the profile, under TVs, enter the code shown on the TV and tap Pair TV (or scan the TV's QR code with the iPhone's camera). The TV now says it is waiting for the account's player.
+4. In the profile, turn on Watch on TV for this TV.
+5. Back on the main screen, under Private games, tap Create a game and choose Poker Heist. The TV shows the lobby with the seated player.
+6. In the lobby, tap Sit here on two more seats (Poker Heist needs 3 players), then Start. The TV shows the game: the shared cards, the chips and the chip table, then the hands as they are revealed, with the game's sounds.
+Other games show their lobby on the TV, and "This game cannot be shown on the TV yet." during the game; they are being added.
+
+PRIVACY
+The TV never shows anyone's hidden cards or the chat. The TV's name and its pairings are kept with the paired accounts; unpairing in the profile, or deleting the account, removes them.
 
 The server is always on; games are played live over the internet.
 
