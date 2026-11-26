@@ -406,9 +406,6 @@ $("install-app-later").addEventListener("click", () => {
 });
 offerInstall(isAppleMobile);
 
-// The privacy policy in the chosen language: privacy.html in English, privacy.<code>.html in the others.
-$("privacy-link").href = language === LANGUAGES[0] ? "/privacy.html" : `/privacy.${language.code}.html`;
-
 if (params.get("session")) {
     $("code").value = params.get("session");
 }

@@ -8,7 +8,7 @@ using GamesLane.Server.Sessions;
 namespace GamesLane.Server.Tests;
 
 // Checks the translation files in wwwroot/lang against each other, the languages in i18n.js, the pages, the
-// translated privacy policies and help, the app manifest, the main screen's pictures and splash screen, the sounds, dark
+// translated help, the app manifest, the main screen's pictures and splash screen, the sounds, dark
 // mode, and the iPhone app's notifications.
 public partial class TranslationsTests
 {
@@ -108,20 +108,12 @@ public partial class TranslationsTests
     }
 
     [Fact]
-    public void Every_language_has_the_privacy_policy_with_the_same_sections_and_links()
+    public void The_privacy_policy_is_only_in_English_and_the_main_screen_links_to_it()
     {
-        var english = File.ReadAllText(Path.Combine(Wwwroot, "privacy.html"));
-        foreach (var code in Translated)
-        {
-            var path = Path.Combine(Wwwroot, $"privacy.{code}.html");
-            Assert.True(File.Exists(path), $"privacy.{code}.html is missing.");
-            var policy = File.ReadAllText(path);
-            Assert.Contains($"<html lang=\"{code}\"", policy);
-            foreach (var tag in new[] { "<h3>", "<li>", "<strong>", "<a href=" })
-            {
-                Assert.True(Count(english, tag) == Count(policy, tag), $"privacy.{code}.html has a different number of {tag} than privacy.html.");
-            }
-        }
+        Assert.True(File.Exists(Path.Combine(Wwwroot, "privacy.html")));
+        Assert.Empty(Directory.GetFiles(Wwwroot, "privacy.*.html"));
+        Assert.Contains("<a id=\"privacy-link\" href=\"/privacy.html\"", File.ReadAllText(Path.Combine(Wwwroot, "index.html")));
+        Assert.DoesNotContain("privacy-link", File.ReadAllText(Path.Combine(Wwwroot, "home.js")));
     }
 
     [Fact]

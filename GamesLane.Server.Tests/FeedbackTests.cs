@@ -74,7 +74,7 @@ public class FeedbackTests
 
     [Theory]
     [InlineData(null, null)]
-    [InlineData("", "inativ01/GamesLane2.0")]
+    [InlineData("", "inativ01/GamesLane")]
     [InlineData("secret", "not a repository")]
     public void Feedback_needs_a_token_and_a_valid_repository(string? token, string? repository)
     {
@@ -84,15 +84,15 @@ public class FeedbackTests
     [Fact]
     public async Task Issues_are_created_with_the_GitHub_API_and_return_their_address()
     {
-        var handler = new RecordingHandler(HttpStatusCode.Created, """{ "html_url": "https://github.com/inativ01/GamesLane2.0/issues/9" }""");
+        var handler = new RecordingHandler(HttpStatusCode.Created, """{ "html_url": "https://github.com/inativ01/GamesLane/issues/9" }""");
         var tracker = Tracker(handler, "secret", null);
 
         Assert.True(tracker.IsConfigured);
-        Assert.Equal("https://github.com/inativ01/GamesLane2.0/issues/9", await tracker.CreateAsync(Draft, CancellationToken.None));
+        Assert.Equal("https://github.com/inativ01/GamesLane/issues/9", await tracker.CreateAsync(Draft, CancellationToken.None));
 
         var request = handler.Request!;
         Assert.Equal(HttpMethod.Post, request.Method);
-        Assert.Equal("https://api.github.com/repos/inativ01/GamesLane2.0/issues", request.RequestUri!.ToString());
+        Assert.Equal("https://api.github.com/repos/inativ01/GamesLane/issues", request.RequestUri!.ToString());
         Assert.Equal(("Bearer", "secret"), (request.Headers.Authorization!.Scheme, request.Headers.Authorization.Parameter));
         Assert.Contains("GamesLane", request.Headers.UserAgent.ToString());
         using var body = JsonDocument.Parse(handler.Body!);

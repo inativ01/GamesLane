@@ -31,7 +31,7 @@ public sealed partial class GitHubIssueTracker : IIssueTracker
     /// <summary>
     /// The repository issues go to when <c>Feedback:GitHubRepository</c> is not set.
     /// </summary>
-    public const string DefaultRepository = "inativ01/GamesLane2.0";
+    public const string DefaultRepository = "inativ01/GamesLane";
 
     private readonly HttpClient _http;
     private readonly string _token;
