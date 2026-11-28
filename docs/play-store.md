@@ -16,7 +16,7 @@ Setting up Google Play and Firebase for the GamesLane Android app (`GamesLane.Mo
 
 ## Setup
 
-Once, in this order. Nothing here is a secret except the keystore, its passwords and the Firebase service account key: keep those out of the repository, chat and command lines.
+Once, in this order. Nothing here is a secret except the keystore, its passwords and the service account keys (Firebase's and Play's): keep those out of the repository, chat and command lines.
 
 ### Which Google account owns what
 
@@ -90,6 +90,21 @@ gh secret set ANDROID_UPLOAD_KEY_PASSWORD
 4. **Protected with Play → Play Store protection → Protect app signing key → Manage Play app signing**: the page shows each fingerprint as a copy button. Copy **App signing key → Classical key → SHA-256 certificate fingerprint** (the one Android checks), and, further down, the upload key's SHA-256 (it matches `keytool -list -v` on `gameslane-upload.jks`). Listing more fingerprints does no harm, so also add the **Post-quantum cryptography key**'s SHA-256 (beta) and any key under **Previous app signing keys** (its ⋮ menu). Do not use **Change key**. Fingerprints are public, not secrets.
 5. On Render, set the environment variable `Android__CertificateFingerprints` to all of them, separated by commas. To try a debug build from Android Studio too, add the debug key's (see the developer guide's [Sign-in setup](developer-guide.md#sign-in-setup)). Then https://gameslane.onrender.com/.well-known/assetlinks.json lists them. Android checks the site when the app is installed or updated, so if the app was installed before they were listed, reinstall it, or turn on `gameslane.onrender.com` under **Settings → Apps → GamesLane → Open by default → Add link**.
 6. Check the app ([Before submitting](#before-submitting)). Firebase needs no fingerprints: turn notifications work without them.
+
+### 6. Automatic uploads to internal testing
+
+Once the first release is uploaded by hand (step 5; Google Play refuses an app's first upload through its API), every push to `main` that changes `GamesLane.Mobile/` builds the app and uploads it to **Internal testing** by itself, as Xcode Cloud does to TestFlight. The upload uses a service account (a login for tools, without a password), signed in with the Android account:
+
+1. https://console.cloud.google.com, with the Firebase project's Cloud project chosen (`GamesLane Android`): **APIs & Services → Library → Google Play Android Developer API → Enable**.
+2. **IAM & Admin → Service accounts → Create service account**: name `github-play-upload`, no roles (**Done** without granting any). Open it → **Keys → Add key → Create new key → JSON**: the key file downloads.
+3. Play Console → **Users and permissions → Invite new users**: the service account's email (`github-play-upload@….iam.gserviceaccount.com`), **App permissions → Add app → GamesLane**, with **Release apps to testing tracks** ticked (nothing else is needed) → **Invite user**. It takes effect at once; there is no invitation to accept.
+4. Give the key to GitHub without showing it, in PowerShell (the file's path as downloaded), then delete the file:
+
+   ```
+   Get-Content -Raw "$env:USERPROFILE\Downloads\<key file>.json" | gh secret set PLAY_SERVICE_ACCOUNT_JSON
+   ```
+
+The workflow's **Upload to Google Play** step then runs on `main`, on every push and on **Actions → Android app → Run workflow** (not on pull requests, nor without the secret or the upload key), as a completed release of the internal testing track named after the run's number, which testers get within about an hour. Releasing to closed testing or production stays in Play Console: **Test and release → Internal testing → Promote release**.
 
 ## Before submitting
 
@@ -187,9 +202,9 @@ Expect a low rating (e.g. PEGI 3 or Everyone, with "Users interact").
 
 ## Releases and testing
 
-- **Internal testing:** up to 100 testers by email, available within minutes; for the first checks (setup step 5).
+- **Internal testing:** up to 100 testers by email, available within minutes; for the first checks (setup step 5). After that, every push to `main` that changes the app uploads a new release here by itself (setup step 6).
 - **Closed testing:** a list of testers (email addresses or a Google Group). A new personal account needs at least 12 testers opted in for 14 days in a row before it can apply for production access (Dashboard → Apply for production).
-- **Production:** Test and release → Production → Create new release, with the `.aab` from GitHub Actions (each run has a higher `versionCode`). Raise `versionName` in `android/app/build.gradle` for each new public version (1.0.1, 1.1 …). Countries: all, or a chosen list.
+- **Production:** Test and release → Internal testing → **Promote release** → Production (or Create new release with the `.aab` from GitHub Actions; each run has a higher `versionCode`). Raise `versionName` in `android/app/build.gradle` for each new public version (1.0.1, 1.1 …). Countries: all, or a chosen list.
 - The app shows the live site, so most changes need no new release; only changes to the app itself (`GamesLane.Mobile/android`) do.
 
 ## Review notes

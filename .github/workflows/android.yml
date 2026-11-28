@@ -1,6 +1,7 @@
-# Builds the Android app (GamesLane.Mobile/android) for the production site: an app bundle (.aab) to upload to Google
-# Play, kept as the run's artifact. Signed with the upload key when the repository has its secrets (see
-# docs/developer-guide.md, Android app); otherwise unsigned, which still checks that the app builds.
+# Builds the Android app (GamesLane.Mobile/android) for the production site: an app bundle (.aab), kept as the run's
+# artifact. Signed with the upload key when the repository has its secrets (see docs/developer-guide.md, Android app);
+# otherwise unsigned, which still checks that the app builds. On main (a push, or a run on request), a signed bundle is also uploaded to
+# Google Play's internal testing track when the repository has the Play service account's key.
 name: Android app
 
 on:
@@ -20,6 +21,7 @@ jobs:
     env:
       GOOGLE_SERVICES_JSON: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON }}
       KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
     steps:
       - uses: actions/checkout@v5
 
@@ -64,6 +66,17 @@ jobs:
           name: gameslane-android-${{ github.run_number }}
           path: GamesLane.Mobile/android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
+
+      - name: Upload to Google Play (internal testing)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.KEYSTORE_BASE64 != '' && env.PLAY_SERVICE_ACCOUNT_JSON != ''
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.gameslane.app
+          releaseFiles: GamesLane.Mobile/android/app/build/outputs/bundle/release/app-release.aab
+          tracks: internal
+          releaseName: ${{ github.run_number }}
+          status: completed
 
       - name: Remove the upload key
         if: always()
